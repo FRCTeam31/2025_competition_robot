@@ -6,7 +6,7 @@ This is the code for the Prime Movers 2025 FRC Competition Robot, which will pla
 [![REEFSCAPE Animation Video](https://img.youtube.com/vi/YWbxcjlY9JY/0.jpg)](https://www.youtube.com/watch?v=YWbxcjlY9JY)
 
 ## Project Tracking
-The Programming team's work is tracked in [this GitHub Project](https://github.com/orgs/FRCTeam31/projects/2/views/1?pane=info), each with one of the below statuses:
+The Programming team's work is tracked in [this GitHub Project](https://github.com/orgs/FRCTeam31/projects/2/views/1?pane=info), with one of the below statuses:
 - _Planning_ - We're planning how we want to code this
 - _Active_ - Coding is in progress
 - _Awaiting Mech/Elec_ - Progress is blocked by a mechanical or electrical problem
@@ -14,6 +14,8 @@ The Programming team's work is tracked in [this GitHub Project](https://github.c
 - _Bugged_ - There is a bug in this code
 - _In Review_ - This code needs to be reviewed by a coach
 - _Done_ - This is code-complete, tested, and merged into the `main` branch
+
+Items on this project board are created from [issues](https://github.com/FRCTeam31/2025_competition_robot/issues) and [pull requests](https://github.com/FRCTeam31/2025_competition_robot/pulls). When you create a new issue or a pull request, make sure to assign it the correct assignee(s), label(s), add it to the "2025 Competition Robot Build" Project, and add a status, size, and start date to the project item
 
 ## Code conventions
 These rules apply to all code committed to this repository.
