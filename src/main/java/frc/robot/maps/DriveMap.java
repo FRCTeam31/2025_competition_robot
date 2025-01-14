@@ -5,7 +5,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.measure.MomentOfInertia;
+import edu.wpi.first.units.measure.MomentOfInertia;
 import prime.control.PrimePIDConstants;
 
 public class DriveMap {
@@ -32,20 +32,6 @@ public class DriveMap {
   public static final int DriveSupplyCurrentLimitDuration = 100;
   public static final String LimelightRearName = "limelight-rear";
   public static final String LimelightFrontName = "limelight-front";
-  public static final RobotConfig PathPlannerRobotConfiguration = new RobotConfig(
-      Units.lbsToKilograms(120),
-      MomentOfInertia.ofBaseUnits(6, edu.wpi.first.units.Units.KilogramSquareMeters).baseUnitMagnitude(), // TODO:
-                                                                                                          // measure,
-                                                                                                          // maybe???
-      new ModuleConfig(
-          Units.inchesToMeters(4),
-          MaxSpeedMetersPerSecond,
-          1.0,
-          DCMotor.getNeoVortex(1),
-          DriveSupplyCurrentLimit,
-          1),
-      TrackWidthMeters,
-      WheelBaseMeters);
 
   public static final SwerveModuleMap FrontLeftSwerveModule = new SwerveModuleMap(
       1,
@@ -79,4 +65,19 @@ public class DriveMap {
       true,
       true,
       new Translation2d(-TrackWidthMeters / 2, WheelBaseMeters / 2));
+
+  public static final RobotConfig PathPlannerRobotConfiguration = new RobotConfig(
+        Units.lbsToKilograms(120),
+        MomentOfInertia.ofBaseUnits(6, edu.wpi.first.units.Units.KilogramSquareMeters).baseUnitMagnitude(),
+        new ModuleConfig(
+            Units.inchesToMeters(4),
+            MaxSpeedMetersPerSecond,
+            1.0,
+            DCMotor.getNeoVortex(1),
+            DriveSupplyCurrentLimit,
+            1),
+        FrontLeftSwerveModule.ModuleLocation,
+        FrontRightSwerveModule.ModuleLocation,
+        RearLeftSwerveModule.ModuleLocation,
+        RearRightSwerveModule.ModuleLocation);
 }

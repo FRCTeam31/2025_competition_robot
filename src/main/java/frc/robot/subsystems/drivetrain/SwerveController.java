@@ -18,8 +18,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.units.measure.Units;
-import edu.wpi.first.units.measure.measure.Voltage;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.simulation.AnalogGyroSim;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
@@ -243,7 +243,7 @@ public class SwerveController {
 
     // Correct drift by taking the input speeds and converting them to a desired
     // per-period speed. This is known as "discretizing"
-    desiredChassisSpeeds.discretize(0.02);
+    desiredChassisSpeeds = ChassisSpeeds.discretize(desiredChassisSpeeds, 0.02);
 
     // Calculate the module states from the chassis speeds
     var swerveModuleStates = m_kinematics.toSwerveModuleStates(desiredChassisSpeeds);
@@ -266,10 +266,10 @@ public class SwerveController {
 
       // Convert the robot-relative speeds to field-relative speeds with the flipped
       // gyro
-      robotRelativeSpeeds.toFieldRelativeSpeeds(gyroAngle);
+      var fieldRelativeSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeSpeeds, gyroAngle);
 
       // Convert back to robot-relative speeds, also with the flipped gyro
-      robotRelativeSpeeds.toRobotRelativeSpeeds(gyroAngle);
+      robotRelativeSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, gyroAngle);
 
       driveRobotRelative(robotRelativeSpeeds, false);
     } else {

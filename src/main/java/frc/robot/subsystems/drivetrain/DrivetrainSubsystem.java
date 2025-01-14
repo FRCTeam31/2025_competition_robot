@@ -11,10 +11,9 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.units.measure.Units;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -310,13 +309,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
       // Drive the robot with the driver-relative inputs, converted to field-relative
       // based on which side we're on
-      var fieldChassisSpeeds = new ChassisSpeeds(
-          (inputYMPS * invert), // Use Y joystick input as X robot movement
-          (inputXMPS * invert), // Use X joystick input as Y robot movement
-          inputRotationRadiansPS);
-      fieldChassisSpeeds.toFieldRelativeSpeeds(_inputs.GyroAngle);
+      var vxSpeed = (inputYMPS * invert); // Driver Y axis is field X axis
+      var vySpeed = (inputXMPS * invert); // Driver X axis is field Y axis
+      var fieldRelativeChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+        vxSpeed, 
+        vySpeed, 
+        inputRotationRadiansPS, 
+        _inputs.GyroAngle);
 
-      driveFieldRelative(fieldChassisSpeeds);
+      driveFieldRelative(fieldRelativeChassisSpeeds);
     });
   }
 
@@ -343,11 +344,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
       // Drive the robot with the driver-relative inputs, converted to field-relative
       // based on which side we're on
-      var robotChassisSpeeds = new ChassisSpeeds(
-          (inputYMPS * invert), // Use Y joystick input as X robot movement
-          (inputXMPS * invert), // Use X joystick input as Y robot movement
-          inputRotationRadiansPS);
-      robotChassisSpeeds.toRobotRelativeSpeeds(_inputs.GyroAngle);
+      var vxSpeed = (inputYMPS * invert);
+      var vySpeed = (inputXMPS * invert);
+      var robotChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+        vxSpeed,
+        vySpeed,
+        inputRotationRadiansPS, 
+        _inputs.GyroAngle);
 
       driveRobotRelative(robotChassisSpeeds);
     });

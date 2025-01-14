@@ -7,7 +7,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.units.measure.Units;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.maps.DriveMap;
 import frc.robot.maps.SwerveModuleMap;
@@ -90,9 +90,10 @@ public class SwerveModuleIOSim implements ISwerveModuleIO {
     // Set the drive motor to the desired speed
     // Calculate target data to voltage data
     var velocityRadPerSec = desiredState.speedMetersPerSecond / (DriveMap.DriveWheelDiameterMeters / 2);
-    var driveAppliedVolts = m_driveFeedforward.calculate(Units.RadiansPerSecond.of(velocityRadPerSec)).magnitude()
-        + m_driveFeedback.calculate(m_driveMotorSim.getAngularVelocityRadPerSec(), velocityRadPerSec);
-    driveAppliedVolts = MathUtil.clamp(driveAppliedVolts, -12.0, 12.0);
+    var feedForward = m_driveFeedforward.calculate(velocityRadPerSec);
+    var feedBack = m_driveFeedback.calculate(m_driveMotorSim.getAngularVelocityRadPerSec(), velocityRadPerSec);
+    
+    var driveAppliedVolts = MathUtil.clamp(feedForward + feedBack, -12.0, 12.0);
 
     m_driveMotorSim.setInputVoltage(driveAppliedVolts);
 
