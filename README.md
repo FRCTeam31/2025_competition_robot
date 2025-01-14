@@ -20,7 +20,7 @@ These rules apply to all code committed to this repository.
 - Package names are always lowercase.
 - `public` or `static` variables are named in `PascalCase`.
 - `private` variables are prefixed with an underscore, and named in `_camelCase`.
-- Any function with greater than 8 parameters must use a DTO class to wrap the parameters
+- Any function with greater than 8 parameters must use a [DTO class](https://www.baeldung.com/java-dto-pattern) to wrap the parameters
     - These DTOs must be suffixed with `Parameters`
 
 ## Subsystem conventions
