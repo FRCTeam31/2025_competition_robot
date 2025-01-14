@@ -13,15 +13,9 @@ public class SwerveModuleMap {
   public boolean SteerInverted;
   public double DriveMotorRampRate = 0.5;
 
-  public SwerveModuleMap(
-    int driveMotorCanId,
-    int steeringMotorCanId,
-    int canCoderCanId,
-    double canCoderStartingOffset,
-    boolean driveInverted,
-    boolean steerInverted,
-    Translation2d location
-  ) {
+  public SwerveModuleMap(int driveMotorCanId, int steeringMotorCanId, int canCoderCanId,
+      double canCoderStartingOffset, boolean driveInverted, boolean steerInverted,
+      Translation2d location) {
     DriveMotorCanId = driveMotorCanId;
     SteeringMotorCanId = steeringMotorCanId;
 

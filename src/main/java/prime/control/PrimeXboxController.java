@@ -81,9 +81,8 @@ public class PrimeXboxController extends CommandXboxController {
    * Returns a supplier for the trigger axis with the left trigger subtracted from the right trigger
    */
   public DoubleSupplier getTriggerSupplier(double deadband, double curveWeight) {
-    return () ->
-      Controls.cubicScaledDeadband(getRawAxis(Controls.RIGHT_TRIGGER), deadband, curveWeight) -
-      Controls.cubicScaledDeadband(getRawAxis(Controls.LEFT_TRIGGER), deadband, curveWeight);
+    return () -> Controls.cubicScaledDeadband(getRawAxis(Controls.RIGHT_TRIGGER), deadband, curveWeight) -
+        Controls.cubicScaledDeadband(getRawAxis(Controls.LEFT_TRIGGER), deadband, curveWeight);
   }
 
   /**
@@ -94,24 +93,21 @@ public class PrimeXboxController extends CommandXboxController {
   }
 
   public SwerveControlSuppliers getSwerveControlProfile(
-    HolonomicControlStyle style,
-    double driveDeadband,
-    double curveWeight
-  ) {
+      HolonomicControlStyle style,
+      double driveDeadband,
+      double curveWeight) {
     switch (style) {
       default:
       case Standard:
         return new SwerveControlSuppliers(
-          getLeftStickXSupplier(driveDeadband, curveWeight),
-          getLeftStickYSupplier(driveDeadband, curveWeight),
-          getTriggerSupplier(driveDeadband, curveWeight)
-        );
+            getLeftStickXSupplier(driveDeadband, curveWeight),
+            getLeftStickYSupplier(driveDeadband, curveWeight),
+            getTriggerSupplier(driveDeadband, curveWeight));
       case Drone:
         return new SwerveControlSuppliers(
-          getRightStickXSupplier(driveDeadband, curveWeight),
-          getRightStickYSupplier(driveDeadband, curveWeight),
-          getLeftStickXSupplier(driveDeadband, curveWeight)
-        );
+            getRightStickXSupplier(driveDeadband, curveWeight),
+            getRightStickYSupplier(driveDeadband, curveWeight),
+            getLeftStickXSupplier(driveDeadband, curveWeight));
     }
   }
 }

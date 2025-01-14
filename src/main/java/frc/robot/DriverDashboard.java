@@ -16,53 +16,53 @@ public class DriverDashboard {
 
   public static SendableChooser<Command> AutoChooser;
   public static GenericEntry AllianceBox = DriverTab
-    .add("Alliance", false)
-    .withPosition(15, 0)
-    .withSize(2, 3)
-    .withWidget(BuiltInWidgets.kBooleanBox)
-    .withProperties(Map.of("Color when true", "#FF0000", "Color when false", "#0000FF"))
-    .getEntry();
+      .add("Alliance", false)
+      .withPosition(15, 0)
+      .withSize(2, 3)
+      .withWidget(BuiltInWidgets.kBooleanBox)
+      .withProperties(Map.of("Color when true", "#FF0000", "Color when false", "#0000FF"))
+      .getEntry();
 
   // Drive
   public static Field2d FieldWidget = new Field2d();
   public static GenericEntry HeadingGyro = DriverTab
-    .add("Current Heading", 0)
-    .withWidget(BuiltInWidgets.kGyro)
-    .withPosition(12, 0)
-    .withSize(3, 3)
-    .withProperties(Map.of("Counter clockwise", true, "Major tick spacing", 45.0, "Minor tick spacing", 15.0))
-    .getEntry();
+      .add("Current Heading", 0)
+      .withWidget(BuiltInWidgets.kGyro)
+      .withPosition(12, 0)
+      .withSize(3, 3)
+      .withProperties(Map.of("Counter clockwise", true, "Major tick spacing", 45.0, "Minor tick spacing", 15.0))
+      .getEntry();
   public static GenericEntry RearApTagIdField = DriverTab
-    .add("Rear APTag", 0)
-    .withWidget(BuiltInWidgets.kTextView)
-    .withPosition(12, 3)
-    .withSize(2, 1)
-    .getEntry();
+      .add("Rear APTag", 0)
+      .withWidget(BuiltInWidgets.kTextView)
+      .withPosition(12, 3)
+      .withSize(2, 1)
+      .getEntry();
   public static GenericEntry FrontApTagIdField = DriverTab
-    .add("Front APTag", 0)
-    .withWidget(BuiltInWidgets.kTextView)
-    .withPosition(14, 3)
-    .withSize(2, 1)
-    .getEntry();
+      .add("Front APTag", 0)
+      .withWidget(BuiltInWidgets.kTextView)
+      .withPosition(14, 3)
+      .withSize(2, 1)
+      .getEntry();
   public static GenericEntry RearApTagOffsetDial = DriverTab
-    .add("Rear APTag X Offset", 0)
-    .withWidget(BuiltInWidgets.kDial)
-    .withProperties(Map.of("Min", -29.8, "Max", 29.8))
-    .withPosition(12, 4)
-    .withSize(2, 3)
-    .getEntry();
+      .add("Rear APTag X Offset", 0)
+      .withWidget(BuiltInWidgets.kDial)
+      .withProperties(Map.of("Min", -29.8, "Max", 29.8))
+      .withPosition(12, 4)
+      .withSize(2, 3)
+      .getEntry();
   public static GenericEntry FrontPoseEstimationSwitch = DriverTab
-    .add("F Pose Est.", true)
-    .withWidget(BuiltInWidgets.kToggleSwitch)
-    .withPosition(14, 4)
-    .withSize(2, 1)
-    .getEntry();
+      .add("F Pose Est.", true)
+      .withWidget(BuiltInWidgets.kToggleSwitch)
+      .withPosition(14, 4)
+      .withSize(2, 1)
+      .getEntry();
   public static GenericEntry RearPoseEstimationSwitch = DriverTab
-    .add("R Pose Est.", true)
-    .withWidget(BuiltInWidgets.kToggleSwitch)
-    .withPosition(14, 5)
-    .withSize(2, 1)
-    .getEntry();
+      .add("R Pose Est.", true)
+      .withWidget(BuiltInWidgets.kToggleSwitch)
+      .withPosition(14, 5)
+      .withSize(2, 1)
+      .getEntry();
 
   /**
    * Constructs a new DriverDashboard and adds complex widgets that must be created in the constructor

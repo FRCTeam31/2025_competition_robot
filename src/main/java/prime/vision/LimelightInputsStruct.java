@@ -30,29 +30,29 @@ public class LimelightInputsStruct implements Struct<LimelightInputs> {
 
     @Override
     public String getSchema() {
-        return "Rotation2d targetHorizontalOffset;"+
-        "Rotation2d targetVerticalOffset;"+
-        "double targetArea;"+
-        "int32 pipelineLatencyMs;"+
-        "int32 capturePipelineLatencyMs;"+
-        "int32 totalLatencyMs;"+
-        "int32 apriltagId;"+
-        "double tagCount;"+
-        "LimelightPose fieldSpaceRobotPose;"+
-        "LimelightPose redAllianceOriginFieldSpaceRobotPose;"+
-        "LimelightPose blueAllianceOriginFieldSpaceRobotPose;"+
-        "LimelightPose targetSpaceRobotPose;"+
-        "LimelightPose targetSpaceCameraPose;"+
-        "LimelightPose robotSpaceCameraPose;"+
-        "LimelightPose cameraSpaceTargetPose;"+
-        "LimelightPose robotSpaceTargetPose";
+        return "Rotation2d targetHorizontalOffset;" +
+                "Rotation2d targetVerticalOffset;" +
+                "double targetArea;" +
+                "int32 pipelineLatencyMs;" +
+                "int32 capturePipelineLatencyMs;" +
+                "int32 totalLatencyMs;" +
+                "int32 apriltagId;" +
+                "double tagCount;" +
+                "LimelightPose fieldSpaceRobotPose;" +
+                "LimelightPose redAllianceOriginFieldSpaceRobotPose;" +
+                "LimelightPose blueAllianceOriginFieldSpaceRobotPose;" +
+                "LimelightPose targetSpaceRobotPose;" +
+                "LimelightPose targetSpaceCameraPose;" +
+                "LimelightPose robotSpaceCameraPose;" +
+                "LimelightPose cameraSpaceTargetPose;" +
+                "LimelightPose robotSpaceTargetPose";
     }
 
     @Override
     public Struct<?>[] getNested() {
-        return new Struct<?>[] { 
-            Rotation2d.struct, 
-            LimelightPose.struct, 
+        return new Struct<?>[] {
+                Rotation2d.struct,
+                LimelightPose.struct,
         };
     }
 

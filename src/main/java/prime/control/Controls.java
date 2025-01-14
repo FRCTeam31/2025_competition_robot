@@ -58,7 +58,8 @@ public class Controls {
     var abs = Math.abs(input);
     var linearInput = scaleLinear(input);
 
-    if (abs < cutoff) return 0;
+    if (abs < cutoff)
+      return 0;
 
     return ((input - (linearInput * cutoff)) / (1 - cutoff));
   }
@@ -70,15 +71,15 @@ public class Controls {
    * @return Cubic-scaled input without a cutoff jump
    */
   public static double cubicScaledDeadband(
-    double input,
-    double cutoff,
-    double weight
-  ) {
+      double input,
+      double cutoff,
+      double weight) {
     var abs = Math.abs(input);
     var cubicInput = scaleCubic(input, weight);
     var cubicCutoff = scaleCubic(cutoff, weight);
 
-    if (abs < cutoff) return 0;
+    if (abs < cutoff)
+      return 0;
 
     return ((cubicInput - (abs / input) * cubicCutoff) / (1.0 - cubicCutoff));
   }

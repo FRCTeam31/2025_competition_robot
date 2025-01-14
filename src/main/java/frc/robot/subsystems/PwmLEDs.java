@@ -26,8 +26,8 @@ public class PwmLEDs extends SubsystemBase {
     @Logged(name = "LoopErrorCounter", importance = Logged.Importance.CRITICAL)
     public byte _loopErrorCounter = 0;
 
-    private LEDPattern m_backgroundPattern = LEDPattern.solid(Color.kGhostWhite)
-        .breathe(Units.Seconds.of(4));
+    private LEDPattern m_backgroundPattern =
+            LEDPattern.solid(Color.kGhostWhite).breathe(Units.Seconds.of(4));
     private LEDPattern m_foregroundPattern = null;
 
     private Alert m_loopStoppedAlert;
@@ -44,7 +44,8 @@ public class PwmLEDs extends SubsystemBase {
         m_backgroundPattern.applyTo(m_ledBuffer);
 
         // Setup the warning for when the loop stops
-        m_loopStoppedAlert = new Alert("[LEDs:ERROR] LED update loop failed.", Alert.AlertType.kWarning);
+        m_loopStoppedAlert =
+                new Alert("[LEDs:ERROR] LED update loop failed.", Alert.AlertType.kWarning);
         m_loopStoppedAlert.set(false);
     }
 
@@ -52,7 +53,7 @@ public class PwmLEDs extends SubsystemBase {
         // If we're not running on a real robot, or we've failed too many times, do nothing.
         if (_loopErrorCounter > 3)
             return;
-            
+
         try {
             if (m_foregroundPattern == null) {
                 // If we're only using a background pattern, apply it directly
@@ -69,7 +70,8 @@ public class PwmLEDs extends SubsystemBase {
             // If we fail to update the LEDs, report the error and increment the error counter
             _loopErrorCounter++;
             DataLogManager.log("[LEDs:ERROR] Failed to update LEDs: " + e.getMessage());
-            DriverStation.reportError("[LEDs:ERROR] Failed to update LEDs: " + e.getMessage(), e.getStackTrace());
+            DriverStation.reportError("[LEDs:ERROR] Failed to update LEDs: " + e.getMessage(),
+                    e.getStackTrace());
 
             // If we've failed too many times, stop the loop and alert the user
             if (_loopErrorCounter > 3) {
@@ -99,13 +101,11 @@ public class PwmLEDs extends SubsystemBase {
     }
 
     public Command setBackgroundPatternCommand(LEDPattern backgroundPattern) {
-        return runOnce(() -> setBackgroundPattern(backgroundPattern))
-            .ignoringDisable(true);
+        return runOnce(() -> setBackgroundPattern(backgroundPattern)).ignoringDisable(true);
     }
 
     public Command setForegroundPatternCommand(LEDPattern foregroundPattern) {
-        return runOnce(() -> setForegroundPattern(foregroundPattern))
-            .ignoringDisable(true); // (only allowed when enabled)
+        return runOnce(() -> setForegroundPattern(foregroundPattern)).ignoringDisable(true); // (only allowed when enabled)
     }
 
     public Command clearForegroundPatternCommand() {

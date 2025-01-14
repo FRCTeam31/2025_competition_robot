@@ -15,18 +15,18 @@ public class LimelightInputs implements StructSerializable {
      * (LL1: -27 degrees to 27 degrees / LL2: -29.8 to 29.8 degrees)
      */
     public Rotation2d TargetHorizontalOffset = new Rotation2d(Math.PI);
-    
+
     /**
      * Vertical Offset From Crosshair To Target 
      * (LL1: -20.5 degrees to 20.5 degrees / LL2: -24.85 to 24.85 degrees)
      */
     public Rotation2d TargetVerticalOffset = new Rotation2d();
-    
+
     /**
      * Target Area (0% of image to 100% of image)
      */
     public double TargetArea = 0.0;
-    
+
     /**
      * The pipeline's latency contribution (ms). Add to "cl" to get total latency.
      */
@@ -57,8 +57,8 @@ public class LimelightInputs implements StructSerializable {
      * Robot transform in field-space.
      */
     public LimelightPose FieldSpaceRobotPose = new LimelightPose(
-        new Pose3d(1, 2, 3, new Rotation3d(Units.Degrees.of(1), Units.Degrees.of(2), Units.Degrees.of(3))),
-        new double[] { 1, 1, 2.5, 3, 4 });
+            new Pose3d(1, 2, 3, new Rotation3d(Units.Degrees.of(1), Units.Degrees.of(2), Units.Degrees.of(3))),
+            new double[] { 1, 1, 2.5, 3, 4 });
 
     /**
      * Robot transform in field-space (alliance driverstation WPILIB origin).

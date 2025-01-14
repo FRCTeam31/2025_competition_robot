@@ -36,8 +36,8 @@ public class SwerveModuleIOSim implements ISwerveModuleIO {
     m_inputs.ModuleState.angle = m_steerAngle;
     m_inputs.ModuleState.speedMetersPerSecond = speedMps;
     m_inputs.ModulePosition.angle = m_steerAngle;
-    m_inputs.ModulePosition.distanceMeters = m_driveMotorSim.getAngularPositionRotations()
-        * DriveMap.DriveWheelCircumferenceMeters;
+    m_inputs.ModulePosition.distanceMeters =
+        m_driveMotorSim.getAngularPositionRotations() * DriveMap.DriveWheelCircumferenceMeters;
 
     return m_inputs;
   }
@@ -66,10 +66,7 @@ public class SwerveModuleIOSim implements ISwerveModuleIO {
    */
   private void setupDriveMotor(PrimePIDConstants pid) {
     m_driveMotorSim = new DCMotorSim(
-        LinearSystemId.createDCMotorSystem(
-            DCMotor.getNeoVortex(1),
-            0.001,
-            DriveMap.DriveGearRatio),
+        LinearSystemId.createDCMotorSystem(DCMotor.getNeoVortex(1), 0.001, DriveMap.DriveGearRatio),
         DCMotor.getNeoVortex(1));
 
     m_driveFeedback = new PIDController(0.1, 0, 0);
@@ -89,10 +86,12 @@ public class SwerveModuleIOSim implements ISwerveModuleIO {
 
     // Set the drive motor to the desired speed
     // Calculate target data to voltage data
-    var velocityRadPerSec = desiredState.speedMetersPerSecond / (DriveMap.DriveWheelDiameterMeters / 2);
+    var velocityRadPerSec =
+        desiredState.speedMetersPerSecond / (DriveMap.DriveWheelDiameterMeters / 2);
     var feedForward = m_driveFeedforward.calculate(velocityRadPerSec);
-    var feedBack = m_driveFeedback.calculate(m_driveMotorSim.getAngularVelocityRadPerSec(), velocityRadPerSec);
-    
+    var feedBack =
+        m_driveFeedback.calculate(m_driveMotorSim.getAngularVelocityRadPerSec(), velocityRadPerSec);
+
     var driveAppliedVolts = MathUtil.clamp(feedForward + feedBack, -12.0, 12.0);
 
     m_driveMotorSim.setInputVoltage(driveAppliedVolts);
@@ -110,8 +109,7 @@ public class SwerveModuleIOSim implements ISwerveModuleIO {
     Rotation2d currentAngle = m_inputs.ModulePosition.angle;
     var delta = desiredState.angle.minus(currentAngle);
     if (Math.abs(delta.getDegrees()) > 90.0) {
-      return new SwerveModuleState(
-          -desiredState.speedMetersPerSecond,
+      return new SwerveModuleState(-desiredState.speedMetersPerSecond,
           desiredState.angle.rotateBy(Rotation2d.fromDegrees(180.0)));
     } else {
       return desiredState;

@@ -24,18 +24,12 @@ public class VisionSubsystem extends SubsystemBase {
         setName("VisionSubsystem");
         var defaultInstance = NetworkTableInstance.getDefault();
 
-        m_limelights = new LimeLightNT[] {
-            new LimeLightNT(defaultInstance, DriveMap.LimelightFrontName),
-            new LimeLightNT(defaultInstance, DriveMap.LimelightRearName)
-        };
-        m_limelightInputs = new LimelightInputs[] {
-            new LimelightInputs(),
-            new LimelightInputs()
-        };
-        m_limelightRobotPoses = new LimelightPose[] {
-            m_limelightInputs[0].FieldSpaceRobotPose,
-            m_limelightInputs[1].FieldSpaceRobotPose
-        };
+        m_limelights =
+                new LimeLightNT[] {new LimeLightNT(defaultInstance, DriveMap.LimelightFrontName),
+                        new LimeLightNT(defaultInstance, DriveMap.LimelightRearName)};
+        m_limelightInputs = new LimelightInputs[] {new LimelightInputs(), new LimelightInputs()};
+        m_limelightRobotPoses = new LimelightPose[] {m_limelightInputs[0].FieldSpaceRobotPose,
+                m_limelightInputs[1].FieldSpaceRobotPose};
         arrayElementCount = m_limelightInputs.length;
     }
 
@@ -144,11 +138,14 @@ public class VisionSubsystem extends SubsystemBase {
         // Update Dashboard & logging
         var frontInputs = getLimelightInputs(0);
         var rearInputs = getLimelightInputs(1);
-        SmartDashboard.putBoolean("Drive/PoseEstimation/Front/IsValidTarget", isAprilTagIdValid(frontInputs.ApriltagId));
-        SmartDashboard.putBoolean("Drive/PoseEstimation/Rear/IsValidTarget", isAprilTagIdValid(rearInputs.ApriltagId));
+        SmartDashboard.putBoolean("Drive/PoseEstimation/Front/IsValidTarget",
+                isAprilTagIdValid(frontInputs.ApriltagId));
+        SmartDashboard.putBoolean("Drive/PoseEstimation/Rear/IsValidTarget",
+                isAprilTagIdValid(rearInputs.ApriltagId));
         DriverDashboard.FrontApTagIdField.setDouble(frontInputs.ApriltagId);
         DriverDashboard.RearApTagIdField.setDouble(rearInputs.ApriltagId);
-        DriverDashboard.RearApTagOffsetDial.setDouble(rearInputs.TargetHorizontalOffset.getDegrees());
+        DriverDashboard.RearApTagOffsetDial
+                .setDouble(rearInputs.TargetHorizontalOffset.getDegrees());
     }
 
     public static boolean isAprilTagIdASpeakerCenterTarget(int apriltagId) {

@@ -25,7 +25,8 @@ public class LimelightPose implements StructSerializable {
   public double AvgTagArea = 0.0;
   public double[] StdDeviations = new double[3];
 
-  public LimelightPose() {}
+  public LimelightPose() {
+  }
 
   public LimelightPose(double[] poseTagPipelineData, double[] stdDeviations) {
     if (poseTagPipelineData.length < 11 || poseTagPipelineData.length > 11) {
@@ -38,15 +39,12 @@ public class LimelightPose implements StructSerializable {
       return;
     }
 
-    Pose =
-      new Pose3d(
+    Pose = new Pose3d(
         new Translation3d(poseTagPipelineData[0], poseTagPipelineData[1], poseTagPipelineData[2]),
         new Rotation3d(
-          Units.degreesToRadians(poseTagPipelineData[3]),
-          Units.degreesToRadians(poseTagPipelineData[4]),
-          Units.degreesToRadians(poseTagPipelineData[5])
-        )
-      );
+            Units.degreesToRadians(poseTagPipelineData[3]),
+            Units.degreesToRadians(poseTagPipelineData[4]),
+            Units.degreesToRadians(poseTagPipelineData[5])));
 
     var latencyMs = poseTagPipelineData[6];
     Timestamp = Timer.getFPGATimestamp() - (latencyMs / 1000.0);

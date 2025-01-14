@@ -46,31 +46,25 @@ public class SwerveController {
   private SwerveDriveKinematics m_kinematics;
   private SwerveDrivePoseEstimator m_poseEstimator;
 
-  private ISwerveModuleIO m_frontLeftModule, m_frontRightModule, m_rearLeftModule, m_rearRightModule;
+  private ISwerveModuleIO m_frontLeftModule, m_frontRightModule, m_rearLeftModule,
+      m_rearRightModule;
 
   @Logged(name = "ModuleInputs", importance = Logged.Importance.CRITICAL)
-  private SwerveModuleIOInputs[] m_moduleInputs = new SwerveModuleIOInputs[] {
-      new SwerveModuleIOInputs(),
-      new SwerveModuleIOInputs(),
-      new SwerveModuleIOInputs(),
-      new SwerveModuleIOInputs()
-  };
+  private SwerveModuleIOInputs[] m_moduleInputs =
+      new SwerveModuleIOInputs[] {new SwerveModuleIOInputs(), new SwerveModuleIOInputs(),
+          new SwerveModuleIOInputs(), new SwerveModuleIOInputs()};
 
   @Logged(name = "ModuleOutputs", importance = Logged.Importance.CRITICAL)
-  private SwerveModuleIOOutputs[] m_moduleOutputs = new SwerveModuleIOOutputs[] {
-      new SwerveModuleIOOutputs(),
-      new SwerveModuleIOOutputs(),
-      new SwerveModuleIOOutputs(),
-      new SwerveModuleIOOutputs()
-  };
+  private SwerveModuleIOOutputs[] m_moduleOutputs =
+      new SwerveModuleIOOutputs[] {new SwerveModuleIOOutputs(), new SwerveModuleIOOutputs(),
+          new SwerveModuleIOOutputs(), new SwerveModuleIOOutputs()};
 
   public SwerveController(boolean isReal) {
     _robotIsReal = isReal;
     _inputs = new DrivetrainInputs();
 
     // Create kinematics in order FL, FR, RL, RR
-    m_kinematics = new SwerveDriveKinematics(
-        DriveMap.FrontLeftSwerveModule.ModuleLocation,
+    m_kinematics = new SwerveDriveKinematics(DriveMap.FrontLeftSwerveModule.ModuleLocation,
         DriveMap.FrontRightSwerveModule.ModuleLocation,
         DriveMap.RearLeftSwerveModule.ModuleLocation,
         DriveMap.RearRightSwerveModule.ModuleLocation);
@@ -87,8 +81,8 @@ public class SwerveController {
       m_rearRightModule = new SwerveModuleIOReal(DriveMap.RearRightSwerveModule);
 
       // Create pose estimator
-      m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, m_gyro.getRotation2d(), getModulePositions(),
-          new Pose2d());
+      m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, m_gyro.getRotation2d(),
+          getModulePositions(), new Pose2d());
     } else {
       m_gyroSim = new AnalogGyroSim(new AnalogGyro(0));
 
@@ -99,8 +93,8 @@ public class SwerveController {
       m_rearRightModule = new SwerveModuleIOSim(DriveMap.RearRightSwerveModule);
 
       // Create pose estimator
-      m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics, Rotation2d.fromDegrees(m_gyroSim.getAngle()),
-          getModulePositions(), new Pose2d());
+      m_poseEstimator = new SwerveDrivePoseEstimator(m_kinematics,
+          Rotation2d.fromDegrees(m_gyroSim.getAngle()), getModulePositions(), new Pose2d());
     }
 
     // Configure snap-to PID
@@ -173,14 +167,12 @@ public class SwerveController {
   public void logSysIdDrive(SysIdRoutineLog log) {
     // Record a frame for the left motors. Since these share an encoder, we consider
     // the entire group to be one motor.
-    log.motor("Front-Left-Module")
-        .voltage(Units.Volts.of(
-            m_moduleInputs[0].DriveMotorVoltage)) // measured motor voltage
-        .linearPosition(Units.Meters.of(
-            m_moduleInputs[0].ModulePosition.distanceMeters)) // distance in meters
-        .linearVelocity(Units.MetersPerSecond.of(m_moduleInputs[0].ModuleState.speedMetersPerSecond)); // speed in
-                                                                                                       // meters per
-                                                                                                       // second
+    log.motor("Front-Left-Module").voltage(Units.Volts.of(m_moduleInputs[0].DriveMotorVoltage)) // measured motor voltage
+        .linearPosition(Units.Meters.of(m_moduleInputs[0].ModulePosition.distanceMeters)) // distance in meters
+        .linearVelocity(
+            Units.MetersPerSecond.of(m_moduleInputs[0].ModuleState.speedMetersPerSecond)); // speed in
+                                                                                                           // meters per
+                                                                                                           // second
 
   }
 
@@ -202,11 +194,13 @@ public class SwerveController {
     if (_robotIsReal) {
       m_poseEstimator.resetPosition(m_gyro.getRotation2d(), getModulePositions(), pose);
     } else {
-      m_poseEstimator.resetPosition(Rotation2d.fromDegrees(m_gyroSim.getAngle()), getModulePositions(), pose);
+      m_poseEstimator.resetPosition(Rotation2d.fromDegrees(m_gyroSim.getAngle()),
+          getModulePositions(), pose);
     }
   }
 
-  public void addPoseEstimatorVisionMeasurement(Pose2d pose, double timestamp, Matrix<N3, N1> stdDeviations) {
+  public void addPoseEstimatorVisionMeasurement(Pose2d pose, double timestamp,
+      Matrix<N3, N1> stdDeviations) {
     m_poseEstimator.addVisionMeasurement(pose, timestamp, stdDeviations);
   }
 
@@ -247,7 +241,8 @@ public class SwerveController {
 
     // Calculate the module states from the chassis speeds
     var swerveModuleStates = m_kinematics.toSwerveModuleStates(desiredChassisSpeeds);
-    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, DriveMap.MaxSpeedMetersPerSecond);
+    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates,
+        DriveMap.MaxSpeedMetersPerSecond);
 
     // Set the desired states for each module
     setDesiredModuleStates(swerveModuleStates);
@@ -260,13 +255,13 @@ public class SwerveController {
    */
   private void drivePathPlanner(ChassisSpeeds robotRelativeSpeeds) {
     if (Robot.onRedAlliance()) {
-      Rotation2d gyroAngle = _robotIsReal
-          ? m_gyro.getRotation2d().plus(Rotation2d.fromDegrees(180))
+      Rotation2d gyroAngle = _robotIsReal ? m_gyro.getRotation2d().plus(Rotation2d.fromDegrees(180))
           : Rotation2d.fromDegrees(m_gyroSim.getAngle()).plus(Rotation2d.fromDegrees(180));
 
       // Convert the robot-relative speeds to field-relative speeds with the flipped
       // gyro
-      var fieldRelativeSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeSpeeds, gyroAngle);
+      var fieldRelativeSpeeds =
+          ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeSpeeds, gyroAngle);
 
       // Convert back to robot-relative speeds, also with the flipped gyro
       robotRelativeSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, gyroAngle);
@@ -294,12 +289,8 @@ public class SwerveController {
    */
   @Logged(importance = Importance.CRITICAL)
   public SwerveModuleState[] getModuleStates() {
-    return new SwerveModuleState[] {
-        m_moduleInputs[0].ModuleState,
-        m_moduleInputs[1].ModuleState,
-        m_moduleInputs[2].ModuleState,
-        m_moduleInputs[3].ModuleState,
-    };
+    return new SwerveModuleState[] {m_moduleInputs[0].ModuleState, m_moduleInputs[1].ModuleState,
+        m_moduleInputs[2].ModuleState, m_moduleInputs[3].ModuleState,};
   }
 
   /**
@@ -307,11 +298,8 @@ public class SwerveController {
    */
   @Logged(importance = Importance.CRITICAL)
   public SwerveModulePosition[] getModulePositions() {
-    return new SwerveModulePosition[] {
-        m_moduleInputs[0].ModulePosition,
-        m_moduleInputs[1].ModulePosition,
-        m_moduleInputs[2].ModulePosition,
-        m_moduleInputs[3].ModulePosition,
-    };
+    return new SwerveModulePosition[] {m_moduleInputs[0].ModulePosition,
+        m_moduleInputs[1].ModulePosition, m_moduleInputs[2].ModulePosition,
+        m_moduleInputs[3].ModulePosition,};
   }
 }

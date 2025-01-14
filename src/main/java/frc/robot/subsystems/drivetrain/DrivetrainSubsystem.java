@@ -39,9 +39,7 @@ import prime.vision.LimelightInputs;
 public class DrivetrainSubsystem extends SubsystemBase {
 
   public enum DrivetrainControlMode {
-    kRobotRelative,
-    kFieldRelative,
-    kPathFollowing,
+    kRobotRelative, kFieldRelative, kPathFollowing,
   }
 
   private Runnable _clearForegroundPatternFunc;
@@ -49,18 +47,12 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   // Shuffleboard Drivetrain tab configuration
   private ShuffleboardTab d_drivetrainTab = Shuffleboard.getTab("Drivetrain");
-  public GenericEntry d_snapToEnabledEntry = d_drivetrainTab
-      .add("SnapTo Enabled", false)
-      .withWidget(BuiltInWidgets.kBooleanBox)
-      .withPosition(0, 0)
-      .withSize(2, 2)
-      .getEntry();
-  private GenericEntry d_snapAngle = d_drivetrainTab
-      .add("SnapTo Angle", 0)
-      .withWidget(BuiltInWidgets.kGyro)
-      .withPosition(2, 0)
-      .withSize(4, 5)
-      .withProperties(Map.of("Counter clockwise", true, "Major tick spacing", 45.0, "Minor tick spacing", 15.0))
+  public GenericEntry d_snapToEnabledEntry = d_drivetrainTab.add("SnapTo Enabled", false)
+      .withWidget(BuiltInWidgets.kBooleanBox).withPosition(0, 0).withSize(2, 2).getEntry();
+  private GenericEntry d_snapAngle = d_drivetrainTab.add("SnapTo Angle", 0)
+      .withWidget(BuiltInWidgets.kGyro).withPosition(2, 0).withSize(4, 5)
+      .withProperties(
+          Map.of("Counter clockwise", true, "Major tick spacing", 45.0, "Minor tick spacing", 15.0))
       .getEntry();
 
   // IO
@@ -80,19 +72,17 @@ public class DrivetrainSubsystem extends SubsystemBase {
   @Logged(importance = Logged.Importance.CRITICAL)
   public boolean WithinPoseEstimationVelocity = true;
 
-  private LEDPattern _snapOnTargetPattern = LEDPattern.solid(Color.kGreen)
-      .blink(Units.Seconds.of(0.1));
-  private LEDPattern _snapOffTargetPattern = LEDPattern.steps(Map.of(0.0, Color.kRed, 0.25, Color.kBlack))
-      .scrollAtRelativeSpeed(Units.Hertz.of(2));
+  private LEDPattern _snapOnTargetPattern =
+      LEDPattern.solid(Color.kGreen).blink(Units.Seconds.of(0.1));
+  private LEDPattern _snapOffTargetPattern = LEDPattern
+      .steps(Map.of(0.0, Color.kRed, 0.25, Color.kBlack)).scrollAtRelativeSpeed(Units.Hertz.of(2));
 
   SysIdRoutine _driveSysIdRoutine;
 
   /**
    * Creates a new Drivetrain.
    */
-  public DrivetrainSubsystem(
-      boolean isReal,
-      Runnable clearForegroundPatternFunc,
+  public DrivetrainSubsystem(boolean isReal, Runnable clearForegroundPatternFunc,
       Consumer<LEDPattern> setForegroundPatternFunc,
       Supplier<LimelightInputs[]> limelightInputsSupplier) {
     setName("Drivetrain");
@@ -114,8 +104,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
     _driveSysIdRoutine = new SysIdRoutine(
         // Ramp up at 1 volt per second for quasistatic tests, step at 2 volts in
         // dynamic tests, run for 13 seconds.
-        new SysIdRoutine.Config(Units.Volts.of(0.5).per(Units.Second),
-            Units.Volts.of(2), Units.Seconds.of(10)),
+        new SysIdRoutine.Config(Units.Volts.of(0.5).per(Units.Second), Units.Volts.of(2),
+            Units.Seconds.of(10)),
         new SysIdRoutine.Mechanism(
             // Tell SysId how to plumb the driving voltage to the motors.
             _swerveController::setDriveVoltages,
@@ -141,29 +131,27 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     // Set up PP to feed current path poses to the field widget
-    PathPlannerLogging.setLogCurrentPoseCallback(pose -> DriverDashboard.FieldWidget.setRobotPose(pose));
     PathPlannerLogging
-        .setLogTargetPoseCallback(pose -> DriverDashboard.FieldWidget.getObject("target pose").setPose(pose));
-    PathPlannerLogging.setLogActivePathCallback(poses -> DriverDashboard.FieldWidget.getObject("path").setPoses(poses));
+        .setLogCurrentPoseCallback(pose -> DriverDashboard.FieldWidget.setRobotPose(pose));
+    PathPlannerLogging.setLogTargetPoseCallback(
+        pose -> DriverDashboard.FieldWidget.getObject("target pose").setPose(pose));
+    PathPlannerLogging.setLogActivePathCallback(
+        poses -> DriverDashboard.FieldWidget.getObject("path").setPoses(poses));
 
     // Configure PathPlanner holonomic control
-    AutoBuilder.configure(
-        () -> _inputs.EstimatedRobotPose,
-        _swerveController::setEstimatorPose,
+    AutoBuilder.configure(() -> _inputs.EstimatedRobotPose, _swerveController::setEstimatorPose,
         () -> _inputs.RobotRelativeChassisSpeeds,
         (speeds, feedForwards) -> drivePathPlanner(speeds),
-        new PPHolonomicDriveController(
-            DriveMap.PathingTranslationPid.toPIDConstants(),
+        new PPHolonomicDriveController(DriveMap.PathingTranslationPid.toPIDConstants(),
             DriveMap.PathingRotationPid.toPIDConstants()),
-        config,
-        () -> {
+        config, () -> {
           // Boolean supplier that controls when the path will be mirrored for the red
           // alliance
           var alliance = DriverStation.getAlliance();
 
           return alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red;
-        },
-        this);
+        }, this);
+
     // Example of overriding PathPlanner's rotation feedback
     // PPHolonomicDriveController.overrideRotationFeedback(() ->
     // m_inputs.SnapCorrectionRadiansPerSecond);
@@ -253,8 +241,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
     WithinPoseEstimationVelocity = _inputs.RobotRelativeChassisSpeeds.omegaRadiansPerSecond < 0.2 && // 1 rad/s is
                                                                                                      // about 60
                                                                                                      // degrees/s
-        _inputs.RobotRelativeChassisSpeeds.vxMetersPerSecond < 2 &&
-        _inputs.RobotRelativeChassisSpeeds.vyMetersPerSecond < 2;
+        _inputs.RobotRelativeChassisSpeeds.vxMetersPerSecond < 2
+        && _inputs.RobotRelativeChassisSpeeds.vyMetersPerSecond < 2;
 
     EstimatePoseUsingFrontCamera = DriverDashboard.FrontPoseEstimationSwitch.getBoolean(false);
     if (EstimatePoseUsingFrontCamera)
@@ -302,7 +290,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
       // Convert inputs to MPS
       var inputXMPS = controlSuppliers.X.getAsDouble() * DriveMap.MaxSpeedMetersPerSecond;
       var inputYMPS = -controlSuppliers.Y.getAsDouble() * DriveMap.MaxSpeedMetersPerSecond;
-      var inputRotationRadiansPS = -controlSuppliers.Z.getAsDouble() * DriveMap.MaxAngularSpeedRadians;
+      var inputRotationRadiansPS =
+          -controlSuppliers.Z.getAsDouble() * DriveMap.MaxAngularSpeedRadians;
 
       // Build chassis speeds
       var invert = Robot.onRedAlliance() ? -1 : 1;
@@ -311,11 +300,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
       // based on which side we're on
       var vxSpeed = (inputYMPS * invert); // Driver Y axis is field X axis
       var vySpeed = (inputXMPS * invert); // Driver X axis is field Y axis
-      var fieldRelativeChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-        vxSpeed, 
-        vySpeed, 
-        inputRotationRadiansPS, 
-        _inputs.GyroAngle);
+      var fieldRelativeChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(vxSpeed, vySpeed,
+          inputRotationRadiansPS, _inputs.GyroAngle);
 
       driveFieldRelative(fieldRelativeChassisSpeeds);
     });
@@ -337,7 +323,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
       // Convert inputs to MPS
       var inputXMPS = controlSuppliers.X.getAsDouble() * DriveMap.MaxSpeedMetersPerSecond;
       var inputYMPS = -controlSuppliers.Y.getAsDouble() * DriveMap.MaxSpeedMetersPerSecond;
-      var inputRotationRadiansPS = -controlSuppliers.Z.getAsDouble() * DriveMap.MaxAngularSpeedRadians;
+      var inputRotationRadiansPS =
+          -controlSuppliers.Z.getAsDouble() * DriveMap.MaxAngularSpeedRadians;
 
       // Build chassis speeds
       var invert = Robot.onRedAlliance() ? -1 : 1;
@@ -346,11 +333,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
       // based on which side we're on
       var vxSpeed = (inputYMPS * invert);
       var vySpeed = (inputXMPS * invert);
-      var robotChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-        vxSpeed,
-        vySpeed,
-        inputRotationRadiansPS, 
-        _inputs.GyroAngle);
+      var robotChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(vxSpeed, vySpeed,
+          inputRotationRadiansPS, _inputs.GyroAngle);
 
       driveRobotRelative(robotChassisSpeeds);
     });
@@ -410,7 +394,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   public Map<String, Command> getNamedCommands() {
-    return Map.of("Enable_Lock_On", enableLockOnCommand(), "Disable_Snap_To", disableSnapToCommand());
+    return Map.of("Enable_Lock_On", enableLockOnCommand(), "Disable_Snap_To",
+        disableSnapToCommand());
   }
   // #endregion
 }

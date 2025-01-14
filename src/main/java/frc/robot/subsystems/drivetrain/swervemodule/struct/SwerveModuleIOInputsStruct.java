@@ -31,7 +31,7 @@ public class SwerveModuleIOInputsStruct implements Struct<SwerveModuleIOInputs> 
 
   @Override
   public Struct<?>[] getNested() {
-    return new Struct<?>[] { SwerveModulePosition.struct, SwerveModuleState.struct };
+    return new Struct<?>[] {SwerveModulePosition.struct, SwerveModuleState.struct};
   }
 
   @Override

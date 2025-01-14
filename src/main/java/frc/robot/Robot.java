@@ -60,9 +60,9 @@ public class Robot extends TimedRobot {
     // This is the recommended way to schedule a periodic task that runs faster than the robot loop
     // This also adds a delay of 3ms to the task to ensure it does not run at the same time as 
     // subsystem periodic functions
-    addPeriodic(m_robotContainer.LEDs::updateLedStrip, 
-      Units.Milliseconds.of(5), 
-      Units.Milliseconds.of(3));
+    addPeriodic(m_robotContainer.LEDs::updateLedStrip,
+        Units.Milliseconds.of(5),
+        Units.Milliseconds.of(3));
   }
 
   @Override
@@ -90,13 +90,13 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     var autoPattern = LEDPattern.gradient(GradientType.kDiscontinuous, getAllianceColor(), Color.kBlack)
-      .offsetBy(-PwmLEDs.VMap.PixelsPerStrip / 2)
-      .scrollAtRelativeSpeed(Units.Hertz.of(2))
-      .reversed();
+        .offsetBy(-PwmLEDs.VMap.PixelsPerStrip / 2)
+        .scrollAtRelativeSpeed(Units.Hertz.of(2))
+        .reversed();
     var combinedPattern = LEDPattern.gradient(GradientType.kDiscontinuous, getAllianceColor(), Color.kBlack)
-      .offsetBy(PwmLEDs.VMap.PixelsPerStrip / 2)
-      .scrollAtRelativeSpeed(Units.Hertz.of(2))
-      .blend(autoPattern);
+        .offsetBy(PwmLEDs.VMap.PixelsPerStrip / 2)
+        .scrollAtRelativeSpeed(Units.Hertz.of(2))
+        .blend(autoPattern);
     m_robotContainer.LEDs.setBackgroundPattern(combinedPattern);
     m_robotContainer.LEDs.clearForegroundPattern();
 
@@ -121,7 +121,8 @@ public class Robot extends TimedRobot {
       m_robotContainer.Drivetrain.EstimatePoseUsingFrontCamera = true;
       m_robotContainer.Drivetrain.EstimatePoseUsingRearCamera = true;
 
-      if (onRedAlliance()) m_robotContainer.Drivetrain.resetGyro();
+      if (onRedAlliance())
+        m_robotContainer.Drivetrain.resetGyro();
 
       SmartDashboard.putString("Robot/Auto/CommandName", m_autonomousCommand.getName());
       m_autonomousCommand.schedule();
@@ -176,9 +177,9 @@ public class Robot extends TimedRobot {
     var alliance = DriverStation.getAlliance();
     Color allianceColor = Color.kGhostWhite;
     if (alliance.isPresent())
-      allianceColor = alliance.get() == Alliance.Red 
-        ? Color.kRed 
-        : Color.kBlue;
+      allianceColor = alliance.get() == Alliance.Red
+          ? Color.kRed
+          : Color.kBlue;
 
     return allianceColor;
   }

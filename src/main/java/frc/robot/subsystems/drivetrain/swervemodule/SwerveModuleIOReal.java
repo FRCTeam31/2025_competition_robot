@@ -89,7 +89,8 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
     config.smartCurrentLimit(60, 50);
 
     m_SteeringMotor.clearFaults();
-    m_SteeringMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_SteeringMotor.configure(config, ResetMode.kResetSafeParameters,
+        PersistMode.kPersistParameters);
 
     // Create a PID controller to calculate steering motor output
     m_steeringPidController = pid.createPIDController(0.02);
@@ -125,14 +126,10 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
     m_encoder.getConfigurator().apply(new CANcoderConfiguration());
 
     // AbsoluteSensorRangeValue
-    m_encoder
-        .getConfigurator()
-        .apply(
-            new CANcoderConfiguration()
-                .withMagnetSensor(
-                    new MagnetSensorConfigs()
-                        .withAbsoluteSensorDiscontinuityPoint(0.5)
-                        .withMagnetOffset(-m_map.CanCoderStartingOffset)));
+    m_encoder.getConfigurator()
+        .apply(new CANcoderConfiguration()
+            .withMagnetSensor(new MagnetSensorConfigs().withAbsoluteSensorDiscontinuityPoint(0.5)
+                .withMagnetOffset(-m_map.CanCoderStartingOffset)));
   }
 
   /**
@@ -171,7 +168,8 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
       setpoint += 1;
 
     // Calculate the new output using the PID controller
-    var newOutput = m_steeringPidController.calculate(m_inputs.ModuleState.angle.getRotations(), setpoint);
+    var newOutput =
+        m_steeringPidController.calculate(m_inputs.ModuleState.angle.getRotations(), setpoint);
 
     // Set the steering motor's speed to the calculated output
     m_SteeringMotor.set(MathUtil.clamp(newOutput, -1, 1));
@@ -187,8 +185,7 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
     Rotation2d currentAngle = m_inputs.ModulePosition.angle;
     var delta = desiredState.angle.minus(currentAngle);
     if (Math.abs(delta.getDegrees()) > 90.0) {
-      return new SwerveModuleState(
-          -desiredState.speedMetersPerSecond,
+      return new SwerveModuleState(-desiredState.speedMetersPerSecond,
           desiredState.angle.rotateBy(Rotation2d.fromDegrees(180.0)));
     } else {
       return desiredState;

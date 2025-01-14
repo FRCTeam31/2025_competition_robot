@@ -30,7 +30,7 @@ public class LimelightPoseStruct implements Struct<LimelightPose> {
 
     @Override
     public Struct<?>[] getNested() {
-        return new Struct<?>[] {Pose3d.struct};
+        return new Struct<?>[] { Pose3d.struct };
     }
 
     @Override
@@ -44,7 +44,7 @@ public class LimelightPoseStruct implements Struct<LimelightPose> {
 
     @Override
     public void pack(ByteBuffer bb, LimelightPose value) {
-        Pose3d.struct.pack(bb, value.Pose); 
+        Pose3d.struct.pack(bb, value.Pose);
         bb.putDouble(value.Timestamp);
         bb.putDouble(value.TagCount);
         bb.putDouble(value.TagSpan);

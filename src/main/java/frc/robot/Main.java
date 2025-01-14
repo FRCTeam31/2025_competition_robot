@@ -9,7 +9,8 @@ import edu.wpi.first.wpilibj.RobotBase;
 public final class Main {
 
   // Builds a Main
-  private Main() {}
+  private Main() {
+  }
 
   // Starts the Robot
   public static void main(String... args) {

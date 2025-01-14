@@ -122,8 +122,8 @@ public class LimeLightNT implements AutoCloseable {
      */
     public LimelightPose getRobotPose(DriverStation.Alliance alliance) {
         var poseData = alliance == Alliance.Blue
-        ? m_limelightTable.getEntry("botpose_wpiblue").getDoubleArray(new double[11])
-        : m_limelightTable.getEntry("botpose_wpired").getDoubleArray(new double[11]);
+                ? m_limelightTable.getEntry("botpose_wpiblue").getDoubleArray(new double[11])
+                : m_limelightTable.getEntry("botpose_wpired").getDoubleArray(new double[11]);
 
         return new LimelightPose(poseData, calculateTrust(poseData[7]));
     }
@@ -132,7 +132,8 @@ public class LimeLightNT implements AutoCloseable {
      * 3D transform of the robot in the coordinate system of the primary in-view AprilTag
      */
     public LimelightPose getRobotPoseInTargetSpace() {
-        var poseData = m_limelightTable.getEntry("botpose_targetspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
+        var poseData =
+                m_limelightTable.getEntry("botpose_targetspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
 
         return new LimelightPose(poseData, calculateTrust(poseData[7]));
     }
@@ -141,7 +142,8 @@ public class LimeLightNT implements AutoCloseable {
      * 3D transform of the camera in the coordinate system of the primary in-view AprilTag
      */
     public LimelightPose getCameraPoseInTargetSpace() {
-        var poseData = m_limelightTable.getEntry("camerapose_targetspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
+        var poseData =
+                m_limelightTable.getEntry("camerapose_targetspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
 
         return new LimelightPose(poseData, calculateTrust(poseData[7]));
     }
@@ -150,7 +152,8 @@ public class LimeLightNT implements AutoCloseable {
      * 3D transform of the camera in the coordinate system of the robot
      */
     public LimelightPose getCameraPoseInRobotSpace() {
-        var poseData = m_limelightTable.getEntry("camerapose_robotspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
+        var poseData =
+                m_limelightTable.getEntry("camerapose_robotspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
 
         return new LimelightPose(poseData, calculateTrust(poseData[7]));
     }
@@ -159,7 +162,8 @@ public class LimeLightNT implements AutoCloseable {
      * 3D transform of the primary in-view AprilTag in the coordinate system of the Camera
      */
     public LimelightPose getTargetPoseInCameraSpace() {
-        var poseData = m_limelightTable.getEntry("targetpose_cameraspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
+        var poseData =
+                m_limelightTable.getEntry("targetpose_cameraspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
 
         return new LimelightPose(poseData, calculateTrust(poseData[7]));
     }
@@ -168,7 +172,8 @@ public class LimeLightNT implements AutoCloseable {
      * 3D transform of the primary in-view AprilTag in the coordinate system of the Robot
      */
     public LimelightPose getTargetPoseInRobotSpace() {
-        var poseData = m_limelightTable.getEntry("targetpose_robotspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
+        var poseData =
+                m_limelightTable.getEntry("targetpose_robotspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
 
         return new LimelightPose(poseData, calculateTrust(poseData[7]));
     }
@@ -208,26 +213,26 @@ public class LimeLightNT implements AutoCloseable {
      */
     public void blinkLed(int blinkCount) {
         m_executorService.submit(() -> {
-        // Blink the LED X times with 100ms on, 200ms off for each blink
-        for (int i = 0; i < blinkCount; i++) {
-            m_limelightTable.getEntry("ledMode").setNumber(3);
+            // Blink the LED X times with 100ms on, 200ms off for each blink
+            for (int i = 0; i < blinkCount; i++) {
+                m_limelightTable.getEntry("ledMode").setNumber(3);
 
-            try {
-            Thread.sleep(100);
-            } catch (Exception e) {
-            Thread.currentThread().interrupt();
+                try {
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                    Thread.currentThread().interrupt();
+                }
+
+                m_limelightTable.getEntry("ledMode").setNumber(1);
+                try {
+                    Thread.sleep(200);
+                } catch (Exception e) {
+                    Thread.currentThread().interrupt();
+                }
             }
 
-            m_limelightTable.getEntry("ledMode").setNumber(1);
-            try {
-            Thread.sleep(200);
-            } catch (Exception e) {
-            Thread.currentThread().interrupt();
-            }
-        }
-
-        // Then return to pipeline control
-        setLedMode(0);
+            // Then return to pipeline control
+            setLedMode(0);
         });
     }
 
@@ -271,14 +276,10 @@ public class LimeLightNT implements AutoCloseable {
      * @param pose
      */
     public void setCameraPose(Pose3d pose) {
-        var poseData = new double[] {
-        pose.getTranslation().getX(),
-        pose.getTranslation().getY(),
-        pose.getTranslation().getZ(),
-        Units.radiansToDegrees(pose.getRotation().getX()),
-        Units.radiansToDegrees(pose.getRotation().getY()),
-        Units.radiansToDegrees(pose.getRotation().getZ()),
-        };
+        var poseData = new double[] {pose.getTranslation().getX(), pose.getTranslation().getY(),
+                pose.getTranslation().getZ(), Units.radiansToDegrees(pose.getRotation().getX()),
+                Units.radiansToDegrees(pose.getRotation().getY()),
+                Units.radiansToDegrees(pose.getRotation().getZ()),};
 
         m_limelightTable.getEntry("camerapose_robotspace_set").setDoubleArray(poseData);
     }
