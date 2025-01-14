@@ -14,7 +14,6 @@ import edu.wpi.first.epilogue.Logged.Strategy;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.*;
 import frc.robot.maps.DriveMap;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
@@ -43,10 +42,8 @@ public class Container {
       // Create new subsystems
       LEDs = new PwmLEDs();
       Vision = new VisionSubsystem();
-      Drivetrain = new DrivetrainSubsystem(isReal,
-          LEDs::clearForegroundPattern,
-          LEDs::setForegroundPattern,
-          Vision::getAllLimelightInputs);
+      Drivetrain = new DrivetrainSubsystem(isReal, LEDs::clearForegroundPattern,
+          LEDs::setForegroundPattern, Vision::getAllLimelightInputs);
 
       // Register the named commands from each subsystem that may be used in
       // PathPlanner
@@ -58,7 +55,8 @@ public class Container {
       // Reconfigure bindings
       configureDriverControls();
     } catch (Exception e) {
-      DriverStation.reportError("[ERROR] >> Failed to configure robot: " + e.getMessage(), e.getStackTrace());
+      DriverStation.reportError("[ERROR] >> Failed to configure robot: " + e.getMessage(),
+          e.getStackTrace());
     }
   }
 
@@ -73,7 +71,8 @@ public class Container {
     var possibleAutos = AutoBuilder.getAllAutoNames();
     for (int i = 0; i < possibleAutos.size(); i++) {
       var autoCommand = new PathPlannerAuto(possibleAutos.get(i));
-      DriverDashboard.AutoTab.add(possibleAutos.get(i), autoCommand).withWidget(BuiltInWidgets.kCommand).withSize(2, 1);
+      DriverDashboard.AutoTab.add(possibleAutos.get(i), autoCommand)
+          .withWidget(BuiltInWidgets.kCommand).withSize(2, 1);
     }
   }
 
@@ -93,11 +92,8 @@ public class Container {
     // Controls for Driving
     m_driverController.a().onTrue(Drivetrain.resetGyroCommand());
     Drivetrain.setDefaultCommand(
-        Drivetrain.driveRobotRelativeCommand(
-            m_driverController.getSwerveControlProfile(
-                HolonomicControlStyle.Drone,
-                DriveMap.DriveDeadband,
-                DriveMap.DeadbandCurveWeight)));
+        Drivetrain.driveRobotRelativeCommand(m_driverController.getSwerveControlProfile(
+            HolonomicControlStyle.Drone, DriveMap.DriveDeadband, DriveMap.DeadbandCurveWeight)));
 
     // While holding b, auto-aim the robot to the apriltag target using snap-to
     m_driverController.leftStick().whileTrue(Drivetrain.enableLockOnCommand())
