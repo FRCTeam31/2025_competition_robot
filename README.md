@@ -23,7 +23,15 @@ These rules apply to all code committed to this repository.
 - `public` or `static` variables are named in `PascalCase`.
 - `private` variables are prefixed with an underscore, and named in `_camelCase`.
 - Any function with greater than 8 parameters must use a [DTO class](https://www.baeldung.com/java-dto-pattern) to wrap the parameters
-    - These DTOs must be suffixed with `Parameters`
+    - These DTOs must be suffixed with `Parameters` and can be as simple or complex as needed.
+- Use the lowest-resolution data type when possible to save memory. 
+    - If a number will always have a value between -128 to 127, use a `byte`. 
+    - If a number will always have a value between −2,147,483,648 to 2,147,483,647, use an `int`.
+    - etc.
+- Follow the principle of least privilege.
+    - If a function or a variable does not **need** to be accessed from outside a class, do not make it `public`
+- Document your code with JavaDoc comments for all `public` functions and variables. 
+- Add comments to your code on the line right above any area that would require explanation. 
 
 ## Subsystem conventions
 These rules apply to subsystems in the robot, unless otherwise approved by a coach.
