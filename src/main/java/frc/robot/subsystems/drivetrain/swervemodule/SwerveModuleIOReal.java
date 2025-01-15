@@ -24,7 +24,7 @@ import prime.control.PrimePIDConstants;
 public class SwerveModuleIOReal implements ISwerveModuleIO {
 
   private SwerveModuleMap m_map;
-  private SwerveModuleIOInputs m_inputs;
+  private SwerveModuleIOInputs m_inputs = new SwerveModuleIOInputs();
 
   // Devices
   private SparkFlex m_SteeringMotor;
@@ -115,6 +115,7 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
     config.closedLoop.outputRange(-12, 12);
     // Apply the configuration
     m_driveMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_drivePidController = m_driveMotor.getClosedLoopController();
   }
 
   /**
@@ -151,14 +152,14 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
   }
 
   private void setDriveSpeed(double speedMetersPerSecond) {
-    // Convert the speed to rotations per second by dividing by the wheel
-    // circumference and gear ratio
-    var speedRotationsPerSecond = Units.MetersPerSecond.of(speedMetersPerSecond)
-        .div(DriveMap.DriveWheelCircumferenceMeters / DriveMap.DriveGearRatio);
+    // // Convert the speed to rotations per second by dividing by the wheel
+    // // circumference and gear ratio
+    // var speedRotationsPerSecond = Units.MetersPerSecond.of(speedMetersPerSecond)
+    //     .div(DriveMap.DriveWheelCircumferenceMeters / DriveMap.DriveGearRatio);
 
-    // Set the drive motor to the desired speed using the spark's internal PID
-    // controller
-    m_drivePidController.setReference(speedRotationsPerSecond.magnitude(), ControlType.kVelocity);
+    // // Set the drive motor to the desired speed using the spark's internal PID
+    // // controller
+    // m_drivePidController.setReference(speedRotationsPerSecond.magnitude(), ControlType.kVelocity);
   }
 
   private void setModuleAngle(Rotation2d angle) {
@@ -168,8 +169,7 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
       setpoint += 1;
 
     // Calculate the new output using the PID controller
-    var newOutput =
-        m_steeringPidController.calculate(m_inputs.ModuleState.angle.getRotations(), setpoint);
+    var newOutput = m_steeringPidController.calculate(m_inputs.ModuleState.angle.getRotations(), setpoint);
 
     // Set the steering motor's speed to the calculated output
     m_SteeringMotor.set(MathUtil.clamp(newOutput, -1, 1));
