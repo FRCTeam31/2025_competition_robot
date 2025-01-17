@@ -129,7 +129,7 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
     // AbsoluteSensorRangeValue
     m_encoder.getConfigurator()
         .apply(new CANcoderConfiguration()
-            .withMagnetSensor(new MagnetSensorConfigs().withAbsoluteSensorDiscontinuityPoint(0.5)
+            .withMagnetSensor(new MagnetSensorConfigs().withAbsoluteSensorDiscontinuityPoint(1)
                 .withMagnetOffset(-m_map.CanCoderStartingOffset)));
   }
 
@@ -154,12 +154,12 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
   private void setDriveSpeed(double speedMetersPerSecond) {
     // // Convert the speed to rotations per second by dividing by the wheel
     // // circumference and gear ratio
-    // var speedRotationsPerSecond = Units.MetersPerSecond.of(speedMetersPerSecond)
-    //     .div(DriveMap.DriveWheelCircumferenceMeters / DriveMap.DriveGearRatio);
+    var speedRotationsPerSecond = Units.MetersPerSecond.of(speedMetersPerSecond)
+        .div(DriveMap.DriveWheelCircumferenceMeters / DriveMap.DriveGearRatio);
 
     // // Set the drive motor to the desired speed using the spark's internal PID
     // // controller
-    // m_drivePidController.setReference(speedRotationsPerSecond.magnitude(), ControlType.kVelocity);
+    m_drivePidController.setReference(speedRotationsPerSecond.magnitude(), ControlType.kVelocity);
   }
 
   private void setModuleAngle(Rotation2d angle) {

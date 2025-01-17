@@ -20,7 +20,7 @@ public class DriveMap {
         public static final double DriveDeadband = 0.15;
         public static final double DeadbandCurveWeight = 0.5;
         public static final PrimePIDConstants DrivePID = new PrimePIDConstants(0.1, 0, 0, 0, 0.091, 0, 0.05);
-        public static final PrimePIDConstants SteeringPID = new PrimePIDConstants(0.1, 0, 0);
+        public static final PrimePIDConstants SteeringPID = new PrimePIDConstants(4.05, 0, 0.075);
         public static final PrimePIDConstants SnapToPID = new PrimePIDConstants(6, 0, 0);
         public static final PrimePIDConstants PathingTranslationPid = new PrimePIDConstants(3, 0, 0);
         public static final PrimePIDConstants PathingRotationPid = new PrimePIDConstants(2, 0, 0);
@@ -34,13 +34,14 @@ public class DriveMap {
         public static final String LimelightFrontName = "limelight-front";
 
         public static final SwerveModuleMap FrontLeftSwerveModule = new SwerveModuleMap(1, 2, 14,
-                        0.673828, true, true, new Translation2d(TrackWidthMeters / 2, WheelBaseMeters / 2));
+                        46.2 * 0.0025, true, false, new Translation2d(TrackWidthMeters / 2, WheelBaseMeters / 2));
         public static final SwerveModuleMap FrontRightSwerveModule = new SwerveModuleMap(7, 8, 13,
-                        0.113770, true, true, new Translation2d(TrackWidthMeters / 2, -(WheelBaseMeters / 2)));
-        public static final SwerveModuleMap RearRightSwerveModule = new SwerveModuleMap(5, 6, 12, 0.699951, true, true,
+                        273.2 * 0.0025, true, false, new Translation2d(TrackWidthMeters / 2, -(WheelBaseMeters / 2)));
+        public static final SwerveModuleMap RearRightSwerveModule = new SwerveModuleMap(5, 6, 12, 278 * 0.0025, true,
+                        false,
                         new Translation2d(-(TrackWidthMeters / 2), -(WheelBaseMeters / 2)));
         public static final SwerveModuleMap RearLeftSwerveModule = new SwerveModuleMap(3, 4, 11,
-                        0.136963, true, true, new Translation2d(-TrackWidthMeters / 2, WheelBaseMeters / 2));
+                        53 * 0.0025, true, false, new Translation2d(-TrackWidthMeters / 2, WheelBaseMeters / 2));
 
         public static final RobotConfig PathPlannerRobotConfiguration = new RobotConfig(Units.lbsToKilograms(120),
                         MomentOfInertia.ofBaseUnits(6, edu.wpi.first.units.Units.KilogramSquareMeters)
