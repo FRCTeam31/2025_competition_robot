@@ -130,7 +130,7 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
 
     // Create a PID controller to calculate driving motor output
     m_drivingPidController = pid.createPIDController(0.02);
-    m_drivingPidController.enableContinuousInput(0, 1); // 0 to 1 
+    // m_drivingPidController.enableContinuousInput(0, 1); // 0 to 1 
     m_drivingPidController.setTolerance((1 / 360.0) * 0.1); // 2 degrees in units of rotations
   }
 
@@ -178,6 +178,8 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
         .div(DriveMap.DriveWheelCircumferenceMeters)
         .times(DriveMap.DriveGearRatio).magnitude();
 
+    // Prints current setpoint
+    System.out.print("Driving setpoint: " + m_drivingPidController.getSetpoint() + "/n");
     SmartDashboard.putNumber("driveVelocityRPS", desiredSpeedRotationsPerSecond);
 
     // Set the drive motor to the desired speed using the spark's internal PID
