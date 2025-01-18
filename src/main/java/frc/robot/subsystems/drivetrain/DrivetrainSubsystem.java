@@ -72,8 +72,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   @Logged(importance = Logged.Importance.CRITICAL)
   public boolean WithinPoseEstimationVelocity = true;
 
-  private LEDPattern _snapOnTargetPattern =
-      LEDPattern.solid(Color.kGreen).blink(Units.Seconds.of(0.1));
+  private LEDPattern _snapOnTargetPattern = LEDPattern.solid(Color.kGreen).blink(Units.Seconds.of(0.1));
   private LEDPattern _snapOffTargetPattern = LEDPattern
       .steps(Map.of(0.0, Color.kRed, 0.25, Color.kBlack)).scrollAtRelativeSpeed(Units.Hertz.of(2));
 
@@ -104,8 +103,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
     _driveSysIdRoutine = new SysIdRoutine(
         // Ramp up at 1 volt per second for quasistatic tests, step at 2 volts in
         // dynamic tests, run for 13 seconds.
-        new SysIdRoutine.Config(Units.Volts.of(0.5).per(Units.Second), Units.Volts.of(2),
-            Units.Seconds.of(10)),
+        new SysIdRoutine.Config(Units.Volts.of(2).per(Units.Second), Units.Volts.of(10),
+            Units.Seconds.of(15)),
         new SysIdRoutine.Mechanism(
             // Tell SysId how to plumb the driving voltage to the motors.
             _swerveController::setDriveVoltages,
@@ -290,8 +289,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
       // Convert inputs to MPS
       var inputXMPS = controlSuppliers.X.getAsDouble() * DriveMap.MaxSpeedMetersPerSecond;
       var inputYMPS = -controlSuppliers.Y.getAsDouble() * DriveMap.MaxSpeedMetersPerSecond;
-      var inputRotationRadiansPS =
-          -controlSuppliers.Z.getAsDouble() * DriveMap.MaxAngularSpeedRadians;
+      var inputRotationRadiansPS = -controlSuppliers.Z.getAsDouble() * DriveMap.MaxAngularSpeedRadians;
 
       // Build chassis speeds
       var invert = Robot.onRedAlliance() ? -1 : 1;
@@ -323,8 +321,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
       // Convert inputs to MPS
       var inputXMPS = controlSuppliers.X.getAsDouble() * DriveMap.MaxSpeedMetersPerSecond;
       var inputYMPS = -controlSuppliers.Y.getAsDouble() * DriveMap.MaxSpeedMetersPerSecond;
-      var inputRotationRadiansPS =
-          -controlSuppliers.Z.getAsDouble() * DriveMap.MaxAngularSpeedRadians;
+      var inputRotationRadiansPS = -controlSuppliers.Z.getAsDouble() * DriveMap.MaxAngularSpeedRadians;
 
       // Build chassis speeds
       var invert = Robot.onRedAlliance() ? -1 : 1;
@@ -345,6 +342,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
    */
   public Command resetGyroCommand() {
     return Commands.runOnce(() -> resetGyro());
+  }
+
+  public Command stopAllMotors() {
+    return this.runOnce(() -> _swerveController.stopAllMotors());
   }
 
   /**

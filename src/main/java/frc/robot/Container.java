@@ -14,6 +14,7 @@ import edu.wpi.first.epilogue.Logged.Strategy;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.*;
 import frc.robot.maps.DriveMap;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
@@ -101,16 +102,24 @@ public class Container {
 
     // Controls for Snap-To with field-relative setpoints
     m_driverController.x().onTrue(Drivetrain.disableSnapToCommand());
-    m_driverController.pov(Controls.up).onTrue(Drivetrain.setSnapToSetpointCommand(0));
-    m_driverController.pov(Controls.left).onTrue(Drivetrain.setSnapToSetpointCommand(270));
-    m_driverController.pov(Controls.down).onTrue(Drivetrain.setSnapToSetpointCommand(180));
-    m_driverController.pov(Controls.right).onTrue(Drivetrain.setSnapToSetpointCommand(90));
+    // m_driverController.pov(Controls.up).onTrue(Drivetrain.setSnapToSetpointCommand(0));
+    // m_driverController.pov(Controls.left).onTrue(Drivetrain.setSnapToSetpointCommand(270));
+    // m_driverController.pov(Controls.down).onTrue(Drivetrain.setSnapToSetpointCommand(180));
+    // m_driverController.pov(Controls.right).onTrue(Drivetrain.setSnapToSetpointCommand(90));
 
     // Uncomment to enable SysID Routines.
-    // m_driverController.pov(Controls.up).onTrue(Drivetrain.runSysIdQuasistaticRoutineCommand(Direction.kForward));
-    // m_driverController.pov(Controls.down).onTrue(Drivetrain.runSysIdQuasistaticRoutineCommand(Direction.kReverse));
-    // m_driverController.pov(Controls.right).onTrue(Drivetrain.runSysIdDynamicRoutineCommand(Direction.kForward));
-    // m_driverController.pov(Controls.left).onTrue(Drivetrain.runSysIdDynamicRoutineCommand(Direction.kReverse));
+    m_driverController.pov(Controls.up)
+        .onTrue(Drivetrain.runSysIdQuasistaticRoutineCommand(Direction.kForward))
+        .onFalse(Drivetrain.stopAllMotors());
+    m_driverController.pov(Controls.down).onTrue(Drivetrain.runSysIdQuasistaticRoutineCommand(Direction.kReverse))
+        .onFalse(Drivetrain.stopAllMotors());
+
+    m_driverController.pov(Controls.right).onTrue(Drivetrain.runSysIdDynamicRoutineCommand(Direction.kForward))
+        .onFalse(Drivetrain.stopAllMotors());
+
+    m_driverController.pov(Controls.left).onTrue(Drivetrain.runSysIdDynamicRoutineCommand(Direction.kReverse))
+        .onFalse(Drivetrain.stopAllMotors());
+
   }
 
 }
