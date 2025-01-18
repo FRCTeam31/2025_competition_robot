@@ -11,7 +11,8 @@ public class SwerveModuleIOOutputs implements StructSerializable {
     /** Struct for serialization. */
     public static final SwerveModuleIOOutputsStruct struct = new SwerveModuleIOOutputsStruct();
 
-    public SwerveModuleIOOutputs() {}
+    public SwerveModuleIOOutputs() {
+    }
 
     public SwerveModuleIOOutputs(SwerveModuleState desiredState) {
         DesiredState = desiredState;

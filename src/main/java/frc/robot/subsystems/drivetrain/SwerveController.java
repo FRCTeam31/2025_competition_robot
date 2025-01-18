@@ -50,14 +50,14 @@ public class SwerveController {
       m_rearRightModule;
 
   @Logged(name = "ModuleInputs", importance = Logged.Importance.CRITICAL)
-  private SwerveModuleIOInputs[] m_moduleInputs =
-      new SwerveModuleIOInputs[] {new SwerveModuleIOInputs(), new SwerveModuleIOInputs(),
-          new SwerveModuleIOInputs(), new SwerveModuleIOInputs()};
+  private SwerveModuleIOInputs[] m_moduleInputs = new SwerveModuleIOInputs[] { new SwerveModuleIOInputs(),
+      new SwerveModuleIOInputs(),
+      new SwerveModuleIOInputs(), new SwerveModuleIOInputs() };
 
   @Logged(name = "ModuleOutputs", importance = Logged.Importance.CRITICAL)
-  private SwerveModuleIOOutputs[] m_moduleOutputs =
-      new SwerveModuleIOOutputs[] {new SwerveModuleIOOutputs(), new SwerveModuleIOOutputs(),
-          new SwerveModuleIOOutputs(), new SwerveModuleIOOutputs()};
+  private SwerveModuleIOOutputs[] m_moduleOutputs = new SwerveModuleIOOutputs[] { new SwerveModuleIOOutputs(),
+      new SwerveModuleIOOutputs(),
+      new SwerveModuleIOOutputs(), new SwerveModuleIOOutputs() };
 
   public SwerveController(boolean isReal) {
     _robotIsReal = isReal;
@@ -260,8 +260,7 @@ public class SwerveController {
 
       // Convert the robot-relative speeds to field-relative speeds with the flipped
       // gyro
-      var fieldRelativeSpeeds =
-          ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeSpeeds, gyroAngle);
+      var fieldRelativeSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeSpeeds, gyroAngle);
 
       // Convert back to robot-relative speeds, also with the flipped gyro
       robotRelativeSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, gyroAngle);
@@ -279,9 +278,9 @@ public class SwerveController {
    */
   private void setDesiredModuleStates(SwerveModuleState[] desiredStates) {
     m_moduleOutputs[0].DesiredState = desiredStates[0];
-    m_moduleOutputs[1].DesiredState = desiredStates[1];
-    m_moduleOutputs[2].DesiredState = desiredStates[2];
-    m_moduleOutputs[3].DesiredState = desiredStates[3];
+    // m_moduleOutputs[1].DesiredState = desiredStates[1];
+    // m_moduleOutputs[2].DesiredState = desiredStates[2];
+    // m_moduleOutputs[3].DesiredState = desiredStates[3];
   }
 
   /**
@@ -289,8 +288,16 @@ public class SwerveController {
    */
   @Logged(importance = Importance.CRITICAL)
   public SwerveModuleState[] getModuleStates() {
-    return new SwerveModuleState[] {m_moduleInputs[0].ModuleState, m_moduleInputs[1].ModuleState,
-        m_moduleInputs[2].ModuleState, m_moduleInputs[3].ModuleState,};
+    return new SwerveModuleState[] { m_moduleInputs[0].ModuleState, m_moduleInputs[1].ModuleState,
+        m_moduleInputs[2].ModuleState, m_moduleInputs[3].ModuleState };
+  }
+
+  @Logged(importance = Importance.CRITICAL)
+  public SwerveModuleState[] getDesiredModuleStates() {
+    return new SwerveModuleState[] {
+        m_moduleOutputs[0].DesiredState, m_moduleOutputs[1].DesiredState, m_moduleOutputs[2].DesiredState,
+        m_moduleOutputs[3].DesiredState
+    };
   }
 
   /**
@@ -298,8 +305,8 @@ public class SwerveController {
    */
   @Logged(importance = Importance.CRITICAL)
   public SwerveModulePosition[] getModulePositions() {
-    return new SwerveModulePosition[] {m_moduleInputs[0].ModulePosition,
+    return new SwerveModulePosition[] { m_moduleInputs[0].ModulePosition,
         m_moduleInputs[1].ModulePosition, m_moduleInputs[2].ModulePosition,
-        m_moduleInputs[3].ModulePosition,};
+        m_moduleInputs[3].ModulePosition, };
   }
 }
