@@ -15,12 +15,18 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.epilogue.Logged.Importance;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.maps.*;
 
@@ -38,6 +44,7 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
   private SimpleMotorFeedforward driveFeedForward;
   private SparkFlex m_driveMotor;
   private CANcoder m_encoder;
+  private double driveOutput;
 
   public SwerveModuleIOReal(SwerveModuleMap moduleMap) {
     m_map = moduleMap;
@@ -45,6 +52,7 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
     setupSteeringMotor(DriveMap.SteeringPID);
     setupDriveMotor(DriveMap.DrivePID);
     setupCanCoder();
+
   }
 
   @Override
@@ -134,7 +142,7 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
     m_drivingPidController = pid.createPIDController(0.02);
     // m_drivingPidController.enableContinuousInput(0, 1); // 0 to 1 
     m_drivingPidController.setTolerance((1 / 360.0) * 0.1); // 2 degrees in units of rotations
-    driveFeedForward = new SimpleMotorFeedforward(0.037987, 0.037265, 0.0047272);
+    driveFeedForward = new SimpleMotorFeedforward(0.033593, 0.19324, 0.020469);
   }
 
   /**
@@ -153,7 +161,7 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
   }
 
   /**
-   * Sets the desired state of the module.
+   * Sets the desired state of the module
    *
    * @param desiredState The optimized state of the module that we'd like to be at
    *                     in this
@@ -174,30 +182,20 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
     // Convert the speed to rotations per second by dividing by the wheel
     // circumference and gear ratio
     var currentSpeedMeterPerSecond = m_inputs.ModuleState.speedMetersPerSecond;
-    // var desiredSpeedRotationsPerSecond = (Units.MetersPerSecond.of(speedMetersPerSecond)
-    //     .div(DriveMap.DriveWheelCircumferenceMeters)
-    //     .div(DriveMap.DriveGearRatio)).magnitude();
 
     var desiredSpeedRotationsPerSecond = (speedMetersPerSecond / DriveMap.DriveWheelCircumferenceMeters)
         / DriveMap.DriveGearRatio;
 
-    // var currentSpeedRotationsPerSecond = Units.MetersPerSecond.of(m_inputs.ModuleState.speedMetersPerSecond)
-    //     .div(DriveMap.DriveWheelCircumferenceMeters)
-    //     .div(DriveMap.DriveGearRatio).magnitude();
-
     var currentSpeedRotationsPerSecond = (currentSpeedMeterPerSecond
         / DriveMap.DriveWheelCircumferenceMeters) / DriveMap.DriveGearRatio;
 
-    // Prints current setpoint
-    System.out.print("Driving setpoint: " + m_drivingPidController.getSetpoint() + "/n");
-    SmartDashboard.putNumber("driveVelocityRPS", desiredSpeedRotationsPerSecond);
+    driveOutput = m_drivingPidController.calculate(currentSpeedRotationsPerSecond, desiredSpeedRotationsPerSecond)
+        + driveFeedForward.calculate(desiredSpeedRotationsPerSecond);
 
-    // Set the drive motor to the desired speed using the spark's internal PID
-    // controller
-    var driveOutput = m_drivingPidController.calculate(currentSpeedRotationsPerSecond, desiredSpeedRotationsPerSecond);
-    driveOutput += driveFeedForward.calculate(desiredSpeedRotationsPerSecond);
+    SmartDashboard.putNumber("driveOuput", driveOutput);
+    // SmartDashboard.putNumber(null, speedMetersPerSecond);
+
     m_driveMotor.setVoltage(MathUtil.clamp(driveOutput, -12, 12));
-    // m_driveMotor.set
   }
 
   private void setModuleAngle(Rotation2d angle) {
@@ -229,4 +227,10 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
       return desiredState;
     }
   }
+
+  @Logged(name = "drive voltage", importance = Importance.CRITICAL)
+  public double getDriveVoltage() {
+    return driveOutput;
+  }
+
 }
