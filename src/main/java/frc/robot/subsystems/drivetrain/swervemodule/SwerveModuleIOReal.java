@@ -188,6 +188,8 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
     var currentSpeedRotationsPerSecond = (currentSpeedMeterPerSecond
         / DriveMap.DriveWheelCircumferenceMeters) / DriveMap.DriveGearRatio;
 
+    // Prints current setpoint
+    System.out.print("Driving setpoint: " + m_drivingPidController.getSetpoint() + "/n");
     SmartDashboard.putNumber("driveVelocityRPS", desiredSpeedRotationsPerSecond);
 
     // Set the drive motor to the desired speed using the spark's internal PID
