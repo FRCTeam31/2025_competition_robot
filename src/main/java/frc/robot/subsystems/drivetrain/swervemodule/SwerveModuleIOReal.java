@@ -17,6 +17,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Units;
@@ -34,6 +35,7 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
   private SparkFlex m_SteeringMotor;
   private PIDController m_steeringPidController;
   private PIDController m_drivingPidController;
+  private SimpleMotorFeedforward driveFeedForward;
   private SparkFlex m_driveMotor;
   private CANcoder m_encoder;
 
@@ -130,8 +132,9 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
 
     // Create a PID controller to calculate driving motor output
     m_drivingPidController = pid.createPIDController(0.02);
-    m_drivingPidController.enableContinuousInput(0, 1); // 0 to 1 
+    // m_drivingPidController.enableContinuousInput(0, 1); // 0 to 1 
     m_drivingPidController.setTolerance((1 / 360.0) * 0.1); // 2 degrees in units of rotations
+    driveFeedForward = new SimpleMotorFeedforward(0.037987, 0.037265, 0.0047272);
   }
 
   /**
@@ -170,20 +173,29 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
   private void setDriveSpeed(double speedMetersPerSecond) {
     // Convert the speed to rotations per second by dividing by the wheel
     // circumference and gear ratio
-    var desiredSpeedRotationsPerSecond = Units.MetersPerSecond.of(speedMetersPerSecond)
-        .div(DriveMap.DriveWheelCircumferenceMeters)
-        .times(DriveMap.DriveGearRatio).magnitude();
+    var currentSpeedMeterPerSecond = m_inputs.ModuleState.speedMetersPerSecond;
+    // var desiredSpeedRotationsPerSecond = (Units.MetersPerSecond.of(speedMetersPerSecond)
+    //     .div(DriveMap.DriveWheelCircumferenceMeters)
+    //     .div(DriveMap.DriveGearRatio)).magnitude();
 
-    var currentSpeedRotationsPerSecond = Units.MetersPerSecond.of(m_inputs.ModuleState.speedMetersPerSecond)
-        .div(DriveMap.DriveWheelCircumferenceMeters)
-        .times(DriveMap.DriveGearRatio).magnitude();
+    var desiredSpeedRotationsPerSecond = (speedMetersPerSecond / DriveMap.DriveWheelCircumferenceMeters)
+        / DriveMap.DriveGearRatio;
+
+    // var currentSpeedRotationsPerSecond = Units.MetersPerSecond.of(m_inputs.ModuleState.speedMetersPerSecond)
+    //     .div(DriveMap.DriveWheelCircumferenceMeters)
+    //     .div(DriveMap.DriveGearRatio).magnitude();
+
+    var currentSpeedRotationsPerSecond = (currentSpeedMeterPerSecond
+        / DriveMap.DriveWheelCircumferenceMeters) / DriveMap.DriveGearRatio;
 
     SmartDashboard.putNumber("driveVelocityRPS", desiredSpeedRotationsPerSecond);
 
     // Set the drive motor to the desired speed using the spark's internal PID
     // controller
     var driveOutput = m_drivingPidController.calculate(currentSpeedRotationsPerSecond, desiredSpeedRotationsPerSecond);
-    m_driveMotor.set(driveOutput);
+    driveOutput += driveFeedForward.calculate(desiredSpeedRotationsPerSecond);
+    m_driveMotor.setVoltage(MathUtil.clamp(driveOutput, -12, 12));
+    // m_driveMotor.set
   }
 
   private void setModuleAngle(Rotation2d angle) {
