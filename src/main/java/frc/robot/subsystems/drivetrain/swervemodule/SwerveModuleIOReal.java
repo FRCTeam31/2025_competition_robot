@@ -183,12 +183,22 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
     // circumference and gear ratio
     var currentSpeedMeterPerSecond = m_inputs.ModuleState.speedMetersPerSecond;
 
+    // NOTE: This should be TIMES drive gear ratio
+    // WHEELrps = speedMPS / wheelCircumferenceMeters
+    // MOTORrps = wheelRPS * gearRatio
     var desiredSpeedRotationsPerSecond = (speedMetersPerSecond / DriveMap.DriveWheelCircumferenceMeters)
         / DriveMap.DriveGearRatio;
 
+    // NOTE: This should be TIMES drive gear ratio
+    // WHEELrps = speedMPS / wheelCircumferenceMeters
+    // MOTORrps = wheelRPS * gearRatio
     var currentSpeedRotationsPerSecond = (currentSpeedMeterPerSecond
         / DriveMap.DriveWheelCircumferenceMeters) / DriveMap.DriveGearRatio;
 
+    // NOTE: Separate these two for better observability
+    // pid = ...
+    // ff = ...
+    // driveOutput = clamp(pid + ff)
     driveOutput = m_drivingPidController.calculate(currentSpeedRotationsPerSecond, desiredSpeedRotationsPerSecond)
         + driveFeedForward.calculate(desiredSpeedRotationsPerSecond);
 
