@@ -59,12 +59,13 @@ These rules apply to subsystems in the robot, unless otherwise approved by a coa
 - [PathPlanner Docs](https://pathplanner.dev/home.html)
     - [Examples](https://github.com/mjansen4857/pathplanner/tree/main/examples/java)
  
+# Team organization 
 
-### Coaches:
+## Coaches:
 - @zeroClearAmerican
 - @PoE309
 
-###  Subsystem Squads:
+##  Subsystem Squads:
 - **Squad 1**
 	- Lead: 
 		- @supazz
@@ -83,7 +84,7 @@ These rules apply to subsystems in the robot, unless otherwise approved by a coa
 		- @ArtsNCrafters
 		- @beese79
 
-### Other Squads:
+## Other Squads:
 - Autonomous Squad - 3 members
 	- This squad is responsible for creating PathPlanner autonomous routines, and integrating subsystem actions into those routines successfully. 
 	- Each Subsystem Squad lead will nominate one member from their squad (it can be themselves) to be on the Autonomous Squad.
