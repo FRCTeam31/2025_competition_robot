@@ -1,4 +1,6 @@
 # Prime Movers 2025 Competition Robot
+[![Build](https://github.com/FRCTeam31/2025_competition_robot/actions/workflows/main.yml/badge.svg)](https://github.com/FRCTeam31/2025_competition_robot/actions/workflows/main.yml)
+
 This is the code for the Prime Movers 2025 FRC Competition Robot, which will play the game [REEFSCAPE](https://www.firstinspires.org/robotics/frc/game-and-season).
 
 ### [Game Manual](https://firstfrc.blob.core.windows.net/frc2025/Manual/2025GameManual.pdf)
