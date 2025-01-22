@@ -58,3 +58,40 @@ These rules apply to subsystems in the robot, unless otherwise approved by a coa
     - [Examples](https://github.com/CrossTheRoadElec/Phoenix6-Examples/tree/main/java)
 - [PathPlanner Docs](https://pathplanner.dev/home.html)
     - [Examples](https://github.com/mjansen4857/pathplanner/tree/main/examples/java)
+ 
+# Team organization 
+
+## Coaches:
+- @zeroClearAmerican
+- @PoE309
+
+##  Subsystem Squads:
+- **Squad 1**
+	- Lead: 
+		- @supazz
+	- Members:
+		- @DjAce626 
+		- @johoseph78 
+- **Squad 2**
+	- Lead:
+		-  @meticulouscorn
+	- Members:
+		- @EthanElite 
+- **Squad 3**
+	- Lead:
+		- @ArrowVark
+	- Members:
+		- @ArtsNCrafters
+		- @beese79
+
+## Other Squads:
+- Autonomous Squad - 3 members
+	- This squad is responsible for creating PathPlanner autonomous routines, and integrating subsystem actions into those routines successfully. 
+	- Each Subsystem Squad lead will nominate one member from their squad (it can be themselves) to be on the Autonomous Squad.
+	- Members:
+		- [TBD]
+- Operator Interface Squad - 3 members
+	- This squad is responsible for crafting the Driver and Operator command structures to create an intuitive interface between the driver controls and the robot's subsystems.  
+	- Each Subsystem Squad lead will nominate one member from their squad (it *cannot* be themselves **or** their Autonomous representative) to be on the Operator Interface team.
+	- Members:
+		- [TBD]
