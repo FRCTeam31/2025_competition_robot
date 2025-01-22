@@ -8,8 +8,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.DriverDashboard;
 import frc.robot.maps.DriveMap;
-import prime.vision.LimelightInputs;
-import prime.vision.LimelightPose;
+import org.prime.vision.LimelightInputs;
+import org.prime.vision.LimelightPose;
 
 @Logged(strategy = Strategy.OPT_IN)
 public class VisionSubsystem extends SubsystemBase {
@@ -24,12 +24,11 @@ public class VisionSubsystem extends SubsystemBase {
         setName("VisionSubsystem");
         var defaultInstance = NetworkTableInstance.getDefault();
 
-        m_limelights =
-                new LimeLightNT[] {new LimeLightNT(defaultInstance, DriveMap.LimelightFrontName),
-                        new LimeLightNT(defaultInstance, DriveMap.LimelightRearName)};
-        m_limelightInputs = new LimelightInputs[] {new LimelightInputs(), new LimelightInputs()};
-        m_limelightRobotPoses = new LimelightPose[] {m_limelightInputs[0].FieldSpaceRobotPose,
-                m_limelightInputs[1].FieldSpaceRobotPose};
+        m_limelights = new LimeLightNT[] { new LimeLightNT(defaultInstance, DriveMap.LimelightFrontName),
+                new LimeLightNT(defaultInstance, DriveMap.LimelightRearName) };
+        m_limelightInputs = new LimelightInputs[] { new LimelightInputs(), new LimelightInputs() };
+        m_limelightRobotPoses = new LimelightPose[] { m_limelightInputs[0].FieldSpaceRobotPose,
+                m_limelightInputs[1].FieldSpaceRobotPose };
         arrayElementCount = m_limelightInputs.length;
     }
 

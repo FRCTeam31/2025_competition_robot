@@ -1,4 +1,4 @@
-package prime.vision;
+package org.prime.vision;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.geometry.Pose3d;

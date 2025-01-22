@@ -1,4 +1,4 @@
-package prime.control;
+package org.prime.control;
 
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import java.util.function.DoubleSupplier;

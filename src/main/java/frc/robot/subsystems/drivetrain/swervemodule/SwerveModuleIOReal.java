@@ -19,7 +19,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Units;
 import frc.robot.maps.*;
 
-import prime.control.PrimePIDConstants;
+import org.prime.control.PrimePIDConstants;
 
 public class SwerveModuleIOReal implements ISwerveModuleIO {
 
@@ -168,8 +168,7 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
       setpoint += 1;
 
     // Calculate the new output using the PID controller
-    var newOutput =
-        m_steeringPidController.calculate(m_inputs.ModuleState.angle.getRotations(), setpoint);
+    var newOutput = m_steeringPidController.calculate(m_inputs.ModuleState.angle.getRotations(), setpoint);
 
     // Set the steering motor's speed to the calculated output
     m_SteeringMotor.set(MathUtil.clamp(newOutput, -1, 1));
