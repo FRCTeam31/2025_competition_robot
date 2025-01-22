@@ -103,7 +103,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     _driveSysIdRoutine = new SysIdRoutine(
         // Ramp up at 1 volt per second for quasistatic tests, step at 2 volts in
         // dynamic tests, run for 13 seconds.
-        new SysIdRoutine.Config(Units.Volts.of(2).per(Units.Second), Units.Volts.of(10),
+        new SysIdRoutine.Config(Units.Volts.of(2).per(Units.Second), Units.Volts.of(8),
             Units.Seconds.of(15)),
         new SysIdRoutine.Mechanism(
             // Tell SysId how to plumb the driving voltage to the motors.

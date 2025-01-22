@@ -13,21 +13,24 @@ public class DriveMap {
         public static final double TrackWidthMeters = 0.51181;
         public static final double WheelBaseMeters = 0.67945;
         public static final double WheelBaseCircumferenceMeters = Math.PI * 0.7778174593052;
-        public static final double MaxSpeedMetersPerSecond = Units.feetToMeters(20);
+        public static final double MaxSpeedMetersPerSecond = 5.6;
         public static final double MaxAccelerationMetersPerSecondSquared = Units.feetToMeters(15);
         public static final double MaxAngularSpeedRadians = Math.PI * 3;
         public static final int PigeonId = 10;
         public static final double DriveDeadband = 0.15;
         public static final double DeadbandCurveWeight = 0.5;
-        // public static final PrimePIDConstants DrivePID = new PrimePIDConstants(0.011545, 0, 0, 0, 0.037265, 0.0047272,
-        //                 0.037987);
-        public static final PrimePIDConstants DrivePID = new PrimePIDConstants(0.00029356, 0, 0);
+        // public static final PrimePIDConstants DrivePID = new PrimePIDConstants(0.24339 / 2, 0, 0, 0,
+        //                 2.022, 0.26097, 0.016668);
+
+        public static final PrimePIDConstants DrivePID = new PrimePIDConstants(0.041253, 0, 0, 0,
+                        0.105, 0.025, 0.016668);
+
         public static final PrimePIDConstants SteeringPID = new PrimePIDConstants(3.25, 0, 0.02);
         public static final PrimePIDConstants SnapToPID = new PrimePIDConstants(6, 0, 0);
         public static final PrimePIDConstants PathingTranslationPid = new PrimePIDConstants(3, 0, 0);
         public static final PrimePIDConstants PathingRotationPid = new PrimePIDConstants(2, 0, 0);
         public static final double DriveGearRatio = 5.9;
-        public static final double DriveWheelDiameterMeters = 0.1016;
+        public static final double DriveWheelDiameterMeters = Units.inchesToMeters(3.875);
         public static final double DriveWheelCircumferenceMeters = Math.PI * DriveWheelDiameterMeters;
         public static final int DriveSupplyCurrentLimit = 40;
         public static final int DriveSupplyCurrentLimitThreshold = 50;

@@ -278,9 +278,9 @@ public class SwerveController {
    */
   private void setDesiredModuleStates(SwerveModuleState[] desiredStates) {
     m_moduleOutputs[0].DesiredState = desiredStates[0];
-    // m_moduleOutputs[1].DesiredState = desiredStates[1];
-    // m_moduleOutputs[2].DesiredState = desiredStates[2];
-    // m_moduleOutputs[3].DesiredState = desiredStates[3];
+    m_moduleOutputs[1].DesiredState = desiredStates[1];
+    m_moduleOutputs[2].DesiredState = desiredStates[2];
+    m_moduleOutputs[3].DesiredState = desiredStates[3];
   }
 
   /**
