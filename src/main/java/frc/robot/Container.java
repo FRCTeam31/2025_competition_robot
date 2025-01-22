@@ -19,9 +19,9 @@ import frc.robot.maps.DriveMap;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
-import prime.control.Controls;
-import prime.control.HolonomicControlStyle;
-import prime.control.PrimeXboxController;
+import org.prime.control.Controls;
+import org.prime.control.HolonomicControlStyle;
+import org.prime.control.PrimeXboxController;
 
 @Logged(strategy = Strategy.OPT_IN)
 public class Container {

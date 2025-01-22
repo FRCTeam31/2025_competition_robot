@@ -1,4 +1,4 @@
-package prime.vision;
+package org.prime.vision;
 
 import org.ejml.simple.SimpleMatrix;
 

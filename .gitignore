@@ -182,3 +182,4 @@ ctre_sim/
 # clangd
 /.cache
 compile_commands.json
+build/reports/problems/problems-report.html
