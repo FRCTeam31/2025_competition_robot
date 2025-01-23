@@ -2,11 +2,11 @@ package frc.robot.subsystems.drivetrain.swervemodule;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
-public interface ISwerveModuleIO {
+public interface ISwerveModule {
 
-  public SwerveModuleIOInputs getInputs();
+  public void updateInputs(SwerveModuleInputsAutoLogged inputs);
 
-  public void setOutputs(SwerveModuleIOOutputs outputs);
+  public void setOutputs(SwerveModuleOutputsAutoLogged outputs);
 
   public void setDriveVoltage(double voltage, Rotation2d moduleAngle);
 

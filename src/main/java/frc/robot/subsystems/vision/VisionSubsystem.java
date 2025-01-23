@@ -1,7 +1,5 @@
 package frc.robot.subsystems.vision;
 
-import edu.wpi.first.epilogue.Logged;
-import edu.wpi.first.epilogue.Logged.Strategy;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -11,14 +9,11 @@ import frc.robot.maps.DriveMap;
 import org.prime.vision.LimelightInputs;
 import org.prime.vision.LimelightPose;
 
-@Logged(strategy = Strategy.OPT_IN)
 public class VisionSubsystem extends SubsystemBase {
     private LimeLightNT[] m_limelights;
 
     private LimelightInputs[] m_limelightInputs;
     private LimelightPose[] m_limelightRobotPoses;
-    @Logged(name = "ArrayElementCount", importance = Logged.Importance.CRITICAL)
-    private int arrayElementCount;
 
     public VisionSubsystem() {
         setName("VisionSubsystem");
@@ -26,10 +21,8 @@ public class VisionSubsystem extends SubsystemBase {
 
         m_limelights = new LimeLightNT[] { new LimeLightNT(defaultInstance, DriveMap.LimelightFrontName),
                 new LimeLightNT(defaultInstance, DriveMap.LimelightRearName) };
-        m_limelightInputs = new LimelightInputs[] { new LimelightInputs(), new LimelightInputs() };
         m_limelightRobotPoses = new LimelightPose[] { m_limelightInputs[0].FieldSpaceRobotPose,
                 m_limelightInputs[1].FieldSpaceRobotPose };
-        arrayElementCount = m_limelightInputs.length;
     }
 
     /**
@@ -43,7 +36,6 @@ public class VisionSubsystem extends SubsystemBase {
     /**
      * Gets all limelight inputs
      */
-    @Logged(name = "LimelightInputs", importance = Logged.Importance.CRITICAL)
     public LimelightInputs[] getAllLimelightInputs() {
         return m_limelightInputs;
     }
@@ -51,7 +43,6 @@ public class VisionSubsystem extends SubsystemBase {
     /**
      * Gets all limelight inputs
      */
-    @Logged(name = "LimelightPoses", importance = Logged.Importance.CRITICAL)
     public LimelightPose[] getAllFieldRobotPoses() {
         return m_limelightRobotPoses;
     }
@@ -129,10 +120,9 @@ public class VisionSubsystem extends SubsystemBase {
 
     public void periodic() {
         // Update all limelight inputs
-        // for (int i = 0; i < m_limelights.length; i++) {
-        //     m_limelightInputs[i] = m_limelights[i].getInputs();
-        // }
-        arrayElementCount = m_limelightInputs.length;
+        for (int i = 0; i < m_limelights.length; i++) {
+            m_limelightInputs[i] = m_limelights[i].getInputs();
+        }
 
         // Update Dashboard & logging
         var frontInputs = getLimelightInputs(0);

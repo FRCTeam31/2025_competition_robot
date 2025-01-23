@@ -8,9 +8,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
-import edu.wpi.first.epilogue.Logged;
-import edu.wpi.first.epilogue.Logged.Importance;
-import edu.wpi.first.epilogue.Logged.Strategy;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,15 +20,11 @@ import org.prime.control.Controls;
 import org.prime.control.HolonomicControlStyle;
 import org.prime.control.PrimeXboxController;
 
-@Logged(strategy = Strategy.OPT_IN)
 public class Container {
   private PrimeXboxController m_driverController;
 
-  @Logged(name = "Vision", importance = Importance.CRITICAL)
   public VisionSubsystem Vision;
-  @Logged(name = "Drive", importance = Importance.CRITICAL)
   public DrivetrainSubsystem Drivetrain;
-  @Logged(name = "LEDs", importance = Importance.CRITICAL)
   public PwmLEDs LEDs;
 
   public Container(boolean isReal) {

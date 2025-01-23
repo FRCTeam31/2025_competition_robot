@@ -5,11 +5,11 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
-import edu.wpi.first.epilogue.Logged;
-import edu.wpi.first.epilogue.Logged.Strategy;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -35,7 +35,6 @@ import java.util.function.Supplier;
 import org.prime.control.SwerveControlSuppliers;
 import org.prime.vision.LimelightInputs;
 
-@Logged(strategy = Strategy.OPT_IN)
 public class DrivetrainSubsystem extends SubsystemBase {
 
   public enum DrivetrainControlMode {
@@ -56,20 +55,20 @@ public class DrivetrainSubsystem extends SubsystemBase {
       .getEntry();
 
   // IO
-  @Logged(name = "DriveIO", importance = Logged.Importance.CRITICAL)
   private SwerveController _swerveController;
-  @Logged(name = "DriveIOInputs", importance = Logged.Importance.CRITICAL)
-  private DrivetrainInputs _inputs;
-  @Logged(name = "DriveIOOutputs", importance = Logged.Importance.CRITICAL)
-  private DrivetrainOutputs _outputs;
+  private SwerveControllerInputsAutoLogged _inputs;
+  // private SwerveControllerOutputsAutoLogged _outputs = new SwerveControllerOutputsAutoLogged();
+
+  // SnapAngle
+  private boolean _snapAngleEnabled = false;
+  private boolean _snapAngleIsOnTarget = false;
+  private Rotation2d _snapSetpoint = Rotation2d.fromDegrees(0);
+  private PIDController _snapAnglePIDController;
 
   // Vision, Kinematics, odometry
   private Supplier<LimelightInputs[]> _limelightInputsSupplier;
-  @Logged(importance = Logged.Importance.CRITICAL)
   public boolean EstimatePoseUsingFrontCamera = true;
-  @Logged(importance = Logged.Importance.CRITICAL)
   public boolean EstimatePoseUsingRearCamera = true;
-  @Logged(importance = Logged.Importance.CRITICAL)
   public boolean WithinPoseEstimationVelocity = true;
 
   private LEDPattern _snapOnTargetPattern = LEDPattern.solid(Color.kGreen).blink(Units.Seconds.of(0.1));
@@ -88,12 +87,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     _swerveController = new SwerveController(isReal);
 
+    // Configure snap-to PID
+    _snapAnglePIDController = DriveMap.SnapToPID.createPIDController(0.02);
+    _snapAnglePIDController.enableContinuousInput(-Math.PI, Math.PI);
+
     _clearForegroundPatternFunc = clearForegroundPatternFunc;
     _setForegroundPatternFunc = setForegroundPatternFunc;
 
     // Create IO
-    _inputs = _swerveController.getInputs();
-    _outputs = new DrivetrainOutputs();
+    _swerveController.updateInputs(_inputs);
 
     _limelightInputsSupplier = limelightInputsSupplier;
 
@@ -140,7 +142,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // Configure PathPlanner holonomic control
     AutoBuilder.configure(() -> _inputs.EstimatedRobotPose, _swerveController::setEstimatorPose,
         () -> _inputs.RobotRelativeChassisSpeeds,
-        (speeds, feedForwards) -> drivePathPlanner(speeds),
+        (speeds, feedForwards) -> driveRobotRelative(speeds),
         new PPHolonomicDriveController(DriveMap.PathingTranslationPid.toPIDConstants(),
             DriveMap.PathingRotationPid.toPIDConstants()),
         config, () -> {
@@ -158,41 +160,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   // #region Control methods
 
-  // Resets the Gyro
   public void resetGyro() {
     _swerveController.resetGyro();
-  }
-
-  /**
-   * Drives robot-relative using a ChassisSpeeds
-   * 
-   * @param desiredChassisSpeeds The desired speeds of the robot
-   */
-  private void driveRobotRelative(ChassisSpeeds desiredChassisSpeeds) {
-    _outputs.ControlMode = DrivetrainControlMode.kRobotRelative;
-    _outputs.DesiredChassisSpeeds = desiredChassisSpeeds;
-  }
-
-  /**
-   * Drives field-relative using a ChassisSpeeds
-   * 
-   * @param desiredChassisSpeeds The desired field-relative speeds of the robot
-   */
-  private void driveFieldRelative(ChassisSpeeds desiredChassisSpeeds) {
-    _outputs.ControlMode = DrivetrainControlMode.kFieldRelative;
-    _outputs.DesiredChassisSpeeds = desiredChassisSpeeds;
-  }
-
-  private void drivePathPlanner(ChassisSpeeds pathSpeeds) {
-    _outputs.ControlMode = DrivetrainControlMode.kPathFollowing;
-    _outputs.DesiredChassisSpeeds = pathSpeeds;
   }
 
   /**
    * Enabled/disables snap-to control
    */
   private void setSnapToEnabled(boolean enabled) {
-    _outputs.SnapEnabled = enabled;
+    _snapAngleEnabled = enabled;
     if (!enabled)
       _clearForegroundPatternFunc.run();
   }
@@ -205,8 +181,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private void setSnapToSetpoint(double angle) {
     var setpoint = MathUtil.angleModulus(Rotation2d.fromDegrees(angle).getRadians());
 
-    _outputs.SnapEnabled = true;
-    _outputs.SnapSetpoint = Rotation2d.fromRadians(setpoint);
+    _snapAngleEnabled = true;
+    _snapSetpoint = Rotation2d.fromRadians(setpoint);
   }
 
   /**
@@ -226,6 +202,48 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
   }
 
+  /**
+   * Drives robot-relative using a ChassisSpeeds
+   * 
+   * @param desiredChassisSpeeds The desired speeds of the robot
+   */
+  private void driveRobotRelative(ChassisSpeeds desiredChassisSpeeds) {
+    // If snap-to is enabled, calculate and override the input rotational speed to
+    // reach the setpoint
+    if (_snapAngleEnabled) {
+      var currentRotationRadians = MathUtil.angleModulus(_inputs.GyroAngle.getRadians());
+      var snapCorrection = _snapAnglePIDController.calculate(currentRotationRadians);
+      desiredChassisSpeeds.omegaRadiansPerSecond = snapCorrection;
+
+      // Report back if snap is on-target
+      _snapAngleIsOnTarget = Math.abs(desiredChassisSpeeds.omegaRadiansPerSecond) < 0.1;
+    }
+
+    // Correct drift by taking the input speeds and converting them to a desired
+    // per-period speed. This is known as "discretizing"
+    desiredChassisSpeeds = ChassisSpeeds.discretize(desiredChassisSpeeds, 0.02);
+
+    // Calculate the module states from the chassis speeds
+    var swerveModuleStates = _swerveController.Kinematics.toSwerveModuleStates(desiredChassisSpeeds);
+    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, DriveMap.MaxSpeedMetersPerSecond);
+
+    // Set the desired states for each module
+    _swerveController.setDesiredModuleStates(swerveModuleStates);
+  }
+
+  /**
+   * Drives field-relative using a ChassisSpeeds
+   * 
+   * @param desiredChassisSpeeds The desired speeds of the robot
+   */
+  private void driveFieldRelative(ChassisSpeeds desiredChassisSpeeds) {
+    // Convert the field-relative speeds to robot-relative
+    var robotRelativeSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(desiredChassisSpeeds.vxMetersPerSecond,
+        desiredChassisSpeeds.vyMetersPerSecond, desiredChassisSpeeds.omegaRadiansPerSecond, _inputs.GyroAngle);
+
+    driveRobotRelative(robotRelativeSpeeds);
+  }
+
   // #endregion
 
   /**
@@ -234,12 +252,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // Get inputs
-    _inputs = _swerveController.getInputs();
+    _swerveController.updateInputs(_inputs);
 
     // Pose estimation
-    WithinPoseEstimationVelocity = _inputs.RobotRelativeChassisSpeeds.omegaRadiansPerSecond < 0.2 && // 1 rad/s is
-                                                                                                     // about 60
-                                                                                                     // degrees/s
+    // (1 rad/s is about 60 degrees/s)
+    WithinPoseEstimationVelocity = _inputs.RobotRelativeChassisSpeeds.omegaRadiansPerSecond < 0.2 &&
         _inputs.RobotRelativeChassisSpeeds.vxMetersPerSecond < 2
         && _inputs.RobotRelativeChassisSpeeds.vyMetersPerSecond < 2;
 
@@ -247,28 +264,20 @@ public class DrivetrainSubsystem extends SubsystemBase {
     if (EstimatePoseUsingFrontCamera)
       evaluatePoseEstimation(WithinPoseEstimationVelocity, 0);
 
-    // EstimatePoseUsingRearCamera =
-    // DriverDashboard.RearPoseEstimationSwitch.getBoolean(false);
-    // if (EstimatePoseUsingRearCamera)
-    // evaluatePoseEstimation(WithinPoseEstimationVelocity, 1);
+    EstimatePoseUsingRearCamera = DriverDashboard.RearPoseEstimationSwitch.getBoolean(false);
+    if (EstimatePoseUsingRearCamera)
+      evaluatePoseEstimation(WithinPoseEstimationVelocity, 1);
 
     // Update LEDs
-    if (_outputs.SnapEnabled) {
-      if (_inputs.SnapIsOnTarget) {
-        _setForegroundPatternFunc.accept(_snapOnTargetPattern);
-      } else {
-        _setForegroundPatternFunc.accept(_snapOffTargetPattern);
-      }
+    if (_snapAngleEnabled) {
+      _setForegroundPatternFunc.accept(_snapAngleIsOnTarget ? _snapOnTargetPattern : _snapOffTargetPattern);
     }
-
-    // Send outputs to the drive IO
-    _swerveController.setOutputs(_outputs);
 
     // Update shuffleboard
     DriverDashboard.HeadingGyro.setDouble(_inputs.GyroAngle.getDegrees());
     DriverDashboard.FieldWidget.setRobotPose(_inputs.EstimatedRobotPose);
-    d_snapToEnabledEntry.setBoolean(_outputs.SnapEnabled);
-    d_snapAngle.setDouble(_outputs.SnapSetpoint.getRadians());
+    d_snapToEnabledEntry.setBoolean(_snapAngleEnabled);
+    d_snapAngle.setDouble(_snapSetpoint.getRadians());
   }
 
   // #region Commands
@@ -341,7 +350,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * Command for resetting the gyro
    */
   public Command resetGyroCommand() {
-    return Commands.runOnce(() -> resetGyro());
+    return Commands.runOnce(() -> _swerveController.resetGyro());
   }
 
   /**

@@ -4,20 +4,20 @@
 
 package frc.robot;
 
+import org.littletonrobotics.junction.LogFileUtil;
+import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGReader;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.prime.util.BuildConstants;
 
-import edu.wpi.first.epilogue.Epilogue;
-import edu.wpi.first.epilogue.Logged;
-import edu.wpi.first.epilogue.Logged.Importance;
-import edu.wpi.first.epilogue.Logged.Strategy;
-import edu.wpi.first.epilogue.logging.errors.ErrorHandler;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.LEDPattern.GradientType;
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -25,10 +25,19 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.PwmLEDs;
 
-@Logged(strategy = Strategy.OPT_IN)
-public class Robot extends TimedRobot {
+public class Robot extends LoggedRobot {
 
-  @Logged(name = "Container", importance = Importance.CRITICAL)
+  public static enum Mode {
+    /** Running on a real robot. */
+    REAL,
+
+    /** Running a physics simulator. */
+    SIM,
+
+    /** Replaying from a log file. */
+    REPLAY
+  }
+
   private Container m_robotContainer;
   private Command m_autonomousCommand;
 
@@ -36,35 +45,62 @@ public class Robot extends TimedRobot {
     super(0.02); // Run the robot loop at 50Hz
 
     // Configure logging
-    DataLogManager.start();
-    DataLogManager.logConsoleOutput(true);
-    DataLogManager.logNetworkTables(true);
-    DriverStation.startDataLog(DataLogManager.getLog());
-    Epilogue.configure(config -> {
-      if (isSimulation()) {
-        // If running in simulation, then we'd want to re-throw any errors that
-        // occur so we can debug and fix them!
-        config.errorHandler = ErrorHandler.crashOnError();
-      }
-
-      // Change the root data path
-      config.root = "Telemetry";
-
-      // Configure minimum logging level
-      // config.minimumImportance = Logged.Importance.CRITICAL;
-    });
-    Epilogue.bind(this);
+    configureLogging();
 
     // Initialize the robot container
     m_robotContainer = new Container(isReal());
 
-    // Schedule the LED patterns to run at 200Hz
-    // This is the recommended way to schedule a periodic task that runs faster than the robot loop
-    // This also adds a delay of 3ms to the task to ensure it does not run at the same time as 
-    // subsystem periodic functions
-    addPeriodic(m_robotContainer.LEDs::updateLedStrip,
-        Units.Milliseconds.of(5),
-        Units.Milliseconds.of(3));
+    // Schedule the LED patterns to run at 120Hz
+    m_robotContainer.LEDs.startUpdateLoop();
+  }
+
+  /**
+   * Logs program metadata, configures logging, and AdvantageKit data receivers, and configures robot logging mode.
+   */
+  private void configureLogging() {
+    Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
+    Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
+    Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
+    Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
+    Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
+
+    switch (BuildConstants.DIRTY) {
+      case 0:
+        Logger.recordMetadata("GitDirty", "All changes committed");
+        break;
+      case 1:
+        Logger.recordMetadata("GitDirty", "Uncomitted changes");
+        break;
+      default:
+        Logger.recordMetadata("GitDirty", "Unknown");
+        break;
+    }
+
+    // Set up data receivers & replay source
+    Mode currentMode = isReal() ? Mode.REAL : isSimulation() ? Mode.SIM : Mode.REPLAY;
+    switch (currentMode) {
+      case REAL:
+        // Running on a real robot, log to a USB stick ("/U/logs")
+        Logger.addDataReceiver(new WPILOGWriter());
+        Logger.addDataReceiver(new NT4Publisher());
+        break;
+
+      case SIM:
+        // Running a physics simulator, log to NT
+        Logger.addDataReceiver(new NT4Publisher());
+        break;
+
+      case REPLAY:
+        // Replaying a log, set up replay source
+        setUseTiming(false); // Run as fast as possible
+        String logPath = LogFileUtil.findReplayLog();
+        Logger.setReplaySource(new WPILOGReader(logPath));
+        Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
+        break;
+    }
+
+    // Start AdvantageKit logger
+    Logger.start();
   }
 
   @Override
@@ -156,16 +192,6 @@ public class Robot extends TimedRobot {
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
-  }
-
-  @Logged(name = "GIT_SHA", importance = Importance.CRITICAL)
-  public String getCommitHash() {
-    return BuildConstants.GIT_SHA;
-  }
-
-  @Logged(name = "VERSION", importance = Importance.CRITICAL)
-  public String getRobotVersion() {
-    return BuildConstants.VERSION;
   }
 
   public static boolean onRedAlliance() {

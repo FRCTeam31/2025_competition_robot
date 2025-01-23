@@ -17,14 +17,18 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import frc.robot.maps.*;
+
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import org.prime.control.PrimePIDConstants;
 
-public class SwerveModuleIOReal implements ISwerveModuleIO {
+public class SwerveModuleReal implements ISwerveModule {
 
   private SwerveModuleMap m_map;
-  private SwerveModuleIOInputs m_inputs;
 
   // Devices
   private SparkFlex m_SteeringMotor;
@@ -33,7 +37,7 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
   private SparkClosedLoopController m_drivePidController;
   private CANcoder m_encoder;
 
-  public SwerveModuleIOReal(SwerveModuleMap moduleMap) {
+  public SwerveModuleReal(SwerveModuleMap moduleMap) {
     m_map = moduleMap;
 
     setupSteeringMotor(DriveMap.SteeringPID);
@@ -42,25 +46,20 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
   }
 
   @Override
-  public SwerveModuleIOInputs getInputs() {
-    var rotation = Rotation2d.fromRotations(m_encoder.getPosition().getValueAsDouble());
-    var speedMps = Units.RotationsPerSecond.of(m_driveMotor.getEncoder().getVelocity())
-        .times(DriveMap.DriveWheelCircumferenceMeters / DriveMap.DriveGearRatio);
-    var distanceMeters = Units.Rotations.of(m_driveMotor.getEncoder().getPosition())
-        .times(DriveMap.DriveWheelCircumferenceMeters / DriveMap.DriveGearRatio);
+  public void updateInputs(SwerveModuleInputsAutoLogged inputs) {
+    var rotation = getCurrentHeading();
+    var speedMps = getCurrentVelocity().in(MetersPerSecond);
+    var distanceMeters = getModuleDistance();
 
-    m_inputs.ModuleState.angle = rotation;
-    m_inputs.ModuleState.speedMetersPerSecond = speedMps.magnitude();
-    m_inputs.ModulePosition.angle = rotation;
-    m_inputs.ModulePosition.distanceMeters = distanceMeters.magnitude();
-
-    m_inputs.DriveMotorVoltage = m_driveMotor.getAppliedOutput() * m_driveMotor.getBusVoltage();
-
-    return m_inputs;
+    inputs.ModuleState.angle = rotation;
+    inputs.ModuleState.speedMetersPerSecond = speedMps;
+    inputs.ModulePosition.angle = rotation;
+    inputs.ModulePosition.distanceMeters = distanceMeters.magnitude();
+    inputs.DriveMotorVoltage = m_driveMotor.getAppliedOutput() * m_driveMotor.getBusVoltage();
   }
 
   @Override
-  public void setOutputs(SwerveModuleIOOutputs outputs) {
+  public void setOutputs(SwerveModuleOutputsAutoLogged outputs) {
     setDesiredState(outputs.DesiredState);
   }
 
@@ -168,10 +167,34 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
       setpoint += 1;
 
     // Calculate the new output using the PID controller
-    var newOutput = m_steeringPidController.calculate(m_inputs.ModuleState.angle.getRotations(), setpoint);
+    var newOutput = m_steeringPidController.calculate(getCurrentHeading().getRotations(), setpoint);
 
     // Set the steering motor's speed to the calculated output
     m_SteeringMotor.set(MathUtil.clamp(newOutput, -1, 1));
+  }
+
+  /**
+   * Gets the current heading of the module
+   */
+  private Rotation2d getCurrentHeading() {
+    return Rotation2d.fromRotations(m_encoder.getPosition().getValueAsDouble());
+  }
+
+  /**
+   * Gets the current velocity of the module
+   */
+  private LinearVelocity getCurrentVelocity() {
+    var speedMps = ((m_driveMotor.getEncoder().getVelocity() / 60) / DriveMap.DriveGearRatio)
+        * DriveMap.DriveWheelCircumferenceMeters;
+
+    return Units.MetersPerSecond.of(speedMps);
+  }
+
+  private Distance getModuleDistance() {
+    var distMeters = (m_driveMotor.getEncoder().getPosition() / DriveMap.DriveGearRatio)
+        * DriveMap.DriveWheelCircumferenceMeters;
+
+    return Meters.of(distMeters);
   }
 
   /**
@@ -181,7 +204,7 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
    * @param desiredState
    */
   private SwerveModuleState optimize(SwerveModuleState desiredState) {
-    Rotation2d currentAngle = m_inputs.ModulePosition.angle;
+    Rotation2d currentAngle = getCurrentHeading();
     var delta = desiredState.angle.minus(currentAngle);
     if (Math.abs(delta.getDegrees()) > 90.0) {
       return new SwerveModuleState(-desiredState.speedMetersPerSecond,

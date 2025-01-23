@@ -13,9 +13,7 @@ import frc.robot.maps.DriveMap;
 import frc.robot.maps.SwerveModuleMap;
 import org.prime.control.PrimePIDConstants;
 
-public class SwerveModuleIOSim implements ISwerveModuleIO {
-
-  private SwerveModuleIOInputs m_inputs = new SwerveModuleIOInputs();
+public class SwerveModuleSim implements ISwerveModule {
 
   // Devices
   private DCMotorSim m_driveMotorSim;
@@ -23,27 +21,25 @@ public class SwerveModuleIOSim implements ISwerveModuleIO {
   private SimpleMotorFeedforward m_driveFeedforward;
   private Rotation2d m_steerAngle = new Rotation2d();
 
-  public SwerveModuleIOSim(SwerveModuleMap moduleMap) {
+  public SwerveModuleSim(SwerveModuleMap moduleMap) {
     setupDriveMotor(DriveMap.DrivePID);
   }
 
   @Override
-  public SwerveModuleIOInputs getInputs() {
+  public void updateInputs(SwerveModuleInputsAutoLogged inputs) {
     m_driveMotorSim.update(0.020);
     var speedMps = m_driveMotorSim.getAngularVelocity().in(Units.RotationsPerSecond)
         * DriveMap.DriveWheelCircumferenceMeters;
 
-    m_inputs.ModuleState.angle = m_steerAngle;
-    m_inputs.ModuleState.speedMetersPerSecond = speedMps;
-    m_inputs.ModulePosition.angle = m_steerAngle;
-    m_inputs.ModulePosition.distanceMeters = m_driveMotorSim.getAngularPositionRotations()
+    inputs.ModuleState.angle = m_steerAngle;
+    inputs.ModuleState.speedMetersPerSecond = speedMps;
+    inputs.ModulePosition.angle = m_steerAngle;
+    inputs.ModulePosition.distanceMeters = m_driveMotorSim.getAngularPositionRotations()
         * DriveMap.DriveWheelCircumferenceMeters;
-
-    return m_inputs;
   }
 
   @Override
-  public void setOutputs(SwerveModuleIOOutputs outputs) {
+  public void setOutputs(SwerveModuleOutputsAutoLogged outputs) {
     setDesiredState(outputs.DesiredState);
   }
 
@@ -104,8 +100,7 @@ public class SwerveModuleIOSim implements ISwerveModuleIO {
    * @param desiredState
    */
   private SwerveModuleState optimize(SwerveModuleState desiredState) {
-    Rotation2d currentAngle = m_inputs.ModulePosition.angle;
-    var delta = desiredState.angle.minus(currentAngle);
+    var delta = desiredState.angle.minus(m_steerAngle);
     if (Math.abs(delta.getDegrees()) > 90.0) {
       return new SwerveModuleState(-desiredState.speedMetersPerSecond,
           desiredState.angle.rotateBy(Rotation2d.fromDegrees(180.0)));
