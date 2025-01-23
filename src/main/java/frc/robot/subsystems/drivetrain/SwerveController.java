@@ -13,7 +13,6 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import frc.robot.Robot;
-import frc.robot.maps.DriveMap;
 import frc.robot.subsystems.drivetrain.gyro.GyroReal;
 import frc.robot.subsystems.drivetrain.gyro.GyroInputsAutoLogged;
 import frc.robot.subsystems.drivetrain.gyro.GyroSim;

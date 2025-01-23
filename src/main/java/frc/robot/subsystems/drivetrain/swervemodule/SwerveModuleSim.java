@@ -9,8 +9,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import frc.robot.maps.DriveMap;
-import frc.robot.maps.SwerveModuleMap;
+import frc.robot.subsystems.drivetrain.DriveMap;
 import org.prime.control.PrimePIDConstants;
 
 public class SwerveModuleSim implements ISwerveModule {

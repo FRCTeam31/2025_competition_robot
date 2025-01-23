@@ -145,7 +145,7 @@ public class Robot extends LoggedRobot {
       // Stop any subsystems still running
     }
 
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    m_autonomousCommand = DriverDashboard.AutoChooser.getSelected();
 
     // Exit without scheduling an auto command if none is selected
     if (m_autonomousCommand == null || m_autonomousCommand == Commands.none()) {

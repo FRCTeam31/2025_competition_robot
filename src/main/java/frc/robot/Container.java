@@ -10,9 +10,8 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.*;
-import frc.robot.maps.DriveMap;
+import frc.robot.subsystems.drivetrain.DriveMap;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
@@ -38,8 +37,7 @@ public class Container {
       Drivetrain = new DrivetrainSubsystem(isReal, LEDs::clearForegroundPattern,
           LEDs::setForegroundPattern, Vision::getAllLimelightInputs);
 
-      // Register the named commands from each subsystem that may be used in
-      // PathPlanner
+      // Register the named commands from each subsystem that may be used in PathPlanner
       NamedCommands.registerCommands(Drivetrain.getNamedCommands());
 
       // Create Auto chooser and Auto tab in Shuffleboard
@@ -57,25 +55,16 @@ public class Container {
    * Configures the autonomous dashboard items
    */
   public void configAutonomousDashboardItems() {
-    // Build an auto chooser. This will use Commands.none() as the default option.
+    // Build an auto chooser for the Driver tab. This will use Commands.none() as the default option.
     DriverDashboard.addAutoChooser(AutoBuilder.buildAutoChooser("Straight Park"));
 
-    // Add all autos to the auto tab
+    // Add all autos to the Auto tab for testing
     var possibleAutos = AutoBuilder.getAllAutoNames();
     for (int i = 0; i < possibleAutos.size(); i++) {
       var autoCommand = new PathPlannerAuto(possibleAutos.get(i));
       DriverDashboard.AutoTab.add(possibleAutos.get(i), autoCommand)
           .withWidget(BuiltInWidgets.kCommand).withSize(2, 1);
     }
-  }
-
-  /**
-   * Returns the selected autonomous command to run
-   * 
-   * @return
-   */
-  public Command getAutonomousCommand() {
-    return DriverDashboard.AutoChooser.getSelected();
   }
 
   /**
@@ -86,7 +75,7 @@ public class Container {
     m_driverController.a().onTrue(Drivetrain.resetGyroCommand());
     Drivetrain.setDefaultCommand(
         Drivetrain.driveRobotRelativeCommand(m_driverController.getSwerveControlProfile(
-            HolonomicControlStyle.Drone, DriveMap.DriveDeadband, DriveMap.DeadbandCurveWeight)));
+            HolonomicControlStyle.Drone, DriveMap.Control.DriveDeadband, DriveMap.Control.DeadbandCurveWeight)));
 
     // While holding b, auto-aim the robot to the apriltag target using snap-to
     m_driverController.leftStick().whileTrue(Drivetrain.enableLockOnCommand())
