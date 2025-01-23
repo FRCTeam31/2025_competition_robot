@@ -1,4 +1,4 @@
-package prime.control;
+package org.prime.control;
 
 import com.pathplanner.lib.config.PIDConstants;
 import edu.wpi.first.math.controller.PIDController;

@@ -32,8 +32,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import prime.control.SwerveControlSuppliers;
-import prime.vision.LimelightInputs;
+import org.prime.control.SwerveControlSuppliers;
+import org.prime.vision.LimelightInputs;
 
 @Logged(strategy = Strategy.OPT_IN)
 public class DrivetrainSubsystem extends SubsystemBase {

@@ -11,7 +11,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.maps.DriveMap;
 import frc.robot.maps.SwerveModuleMap;
-import prime.control.PrimePIDConstants;
+import org.prime.control.PrimePIDConstants;
 
 public class SwerveModuleIOSim implements ISwerveModuleIO {
 
@@ -36,8 +36,8 @@ public class SwerveModuleIOSim implements ISwerveModuleIO {
     m_inputs.ModuleState.angle = m_steerAngle;
     m_inputs.ModuleState.speedMetersPerSecond = speedMps;
     m_inputs.ModulePosition.angle = m_steerAngle;
-    m_inputs.ModulePosition.distanceMeters =
-        m_driveMotorSim.getAngularPositionRotations() * DriveMap.DriveWheelCircumferenceMeters;
+    m_inputs.ModulePosition.distanceMeters = m_driveMotorSim.getAngularPositionRotations()
+        * DriveMap.DriveWheelCircumferenceMeters;
 
     return m_inputs;
   }
@@ -86,11 +86,9 @@ public class SwerveModuleIOSim implements ISwerveModuleIO {
 
     // Set the drive motor to the desired speed
     // Calculate target data to voltage data
-    var velocityRadPerSec =
-        desiredState.speedMetersPerSecond / (DriveMap.DriveWheelDiameterMeters / 2);
+    var velocityRadPerSec = desiredState.speedMetersPerSecond / (DriveMap.DriveWheelDiameterMeters / 2);
     var feedForward = m_driveFeedforward.calculate(velocityRadPerSec);
-    var feedBack =
-        m_driveFeedback.calculate(m_driveMotorSim.getAngularVelocityRadPerSec(), velocityRadPerSec);
+    var feedBack = m_driveFeedback.calculate(m_driveMotorSim.getAngularVelocityRadPerSec(), velocityRadPerSec);
 
     var driveAppliedVolts = MathUtil.clamp(feedForward + feedBack, -12.0, 12.0);
 

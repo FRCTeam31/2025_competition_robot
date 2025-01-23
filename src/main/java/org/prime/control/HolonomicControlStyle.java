@@ -1,4 +1,4 @@
-package prime.control;
+package org.prime.control;
 
 public enum HolonomicControlStyle {
   /**

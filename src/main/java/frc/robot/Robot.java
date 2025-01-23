@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import org.prime.util.BuildConstants;
+
 import edu.wpi.first.epilogue.Epilogue;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.Logged.Importance;
@@ -13,8 +15,8 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.LEDPattern.GradientType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -105,10 +107,7 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
 
-      // Stop the shooter and intake motors in case they're still running and set the intake IN
-      // m_robotContainer.Shooter.stopMotorsCommand().schedule();
-      // m_robotContainer.Intake.stopRollersCommand().schedule();
-      // m_robotContainer.Intake.setIntakeInCommand().schedule();
+      // Stop any subsystems still running
     }
 
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
@@ -140,9 +139,7 @@ public class Robot extends TimedRobot {
       // Cancel the auto command if it's still running
       m_autonomousCommand.cancel();
 
-      // Stop the shooter and intake motors in case they're still running
-      // m_robotContainer.Shooter.stopMotorsCommand().schedule();
-      // m_robotContainer.Intake.stopRollersCommand().schedule();
+      // Stop any subsystems still running
     }
 
     // Set teleop LED pattern
@@ -160,6 +157,16 @@ public class Robot extends TimedRobot {
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
+  }
+
+  @Logged(name = "GIT_SHA", importance = Importance.CRITICAL)
+  public String getCommitHash() {
+    return BuildConstants.GIT_SHA;
+  }
+
+  @Logged(name = "VERSION", importance = Importance.CRITICAL)
+  public String getRobotVersion() {
+    return BuildConstants.VERSION;
   }
 
   public static boolean onRedAlliance() {

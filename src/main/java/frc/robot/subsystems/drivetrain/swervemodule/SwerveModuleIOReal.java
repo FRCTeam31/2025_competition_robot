@@ -19,7 +19,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.maps.*;
 
-import prime.control.PrimePIDConstants;
+import org.prime.control.PrimePIDConstants;
 
 public class SwerveModuleIOReal implements ISwerveModuleIO {
 
