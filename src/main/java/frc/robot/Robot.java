@@ -38,8 +38,8 @@ public class Robot extends LoggedRobot {
     REPLAY
   }
 
-  private Container m_robotContainer;
-  private Command m_autonomousCommand;
+  private Container _robotContainer;
+  private Command _autonomousCommand;
 
   public Robot() {
     super(0.02); // Run the robot loop at 50Hz
@@ -48,10 +48,10 @@ public class Robot extends LoggedRobot {
     configureLogging();
 
     // Initialize the robot container
-    m_robotContainer = new Container(isReal());
+    _robotContainer = new Container(isReal());
 
     // Schedule the LED patterns to run at 120Hz
-    m_robotContainer.LEDs.startUpdateLoop();
+    _robotContainer.LEDs.startUpdateLoop();
   }
 
   /**
@@ -77,7 +77,12 @@ public class Robot extends LoggedRobot {
     }
 
     // Set up data receivers & replay source
-    Mode currentMode = isReal() ? Mode.REAL : isSimulation() ? Mode.SIM : Mode.REPLAY;
+    Mode currentMode = isReal()
+        ? Mode.REAL
+        : isSimulation()
+            ? Mode.SIM
+            : Mode.REPLAY;
+
     switch (currentMode) {
       case REAL:
         // Running on a real robot, log to a USB stick ("/U/logs")
@@ -107,8 +112,8 @@ public class Robot extends LoggedRobot {
   public void disabledInit() {
     DataLogManager.log("Robot disabled");
     var disabledPattern = LEDPattern.solid(getAllianceColor()).breathe(Units.Seconds.of(2.0));
-    m_robotContainer.LEDs.setBackgroundPattern(disabledPattern);
-    m_robotContainer.LEDs.clearForegroundPattern();
+    _robotContainer.LEDs.setBackgroundPattern(disabledPattern);
+    _robotContainer.LEDs.clearForegroundPattern();
   }
 
   /**
@@ -135,32 +140,32 @@ public class Robot extends LoggedRobot {
         .offsetBy(PwmLEDs.VMap.PixelsPerStrip / 2)
         .scrollAtRelativeSpeed(Units.Hertz.of(2))
         .blend(autoPattern);
-    m_robotContainer.LEDs.setBackgroundPattern(combinedPattern);
-    m_robotContainer.LEDs.clearForegroundPattern();
+    _robotContainer.LEDs.setBackgroundPattern(combinedPattern);
+    _robotContainer.LEDs.clearForegroundPattern();
 
     // Cancel any auto command that's still running and reset the subsystem states
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
+    if (_autonomousCommand != null) {
+      _autonomousCommand.cancel();
 
       // Stop any subsystems still running
     }
 
-    m_autonomousCommand = DriverDashboard.AutoChooser.getSelected();
+    _autonomousCommand = DriverDashboard.AutoChooser.getSelected();
 
     // Exit without scheduling an auto command if none is selected
-    if (m_autonomousCommand == null || m_autonomousCommand == Commands.none()) {
+    if (_autonomousCommand == null || _autonomousCommand == Commands.none()) {
       DriverStation.reportError("[ERROR] >> No auto command selected", false);
-      m_robotContainer.Drivetrain.resetGyro();
+      _robotContainer.Drivetrain.resetGyro();
     } else {
       // Schedule the auto command
-      m_robotContainer.Drivetrain.EstimatePoseUsingFrontCamera = true;
-      m_robotContainer.Drivetrain.EstimatePoseUsingRearCamera = true;
+      _robotContainer.Drivetrain.EstimatePoseUsingFrontCamera = true;
+      _robotContainer.Drivetrain.EstimatePoseUsingRearCamera = true;
 
       if (onRedAlliance())
-        m_robotContainer.Drivetrain.resetGyro();
+        _robotContainer.Drivetrain.resetGyro();
 
-      SmartDashboard.putString("Robot/Auto/CommandName", m_autonomousCommand.getName());
-      m_autonomousCommand.schedule();
+      SmartDashboard.putString("Robot/Auto/CommandName", _autonomousCommand.getName());
+      _autonomousCommand.schedule();
     }
   }
 
@@ -170,20 +175,20 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     DataLogManager.log("Teleop Enabled");
-    if (m_autonomousCommand != null) {
+    if (_autonomousCommand != null) {
       // Cancel the auto command if it's still running
-      m_autonomousCommand.cancel();
+      _autonomousCommand.cancel();
 
       // Stop any subsystems still running
     }
 
     // Set teleop LED pattern
     var telePattern = LEDPattern.solid(getAllianceColor()).scrollAtRelativeSpeed(Units.Hertz.of(2));
-    m_robotContainer.LEDs.setBackgroundPattern(telePattern);
-    m_robotContainer.LEDs.clearForegroundPattern();
+    _robotContainer.LEDs.setBackgroundPattern(telePattern);
+    _robotContainer.LEDs.clearForegroundPattern();
 
-    m_robotContainer.Drivetrain.EstimatePoseUsingFrontCamera = false;
-    m_robotContainer.Drivetrain.EstimatePoseUsingRearCamera = false;
+    _robotContainer.Drivetrain.EstimatePoseUsingFrontCamera = false;
+    _robotContainer.Drivetrain.EstimatePoseUsingRearCamera = false;
   }
 
   /**
