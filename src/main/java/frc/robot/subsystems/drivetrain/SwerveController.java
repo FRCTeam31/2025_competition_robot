@@ -1,5 +1,7 @@
 package frc.robot.subsystems.drivetrain;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,7 +21,6 @@ import frc.robot.subsystems.drivetrain.gyro.GyroSim;
 import frc.robot.subsystems.drivetrain.gyro.IGyro;
 import frc.robot.subsystems.drivetrain.swervemodule.ISwerveModule;
 import frc.robot.subsystems.drivetrain.swervemodule.SwerveModuleInputsAutoLogged;
-import frc.robot.subsystems.drivetrain.swervemodule.SwerveModuleOutputsAutoLogged;
 import frc.robot.subsystems.drivetrain.swervemodule.SwerveModuleReal;
 import frc.robot.subsystems.drivetrain.swervemodule.SwerveModuleSim;
 
@@ -29,8 +30,7 @@ public class SwerveController {
   private SwerveDrivePoseEstimator m_poseEstimator;
 
   private IGyro _gyro;
-  private ISwerveModule m_frontLeftModule, m_frontRightModule, m_rearLeftModule,
-      m_rearRightModule;
+  private ISwerveModule _frontLeftModule, _frontRightModule, _rearLeftModule, _rearRightModule;
 
   private GyroInputsAutoLogged _gyroInputs = new GyroInputsAutoLogged();
   private SwerveModuleInputsAutoLogged[] m_moduleInputs = new SwerveModuleInputsAutoLogged[] {
@@ -39,11 +39,6 @@ public class SwerveController {
       new SwerveModuleInputsAutoLogged(),
       new SwerveModuleInputsAutoLogged()
   };
-  private SwerveModuleOutputsAutoLogged[] m_moduleOutputs = new SwerveModuleOutputsAutoLogged[] {
-      new SwerveModuleOutputsAutoLogged(),
-      new SwerveModuleOutputsAutoLogged(),
-      new SwerveModuleOutputsAutoLogged(),
-      new SwerveModuleOutputsAutoLogged() };
 
   public SwerveController(boolean isReal) {
     // Create kinematics in order FL, FR, RL, RR
@@ -57,18 +52,18 @@ public class SwerveController {
         : new GyroSim(0);
     _gyro.updateInputs(_gyroInputs, 0);
 
-    m_frontLeftModule = isReal
-        ? new SwerveModuleReal(DriveMap.FrontLeftSwerveModule)
-        : new SwerveModuleSim(DriveMap.FrontLeftSwerveModule);
-    m_frontRightModule = isReal
-        ? new SwerveModuleReal(DriveMap.FrontRightSwerveModule)
-        : new SwerveModuleSim(DriveMap.FrontRightSwerveModule);
-    m_rearLeftModule = isReal
-        ? new SwerveModuleReal(DriveMap.RearLeftSwerveModule)
-        : new SwerveModuleSim(DriveMap.RearLeftSwerveModule);
-    m_rearRightModule = isReal
-        ? new SwerveModuleReal(DriveMap.RearRightSwerveModule)
-        : new SwerveModuleSim(DriveMap.RearRightSwerveModule);
+    _frontLeftModule = isReal
+        ? new SwerveModuleReal("FrontLeftModule", DriveMap.FrontLeftSwerveModule)
+        : new SwerveModuleSim("FrontLeftModule", DriveMap.FrontLeftSwerveModule);
+    _frontRightModule = isReal
+        ? new SwerveModuleReal("FrontRightModule", DriveMap.FrontRightSwerveModule)
+        : new SwerveModuleSim("FrontRightModule", DriveMap.FrontRightSwerveModule);
+    _rearLeftModule = isReal
+        ? new SwerveModuleReal("RearLeftModule", DriveMap.RearLeftSwerveModule)
+        : new SwerveModuleSim("RearLeftModule", DriveMap.RearLeftSwerveModule);
+    _rearRightModule = isReal
+        ? new SwerveModuleReal("RearRightModule", DriveMap.RearRightSwerveModule)
+        : new SwerveModuleSim("RearRightModule", DriveMap.RearRightSwerveModule);
 
     // Create pose estimator
     m_poseEstimator = new SwerveDrivePoseEstimator(Kinematics, _gyroInputs.Rotation.toRotation2d(),
@@ -76,12 +71,16 @@ public class SwerveController {
   }
 
   public void updateInputs(SwerveControllerInputsAutoLogged inputs) {
-    m_frontLeftModule.updateInputs(m_moduleInputs[0]);
-    m_frontRightModule.updateInputs(m_moduleInputs[1]);
-    m_rearLeftModule.updateInputs(m_moduleInputs[2]);
-    m_rearRightModule.updateInputs(m_moduleInputs[3]);
-    inputs.ModuleStates = getModuleStates();
+    _frontLeftModule.updateInputs(m_moduleInputs[0]);
+    Logger.processInputs("Drivetrain/FLModule", m_moduleInputs[0]);
+    _frontRightModule.updateInputs(m_moduleInputs[1]);
+    Logger.processInputs("Drivetrain/FRModule", m_moduleInputs[1]);
+    _rearLeftModule.updateInputs(m_moduleInputs[2]);
+    Logger.processInputs("Drivetrain/RLModule", m_moduleInputs[2]);
+    _rearRightModule.updateInputs(m_moduleInputs[3]);
+    Logger.processInputs("Drivetrain/RRModule", m_moduleInputs[3]);
 
+    inputs.ModuleStates = getModuleStates();
     inputs.RobotRelativeChassisSpeeds = Kinematics.toChassisSpeeds(getModuleStates());
     inputs.GyroAngle = _gyroInputs.Rotation.toRotation2d();
     inputs.GyroAccelX = _gyroInputs.AccelerationX;
@@ -92,31 +91,23 @@ public class SwerveController {
     inputs.EstimatedRobotPose = m_poseEstimator.update(inputs.GyroAngle, modulePositions);
   }
 
-  public void setDriveVoltages(Voltage volts) {
-    var angle = Rotation2d.fromDegrees(0);
-    m_frontLeftModule.setDriveVoltage(volts.magnitude(), angle);
-    m_frontRightModule.setDriveVoltage(volts.magnitude(), angle);
-    m_rearLeftModule.setDriveVoltage(volts.magnitude(), angle);
-    m_rearRightModule.setDriveVoltage(volts.magnitude(), angle);
-  }
-
   /**
    * Sets the desired states for each swerve module in order FL, FR, RL, RR
    * 
    * @param desiredStates
    */
   public void setDesiredModuleStates(SwerveModuleState[] desiredStates) {
-    m_moduleOutputs[0].DesiredState = desiredStates[0];
-    m_moduleOutputs[1].DesiredState = desiredStates[1];
-    m_moduleOutputs[2].DesiredState = desiredStates[2];
-    m_moduleOutputs[3].DesiredState = desiredStates[3];
+    _frontLeftModule.setDesiredState(desiredStates[0]);
+    _frontRightModule.setDesiredState(desiredStates[1]);
+    _rearLeftModule.setDesiredState(desiredStates[2]);
+    _rearRightModule.setDesiredState(desiredStates[3]);
   }
 
   public void stopAllMotors() {
-    m_frontLeftModule.stopMotors();
-    m_frontRightModule.stopMotors();
-    m_rearLeftModule.stopMotors();
-    m_rearRightModule.stopMotors();
+    _frontLeftModule.stopMotors();
+    _frontRightModule.stopMotors();
+    _rearLeftModule.stopMotors();
+    _rearRightModule.stopMotors();
   }
 
   public void resetGyro() {
@@ -135,6 +126,14 @@ public class SwerveController {
     m_poseEstimator.addVisionMeasurement(pose, timestamp, stdDeviations);
   }
 
+  public void setDriveVoltages(Voltage volts) {
+    var angle = Rotation2d.fromDegrees(0);
+    _frontLeftModule.setDriveVoltage(volts.magnitude(), angle);
+    _frontRightModule.setDriveVoltage(volts.magnitude(), angle);
+    _rearLeftModule.setDriveVoltage(volts.magnitude(), angle);
+    _rearRightModule.setDriveVoltage(volts.magnitude(), angle);
+  }
+
   public void logSysIdDrive(SysIdRoutineLog log) {
     // Record a frame for the left motors. Since these share an encoder, we consider
     // the entire group to be one motor.
@@ -149,16 +148,21 @@ public class SwerveController {
    * Gets the instantaneous states for each swerve module in FL, FR, RL, RR order
    */
   public SwerveModuleState[] getModuleStates() {
-    return new SwerveModuleState[] { m_moduleInputs[0].ModuleState, m_moduleInputs[1].ModuleState,
-        m_moduleInputs[2].ModuleState, m_moduleInputs[3].ModuleState, };
+    return new SwerveModuleState[] {
+        m_moduleInputs[0].ModuleState,
+        m_moduleInputs[1].ModuleState,
+        m_moduleInputs[2].ModuleState,
+        m_moduleInputs[3].ModuleState, };
   }
 
   /**
    * Gets the cumulative positions for each swerve module in FL, FR, RL, RR order
    */
   public SwerveModulePosition[] getModulePositions() {
-    return new SwerveModulePosition[] { m_moduleInputs[0].ModulePosition,
-        m_moduleInputs[1].ModulePosition, m_moduleInputs[2].ModulePosition,
+    return new SwerveModulePosition[] {
+        m_moduleInputs[0].ModulePosition,
+        m_moduleInputs[1].ModulePosition,
+        m_moduleInputs[2].ModulePosition,
         m_moduleInputs[3].ModulePosition, };
   }
 }

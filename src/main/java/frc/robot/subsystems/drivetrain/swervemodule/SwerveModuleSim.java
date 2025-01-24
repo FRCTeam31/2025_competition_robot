@@ -10,48 +10,48 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.subsystems.drivetrain.DriveMap;
+
+import org.littletonrobotics.junction.Logger;
 import org.prime.control.PrimePIDConstants;
 
 public class SwerveModuleSim implements ISwerveModule {
+  private String _name;
 
   // Devices
-  private DCMotorSim m_driveMotorSim;
-  private PIDController m_driveFeedback;
-  private SimpleMotorFeedforward m_driveFeedforward;
-  private Rotation2d m_steerAngle = new Rotation2d();
+  private DCMotorSim _driveMotorSim;
+  private PIDController _drivingPidController;
+  private SimpleMotorFeedforward _driveFeedForward;
+  private Rotation2d _steerAngle = new Rotation2d();
 
-  public SwerveModuleSim(SwerveModuleMap moduleMap) {
+  public SwerveModuleSim(String name, SwerveModuleMap moduleMap) {
+    _name = name;
     setupDriveMotor(DriveMap.DrivePID);
   }
 
   @Override
   public void updateInputs(SwerveModuleInputsAutoLogged inputs) {
-    m_driveMotorSim.update(0.020);
-    var speedMps = m_driveMotorSim.getAngularVelocity().in(Units.RotationsPerSecond)
+    _driveMotorSim.update(0.020);
+    var speedMps = _driveMotorSim.getAngularVelocity().in(Units.RotationsPerSecond)
         * DriveMap.DriveWheelCircumferenceMeters;
 
-    inputs.ModuleState.angle = m_steerAngle;
+    inputs.ModuleState.angle = _steerAngle;
     inputs.ModuleState.speedMetersPerSecond = speedMps;
-    inputs.ModulePosition.angle = m_steerAngle;
-    inputs.ModulePosition.distanceMeters = m_driveMotorSim.getAngularPositionRotations()
+    inputs.ModulePosition.angle = _steerAngle;
+    inputs.ModulePosition.distanceMeters = _driveMotorSim.getAngularPositionRotations()
         * DriveMap.DriveWheelCircumferenceMeters;
-  }
-
-  @Override
-  public void setOutputs(SwerveModuleOutputsAutoLogged outputs) {
-    setDesiredState(outputs.DesiredState);
+    Logger.recordOutput("Drive/" + _name + "/DriveMotorMeasuredVoltage", _driveMotorSim.getInputVoltage());
   }
 
   @Override
   public void setDriveVoltage(double voltage, Rotation2d moduleAngle) {
-    m_driveMotorSim.setInputVoltage(voltage);
-    m_steerAngle = moduleAngle;
+    _driveMotorSim.setInputVoltage(voltage);
+    _steerAngle = moduleAngle;
   }
 
   @Override
   public void stopMotors() {
-    m_driveMotorSim.setInputVoltage(0);
-    m_driveMotorSim.setAngularVelocity(0);
+    _driveMotorSim.setInputVoltage(0);
+    _driveMotorSim.setAngularVelocity(0);
   }
 
   /**
@@ -60,12 +60,12 @@ public class SwerveModuleSim implements ISwerveModule {
    * @param pid
    */
   private void setupDriveMotor(PrimePIDConstants pid) {
-    m_driveMotorSim = new DCMotorSim(
+    _driveMotorSim = new DCMotorSim(
         LinearSystemId.createDCMotorSystem(DCMotor.getNeoVortex(1), 0.001, DriveMap.DriveGearRatio),
         DCMotor.getNeoVortex(1));
 
-    m_driveFeedback = new PIDController(0.1, 0, 0);
-    m_driveFeedforward = new SimpleMotorFeedforward(0.0, 0.085);
+    _drivingPidController = pid.createPIDController(0.02);
+    _driveFeedForward = new SimpleMotorFeedforward(pid.kS, pid.kV, pid.kA);
   }
 
   /**
@@ -75,21 +75,28 @@ public class SwerveModuleSim implements ISwerveModule {
    *                     in this
    *                     period
    */
-  private void setDesiredState(SwerveModuleState desiredState) {
+  public void setDesiredState(SwerveModuleState desiredState) {
     // Optimize the desired state
     desiredState = optimize(desiredState);
 
+    Logger.recordOutput("Drive/" + _name + "/SteeringMotorOutputSpeed", 0);
+    _steerAngle = desiredState.angle;
+
     // Set the drive motor to the desired speed
     // Calculate target data to voltage data
-    var velocityRadPerSec = desiredState.speedMetersPerSecond / (DriveMap.DriveWheelDiameterMeters / 2);
-    var feedForward = m_driveFeedforward.calculate(velocityRadPerSec);
-    var feedBack = m_driveFeedback.calculate(m_driveMotorSim.getAngularVelocityRadPerSec(), velocityRadPerSec);
+    var desiredSpeedRotationsPerSecond = (desiredState.speedMetersPerSecond / DriveMap.DriveWheelCircumferenceMeters)
+        * DriveMap.DriveGearRatio;
 
-    var driveAppliedVolts = MathUtil.clamp(feedForward + feedBack, -12.0, 12.0);
+    var ff = _driveFeedForward.calculate(desiredSpeedRotationsPerSecond);
 
-    m_driveMotorSim.setInputVoltage(driveAppliedVolts);
+    var currentSpeedRotationsPerSecond = _driveMotorSim.getAngularVelocityRadPerSec() / (2 * Math.PI);
+    var pid = _drivingPidController.calculate(currentSpeedRotationsPerSecond, desiredSpeedRotationsPerSecond);
+    var driveOutput = MathUtil.clamp(ff + pid, -12.0, 12.0);
 
-    m_steerAngle = desiredState.angle;
+    Logger.recordOutput("Drive/" + _name + "/DrivePID", pid);
+    Logger.recordOutput("Drive/" + _name + "/DriveFF", ff);
+    Logger.recordOutput("Drive/" + _name + "/DriveMotorOutputVoltage", driveOutput);
+    _driveMotorSim.setInputVoltage(driveOutput);
   }
 
   /**
@@ -99,7 +106,7 @@ public class SwerveModuleSim implements ISwerveModule {
    * @param desiredState
    */
   private SwerveModuleState optimize(SwerveModuleState desiredState) {
-    var delta = desiredState.angle.minus(m_steerAngle);
+    var delta = desiredState.angle.minus(_steerAngle);
     if (Math.abs(delta.getDegrees()) > 90.0) {
       return new SwerveModuleState(-desiredState.speedMetersPerSecond,
           desiredState.angle.rotateBy(Rotation2d.fromDegrees(180.0)));

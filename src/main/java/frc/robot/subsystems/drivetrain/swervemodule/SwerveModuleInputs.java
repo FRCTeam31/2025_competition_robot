@@ -17,5 +17,5 @@ public class SwerveModuleInputs {
 
   public SwerveModulePosition ModulePosition = new SwerveModulePosition();
   public SwerveModuleState ModuleState = new SwerveModuleState();
-  public double DriveMotorVoltage = 0.0;
+  public double DriveMotorVoltage = 0.0; // Used for feeding data back to sysid
 }
