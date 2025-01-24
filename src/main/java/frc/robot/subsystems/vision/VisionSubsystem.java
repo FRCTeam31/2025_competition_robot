@@ -5,6 +5,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.DriverDashboard;
+
+import org.littletonrobotics.junction.Logger;
 import org.prime.vision.LimelightInputs;
 import org.prime.vision.LimelightPose;
 
@@ -14,19 +16,20 @@ public class VisionSubsystem extends SubsystemBase {
         public static final String LimelightRearName = "limelight-rear";
     }
 
-    private LimeLightNT[] m_limelights;
-
-    private LimelightInputs[] m_limelightInputs;
-    private LimelightPose[] m_limelightRobotPoses;
+    private LimeLightNT[] _limelights;
+    private LimelightInputs[] _limelightInputs;
+    private LimelightPose[] _limelightRobotPoses;
 
     public VisionSubsystem() {
         setName("VisionSubsystem");
         var defaultInstance = NetworkTableInstance.getDefault();
 
-        m_limelights = new LimeLightNT[] { new LimeLightNT(defaultInstance, VisionMap.LimelightFrontName),
+        _limelights = new LimeLightNT[] {
+                new LimeLightNT(defaultInstance, VisionMap.LimelightFrontName),
                 new LimeLightNT(defaultInstance, VisionMap.LimelightRearName) };
-        m_limelightRobotPoses = new LimelightPose[] { m_limelightInputs[0].FieldSpaceRobotPose,
-                m_limelightInputs[1].FieldSpaceRobotPose };
+        _limelightRobotPoses = new LimelightPose[] {
+                _limelightInputs[0].FieldSpaceRobotPose,
+                _limelightInputs[1].FieldSpaceRobotPose };
     }
 
     /**
@@ -34,21 +37,21 @@ public class VisionSubsystem extends SubsystemBase {
      * @param llIndex The index of the limelight to get inputs from.
      */
     public LimelightInputs getLimelightInputs(int llIndex) {
-        return m_limelightInputs[llIndex];
+        return _limelightInputs[llIndex];
     }
 
     /**
      * Gets all limelight inputs
      */
     public LimelightInputs[] getAllLimelightInputs() {
-        return m_limelightInputs;
+        return _limelightInputs;
     }
 
     /**
      * Gets all limelight inputs
      */
     public LimelightPose[] getAllFieldRobotPoses() {
-        return m_limelightRobotPoses;
+        return _limelightRobotPoses;
     }
 
     /**
@@ -61,7 +64,7 @@ public class VisionSubsystem extends SubsystemBase {
      * @param mode The LED mode to set
      */
     public void setLedMode(int llIndex, int mode) {
-        m_limelights[llIndex].setLedMode(mode);
+        _limelights[llIndex].setLedMode(mode);
     }
 
     /**
@@ -70,7 +73,7 @@ public class VisionSubsystem extends SubsystemBase {
      * @param blinkCount The number of times to blink the LED
      */
     public void blinkLed(int llIndex, int blinkCount) {
-        m_limelights[llIndex].blinkLed(blinkCount);
+        _limelights[llIndex].blinkLed(blinkCount);
     }
 
     /**
@@ -81,7 +84,7 @@ public class VisionSubsystem extends SubsystemBase {
      * @param mode The camera mode to set
      */
     public void setCameraMode(int llIndex, int mode) {
-        m_limelights[llIndex].setCameraMode(mode);
+        _limelights[llIndex].setCameraMode(mode);
     }
 
     /**
@@ -90,7 +93,7 @@ public class VisionSubsystem extends SubsystemBase {
      * @param pipeline The pipeline to set active
      */
     public void setPipeline(int llIndex, int pipeline) {
-        m_limelights[llIndex].setPipeline(pipeline);
+        _limelights[llIndex].setPipeline(pipeline);
     }
 
     /**
@@ -102,7 +105,7 @@ public class VisionSubsystem extends SubsystemBase {
      * @param mode The streaming mode to set
      */
     public void setPiPStreamingMode(int llIndex, int mode) {
-        m_limelights[llIndex].setPiPStreamingMode(mode);
+        _limelights[llIndex].setPiPStreamingMode(mode);
     }
 
     /**
@@ -110,7 +113,7 @@ public class VisionSubsystem extends SubsystemBase {
      * @param llIndex The index of the desired limelight
      */
     public void takeSnapshot(int llIndex) {
-        m_limelights[llIndex].takeSnapshot();
+        _limelights[llIndex].takeSnapshot();
     }
 
     /**
@@ -119,30 +122,25 @@ public class VisionSubsystem extends SubsystemBase {
      * @param pose The Camera's pose to set in Robot space
      */
     public void setCameraPose(int llIndex, Pose3d pose) {
-        m_limelights[llIndex].setCameraPose(pose);
+        _limelights[llIndex].setCameraPose(pose);
     }
 
     public void periodic() {
         // Update all limelight inputs
-        for (int i = 0; i < m_limelights.length; i++) {
-            m_limelightInputs[i] = m_limelights[i].getInputs();
+        for (int i = 0; i < _limelights.length; i++) {
+            _limelights[i].updateInputs(_limelightInputs[i]);
+            Logger.processInputs("Vision/LL" + i + "/TagID", _limelightInputs[i]);
         }
 
         // Update Dashboard & logging
         var frontInputs = getLimelightInputs(0);
         var rearInputs = getLimelightInputs(1);
-        SmartDashboard.putBoolean("Drive/PoseEstimation/Front/IsValidTarget",
-                isAprilTagIdValid(frontInputs.ApriltagId));
-        SmartDashboard.putBoolean("Drive/PoseEstimation/Rear/IsValidTarget",
-                isAprilTagIdValid(rearInputs.ApriltagId));
+        SmartDashboard.putBoolean("Drive/Vision/Front/IsValidTarget", isAprilTagIdValid(frontInputs.ApriltagId));
+        SmartDashboard.putBoolean("Drive/Vision/Rear/IsValidTarget", isAprilTagIdValid(rearInputs.ApriltagId));
         DriverDashboard.FrontApTagIdField.setDouble(frontInputs.ApriltagId);
         DriverDashboard.RearApTagIdField.setDouble(rearInputs.ApriltagId);
         DriverDashboard.RearApTagOffsetDial
                 .setDouble(rearInputs.TargetHorizontalOffset.getDegrees());
-    }
-
-    public static boolean isAprilTagIdASpeakerCenterTarget(int apriltagId) {
-        return apriltagId == 4 || apriltagId == 7;
     }
 
     public static boolean isAprilTagIdValid(int apriltagId) {

@@ -5,8 +5,6 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -35,6 +33,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import org.littletonrobotics.junction.Logger;
 import org.prime.control.SwerveControlSuppliers;
 import org.prime.vision.LimelightInputs;
 
@@ -49,12 +48,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   // Shuffleboard Drivetrain tab configuration
   private ShuffleboardTab d_drivetrainTab = Shuffleboard.getTab("Drivetrain");
-  public GenericEntry d_snapToEnabledEntry = d_drivetrainTab.add("SnapTo Enabled", false)
-      .withWidget(BuiltInWidgets.kBooleanBox).withPosition(0, 0).withSize(2, 2).getEntry();
-  private GenericEntry d_snapAngle = d_drivetrainTab.add("SnapTo Angle", 0)
-      .withWidget(BuiltInWidgets.kGyro).withPosition(2, 0).withSize(4, 5)
-      .withProperties(
-          Map.of("Counter clockwise", true, "Major tick spacing", 45.0, "Minor tick spacing", 15.0))
+  public GenericEntry d_autoAlignEnabledEntry = d_drivetrainTab.add("AutoAlign Enabled", false)
+      .withWidget(BuiltInWidgets.kBooleanBox)
+      .withPosition(0, 0)
+      .withSize(2, 2)
+      .getEntry();
+  private GenericEntry d_autoAlignAngle = d_drivetrainTab.add("AutoAlign Angle", 0)
+      .withWidget(BuiltInWidgets.kGyro)
+      .withPosition(2, 0).withSize(4, 5)
+      .withProperties(Map.of("Counter clockwise", true, "Major tick spacing", 45.0, "Minor tick spacing", 15.0))
       .getEntry();
 
   // IO
@@ -62,9 +64,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private SwerveControllerInputsAutoLogged _inputs = new SwerveControllerInputsAutoLogged();
 
   // SnapAngle
-  private boolean _snapAngleEnabled = false;
-  private Rotation2d _snapSetpoint = Rotation2d.fromDegrees(0);
-  private PIDController _snapAnglePIDController;
+  private boolean _useAutoAlign = false;
+  private AutoAlign _autoAlign;
 
   // Vision, Kinematics, odometry
   private Supplier<LimelightInputs[]> _limelightInputsSupplier;
@@ -92,10 +93,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
     _swerveController = new SwerveController(isReal);
     _swerveController.updateInputs(_inputs);
 
-    // Configure snap-to PID
-    _snapAnglePIDController = DriveMap.SnapToPID.createPIDController(0.02);
-    _snapAnglePIDController.enableContinuousInput(-Math.PI, Math.PI);
-    _snapAnglePIDController.setTolerance(Math.PI / 180d);
+    // Configure AutoAlign
+    _autoAlign = new AutoAlign(DriveMap.AutoAlignPID);
 
     // Store references to LED pattern control funcs
     _clearForegroundPatternFunc = clearForegroundPatternFunc;
@@ -111,8 +110,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
     _driveSysIdRoutine = new SysIdRoutine(
         // Ramp up at 1 volt per second for quasistatic tests, step at 2 volts in
         // dynamic tests, run for 13 seconds.
-        new SysIdRoutine.Config(Units.Volts.of(0.5).per(Units.Second), Units.Volts.of(2),
-            Units.Seconds.of(10)),
+        new SysIdRoutine.Config(Units.Volts.of(2).per(Units.Second), Units.Volts.of(8),
+            Units.Seconds.of(15)),
         new SysIdRoutine.Mechanism(
             // Tell SysId how to plumb the driving voltage to the motors.
             _swerveController::setDriveVoltages,
@@ -163,6 +162,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   // #region Control methods
 
+  /**
+   * Resets the gyro angle
+   */
   public void resetGyro() {
     _swerveController.resetGyro();
   }
@@ -170,22 +172,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
   /**
    * Enabled/disables snap-to control
    */
-  private void setSnapToEnabled(boolean enabled) {
-    _snapAngleEnabled = enabled;
+  private void setAutoAlignEnabled(boolean enabled) {
+    _useAutoAlign = enabled;
     if (!enabled)
       _clearForegroundPatternFunc.run();
-  }
-
-  /**
-   * Sets the snap-to gyro setpoint, converting from degrees to radians
-   * 
-   * @param angle The angle to snap to in degrees
-   */
-  private void setSnapToSetpoint(double angle) {
-    var setpointModulated = MathUtil.angleModulus(Rotation2d.fromDegrees(angle).getRadians());
-    _snapSetpoint = Rotation2d.fromRadians(setpointModulated);
-
-    setSnapToEnabled(true);
   }
 
   /**
@@ -196,8 +186,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private void driveRobotRelative(ChassisSpeeds robotRelativeChassisSpeeds) {
     // If snap-to is enabled, calculate and override the input rotational speed to
     // reach the setpoint
-    robotRelativeChassisSpeeds.omegaRadiansPerSecond = _snapAngleEnabled
-        ? getSnapAngleCorrection(_inputs.GyroAngle)
+    var autoAlignCorrection = _autoAlign.getCorrection(_inputs.GyroAngle);
+    Logger.recordOutput("Drive/AutoAlignCorrection", autoAlignCorrection);
+
+    robotRelativeChassisSpeeds.omegaRadiansPerSecond = _useAutoAlign
+        ? autoAlignCorrection
         : robotRelativeChassisSpeeds.omegaRadiansPerSecond;
 
     // Correct drift by taking the input speeds and converting them to a desired
@@ -209,43 +202,22 @@ public class DrivetrainSubsystem extends SubsystemBase {
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, DriveMap.Chassis.MaxSpeedMetersPerSecond);
 
     // Set the desired states for each module
+    Logger.recordOutput("Drive/ChassisSpeedsRobot", robotRelativeChassisSpeeds);
+    Logger.recordOutput("Drive/ModuleStates", swerveModuleStates);
     _swerveController.setDesiredModuleStates(swerveModuleStates);
   }
 
   /**
    * Drives field-relative using a ChassisSpeeds
    * 
-   * @param desiredChassisSpeeds The desired speeds of the robot
+   * @param fieldChassisSpeeds The desired speeds of the robot
    */
-  private void driveFieldRelative(ChassisSpeeds desiredChassisSpeeds) {
+  private void driveFieldRelative(ChassisSpeeds fieldChassisSpeeds) {
     // Convert the field-relative speeds to robot-relative
-    var robotRelativeSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(desiredChassisSpeeds.vxMetersPerSecond,
-        desiredChassisSpeeds.vyMetersPerSecond, desiredChassisSpeeds.omegaRadiansPerSecond, _inputs.GyroAngle);
+    var robotRelativeChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(fieldChassisSpeeds.vxMetersPerSecond,
+        fieldChassisSpeeds.vyMetersPerSecond, fieldChassisSpeeds.omegaRadiansPerSecond, _inputs.GyroAngle);
 
-    driveRobotRelative(robotRelativeSpeeds);
-  }
-
-  /**
-   * Calculates the snap angle correction using the current gyro angle and the PID controller
-   * 
-   * @return The rotational speed correction 
-   */
-  private double getSnapAngleCorrection() {
-    return getSnapAngleCorrection(_inputs.GyroAngle);
-  }
-
-  /**
-   * Calculates the snap angle correction using the PID controller
-   * 
-   * @param currentAngle The current angle of the robot
-   * @return The rotational speed correction 
-   */
-  private double getSnapAngleCorrection(Rotation2d currentAngle) {
-    var currentRotationRadians = MathUtil.angleModulus(currentAngle.getRadians());
-    var correction = _snapAnglePIDController.calculate(currentRotationRadians, _snapSetpoint.getRadians());
-
-    return MathUtil.clamp(correction, -DriveMap.Chassis.MaxAngularSpeedRadians,
-        DriveMap.Chassis.MaxAngularSpeedRadians);
+    driveRobotRelative(robotRelativeChassisSpeeds);
   }
 
   /**
@@ -292,6 +264,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
         llPose.Timestamp,
         llPose.getStdDeviations());
   }
+
   // #endregion
 
   /**
@@ -301,87 +274,98 @@ public class DrivetrainSubsystem extends SubsystemBase {
   public void periodic() {
     // Get inputs
     _swerveController.updateInputs(_inputs);
+    Logger.processInputs(getName(), _inputs);
 
     processVisionEstimations();
 
     // Update LEDs
-    if (_snapAngleEnabled) {
-      _setForegroundPatternFunc.accept(_snapAnglePIDController.atSetpoint()
+    Logger.recordOutput("Drive/AutoAlignEnabled", _useAutoAlign);
+    Logger.recordOutput("Drive/AutoAlignSetpoint", _autoAlign.getSetpoint());
+    Logger.recordOutput("Drive/AutoAlignAtSetpoint", _autoAlign.atSetpoint());
+    if (_useAutoAlign) {
+      _setForegroundPatternFunc.accept(_autoAlign.atSetpoint()
           ? _snapOnTargetPattern
           : _snapOffTargetPattern);
     }
 
     // Update shuffleboard
     DriverDashboard.HeadingGyro.setDouble(_inputs.GyroAngle.getDegrees());
+    Logger.recordOutput("Drive/EstimatedRobotPose", _inputs.EstimatedRobotPose);
     DriverDashboard.FieldWidget.setRobotPose(_inputs.EstimatedRobotPose);
-    d_snapToEnabledEntry.setBoolean(_snapAngleEnabled);
-    d_snapAngle.setDouble(_snapSetpoint.getRadians());
+    d_autoAlignEnabledEntry.setBoolean(_useAutoAlign);
+    d_autoAlignAngle.setDouble(_autoAlign.getSetpoint().getRadians());
   }
 
   // #region Commands
 
   /**
-   * Creates a command that drives the robot using input controls
+   * Creates a command that drives the robot in field-relative mode using input controls
    * 
    * @param controlSuppliers Controller input suppliers
    */
   public Command driveFieldRelativeCommand(SwerveControlSuppliers controlSuppliers) {
     return this.run(() -> {
-      // If the driver is trying to rotate the robot, disable snap-to control
-      if (Math.abs(controlSuppliers.Z.getAsDouble()) > 0.2) {
-        setSnapToEnabled(false);
-        _clearForegroundPatternFunc.run();
-      }
-
-      // Convert inputs to MPS
-      var inputXMPS = controlSuppliers.X.getAsDouble() * DriveMap.Chassis.MaxSpeedMetersPerSecond;
-      var inputYMPS = -controlSuppliers.Y.getAsDouble() * DriveMap.Chassis.MaxSpeedMetersPerSecond;
-      var inputRotationRadiansPS = -controlSuppliers.Z.getAsDouble() * DriveMap.Chassis.MaxAngularSpeedRadians;
-
-      // Build chassis speeds
-      var invert = Robot.onRedAlliance() ? -1 : 1;
-
-      // Drive the robot with the driver-relative inputs, converted to field-relative
-      // based on which side we're on
-      var vxSpeed = (inputYMPS * invert); // Driver Y axis is field X axis
-      var vySpeed = (inputXMPS * invert); // Driver X axis is field Y axis
-      var fieldRelativeChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(vxSpeed, vySpeed,
-          inputRotationRadiansPS, _inputs.GyroAngle);
+      var fieldRelativeChassisSpeeds = getChassisSpeeds(controlSuppliers, false);
 
       driveFieldRelative(fieldRelativeChassisSpeeds);
     });
   }
 
   /**
-   * Creates a command that drives the robot using input controls
+   * Creates a command that drives the robot in robot-relative mode using input controls
    * 
    * @param controlSuppliers Controller input suppliers
    */
   public Command driveRobotRelativeCommand(SwerveControlSuppliers controlSuppliers) {
     return this.run(() -> {
-      // If the driver is trying to rotate the robot, disable snap-to control
-      if (Math.abs(controlSuppliers.Z.getAsDouble()) > 0.2) {
-        setSnapToEnabled(false);
-        _clearForegroundPatternFunc.run();
-      }
-
-      // Convert inputs to MPS
-      var inputXMPS = controlSuppliers.X.getAsDouble() * DriveMap.Chassis.MaxSpeedMetersPerSecond;
-      var inputYMPS = -controlSuppliers.Y.getAsDouble() * DriveMap.Chassis.MaxSpeedMetersPerSecond;
-      var inputRotationRadiansPS = -controlSuppliers.Z.getAsDouble() * DriveMap.Chassis.MaxAngularSpeedRadians;
-
-      // Build chassis speeds
-      var invert = Robot.onRedAlliance() ? -1 : 1;
-
-      // Drive the robot with the driver-relative inputs, converted to field-relative
-      // based on which side we're on
-      var vxSpeed = (inputYMPS * invert);
-      var vySpeed = (inputXMPS * invert);
-      var robotChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(vxSpeed, vySpeed,
-          inputRotationRadiansPS, _inputs.GyroAngle);
-
-      driveRobotRelative(robotChassisSpeeds);
+      var robotRelativeChassisSpeeds = getChassisSpeeds(controlSuppliers, true);
+      driveRobotRelative(robotRelativeChassisSpeeds);
     });
+  }
+
+  /**
+   * Gets the robot or field-relative ChassisSpeeds from the control suppliers
+   * @param controlSuppliers The user input suppliers
+   * @param robotRelative Whether the speeds should be robot-relative
+   */
+  private ChassisSpeeds getChassisSpeeds(SwerveControlSuppliers controlSuppliers, boolean robotRelative) {
+    // If the driver is trying to rotate the robot, disable snap-to control
+    if (Math.abs(controlSuppliers.Z.getAsDouble()) > 0.2) {
+      setAutoAlignEnabled(false);
+    }
+
+    // Convert inputs to MPS
+    var inputXMPS = controlSuppliers.X.getAsDouble() * DriveMap.Chassis.MaxSpeedMetersPerSecond;
+    var inputYMPS = -controlSuppliers.Y.getAsDouble() * DriveMap.Chassis.MaxSpeedMetersPerSecond;
+    var inputRotationRadiansPS = -controlSuppliers.Z.getAsDouble() * DriveMap.Chassis.MaxAngularSpeedRadians;
+
+    // Build chassis speeds
+    var invert = Robot.onRedAlliance() ? -1 : 1;
+
+    // Drive the robot with the driver-relative inputs, converted to field-relative
+    // based on which side we're on
+    var fwdSpeed = (inputYMPS * invert);
+    var strSpeed = (inputXMPS * invert);
+
+    // Return the proper chassis speeds based on the control mode
+    return robotRelative
+        ? ChassisSpeeds.fromRobotRelativeSpeeds(
+            fwdSpeed,
+            strSpeed,
+            inputRotationRadiansPS,
+            _inputs.GyroAngle)
+        : ChassisSpeeds.fromFieldRelativeSpeeds(
+            fwdSpeed,
+            strSpeed,
+            inputRotationRadiansPS,
+            _inputs.GyroAngle);
+  }
+
+  /**
+   * Command for stopping all motors
+   */
+  public Command stopAllMotors() {
+    return this.runOnce(() -> _swerveController.stopAllMotors());
   }
 
   /**
@@ -396,51 +380,58 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * 
    * @param angle
    */
-  public Command setSnapToSetpointCommand(double angle) {
-    return Commands.runOnce(() -> setSnapToSetpoint(Robot.onBlueAlliance() ? angle + 180 : angle));
+  public Command setAutoAlignSetpointCommand(double angle) {
+    return Commands.runOnce(() -> {
+      var setpoint = Robot.onBlueAlliance()
+          ? angle + 180
+          : angle;
+      _autoAlign.setSetpoint(Rotation2d.fromDegrees(setpoint));
+      setAutoAlignEnabled(true);
+    });
   }
 
   /**
    * Disables snap-to control
    */
-  public Command disableSnapToCommand() {
-    return Commands.runOnce(() -> setSnapToEnabled(false));
+  public Command disableAutoAlignCommand() {
+    return Commands.runOnce(() -> setAutoAlignEnabled(false));
   }
 
   /**
-   * Enables lock-on control
+   * Enables lock-on control to whichever target is in view
    */
   public Command enableLockOnCommand() {
     return Commands.run(() -> {
       var rearLimelightInputs = _limelightInputsSupplier.get()[1];
 
       // If targeted AprilTag is in validTargets, snap to its offset
-      if (VisionSubsystem.isAprilTagIdASpeakerCenterTarget(rearLimelightInputs.ApriltagId)) {
+      if (VisionSubsystem.isAprilTagIdValid(rearLimelightInputs.ApriltagId)) {
         // Calculate the target heading
         var horizontalOffsetDeg = rearLimelightInputs.TargetHorizontalOffset.getDegrees();
         var robotHeadingDeg = _inputs.GyroAngle.getDegrees();
         var targetHeadingDeg = robotHeadingDeg - horizontalOffsetDeg;
 
         // Set the drivetrain to snap to the target heading
-        setSnapToSetpoint(targetHeadingDeg);
+        _autoAlign.setSetpoint(Rotation2d.fromDegrees(targetHeadingDeg));
+        setAutoAlignEnabled(true);
       } else {
-        setSnapToEnabled(false);
+        setAutoAlignEnabled(false);
       }
     });
   }
 
   /**
-   * Enables SnapAngle control in PathPlanner routines
+   * Enables AutoAlign for PathPlanner routines
    * @return
    */
   public Command enablePathPlannerSnapRotationFeedbackCommand() {
     return Commands.run(() -> {
-      PPHolonomicDriveController.overrideRotationFeedback(this::getSnapAngleCorrection);
+      PPHolonomicDriveController.overrideRotationFeedback(() -> _autoAlign.getCorrection(_inputs.GyroAngle));
     });
   }
 
   /**
-   * Disables SnapAngle control in PathPlanner routines
+   * Disables AutoAlign for PathPlanner routines
    * @return
    */
   public Command disablePathPlannerSnapRotationFeedbackCommand() {
@@ -466,11 +457,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
     return Map.of(
         "EnableTargetLockOn",
         enableLockOnCommand(),
-        "DisableSnapAngle",
-        disableSnapToCommand(),
-        "EnableSnapAngleRotationFeedback",
+        "DisableAutoAlign",
+        disableAutoAlignCommand(),
+        "EnableAutoAlignRotationFeedback",
         enablePathPlannerSnapRotationFeedbackCommand(),
-        "DisableSnapAngleRotationFeedback",
+        "DisableAutoAlignRotationFeedback",
         disablePathPlannerSnapRotationFeedbackCommand());
   }
   // #endregion
