@@ -23,8 +23,8 @@ public class DriveMap {
         // public static final PrimePIDConstants DrivePID = new PrimePIDConstants(0.24339 / 2, 0, 0, 0,
         //                 2.022, 0.26097, 0.016668);
 
-        public static final PrimePIDConstants DrivePID = new PrimePIDConstants(0.05, 0, 0.000, 0.0,
-                        0.097, 0.025, 0.14);
+        public static final PrimePIDConstants DrivePID = new PrimePIDConstants(0.01, 0, 0.000, 0.0,
+                        0.096, 0, 0.14);
 
         public static final PrimePIDConstants SteeringPID = new PrimePIDConstants(4, 0, 0.04);
         public static final PrimePIDConstants SnapToPID = new PrimePIDConstants(6, 0, 0);
