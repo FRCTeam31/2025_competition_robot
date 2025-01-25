@@ -37,6 +37,7 @@ public class Container {
 
   public Container(boolean isReal) {
     try {
+      System.out.println("Robot diameter: " + DriveMap.WheelBaseCircumferenceMeters);
       DriverDashboard.init(isReal);
       m_driverController = new PrimeXboxController(Controls.DRIVER_PORT);
 

@@ -88,7 +88,7 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
     SparkMaxConfig config = new SparkMaxConfig();
     config.inverted(m_map.SteerInverted); // CCW inversion
     config.idleMode(IdleMode.kBrake);
-    config.smartCurrentLimit(60, 50);
+    config.smartCurrentLimit(30, 20);
 
     m_SteeringMotor.clearFaults();
     m_SteeringMotor.configure(config, ResetMode.kResetSafeParameters,
@@ -108,7 +108,7 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
   private void setupDriveMotor(PrimePIDConstants pid) {
     m_driveMotor = new SparkFlex(m_map.DriveMotorCanId, MotorType.kBrushless);
     SparkMaxConfig config = new SparkMaxConfig();
-    config.smartCurrentLimit(60, 50);
+    config.smartCurrentLimit(DriveMap.DriveStallCurrentLimit, DriveMap.DriveFreeCurrentLimit);
     config.openLoopRampRate(m_map.DriveMotorRampRate);
     config.inverted(m_map.DriveInverted);
     config.idleMode(IdleMode.kBrake);
@@ -121,7 +121,7 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
 
     // Create a PID controller to calculate driving motor output
     m_drivingPidController = pid.createPIDController(0.02);
-    m_drivingPidController.setTolerance(0.001);
+    // m_drivingPidController.setTolerance(0.001);
     driveFeedForward = new SimpleMotorFeedforward(pid.kS, pid.kV, pid.kA);
   }
 
@@ -149,7 +149,7 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
    */
   private void setDesiredState(SwerveModuleState desiredState) {
     // Optimize the desired state
-    desiredState = optimize(desiredState);
+    // desiredState = optimize(desiredState);
 
     // Set the drive motor to the desired speed
     setDriveSpeed(desiredState.speedMetersPerSecond);
