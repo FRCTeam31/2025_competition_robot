@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -100,20 +101,27 @@ public class DrivetrainSubsystem extends SubsystemBase {
     configurePathPlanner();
 
     // Create a new SysId routine for characterizing the drive.
-    _driveSysIdRoutine = new SysIdRoutine(
-        // Ramp up at 1 volt per second for quasistatic tests, step at 2 volts in
-        // dynamic tests, run for 13 seconds.
-        new SysIdRoutine.Config(Units.Volts.of(2).per(Units.Second), Units.Volts.of(8),
-            Units.Seconds.of(15)),
-        new SysIdRoutine.Mechanism(
-            // Tell SysId how to plumb the driving voltage to the motors.
-            _swerveController::setDriveVoltages,
-            // Tell SysId how to record a frame of data for each motor on the mechanism
-            // being characterized.
-            _swerveController::logSysIdDrive,
-            // Tell SysId to make generated commands require this subsystem, suffix test
-            // state in WPILog with this subsystem's name
-            this));
+    // _driveSysIdRoutine = new SysIdRoutine(
+    //     // Ramp up at 1 volt per second for quasistatic tests, step at 2 volts in
+    //     // dynamic tests, run for 13 seconds.
+    //     new SysIdRoutine.Config(Units.Volts.of(2).per(Units.Second), Units.Volts.of(8),
+    //         Units.Seconds.of(15)),
+    //     new SysIdRoutine.Mechanism(
+    //         // Tell SysId how to plumb the driving voltage to the motors.
+    //         _swerveController::setDriveVoltages,
+    //         // Tell SysId how to record a frame of data for each motor on the mechanism
+    //         // being characterized.
+    //         _swerveController::logSysIdDrive,
+    //         // Tell SysId to make generated commands require this subsystem, suffix test
+    //         // state in WPILog with this subsystem's name
+    //         this));
+  }
+
+  public Command driveSwerveVoltage(double voltage) {
+    return Commands.runOnce(() -> {
+      _swerveController.setDriveVoltages(voltage);
+
+    }, this);
   }
 
   private void configurePathPlanner() {

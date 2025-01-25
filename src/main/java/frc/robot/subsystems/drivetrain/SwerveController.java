@@ -156,12 +156,12 @@ public class SwerveController {
     m_rearRightModule.setOutputs(m_moduleOutputs[3]);
   }
 
-  public void setDriveVoltages(Voltage volts) {
+  public void setDriveVoltages(double volts) {
     var angle = Rotation2d.fromDegrees(0);
-    m_frontLeftModule.setDriveVoltage(volts.magnitude(), angle);
-    m_frontRightModule.setDriveVoltage(volts.magnitude(), angle);
-    m_rearLeftModule.setDriveVoltage(volts.magnitude(), angle);
-    m_rearRightModule.setDriveVoltage(volts.magnitude(), angle);
+    m_frontLeftModule.setDriveVoltage(volts, angle);
+    m_frontRightModule.setDriveVoltage(volts, angle);
+    m_rearLeftModule.setDriveVoltage(volts, angle);
+    m_rearRightModule.setDriveVoltage(volts, angle);
   }
 
   public void logSysIdDrive(SysIdRoutineLog log) {

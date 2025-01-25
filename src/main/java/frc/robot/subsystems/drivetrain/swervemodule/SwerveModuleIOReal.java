@@ -149,7 +149,7 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
    */
   private void setDesiredState(SwerveModuleState desiredState) {
     // Optimize the desired state
-    desiredState = optimize(desiredState);
+    // desiredState = optimize(desiredState);
 
     // Set the drive motor to the desired speed
     setDriveSpeed(desiredState.speedMetersPerSecond);

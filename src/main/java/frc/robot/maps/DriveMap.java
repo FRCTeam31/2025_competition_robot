@@ -13,7 +13,7 @@ public class DriveMap {
         public static final double TrackWidthMeters = 0.51181;
         public static final double WheelBaseMeters = 0.67945;
         public static final double WheelBaseCircumferenceMeters = Math.PI * 0.7778174593052;
-        public static final double MaxSpeedMetersPerSecond = 5.6;
+        public static final double MaxSpeedMetersPerSecond = 5.6 / 2;
         public static final double MaxAccelerationMetersPerSecondSquared = Units.feetToMeters(15);
         public static final double MaxAngularSpeedRadians = Math.PI * 3;
         public static final int PigeonId = 10;
@@ -22,8 +22,8 @@ public class DriveMap {
         // public static final PrimePIDConstants DrivePID = new PrimePIDConstants(0.24339 / 2, 0, 0, 0,
         //                 2.022, 0.26097, 0.016668);
 
-        public static final PrimePIDConstants DrivePID = new PrimePIDConstants(0.041253, 0, 0, 0,
-                        0.105, 0.025, 0.016668);
+        public static final PrimePIDConstants DrivePID = new PrimePIDConstants(0.08, 0, 0.0008, 0,
+                        0.095, 0, 0.14);
 
         public static final PrimePIDConstants SteeringPID = new PrimePIDConstants(3.25, 0, 0.02);
         public static final PrimePIDConstants SnapToPID = new PrimePIDConstants(6, 0, 0);

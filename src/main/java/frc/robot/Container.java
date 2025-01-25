@@ -11,14 +11,19 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.Logged.Importance;
 import edu.wpi.first.epilogue.Logged.Strategy;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.*;
 import frc.robot.maps.DriveMap;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
+import frc.robot.subsystems.drivetrain.SwerveController;
 import frc.robot.subsystems.vision.VisionSubsystem;
+
+import java.lang.invoke.VolatileCallSite;
 
 import org.prime.control.Controls;
 import org.prime.control.HolonomicControlStyle;
@@ -34,6 +39,8 @@ public class Container {
   public DrivetrainSubsystem Drivetrain;
   @Logged(name = "LEDs", importance = Importance.CRITICAL)
   public PwmLEDs LEDs;
+
+  // double voltage = 0;
 
   public Container(boolean isReal) {
     try {
@@ -108,17 +115,46 @@ public class Container {
     // m_driverController.pov(Controls.right).onTrue(Drivetrain.setSnapToSetpointCommand(90));
 
     // Uncomment to enable SysID Routines.
-    m_driverController.pov(Controls.up)
-        .onTrue(Drivetrain.runSysIdQuasistaticRoutineCommand(Direction.kForward))
-        .onFalse(Drivetrain.stopAllMotors());
-    m_driverController.pov(Controls.down).onTrue(Drivetrain.runSysIdQuasistaticRoutineCommand(Direction.kReverse))
-        .onFalse(Drivetrain.stopAllMotors());
+    // m_driverController.pov(Controls.up)
+    //     .onTrue(Drivetrain.runSysIdQuasistaticRoutineCommand(Direction.kForward))
+    //     .onFalse(Drivetrain.stopAllMotors());
+    // m_driverController.pov(Controls.down).onTrue(Drivetrain.runSysIdQuasistaticRoutineCommand(Direction.kReverse))
+    //     .onFalse(Drivetrain.stopAllMotors());
 
-    m_driverController.pov(Controls.right).onTrue(Drivetrain.runSysIdDynamicRoutineCommand(Direction.kForward))
-        .onFalse(Drivetrain.stopAllMotors());
+    // m_driverController.pov(Controls.right).onTrue(Drivetrain.runSysIdDynamicRoutineCommand(Direction.kForward))
+    //     .onFalse(Drivetrain.stopAllMotors());
 
-    m_driverController.pov(Controls.left).onTrue(Drivetrain.runSysIdDynamicRoutineCommand(Direction.kReverse))
-        .onFalse(Drivetrain.stopAllMotors());
+    // m_driverController.pov(Controls.left).onTrue(Drivetrain.runSysIdDynamicRoutineCommand(Direction.kReverse))
+    //     .onFalse(Drivetrain.stopAllMotors());
+
+    // Uncomment below and voltage variable at the top of file to enable voltage step drive for kS testing
+    // m_driverController.pov(Controls.up)
+    //     .onTrue(Commands.runOnce(() -> {
+    //       voltage += 0.05;
+    //       System.out.println("Set to voltage: " + voltage);
+    //     }));
+
+    // m_driverController.pov(Controls.down)
+    //     .onTrue(Commands.runOnce(() -> {
+    //       voltage -= 0.01;
+    //       System.out.println("Set to voltage: " + voltage);
+    //     }));
+
+    // m_driverController.pov(Controls.right)
+    //     .onTrue(Commands.run(() -> {
+    //       Drivetrain.driveSwerveVoltage(voltage);
+    //     }, Drivetrain).alongWith(Commands.runOnce(()->{
+    //       System.out.println("Voltage Step Enabled!");
+    //     })));
+
+    // m_driverController.pov(Controls.left)
+    //     .onTrue(Commands.runOnce(() -> {
+    //       voltage = 0;
+    //       Drivetrain.driveSwerveVoltage(0);
+    //       System.out.println("Set to voltage: " + voltage);
+    //     }, Drivetrain).alongWith(Commands.runOnce(()->{
+    //       System.out.println("Voltage Step Disabled!");
+    //     })));
 
   }
 
