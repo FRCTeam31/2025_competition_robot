@@ -22,10 +22,10 @@ public class DriveMap {
         // public static final PrimePIDConstants DrivePID = new PrimePIDConstants(0.24339 / 2, 0, 0, 0,
         //                 2.022, 0.26097, 0.016668);
 
-        public static final PrimePIDConstants DrivePID = new PrimePIDConstants(0.041253, 0, 0, 0,
-                        0.105, 0.025, 0.016668);
+        public static final PrimePIDConstants DrivePID = new PrimePIDConstants(0, 0, 0, 0,
+                        0.105, 0.025, 0.13);
 
-        public static final PrimePIDConstants SteeringPID = new PrimePIDConstants(3.25, 0, 0.02);
+        public static final PrimePIDConstants SteeringPID = new PrimePIDConstants(4.5, 0, 0.04);
         public static final PrimePIDConstants SnapToPID = new PrimePIDConstants(6, 0, 0);
         public static final PrimePIDConstants PathingTranslationPid = new PrimePIDConstants(3, 0, 0);
         public static final PrimePIDConstants PathingRotationPid = new PrimePIDConstants(2, 0, 0);
@@ -43,9 +43,10 @@ public class DriveMap {
         public static final SwerveModuleMap FrontRightSwerveModule = new SwerveModuleMap(7, 8, 13,
                         272 * 0.0025, true, false, new Translation2d(TrackWidthMeters / 2, -(WheelBaseMeters / 2)));
         public static final SwerveModuleMap RearRightSwerveModule = new SwerveModuleMap(5, 6, 12,
-                        278 * 0.0025, true, false, new Translation2d(-(TrackWidthMeters / 2), -(WheelBaseMeters / 2)));
+                        278.75 * 0.0025, true, false,
+                        new Translation2d(-(TrackWidthMeters / 2), -(WheelBaseMeters / 2)));
         public static final SwerveModuleMap RearLeftSwerveModule = new SwerveModuleMap(3, 4, 11,
-                        54 * 0.0025, false, false, new Translation2d(-TrackWidthMeters / 2, WheelBaseMeters / 2));
+                        55 * 0.0025, false, false, new Translation2d(-TrackWidthMeters / 2, WheelBaseMeters / 2));
 
         public static final RobotConfig PathPlannerRobotConfiguration = new RobotConfig(Units.lbsToKilograms(120),
                         MomentOfInertia.ofBaseUnits(6, edu.wpi.first.units.Units.KilogramSquareMeters)

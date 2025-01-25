@@ -97,7 +97,7 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
     // Create a PID controller to calculate steering motor output
     m_steeringPidController = pid.createPIDController(0.02);
     m_steeringPidController.enableContinuousInput(0, 1); // 0 to 1 rotation
-    m_steeringPidController.setTolerance((1 / 360.0) * 0.1); // 2 degrees in units of rotations
+    // m_steeringPidController.setTolerance((1 / 360.0) * 0.1); // 2 degrees in units of rotations
   }
 
   /**
