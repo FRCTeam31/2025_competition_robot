@@ -16,8 +16,8 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.MutDistance;
+import edu.wpi.first.units.measure.MutLinearVelocity;
 import frc.robot.subsystems.drivetrain.DriveMap;
 
 import static edu.wpi.first.units.Units.Meters;
@@ -45,34 +45,6 @@ public class SwerveModuleReal implements ISwerveModule {
     setupSteeringMotor(DriveMap.SteeringPID);
     setupDriveMotor(DriveMap.DrivePID);
     setupCanCoder();
-  }
-
-  @Override
-  public void updateInputs(SwerveModuleInputsAutoLogged inputs) {
-    var rotation = getCurrentHeading();
-    var speedMps = getCurrentVelocity().in(MetersPerSecond);
-    var distanceMeters = getModuleDistance();
-
-    inputs.ModuleState.angle = rotation;
-    inputs.ModuleState.speedMetersPerSecond = speedMps;
-    inputs.ModulePosition.angle = rotation;
-    inputs.ModulePosition.distanceMeters = distanceMeters.magnitude();
-    Logger.recordOutput("Drive/" + _name + "/DriveMotorMeasuredVoltage",
-        _driveMotor.getAppliedOutput() * _driveMotor.getBusVoltage());
-  }
-
-  @Override
-  public void setDriveVoltage(double voltage, Rotation2d moduleAngle) {
-    var speed = voltage / _driveMotor.getBusVoltage();
-    _driveMotor.set(speed);
-
-    setModuleAngle(moduleAngle);
-  }
-
-  @Override
-  public void stopMotors() {
-    _driveMotor.stopMotor();
-    _steeringMotor.stopMotor();
   }
 
   /**
@@ -133,6 +105,34 @@ public class SwerveModuleReal implements ISwerveModule {
         .apply(new CANcoderConfiguration()
             .withMagnetSensor(new MagnetSensorConfigs().withAbsoluteSensorDiscontinuityPoint(0.5)
                 .withMagnetOffset(-_map.CanCoderStartingOffset)));
+  }
+
+  @Override
+  public void updateInputs(SwerveModuleInputsAutoLogged inputs) {
+    var rotation = getCurrentHeading();
+    var speedMps = getCurrentVelocity().in(MetersPerSecond);
+    var distanceMeters = getModuleDistance();
+
+    inputs.ModuleState.angle = rotation;
+    inputs.ModuleState.speedMetersPerSecond = speedMps;
+    inputs.ModulePosition.angle = rotation;
+    inputs.ModulePosition.distanceMeters = distanceMeters.magnitude();
+    Logger.recordOutput("Drive/" + _name + "/DriveMotorMeasuredVoltage",
+        _driveMotor.getAppliedOutput() * _driveMotor.getBusVoltage());
+  }
+
+  @Override
+  public void setDriveVoltage(double voltage, Rotation2d moduleAngle) {
+    var speed = voltage / _driveMotor.getBusVoltage();
+    _driveMotor.set(speed);
+
+    setModuleAngle(moduleAngle);
+  }
+
+  @Override
+  public void stopMotors() {
+    _driveMotor.stopMotor();
+    _steeringMotor.stopMotor();
   }
 
   /**
@@ -199,18 +199,18 @@ public class SwerveModuleReal implements ISwerveModule {
   /**
    * Gets the current velocity of the module
    */
-  private LinearVelocity getCurrentVelocity() {
+  private MutLinearVelocity getCurrentVelocity() {
     var speedMps = ((_driveMotor.getEncoder().getVelocity() / 60) / DriveMap.DriveGearRatio)
         * DriveMap.DriveWheelCircumferenceMeters;
 
-    return Units.MetersPerSecond.of(speedMps);
+    return Units.MetersPerSecond.mutable(speedMps);
   }
 
-  private Distance getModuleDistance() {
+  private MutDistance getModuleDistance() {
     var distMeters = (_driveMotor.getEncoder().getPosition() / DriveMap.DriveGearRatio)
         * DriveMap.DriveWheelCircumferenceMeters;
 
-    return Meters.of(distMeters);
+    return Meters.mutable(distMeters);
   }
 
   /**
