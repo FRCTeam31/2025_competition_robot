@@ -27,6 +27,7 @@ import org.prime.control.PrimeXboxController;
 @Logged(strategy = Strategy.OPT_IN)
 public class Container {
   private PrimeXboxController m_driverController;
+  //private double _voltage = 0;
 
   @Logged(name = "Vision", importance = Importance.CRITICAL)
   public VisionSubsystem Vision;
@@ -120,6 +121,35 @@ public class Container {
 
     m_driverController.pov(Controls.left).onTrue(Drivetrain.runSysIdDynamicRoutineCommand(Direction.kReverse))
         .onFalse(Drivetrain.stopAllMotors());
+
+    // Uncomment below and voltage variable at the top of file to enable voltage step drive for kS testing
+    // m_driverController.pov(Controls.up)
+    //     .onTrue(Commands.runOnce(() -> {
+    //       _voltage += 0.05;
+    //       System.out.println("Set to voltage: " + _voltage);
+    //     }));
+
+    // m_driverController.pov(Controls.down)
+    //     .onTrue(Commands.runOnce(() -> {
+    //       _voltage -= 0.01;
+    //       System.out.println("Set to voltage: " + _voltage);
+    //     }));
+
+    // m_driverController.pov(Controls.right)
+    //     .onTrue(Commands.run(() -> {
+    //       Drivetrain.driveSwerveVoltage(_voltage);
+    //     }, Drivetrain).alongWith(Commands.runOnce(()->{
+    //       System.out.println("Voltage Step Enabled!");
+    //     })));
+
+    // m_driverController.pov(Controls.left)
+    //     .onTrue(Commands.runOnce(() -> {
+    //       _voltage = 0;
+    //       Drivetrain.driveSwerveVoltage(0);
+    //       System.out.println("Set to voltage: " + _voltage);
+    //     }, Drivetrain).alongWith(Commands.runOnce(()->{
+    //       System.out.println("Voltage Step Disabled!");
+    //     })));
 
   }
 
