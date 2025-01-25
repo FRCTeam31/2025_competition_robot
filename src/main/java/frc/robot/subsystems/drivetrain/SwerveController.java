@@ -100,6 +100,7 @@ public class SwerveController {
     // Configure snap-to PID
     m_snapAngleController = DriveMap.SnapToPID.createPIDController(0.02);
     m_snapAngleController.enableContinuousInput(-Math.PI, Math.PI);
+
   }
 
   public DrivetrainInputs getInputs() {

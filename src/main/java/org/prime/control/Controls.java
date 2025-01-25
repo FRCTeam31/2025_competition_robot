@@ -33,9 +33,13 @@ public class Controls {
 
   // POV Buttons
   public static final int up = 0;
+  public static final int upRight = 45;
+  public static final int right = 90;
+  public static final int downRight = 135;
   public static final int down = 180;
-  public static final int right = 270;
-  public static final int left = 90;
+  public static final int downLeft = 225;
+  public static final int left = 270;
+  public static final int upLeft = 315;
 
   // deadbands
   public static final double AXIS_DEADBAND = 0.1;
