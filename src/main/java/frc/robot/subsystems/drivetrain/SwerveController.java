@@ -19,9 +19,9 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.simulation.AnalogGyroSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import frc.robot.Robot;
 import frc.robot.maps.DriveMap;
@@ -100,6 +100,8 @@ public class SwerveController {
     // Configure snap-to PID
     m_snapAngleController = DriveMap.SnapToPID.createPIDController(0.02);
     m_snapAngleController.enableContinuousInput(-Math.PI, Math.PI);
+    // Put the PID controller on the dashboard for easier adjustment on the fly
+    SmartDashboard.putData(m_snapAngleController);
   }
 
   public DrivetrainInputs getInputs() {
