@@ -13,6 +13,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import frc.robot.Robot;
 import frc.robot.subsystems.drivetrain.gyro.GyroReal;
@@ -68,8 +69,23 @@ public class SwerveController {
     // Create pose estimator
     m_poseEstimator = new SwerveDrivePoseEstimator(Kinematics, _gyroInputs.Rotation.toRotation2d(),
         getModulePositions(), new Pose2d());
+
+    // Store current Drive and Steering PID values in Preferences
+    Preferences.initDouble("DriveKp", DriveMap.DrivePID.kP);
+    Preferences.initDouble("DriveKi", DriveMap.DrivePID.kI);
+    Preferences.initDouble("DriveKd", DriveMap.DrivePID.kD);
+    Preferences.initDouble("DriveKs", DriveMap.DrivePID.kS);
+    Preferences.initDouble("DriveKv", DriveMap.DrivePID.kV);
+    Preferences.initDouble("DriveKa", DriveMap.DrivePID.kA);
+    Preferences.initDouble("SteerKp", DriveMap.SteeringPID.kP);
+    Preferences.initDouble("SteerKi", DriveMap.SteeringPID.kI);
+    Preferences.initDouble("SteerKd", DriveMap.SteeringPID.kD);
   }
 
+  /**
+   * Called periodically to update the swerve modules and gyro
+   * @param inputs
+   */
   public void updateInputs(SwerveControllerInputsAutoLogged inputs) {
     _frontLeftModule.updateInputs(m_moduleInputs[0]);
     Logger.processInputs("Drivetrain/FLModule", m_moduleInputs[0]);
@@ -89,6 +105,48 @@ public class SwerveController {
 
     var modulePositions = getModulePositions();
     inputs.EstimatedRobotPose = m_poseEstimator.update(inputs.GyroAngle, modulePositions);
+
+    checkPreferences();
+  }
+
+  /**
+   * Checks the preferences for any changes and updates the PID values in each swerve module if necessary
+   */
+  private void checkPreferences() {
+    var driveKpChanged = Preferences.getDouble("DriveKp", DriveMap.DrivePID.kP) != DriveMap.DrivePID.kP;
+    var driveKiChanged = Preferences.getDouble("DriveKi", DriveMap.DrivePID.kI) != DriveMap.DrivePID.kI;
+    var driveKdChanged = Preferences.getDouble("DriveKd", DriveMap.DrivePID.kD) != DriveMap.DrivePID.kD;
+    var driveKsChanged = Preferences.getDouble("DriveKs", DriveMap.DrivePID.kS) != DriveMap.DrivePID.kS;
+    var driveKvChanged = Preferences.getDouble("DriveKv", DriveMap.DrivePID.kV) != DriveMap.DrivePID.kV;
+    var driveKaChanged = Preferences.getDouble("DriveKa", DriveMap.DrivePID.kA) != DriveMap.DrivePID.kA;
+
+    if (driveKpChanged || driveKiChanged || driveKdChanged || driveKsChanged || driveKvChanged || driveKaChanged) {
+      DriveMap.DrivePID.kP = Preferences.getDouble("DriveKp", DriveMap.DrivePID.kP);
+      DriveMap.DrivePID.kI = Preferences.getDouble("DriveKi", DriveMap.DrivePID.kI);
+      DriveMap.DrivePID.kD = Preferences.getDouble("DriveKd", DriveMap.DrivePID.kD);
+      DriveMap.DrivePID.kS = Preferences.getDouble("DriveKs", DriveMap.DrivePID.kS);
+      DriveMap.DrivePID.kV = Preferences.getDouble("DriveKv", DriveMap.DrivePID.kV);
+      DriveMap.DrivePID.kA = Preferences.getDouble("DriveKa", DriveMap.DrivePID.kA);
+
+      _frontLeftModule.setDrivePID(DriveMap.DrivePID);
+      _frontRightModule.setDrivePID(DriveMap.DrivePID);
+      _rearLeftModule.setDrivePID(DriveMap.DrivePID);
+      _rearRightModule.setDrivePID(DriveMap.DrivePID);
+    }
+
+    var steerKpChanged = Preferences.getDouble("SteerKp", DriveMap.SteeringPID.kP) != DriveMap.SteeringPID.kP;
+    var steerKiChanged = Preferences.getDouble("SteerKi", DriveMap.SteeringPID.kI) != DriveMap.SteeringPID.kI;
+    var steerKdChanged = Preferences.getDouble("SteerKd", DriveMap.SteeringPID.kD) != DriveMap.SteeringPID.kD;
+    if (steerKpChanged || steerKiChanged || steerKdChanged) {
+      DriveMap.SteeringPID.kP = Preferences.getDouble("SteerKp", DriveMap.SteeringPID.kP);
+      DriveMap.SteeringPID.kI = Preferences.getDouble("SteerKi", DriveMap.SteeringPID.kI);
+      DriveMap.SteeringPID.kD = Preferences.getDouble("SteerKd", DriveMap.SteeringPID.kD);
+
+      _frontLeftModule.setSteeringPID(DriveMap.SteeringPID);
+      _frontRightModule.setSteeringPID(DriveMap.SteeringPID);
+      _rearLeftModule.setSteeringPID(DriveMap.SteeringPID);
+      _rearRightModule.setSteeringPID(DriveMap.SteeringPID);
+    }
   }
 
   /**

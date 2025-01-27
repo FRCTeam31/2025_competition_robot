@@ -67,6 +67,13 @@ public class SwerveModuleReal implements ISwerveModule {
     _steeringPidController.setTolerance((1 / 360.0) * 0.05);
   }
 
+  @Override
+  public void setSteeringPID(PrimePIDConstants steeringPID) {
+    var currentSetpoint = _steeringPidController.getSetpoint();
+    _steeringPidController = steeringPID.createPIDController(0.02);
+    _steeringPidController.setSetpoint(currentSetpoint);
+  }
+
   /**
    * Configures the drive motors
    * 
@@ -90,6 +97,15 @@ public class SwerveModuleReal implements ISwerveModule {
     _drivingPidController = pid.createPIDController(0.02);
     _drivingPidController.setTolerance(0.001);
     _driveFeedForward = new SimpleMotorFeedforward(pid.kS, pid.kV, pid.kA);
+  }
+
+  @Override
+  public void setDrivePID(PrimePIDConstants drivePID) {
+    var currentSetpoint = _drivingPidController.getSetpoint();
+    _drivingPidController = drivePID.createPIDController(0.02);
+    _drivingPidController.setSetpoint(currentSetpoint);
+
+    _driveFeedForward = new SimpleMotorFeedforward(drivePID.kS, drivePID.kV, drivePID.kA);
   }
 
   /**

@@ -54,6 +54,20 @@ public class SwerveModuleSim implements ISwerveModule {
     _driveMotorSim.setAngularVelocity(0);
   }
 
+  @Override
+  public void setDrivePID(PrimePIDConstants drivePID) {
+    var currentSetpoint = _drivingPidController.getSetpoint();
+    _drivingPidController = drivePID.createPIDController(0.02);
+    _drivingPidController.setSetpoint(currentSetpoint);
+
+    _driveFeedForward = new SimpleMotorFeedforward(drivePID.kS, drivePID.kV, drivePID.kA);
+  }
+
+  @Override
+  public void setSteeringPID(PrimePIDConstants steeringPID) {
+    // Not implemented
+  }
+
   /**
    * Configures the drive motors
    * 
