@@ -304,11 +304,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * @param controlSuppliers Controller input suppliers
    */
   public Command driveFieldRelativeCommand(SwerveControlSuppliers controlSuppliers) {
-    return this.run(() -> {
-      var fieldRelativeChassisSpeeds = getChassisSpeeds(controlSuppliers, false);
-
-      driveFieldRelative(fieldRelativeChassisSpeeds);
-    });
+    return this.run(() -> driveFieldRelative(controlSuppliers.getChassisSpeeds(
+        false,
+        _inputs.GyroAngle,
+        () -> setAutoAlignEnabled(false))));
   }
 
   /**
@@ -317,48 +316,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * @param controlSuppliers Controller input suppliers
    */
   public Command driveRobotRelativeCommand(SwerveControlSuppliers controlSuppliers) {
-    return this.run(() -> {
-      var robotRelativeChassisSpeeds = getChassisSpeeds(controlSuppliers, true);
-      driveRobotRelative(robotRelativeChassisSpeeds);
-    });
-  }
-
-  /**
-   * Gets the robot or field-relative ChassisSpeeds from the control suppliers
-   * @param controlSuppliers The user input suppliers
-   * @param robotRelative Whether the speeds should be robot-relative
-   */
-  private ChassisSpeeds getChassisSpeeds(SwerveControlSuppliers controlSuppliers, boolean robotRelative) {
-    // If the driver is trying to rotate the robot, disable snap-to control
-    if (Math.abs(controlSuppliers.Z.getAsDouble()) > 0.2) {
-      setAutoAlignEnabled(false);
-    }
-
-    // Convert inputs to MPS
-    var inputXMPS = controlSuppliers.X.getAsDouble() * DriveMap.Chassis.MaxSpeedMetersPerSecond;
-    var inputYMPS = -controlSuppliers.Y.getAsDouble() * DriveMap.Chassis.MaxSpeedMetersPerSecond;
-    var inputRotationRadiansPS = -controlSuppliers.Z.getAsDouble() * DriveMap.Chassis.MaxAngularSpeedRadians;
-
-    // Build chassis speeds
-    var invert = Robot.onRedAlliance() ? -1 : 1;
-
-    // Drive the robot with the driver-relative inputs, converted to field-relative
-    // based on which side we're on
-    var fwdSpeed = (inputYMPS * invert);
-    var strSpeed = (inputXMPS * invert);
-
-    // Return the proper chassis speeds based on the control mode
-    return robotRelative
-        ? ChassisSpeeds.fromRobotRelativeSpeeds(
-            fwdSpeed,
-            strSpeed,
-            inputRotationRadiansPS,
-            _inputs.GyroAngle)
-        : ChassisSpeeds.fromFieldRelativeSpeeds(
-            fwdSpeed,
-            strSpeed,
-            inputRotationRadiansPS,
-            _inputs.GyroAngle);
+    return this.run(() -> driveRobotRelative(controlSuppliers.getChassisSpeeds(
+        true,
+        _inputs.GyroAngle,
+        () -> setAutoAlignEnabled(false))));
   }
 
   /**
