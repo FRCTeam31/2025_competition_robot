@@ -27,7 +27,7 @@ public class DriveMap {
                         0.096, 0, 0.14);
 
         public static final PrimePIDConstants SteeringPID = new PrimePIDConstants(4, 0, 0.04);
-        public static final PrimePIDConstants SnapToPID = new PrimePIDConstants(3.15, 0, 0.125);
+        public static final PrimePIDConstants SnapToPID = new PrimePIDConstants(3.75, 0, 0);
         public static final PrimePIDConstants PathingTranslationPid = new PrimePIDConstants(3, 0, 0);
         public static final PrimePIDConstants PathingRotationPid = new PrimePIDConstants(2, 0, 0);
         public static final double DriveGearRatio = 5.9;

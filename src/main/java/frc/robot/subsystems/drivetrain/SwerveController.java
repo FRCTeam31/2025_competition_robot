@@ -22,6 +22,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.simulation.AnalogGyroSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import frc.robot.Robot;
 import frc.robot.maps.DriveMap;
@@ -100,6 +101,8 @@ public class SwerveController {
     // Configure snap-to PID
     m_snapAngleController = DriveMap.SnapToPID.createPIDController(0.02);
     m_snapAngleController.enableContinuousInput(-Math.PI, Math.PI);
+
+    SmartDashboard.putData(m_snapAngleController);
 
   }
 
@@ -219,11 +222,14 @@ public class SwerveController {
    */
   private void driveRobotRelative(ChassisSpeeds desiredChassisSpeeds, boolean snapAngleEnabled) {
     // If snap-to is enabled, calculate and override the input rotational speed to
-    // reach the setpoint
+    // reach the setpoint 
+
     if (snapAngleEnabled) {
       if (_robotIsReal) {
         var currentRotationRadians = MathUtil.angleModulus(m_gyro.getRotation2d().getRadians());
-        var snapCorrection = m_snapAngleController.calculate(currentRotationRadians);
+
+        var snapCorrection = MathUtil.clamp(m_snapAngleController.calculate(currentRotationRadians),
+            -DriveMap.MaxAngularSpeedRadians * 0.9, DriveMap.MaxAngularSpeedRadians * 0.9);
         _inputs.SnapCorrectionRadiansPerSecond = snapCorrection;
         desiredChassisSpeeds.omegaRadiansPerSecond = snapCorrection;
 
