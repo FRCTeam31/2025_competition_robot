@@ -33,12 +33,6 @@ import org.prime.control.SwerveControlSuppliers;
 import org.prime.vision.LimelightInputs;
 
 public class DrivetrainSubsystem extends SubsystemBase {
-
-  public enum DrivetrainControlMode {
-    kRobotRelative, kFieldRelative, kPathFollowing,
-  }
-
-  // Shuffleboard Drivetrain tab configuration
   private DrivetrainDashboardTab _drivetrainDashboardTab;
 
   // IO
