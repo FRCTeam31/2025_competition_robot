@@ -143,6 +143,7 @@ public class VisionSubsystem extends SubsystemBase {
         // Update Dashboard & logging
         var frontInputs = getLimelightInputs(0);
         var rearInputs = getLimelightInputs(1);
+        // TODO: Revise this to use SmartDashboard
         SmartDashboard.putBoolean("Drive/Vision/Front/IsValidTarget", isAprilTagIdValid(frontInputs.ApriltagId));
         SmartDashboard.putBoolean("Drive/Vision/Rear/IsValidTarget", isAprilTagIdValid(rearInputs.ApriltagId));
         Container.DriverDashboardTab.setFrontAprilTagId(frontInputs.ApriltagId);

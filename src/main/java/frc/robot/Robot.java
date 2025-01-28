@@ -166,6 +166,7 @@ public class Robot extends LoggedRobot {
       if (onRedAlliance())
         Container.Drivetrain.resetGyro();
 
+      // TODO: Revise this to use the SmartDashboard
       SmartDashboard.putString("Robot/Auto/CommandName", _autonomousCommand.getName());
       _autonomousCommand.schedule();
     }

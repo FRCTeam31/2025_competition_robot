@@ -325,14 +325,17 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * Disables snap-to control
    */
   public Command disableAutoAlignCommand() {
-    return Commands.runOnce(() -> setAutoAlignEnabled(false));
+    var cmd = Commands.runOnce(() -> setAutoAlignEnabled(false));
+    cmd.setName("DisableAutoAlign");
+
+    return cmd;
   }
 
   /**
    * Enables lock-on control to whichever target is in view
    */
   public Command enableLockOnCommand() {
-    return Commands.run(() -> {
+    var cmd = Commands.run(() -> {
       var rearLimelightInputs = Container.Vision.getLimelightInputs(1);
 
       // If targeted AprilTag is in validTargets, snap to its offset
@@ -349,6 +352,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
         setAutoAlignEnabled(false);
       }
     });
+
+    cmd.setName("EnableLockOn");
+
+    return cmd;
   }
 
   /**
@@ -356,9 +363,12 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * @return
    */
   public Command enablePathPlannerSnapRotationFeedbackCommand() {
-    return Commands.run(() -> {
+    var cmd = Commands.run(() -> {
       PPHolonomicDriveController.overrideRotationFeedback(() -> _autoAlign.getCorrection(_inputs.GyroAngle));
     });
+    cmd.setName("EnableAutoAlignRotationFeedback");
+
+    return cmd;
   }
 
   /**
@@ -366,9 +376,12 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * @return
    */
   public Command disablePathPlannerSnapRotationFeedbackCommand() {
-    return Commands.run(() -> {
+    var cmd = Commands.run(() -> {
       PPHolonomicDriveController.clearRotationFeedbackOverride();
     });
+    cmd.setName("DisableAutoAlignRotationFeedback");
+
+    return cmd;
   }
 
   // TODO: Remove when no longer needed
