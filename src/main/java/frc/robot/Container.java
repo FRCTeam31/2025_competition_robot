@@ -4,13 +4,9 @@
 
 package frc.robot;
 
-import java.util.Map;
-
 import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.dashboard.DriverDashboardTab;
 import frc.robot.dashboard.TestDashboardTab;
