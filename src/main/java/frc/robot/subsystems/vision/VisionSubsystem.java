@@ -4,7 +4,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.DriverDashboard;
+import frc.robot.dashboard.DriverDashboardTab;
 
 import org.littletonrobotics.junction.Logger;
 import org.prime.vision.LimelightInputs;
@@ -16,12 +16,14 @@ public class VisionSubsystem extends SubsystemBase {
         public static final String LimelightRearName = "limelight-rear";
     }
 
+    private DriverDashboardTab _driverView;
     private LimeLightNT[] _limelights;
     private LimelightInputs[] _limelightInputs;
     private LimelightPose[] _limelightRobotPoses;
 
-    public VisionSubsystem() {
+    public VisionSubsystem(DriverDashboardTab driverView) {
         setName("VisionSubsystem");
+        _driverView = driverView;
         var defaultInstance = NetworkTableInstance.getDefault();
 
         _limelights = new LimeLightNT[] {
@@ -137,10 +139,9 @@ public class VisionSubsystem extends SubsystemBase {
         var rearInputs = getLimelightInputs(1);
         SmartDashboard.putBoolean("Drive/Vision/Front/IsValidTarget", isAprilTagIdValid(frontInputs.ApriltagId));
         SmartDashboard.putBoolean("Drive/Vision/Rear/IsValidTarget", isAprilTagIdValid(rearInputs.ApriltagId));
-        DriverDashboard.FrontApTagIdField.setDouble(frontInputs.ApriltagId);
-        DriverDashboard.RearApTagIdField.setDouble(rearInputs.ApriltagId);
-        DriverDashboard.RearApTagOffsetDial
-                .setDouble(rearInputs.TargetHorizontalOffset.getDegrees());
+        _driverView.setFrontAprilTagId(frontInputs.ApriltagId);
+        _driverView.setRearAprilTagId(rearInputs.ApriltagId);
+        _driverView.setRearAprilTagOffset(rearInputs.TargetHorizontalOffset.getDegrees());
     }
 
     public static boolean isAprilTagIdValid(int apriltagId) {

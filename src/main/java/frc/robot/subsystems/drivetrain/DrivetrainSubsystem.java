@@ -8,20 +8,17 @@ import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.DriverDashboard;
+import frc.robot.dashboard.DriverDashboardTab;
+import frc.robot.dashboard.DrivetrainDashboardTab;
 import frc.robot.Robot;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
@@ -47,17 +44,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private Consumer<LEDPattern> _setForegroundPatternFunc;
 
   // Shuffleboard Drivetrain tab configuration
-  private ShuffleboardTab d_drivetrainTab = Shuffleboard.getTab("Drivetrain");
-  public GenericEntry d_autoAlignEnabledEntry = d_drivetrainTab.add("AutoAlign Enabled", false)
-      .withWidget(BuiltInWidgets.kBooleanBox)
-      .withPosition(0, 0)
-      .withSize(2, 2)
-      .getEntry();
-  private GenericEntry d_autoAlignAngle = d_drivetrainTab.add("AutoAlign Angle", 0)
-      .withWidget(BuiltInWidgets.kGyro)
-      .withPosition(2, 0).withSize(4, 5)
-      .withProperties(Map.of("Counter clockwise", true, "Major tick spacing", 45.0, "Minor tick spacing", 15.0))
-      .getEntry();
+  private DriverDashboardTab _driverDashboardTab;
+  private DrivetrainDashboardTab _drivetrainDashboardTab;
 
   // IO
   private SwerveController _swerveController;
@@ -85,23 +73,25 @@ public class DrivetrainSubsystem extends SubsystemBase {
   /**
    * Creates a new Drivetrain.
    */
-  public DrivetrainSubsystem(boolean isReal, Runnable clearForegroundPatternFunc,
+  public DrivetrainSubsystem(boolean isReal,
+      DriverDashboardTab driverDashboardTab,
+      Runnable clearForegroundPatternFunc,
       Consumer<LEDPattern> setForegroundPatternFunc,
       Supplier<LimelightInputs[]> limelightInputsSupplier) {
     setName("Drivetrain");
+    _driverDashboardTab = driverDashboardTab;
+    _clearForegroundPatternFunc = clearForegroundPatternFunc;
+    _setForegroundPatternFunc = setForegroundPatternFunc;
+    _limelightInputsSupplier = limelightInputsSupplier;
 
+    // Create swerve controller
     _swerveController = new SwerveController(isReal);
     _swerveController.updateInputs(_inputs);
 
     // Configure AutoAlign
     _autoAlign = new AutoAlign(DriveMap.AutoAlignPID);
 
-    // Store references to LED pattern control funcs
-    _clearForegroundPatternFunc = clearForegroundPatternFunc;
-    _setForegroundPatternFunc = setForegroundPatternFunc;
-
-    // Store reference to limelight inputs supplier
-    _limelightInputsSupplier = limelightInputsSupplier;
+    _drivetrainDashboardTab = new DrivetrainDashboardTab();
 
     configurePathPlanner();
 
@@ -135,10 +125,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     // Set up PP to feed current path poses to the dashboard's field widget
-    PathPlannerLogging.setLogCurrentPoseCallback(pose -> DriverDashboard.FieldWidget.setRobotPose(pose));
+    PathPlannerLogging.setLogCurrentPoseCallback(pose -> _driverDashboardTab.setFieldRobotPose(pose));
     PathPlannerLogging
-        .setLogTargetPoseCallback(pose -> DriverDashboard.FieldWidget.getObject("target pose").setPose(pose));
-    PathPlannerLogging.setLogActivePathCallback(poses -> DriverDashboard.FieldWidget.getObject("path").setPoses(poses));
+        .setLogTargetPoseCallback(pose -> _driverDashboardTab.getFieldTargetPose().setPose(pose));
+    PathPlannerLogging
+        .setLogActivePathCallback(poses -> _driverDashboardTab.getFieldPath().setPoses(poses));
 
     // Configure PathPlanner holonomic control
     AutoBuilder.configure(() -> _inputs.EstimatedRobotPose, _swerveController::setEstimatorPose,
@@ -240,10 +231,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     var limelightInputs = _limelightInputsSupplier.get();
 
-    if (DriverDashboard.FrontPoseEstimationSwitch.getBoolean(false))
+    if (_driverDashboardTab.getFrontPoseEstimationSwitch())
       evaluatePoseEstimation(limelightInputs[0]);
 
-    if (DriverDashboard.RearPoseEstimationSwitch.getBoolean(false))
+    if (_driverDashboardTab.getRearPoseEstimationSwitch())
       evaluatePoseEstimation(limelightInputs[1]);
   }
 
@@ -289,11 +280,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     // Update shuffleboard
-    DriverDashboard.HeadingGyro.setDouble(_inputs.GyroAngle.getDegrees());
+    _driverDashboardTab.setGyroHeading(_inputs.GyroAngle);
     Logger.recordOutput("Drive/EstimatedRobotPose", _inputs.EstimatedRobotPose);
-    DriverDashboard.FieldWidget.setRobotPose(_inputs.EstimatedRobotPose);
-    d_autoAlignEnabledEntry.setBoolean(_useAutoAlign);
-    d_autoAlignAngle.setDouble(_autoAlign.getSetpoint().getRadians());
+    _driverDashboardTab.setFieldRobotPose(_inputs.EstimatedRobotPose);
+    _drivetrainDashboardTab.setAutoAlignEnabled(_useAutoAlign);
+    _drivetrainDashboardTab.setAutoAlignTarget(_autoAlign.getSetpoint());
   }
 
   // #region Commands

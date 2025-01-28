@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.LEDPattern.GradientType;
+import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -38,6 +39,7 @@ public class Robot extends LoggedRobot {
     REPLAY
   }
 
+  public static EventLoop EventLoop = new EventLoop();
   private Container _robotContainer;
   private Command _autonomousCommand;
 
@@ -123,8 +125,9 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    EventLoop.poll();
 
-    DriverDashboard.AllianceBox.setBoolean(onRedAlliance());
+    _robotContainer.DriverDashboardTab.setAllianceColor(onRedAlliance());
   }
 
   /**
@@ -150,7 +153,7 @@ public class Robot extends LoggedRobot {
       // Stop any subsystems still running
     }
 
-    _autonomousCommand = DriverDashboard.AutoChooser.getSelected();
+    _autonomousCommand = _robotContainer.DriverDashboardTab.getSelectedAuto();
 
     // Exit without scheduling an auto command if none is selected
     if (_autonomousCommand == null || _autonomousCommand == Commands.none()) {
@@ -197,6 +200,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
+    _robotContainer.configureTestDashboard();
   }
 
   public static boolean onRedAlliance() {
