@@ -16,25 +16,21 @@ import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
 public class Container {
-  public DrivetrainSubsystem Drivetrain;
-  public VisionSubsystem Vision;
-  public PwmLEDs LEDs;
+  public static DriverDashboardTab DriverDashboardTab;
+  public static TestDashboardTab TestDashboardTab;
 
-  public OperatorInterface OperatorInterface;
-  public DriverDashboardTab DriverDashboardTab;
-  public TestDashboardTab TestDashboardTab;
+  public static DrivetrainSubsystem Drivetrain;
+  public static VisionSubsystem Vision;
+  public static PwmLEDs LEDs;
+  public static OperatorInterface OperatorInterface;
 
-  public Container(boolean isReal) {
+  public static void initialize(boolean isReal) {
     try {
       // Create subsystems
-      DriverDashboardTab = new DriverDashboardTab();
       LEDs = new PwmLEDs();
-      Vision = new VisionSubsystem(DriverDashboardTab);
-      Drivetrain = new DrivetrainSubsystem(isReal,
-          DriverDashboardTab,
-          LEDs::clearForegroundPattern,
-          LEDs::setForegroundPattern,
-          Vision::getAllLimelightInputs);
+      Vision = new VisionSubsystem();
+      Drivetrain = new DrivetrainSubsystem(isReal);
+      DriverDashboardTab = new DriverDashboardTab();
 
       // Register the named commands from each subsystem that may be used in PathPlanner
       NamedCommands.registerCommands(Drivetrain.getNamedCommands());
@@ -57,7 +53,7 @@ public class Container {
   /**
    * Gets the named commands from each subsystem and adds them to a tab on the dashboard called "Test"
    */
-  public void configureTestDashboard() {
+  public static void configureTestDashboard() {
     var driveList = TestDashboardTab.addLayoutWithHiddenLabels("Drivetrain", 0, 0, 4, 16);
     var namedCommands = Drivetrain.getNamedCommands();
     var names = namedCommands.keySet().toArray();

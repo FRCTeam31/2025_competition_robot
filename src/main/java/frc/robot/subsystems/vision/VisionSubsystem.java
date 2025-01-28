@@ -4,7 +4,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.dashboard.DriverDashboardTab;
+import frc.robot.Container;
 
 import org.littletonrobotics.junction.Logger;
 import org.prime.vision.LimelightInputs;
@@ -16,22 +16,28 @@ public class VisionSubsystem extends SubsystemBase {
         public static final String LimelightRearName = "limelight-rear";
     }
 
-    private DriverDashboardTab _driverView;
     private LimeLightNT[] _limelights;
     private LimelightInputs[] _limelightInputs;
     private LimelightPose[] _limelightRobotPoses;
 
-    public VisionSubsystem(DriverDashboardTab driverView) {
+    public VisionSubsystem() {
         setName("VisionSubsystem");
-        _driverView = driverView;
         var defaultInstance = NetworkTableInstance.getDefault();
 
         _limelights = new LimeLightNT[] {
                 new LimeLightNT(defaultInstance, VisionMap.LimelightFrontName),
-                new LimeLightNT(defaultInstance, VisionMap.LimelightRearName) };
+                new LimeLightNT(defaultInstance, VisionMap.LimelightRearName)
+        };
+
+        _limelightInputs = new LimelightInputs[_limelights.length];
+        for (int i = 0; i < _limelights.length; i++) {
+            _limelightInputs[i] = new LimelightInputs();
+        }
+
         _limelightRobotPoses = new LimelightPose[] {
                 _limelightInputs[0].FieldSpaceRobotPose,
-                _limelightInputs[1].FieldSpaceRobotPose };
+                _limelightInputs[1].FieldSpaceRobotPose
+        };
     }
 
     /**
@@ -139,9 +145,9 @@ public class VisionSubsystem extends SubsystemBase {
         var rearInputs = getLimelightInputs(1);
         SmartDashboard.putBoolean("Drive/Vision/Front/IsValidTarget", isAprilTagIdValid(frontInputs.ApriltagId));
         SmartDashboard.putBoolean("Drive/Vision/Rear/IsValidTarget", isAprilTagIdValid(rearInputs.ApriltagId));
-        _driverView.setFrontAprilTagId(frontInputs.ApriltagId);
-        _driverView.setRearAprilTagId(rearInputs.ApriltagId);
-        _driverView.setRearAprilTagOffset(rearInputs.TargetHorizontalOffset.getDegrees());
+        Container.DriverDashboardTab.setFrontAprilTagId(frontInputs.ApriltagId);
+        Container.DriverDashboardTab.setRearAprilTagId(rearInputs.ApriltagId);
+        Container.DriverDashboardTab.setRearAprilTagOffset(rearInputs.TargetHorizontalOffset.getDegrees());
     }
 
     public static boolean isAprilTagIdValid(int apriltagId) {

@@ -17,8 +17,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.dashboard.DriverDashboardTab;
 import frc.robot.dashboard.DrivetrainDashboardTab;
+import frc.robot.Container;
 import frc.robot.Robot;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
@@ -27,8 +27,6 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.SwerveControlSuppliers;
@@ -40,11 +38,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     kRobotRelative, kFieldRelative, kPathFollowing,
   }
 
-  private Runnable _clearForegroundPatternFunc;
-  private Consumer<LEDPattern> _setForegroundPatternFunc;
-
   // Shuffleboard Drivetrain tab configuration
-  private DriverDashboardTab _driverDashboardTab;
   private DrivetrainDashboardTab _drivetrainDashboardTab;
 
   // IO
@@ -56,7 +50,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private AutoAlign _autoAlign;
 
   // Vision, Kinematics, odometry
-  private Supplier<LimelightInputs[]> _limelightInputsSupplier;
   public boolean EstimatePoseUsingFrontCamera = true;
   public boolean EstimatePoseUsingRearCamera = true;
   public boolean WithinPoseEstimationVelocity = true;
@@ -73,16 +66,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
   /**
    * Creates a new Drivetrain.
    */
-  public DrivetrainSubsystem(boolean isReal,
-      DriverDashboardTab driverDashboardTab,
-      Runnable clearForegroundPatternFunc,
-      Consumer<LEDPattern> setForegroundPatternFunc,
-      Supplier<LimelightInputs[]> limelightInputsSupplier) {
+  public DrivetrainSubsystem(boolean isReal) {
     setName("Drivetrain");
-    _driverDashboardTab = driverDashboardTab;
-    _clearForegroundPatternFunc = clearForegroundPatternFunc;
-    _setForegroundPatternFunc = setForegroundPatternFunc;
-    _limelightInputsSupplier = limelightInputsSupplier;
 
     // Create swerve controller
     _swerveController = new SwerveController(isReal);
@@ -125,11 +110,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     // Set up PP to feed current path poses to the dashboard's field widget
-    PathPlannerLogging.setLogCurrentPoseCallback(pose -> _driverDashboardTab.setFieldRobotPose(pose));
+    PathPlannerLogging.setLogCurrentPoseCallback(pose -> Container.DriverDashboardTab.setFieldRobotPose(pose));
     PathPlannerLogging
-        .setLogTargetPoseCallback(pose -> _driverDashboardTab.getFieldTargetPose().setPose(pose));
+        .setLogTargetPoseCallback(pose -> Container.DriverDashboardTab.getFieldTargetPose().setPose(pose));
     PathPlannerLogging
-        .setLogActivePathCallback(poses -> _driverDashboardTab.getFieldPath().setPoses(poses));
+        .setLogActivePathCallback(poses -> Container.DriverDashboardTab.getFieldPath().setPoses(poses));
 
     // Configure PathPlanner holonomic control
     AutoBuilder.configure(() -> _inputs.EstimatedRobotPose, _swerveController::setEstimatorPose,
@@ -166,7 +151,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private void setAutoAlignEnabled(boolean enabled) {
     _useAutoAlign = enabled;
     if (!enabled)
-      _clearForegroundPatternFunc.run();
+      Container.LEDs.clearForegroundPattern();
   }
 
   /**
@@ -229,12 +214,12 @@ public class DrivetrainSubsystem extends SubsystemBase {
       return;
     }
 
-    var limelightInputs = _limelightInputsSupplier.get();
+    var limelightInputs = Container.Vision.getAllLimelightInputs();
 
-    if (_driverDashboardTab.getFrontPoseEstimationSwitch())
+    if (Container.DriverDashboardTab.getFrontPoseEstimationSwitch())
       evaluatePoseEstimation(limelightInputs[0]);
 
-    if (_driverDashboardTab.getRearPoseEstimationSwitch())
+    if (Container.DriverDashboardTab.getRearPoseEstimationSwitch())
       evaluatePoseEstimation(limelightInputs[1]);
   }
 
@@ -274,15 +259,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
     Logger.recordOutput("Drive/AutoAlignSetpoint", _autoAlign.getSetpoint());
     Logger.recordOutput("Drive/AutoAlignAtSetpoint", _autoAlign.atSetpoint());
     if (_useAutoAlign) {
-      _setForegroundPatternFunc.accept(_autoAlign.atSetpoint()
+      Container.LEDs.setForegroundPattern(_autoAlign.atSetpoint()
           ? _snapOnTargetPattern
           : _snapOffTargetPattern);
     }
 
     // Update shuffleboard
-    _driverDashboardTab.setGyroHeading(_inputs.GyroAngle);
+    Container.DriverDashboardTab.setGyroHeading(_inputs.GyroAngle);
+    Container.DriverDashboardTab.setFieldRobotPose(_inputs.EstimatedRobotPose);
     Logger.recordOutput("Drive/EstimatedRobotPose", _inputs.EstimatedRobotPose);
-    _driverDashboardTab.setFieldRobotPose(_inputs.EstimatedRobotPose);
     _drivetrainDashboardTab.setAutoAlignEnabled(_useAutoAlign);
     _drivetrainDashboardTab.setAutoAlignTarget(_autoAlign.getSetpoint());
   }
@@ -354,7 +339,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
    */
   public Command enableLockOnCommand() {
     return Commands.run(() -> {
-      var rearLimelightInputs = _limelightInputsSupplier.get()[1];
+      var rearLimelightInputs = Container.Vision.getLimelightInputs(1);
 
       // If targeted AprilTag is in validTargets, snap to its offset
       if (VisionSubsystem.isAprilTagIdValid(rearLimelightInputs.ApriltagId)) {

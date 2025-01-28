@@ -40,7 +40,6 @@ public class Robot extends LoggedRobot {
   }
 
   public static EventLoop EventLoop = new EventLoop();
-  private Container _robotContainer;
   private Command _autonomousCommand;
 
   public Robot() {
@@ -50,10 +49,10 @@ public class Robot extends LoggedRobot {
     configureLogging();
 
     // Initialize the robot container
-    _robotContainer = new Container(isReal());
+    Container.initialize(isReal());
 
     // Schedule the LED patterns to run at 120Hz
-    _robotContainer.LEDs.startUpdateLoop();
+    Container.LEDs.startUpdateLoop();
   }
 
   /**
@@ -114,8 +113,8 @@ public class Robot extends LoggedRobot {
   public void disabledInit() {
     DataLogManager.log("Robot disabled");
     var disabledPattern = LEDPattern.solid(getAllianceColor()).breathe(Units.Seconds.of(2.0));
-    _robotContainer.LEDs.setBackgroundPattern(disabledPattern);
-    _robotContainer.LEDs.clearForegroundPattern();
+    Container.LEDs.setBackgroundPattern(disabledPattern);
+    Container.LEDs.clearForegroundPattern();
   }
 
   /**
@@ -127,7 +126,7 @@ public class Robot extends LoggedRobot {
     CommandScheduler.getInstance().run();
     EventLoop.poll();
 
-    _robotContainer.DriverDashboardTab.setAllianceColor(onRedAlliance());
+    Container.DriverDashboardTab.setAllianceColor(onRedAlliance());
   }
 
   /**
@@ -143,8 +142,8 @@ public class Robot extends LoggedRobot {
         .offsetBy(PwmLEDs.VMap.PixelsPerStrip / 2)
         .scrollAtRelativeSpeed(Units.Hertz.of(2))
         .blend(autoPattern);
-    _robotContainer.LEDs.setBackgroundPattern(combinedPattern);
-    _robotContainer.LEDs.clearForegroundPattern();
+    Container.LEDs.setBackgroundPattern(combinedPattern);
+    Container.LEDs.clearForegroundPattern();
 
     // Cancel any auto command that's still running and reset the subsystem states
     if (_autonomousCommand != null) {
@@ -153,19 +152,19 @@ public class Robot extends LoggedRobot {
       // Stop any subsystems still running
     }
 
-    _autonomousCommand = _robotContainer.DriverDashboardTab.getSelectedAuto();
+    _autonomousCommand = Container.DriverDashboardTab.getSelectedAuto();
 
     // Exit without scheduling an auto command if none is selected
     if (_autonomousCommand == null || _autonomousCommand == Commands.none()) {
       DriverStation.reportError("[ERROR] >> No auto command selected", false);
-      _robotContainer.Drivetrain.resetGyro();
+      Container.Drivetrain.resetGyro();
     } else {
       // Schedule the auto command
-      _robotContainer.Drivetrain.EstimatePoseUsingFrontCamera = true;
-      _robotContainer.Drivetrain.EstimatePoseUsingRearCamera = true;
+      Container.Drivetrain.EstimatePoseUsingFrontCamera = true;
+      Container.Drivetrain.EstimatePoseUsingRearCamera = true;
 
       if (onRedAlliance())
-        _robotContainer.Drivetrain.resetGyro();
+        Container.Drivetrain.resetGyro();
 
       SmartDashboard.putString("Robot/Auto/CommandName", _autonomousCommand.getName());
       _autonomousCommand.schedule();
@@ -187,11 +186,11 @@ public class Robot extends LoggedRobot {
 
     // Set teleop LED pattern
     var telePattern = LEDPattern.solid(getAllianceColor()).scrollAtRelativeSpeed(Units.Hertz.of(2));
-    _robotContainer.LEDs.setBackgroundPattern(telePattern);
-    _robotContainer.LEDs.clearForegroundPattern();
+    Container.LEDs.setBackgroundPattern(telePattern);
+    Container.LEDs.clearForegroundPattern();
 
-    _robotContainer.Drivetrain.EstimatePoseUsingFrontCamera = false;
-    _robotContainer.Drivetrain.EstimatePoseUsingRearCamera = false;
+    Container.Drivetrain.EstimatePoseUsingFrontCamera = false;
+    Container.Drivetrain.EstimatePoseUsingRearCamera = false;
   }
 
   /**
@@ -200,7 +199,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
-    _robotContainer.configureTestDashboard();
+    Container.configureTestDashboard();
   }
 
   public static boolean onRedAlliance() {
