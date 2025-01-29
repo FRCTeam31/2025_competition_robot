@@ -1,0 +1,1 @@
+When creating your custom field image, set the pixels per meter to 50.00
