@@ -191,7 +191,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   private void drivePathPlanner(ChassisSpeeds pathSpeeds) {
-    _outputs.ControlMode = DrivetrainControlMode.kPathFollowing;
+    //temporary until there is a drive method that drives path planner using limelight pose
+    _outputs.ControlMode = DrivetrainControlMode.kFieldRelative;
     _outputs.DesiredChassisSpeeds = pathSpeeds;
   }
 
