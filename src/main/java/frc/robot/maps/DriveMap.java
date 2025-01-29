@@ -10,8 +10,12 @@ import org.prime.control.PrimePIDConstants;
 
 public class DriveMap {
 
-        public static final double TrackWidthMeters = 0.51181;
-        public static final double WheelBaseMeters = 0.67945;
+        //Track width and wheelbase for competition robot
+        // public static final double TrackWidthMeters = Units.inchesToMeters(24.75);
+        // public static final double WheelBaseMeters = Units.inchesToMeters(24.75);
+
+        public static final double TrackWidthMeters = Units.inchesToMeters(21.25);
+        public static final double WheelBaseMeters = Units.inchesToMeters(21.25);
         public static final double WheelBaseCircumferenceMeters = Math.PI
                         * Math.sqrt((TrackWidthMeters * TrackWidthMeters) + (WheelBaseMeters * WheelBaseMeters));
         public static final double MaxSpeedMetersPerSecond = 5.4;

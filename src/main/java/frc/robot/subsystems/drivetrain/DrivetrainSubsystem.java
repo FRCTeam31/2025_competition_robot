@@ -250,9 +250,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
         _inputs.RobotRelativeChassisSpeeds.vxMetersPerSecond < 2
         && _inputs.RobotRelativeChassisSpeeds.vyMetersPerSecond < 2;
 
-    EstimatePoseUsingFrontCamera = DriverDashboard.FrontPoseEstimationSwitch.getBoolean(false);
-    if (EstimatePoseUsingFrontCamera)
-      evaluatePoseEstimation(WithinPoseEstimationVelocity, 0);
+    // EstimatePoseUsingFrontCamera = DriverDashboard.FrontPoseEstimationSwitch.getBoolean(false);
+    // if (EstimatePoseUsingFrontCamera)
+    //   evaluatePoseEstimation(WithinPoseEstimationVelocity, 0);
 
     // EstimatePoseUsingRearCamera =
     // DriverDashboard.RearPoseEstimationSwitch.getBoolean(false);
