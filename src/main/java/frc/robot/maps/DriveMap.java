@@ -32,8 +32,8 @@ public class DriveMap {
 
         public static final PrimePIDConstants SteeringPID = new PrimePIDConstants(4, 0, 0.04);
         public static final PrimePIDConstants SnapToPID = new PrimePIDConstants(3.75, 0, 0);
-        public static final PrimePIDConstants PathingTranslationPid = new PrimePIDConstants(0, 0, 0);
-        public static final PrimePIDConstants PathingRotationPid = new PrimePIDConstants(0, 0, 0);
+        public static final PrimePIDConstants PathingTranslationPid = new PrimePIDConstants(3, 0, 0);
+        public static final PrimePIDConstants PathingRotationPid = new PrimePIDConstants(2, 0, 0);
         public static final double DriveGearRatio = 5.9;
         public static final double DriveWheelDiameterMeters = Units.inchesToMeters(3.875);
         public static final double DriveWheelCircumferenceMeters = Math.PI * DriveWheelDiameterMeters;
