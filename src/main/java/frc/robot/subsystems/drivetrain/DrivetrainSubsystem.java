@@ -191,7 +191,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   private void drivePathPlanner(ChassisSpeeds pathSpeeds) {
-    _outputs.ControlMode = DrivetrainControlMode.kPathFollowing;
+    //temporary until there is a drive method that drives path planner using limelight pose
+    _outputs.ControlMode = DrivetrainControlMode.kFieldRelative;
     _outputs.DesiredChassisSpeeds = pathSpeeds;
   }
 
@@ -250,9 +251,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
         _inputs.RobotRelativeChassisSpeeds.vxMetersPerSecond < 2
         && _inputs.RobotRelativeChassisSpeeds.vyMetersPerSecond < 2;
 
-    EstimatePoseUsingFrontCamera = DriverDashboard.FrontPoseEstimationSwitch.getBoolean(false);
-    if (EstimatePoseUsingFrontCamera)
-      evaluatePoseEstimation(WithinPoseEstimationVelocity, 0);
+    // EstimatePoseUsingFrontCamera = DriverDashboard.FrontPoseEstimationSwitch.getBoolean(false);
+    // if (EstimatePoseUsingFrontCamera)
+    //   evaluatePoseEstimation(WithinPoseEstimationVelocity, 0);
 
     // EstimatePoseUsingRearCamera =
     // DriverDashboard.RearPoseEstimationSwitch.getBoolean(false);
