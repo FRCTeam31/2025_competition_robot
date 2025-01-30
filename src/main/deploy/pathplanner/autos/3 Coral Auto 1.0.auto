@@ -1,0 +1,37 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Direct - Coral Reef"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Direct - Instant Coral Grab"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Direct - Coral place"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Direct - Possible End"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
