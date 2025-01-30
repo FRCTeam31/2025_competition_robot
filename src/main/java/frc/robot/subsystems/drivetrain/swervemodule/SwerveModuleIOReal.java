@@ -49,7 +49,7 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
     var speedMps = ((m_driveMotor.getEncoder().getVelocity() / 60) / DriveMap.DriveGearRatio)
         * DriveMap.DriveWheelCircumferenceMeters;
     var distanceMeters = Units.Rotations.of(m_driveMotor.getEncoder().getPosition())
-        .times(DriveMap.DriveWheelCircumferenceMeters * DriveMap.DriveGearRatio);
+        .times(DriveMap.DriveWheelCircumferenceMeters / DriveMap.DriveGearRatio);
 
     m_inputs.ModuleState.angle = rotation;
     m_inputs.ModuleState.speedMetersPerSecond = speedMps;
