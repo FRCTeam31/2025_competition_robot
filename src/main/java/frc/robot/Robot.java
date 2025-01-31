@@ -12,6 +12,8 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.prime.util.BuildConstants;
 
+import com.pathplanner.lib.pathfinding.Pathfinding;
+
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -25,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.PwmLEDs;
+import frc.robot.subsystems.drivetrain.LocalADStarAK;
 
 public class Robot extends LoggedRobot {
 
@@ -44,6 +47,9 @@ public class Robot extends LoggedRobot {
 
   public Robot() {
     super(0.02); // Run the robot loop at 50Hz
+
+    // Set up pathfinding compatibility with AdvantageKit
+    Pathfinding.setPathfinder(new LocalADStarAK());
 
     // Configure logging
     configureLogging();
@@ -166,8 +172,6 @@ public class Robot extends LoggedRobot {
       if (onRedAlliance())
         Container.Drivetrain.resetGyro();
 
-      // TODO: Revise this to use the SmartDashboard
-      SmartDashboard.putString("Robot/Auto/CommandName", _autonomousCommand.getName());
       _autonomousCommand.schedule();
     }
   }
