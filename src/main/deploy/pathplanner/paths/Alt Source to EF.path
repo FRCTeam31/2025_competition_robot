@@ -4,24 +4,24 @@
     {
       "anchor": {
         "x": 1.2,
-        "y": 7.0
+        "y": 1.05
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.530666666666666,
-        "y": 5.311333333333334
+        "x": 3.3549999999999995,
+        "y": 1.8029999999999986
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.68,
-        "y": 2.52
+        "x": 5.344772727272727,
+        "y": 2.5741335227272724
       },
       "prevControl": {
-        "x": 0.9093333333333331,
-        "y": 3.587461538461538
+        "x": 3.8819999999999997,
+        "y": 1.1056666666666657
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 59.99999999999999
+    "rotation": 122.12499844038751
   },
   "reversed": false,
   "folder": "Source to Reef",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 128.0
+    "rotation": -128.0
   },
   "useDefaultConstraints": true
 }
