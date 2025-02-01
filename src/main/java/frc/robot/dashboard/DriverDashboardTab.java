@@ -54,7 +54,7 @@ public class DriverDashboardTab extends DashboardTabBase {
                 _tab.add("PrimeAutoBuilder", autoBuilder)
                                 .withWidget("PrimeAutoBuilder")
                                 .withPosition(0, 6)
-                                .withSize(5, 2);
+                                .withSize(5, 5);
         }
 
         public Command getSelectedAuto() {

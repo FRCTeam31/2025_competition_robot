@@ -47,6 +47,7 @@ public class PrimeAutoRoutine implements Sendable {
         builder.addStringArrayProperty("routineSteps", () -> _routineSteps, this::setRoutineSteps);
         builder.addStringArrayProperty("availablePaths", () -> _pathNames, null);
         builder.addStringArrayProperty("availableCommands", () -> _namedCommands.keySet().toArray(new String[0]), null);
+        builder.update();
     }
 
     public void setRoutineSteps(String[] steps) {
