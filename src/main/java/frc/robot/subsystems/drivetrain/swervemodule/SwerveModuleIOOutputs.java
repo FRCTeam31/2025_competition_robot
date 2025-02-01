@@ -18,7 +18,5 @@ public class SwerveModuleIOOutputs implements StructSerializable {
         DesiredState = desiredState;
     }
 
-    public boolean VoltageDrive = false;
-
     public SwerveModuleState DesiredState = new SwerveModuleState();
 }
