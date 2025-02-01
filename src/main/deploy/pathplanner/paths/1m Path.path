@@ -45,7 +45,7 @@
     "rotation": 179.51445416999186
   },
   "reversed": false,
-  "folder": "Testing paths",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": -179.9999999994791
