@@ -157,7 +157,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // If snap-to is enabled, calculate and override the input rotational speed to
     // reach the setpoint
     var autoAlignCorrection = _autoAlign.getCorrection(_inputs.GyroAngle);
-    Logger.recordOutput("Drive/AutoAlignCorrection", autoAlignCorrection);
+    Logger.recordOutput("Drive/autoAlignCorrection", autoAlignCorrection);
 
     robotRelativeChassisSpeeds.omegaRadiansPerSecond = _useAutoAlign
         ? autoAlignCorrection
@@ -166,14 +166,14 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // Correct drift by taking the input speeds and converting them to a desired
     // per-period speed. This is known as "discretizing"
     robotRelativeChassisSpeeds = ChassisSpeeds.discretize(robotRelativeChassisSpeeds, 0.02);
+    Logger.recordOutput("Drive/desiredChassisSpeeds", robotRelativeChassisSpeeds);
 
     // Calculate the module states from the chassis speeds
     var swerveModuleStates = _swerveController.Kinematics.toSwerveModuleStates(robotRelativeChassisSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, DriveMap.Chassis.MaxSpeedMetersPerSecond);
 
     // Set the desired states for each module
-    Logger.recordOutput("Drive/ChassisSpeedsRobot", robotRelativeChassisSpeeds);
-    Logger.recordOutput("Drive/ModuleStates", swerveModuleStates);
+    Logger.recordOutput("Drive/desiredStates", swerveModuleStates);
     _swerveController.setDesiredModuleStates(swerveModuleStates);
   }
 
@@ -249,9 +249,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
     processVisionEstimations();
 
     // Update LEDs
-    Logger.recordOutput("Drive/AutoAlignEnabled", _useAutoAlign);
-    Logger.recordOutput("Drive/AutoAlignSetpoint", _autoAlign.getSetpoint());
-    Logger.recordOutput("Drive/AutoAlignAtSetpoint", _autoAlign.atSetpoint());
+    Logger.recordOutput("Drive/autoAlignEnabled", _useAutoAlign);
+    Logger.recordOutput("Drive/autoAlignSetpoint", _autoAlign.getSetpoint());
+    Logger.recordOutput("Drive/autoAlignAtSetpoint", _autoAlign.atSetpoint());
     if (_useAutoAlign) {
       Container.LEDs.setForegroundPattern(_autoAlign.atSetpoint()
           ? _snapOnTargetPattern
@@ -261,7 +261,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // Update shuffleboard
     Container.DriverDashboardTab.setGyroHeading(_inputs.GyroAngle);
     Container.DriverDashboardTab.setFieldRobotPose(_inputs.EstimatedRobotPose);
-    Logger.recordOutput("Drive/EstimatedRobotPose", _inputs.EstimatedRobotPose);
+    Logger.recordOutput("Drive/estimatedRobotPose", _inputs.EstimatedRobotPose);
     _drivetrainDashboardTab.setAutoAlignEnabled(_useAutoAlign);
     _drivetrainDashboardTab.setAutoAlignTarget(_autoAlign.getSetpoint());
   }

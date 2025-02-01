@@ -15,7 +15,10 @@ import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 
-public class LocalADStarAK implements Pathfinder {
+/**
+ * A wrapper around the LocalADStar pathfinding algorithm to be used as a Pathfinder in PathPlanner when using ADK
+ */
+public class LocalADStarADK implements Pathfinder {
     private final ADStarIO io = new ADStarIO();
 
     /**

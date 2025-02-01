@@ -29,14 +29,14 @@ public class OperatorInterface {
      * @param enableLockOnCommand
      * @param disableSnapAngleCommand
      * @param setSnapToSetpointCommandFunc
-     * @param setDefaultDriveTrainCommandConsumer
+     * @param setDefaultDrivetrainCommandConsumer
      * @param getDriveCommandFunc
      */
     public void bindDriverControls(Command resetGyroCommand,
             Command enableLockOnCommand,
             Command disableSnapAngleCommand,
             Function<Integer, Command> setSnapToSetpointCommandFunc,
-            Consumer<Command> setDefaultDriveTrainCommandConsumer,
+            Consumer<Command> setDefaultDrivetrainCommandConsumer,
             Function<SwerveControlSuppliers, Command> getDriveCommandFunc) {
 
         var controlProfile = DriverController.getSwerveControlProfile(
@@ -44,7 +44,7 @@ public class OperatorInterface {
                 DriveMap.Control.DriveDeadband,
                 DriveMap.Control.DeadbandCurveWeight);
 
-        setDefaultDriveTrainCommandConsumer.accept(getDriveCommandFunc.apply(controlProfile));
+        setDefaultDrivetrainCommandConsumer.accept(getDriveCommandFunc.apply(controlProfile));
 
         DriverController.a().onTrue(resetGyroCommand);
 
@@ -56,5 +56,9 @@ public class OperatorInterface {
         DriverController.pov(Controls.left).onTrue(setSnapToSetpointCommandFunc.apply(270));
         DriverController.pov(Controls.down).onTrue(setSnapToSetpointCommandFunc.apply(180));
         DriverController.pov(Controls.right).onTrue(setSnapToSetpointCommandFunc.apply(90));
+    }
+
+    public void bindOperatorControls() {
+        // Not implemented yet
     }
 }

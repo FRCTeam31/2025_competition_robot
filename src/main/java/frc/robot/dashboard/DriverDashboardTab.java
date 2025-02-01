@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
+import frc.robot.oi.PrimeAutoRoutine;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 
@@ -28,7 +29,7 @@ public class DriverDashboardTab extends DashboardTabBase {
         private GenericEntry _rearPoseEstimationSwitch;
         private BooleanEvent _rearPoseEstimationEvent = null;
 
-        public DriverDashboardTab() {
+        public DriverDashboardTab(PrimeAutoRoutine autoBuilder) {
                 super("Driver");
                 _fieldWidget = new Field2d();
 
@@ -46,8 +47,12 @@ public class DriverDashboardTab extends DashboardTabBase {
                                 .withPosition(0, 0)
                                 .withSize(12, 6);
                 _autoChooser = AutoBuilder.buildAutoChooser("Default");
-                _tab.add(_autoChooser)
-                                .withWidget(BuiltInWidgets.kComboBoxChooser)
+                // _tab.add(_autoChooser)
+                //                 .withWidget(BuiltInWidgets.kComboBoxChooser)
+                //                 .withPosition(0, 6)
+                //                 .withSize(5, 2);
+                _tab.add("PrimeAutoBuilder", autoBuilder)
+                                .withWidget("PrimeAutoBuilder")
                                 .withPosition(0, 6)
                                 .withSize(5, 2);
         }

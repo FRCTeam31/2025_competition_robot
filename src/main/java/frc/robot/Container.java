@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.dashboard.DriverDashboardTab;
 import frc.robot.dashboard.TestDashboardTab;
 import frc.robot.oi.OperatorInterface;
+import frc.robot.oi.PrimeAutoRoutine;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
@@ -30,10 +31,14 @@ public class Container {
       LEDs = new PwmLEDs();
       Vision = new VisionSubsystem();
       Drivetrain = new DrivetrainSubsystem(isReal);
-      DriverDashboardTab = new DriverDashboardTab();
 
       // Register the named commands from each subsystem that may be used in PathPlanner
-      NamedCommands.registerCommands(Drivetrain.getNamedCommands());
+      var namedCommandsMap = Drivetrain.getNamedCommands();
+      NamedCommands.registerCommands(namedCommandsMap);
+
+      // Create our custom auto builder
+      var autoBuilder = new PrimeAutoRoutine(namedCommandsMap);
+      DriverDashboardTab = new DriverDashboardTab(autoBuilder);
       TestDashboardTab = new TestDashboardTab();
 
       // Configure controller bindings

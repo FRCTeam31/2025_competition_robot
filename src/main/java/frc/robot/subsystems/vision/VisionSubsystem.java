@@ -2,7 +2,6 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Container;
 
@@ -143,9 +142,6 @@ public class VisionSubsystem extends SubsystemBase {
         // Update Dashboard & logging
         var frontInputs = getLimelightInputs(0);
         var rearInputs = getLimelightInputs(1);
-        // TODO: Revise this to use SmartDashboard
-        SmartDashboard.putBoolean("Drive/Vision/Front/IsValidTarget", isAprilTagIdValid(frontInputs.ApriltagId));
-        SmartDashboard.putBoolean("Drive/Vision/Rear/IsValidTarget", isAprilTagIdValid(rearInputs.ApriltagId));
         Container.DriverDashboardTab.setFrontAprilTagId(frontInputs.ApriltagId);
         Container.DriverDashboardTab.setRearAprilTagId(rearInputs.ApriltagId);
         Container.DriverDashboardTab.setRearAprilTagOffset(rearInputs.TargetHorizontalOffset.getDegrees());

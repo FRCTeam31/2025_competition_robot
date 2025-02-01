@@ -21,13 +21,12 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.LEDPattern.GradientType;
 import edu.wpi.first.wpilibj.event.EventLoop;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.PwmLEDs;
-import frc.robot.subsystems.drivetrain.LocalADStarAK;
+import frc.robot.subsystems.drivetrain.LocalADStarADK;
 
 public class Robot extends LoggedRobot {
 
@@ -49,7 +48,7 @@ public class Robot extends LoggedRobot {
     super(0.02); // Run the robot loop at 50Hz
 
     // Set up pathfinding compatibility with AdvantageKit
-    Pathfinding.setPathfinder(new LocalADStarAK());
+    Pathfinding.setPathfinder(new LocalADStarADK());
 
     // Configure logging
     configureLogging();

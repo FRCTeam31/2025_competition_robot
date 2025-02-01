@@ -210,7 +210,8 @@ public class SwerveController {
         m_moduleInputs[0].ModuleState,
         m_moduleInputs[1].ModuleState,
         m_moduleInputs[2].ModuleState,
-        m_moduleInputs[3].ModuleState, };
+        m_moduleInputs[3].ModuleState,
+    };
   }
 
   /**
@@ -221,6 +222,7 @@ public class SwerveController {
         m_moduleInputs[0].ModulePosition,
         m_moduleInputs[1].ModulePosition,
         m_moduleInputs[2].ModulePosition,
-        m_moduleInputs[3].ModulePosition, };
+        m_moduleInputs[3].ModulePosition,
+    };
   }
 }
