@@ -16,10 +16,16 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.maps.*;
 
+import static edu.wpi.first.units.Units.InchesPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import org.prime.control.PrimePIDConstants;
+import static edu.wpi.first.units.Units.Meters;
 
 public class SwerveModuleIOReal implements ISwerveModuleIO {
 
@@ -45,11 +51,9 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
 
   @Override
   public SwerveModuleIOInputs getInputs() {
-    var rotation = Rotation2d.fromRotations(m_encoder.getPosition().getValueAsDouble());
-    var speedMps = ((m_driveMotor.getEncoder().getVelocity() / 60) / DriveMap.DriveGearRatio)
-        * DriveMap.DriveWheelCircumferenceMeters;
-    var distanceMeters = Units.Rotations.of(m_driveMotor.getEncoder().getPosition())
-        .times(DriveMap.DriveWheelCircumferenceMeters / DriveMap.DriveGearRatio);
+    var rotation = getCurrentHeading();
+    var speedMps = getCurrentVelocity().in(MetersPerSecond);
+    var distanceMeters = getModuleDistance();
 
     m_inputs.ModuleState.angle = rotation;
     m_inputs.ModuleState.speedMetersPerSecond = speedMps;
@@ -58,6 +62,23 @@ public class SwerveModuleIOReal implements ISwerveModuleIO {
     m_inputs.DriveMotorVoltage = m_driveMotor.getAppliedOutput() * m_driveMotor.getBusVoltage();
 
     return m_inputs;
+  }
+
+  private Rotation2d getCurrentHeading() {
+    return Rotation2d.fromRotations(m_encoder.getPosition().getValueAsDouble());
+  }
+
+  private LinearVelocity getCurrentVelocity() {
+    var speedMps = ((m_driveMotor.getEncoder().getVelocity() / 60) / DriveMap.DriveGearRatio)
+        * DriveMap.DriveWheelCircumferenceMeters;
+
+    return Units.MetersPerSecond.mutable(speedMps);
+  }
+
+  private Distance getModuleDistance() {
+    var distance = m_driveMotor.getEncoder().getPosition()
+        * (DriveMap.DriveWheelCircumferenceMeters / DriveMap.DriveGearRatio);
+    return Meters.mutable(distance);
   }
 
   @Override
