@@ -1,9 +1,9 @@
 package frc.robot.subsystems.endEffector;
 
 public class EndEffectorIOInputs {
-    public void getInputs(double velocityRpm) {
-        velocityRpm = velocityRpm;
-    }
+    double VelocityRadPerSec = 0;
 
-    double velocityRpm = 0;
+    public void getInputs(double velocityRadPerSec) {
+        VelocityRadPerSec = velocityRadPerSec;
+    }
 }

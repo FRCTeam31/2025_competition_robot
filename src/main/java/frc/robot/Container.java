@@ -18,7 +18,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.*;
 import frc.robot.maps.DriveMap;
+import frc.robot.maps.EndEffectorMap;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
+import frc.robot.subsystems.endEffector.EndEffectorSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
 import org.prime.control.Controls;
@@ -27,7 +29,7 @@ import org.prime.control.PrimeXboxController;
 
 @Logged(strategy = Strategy.OPT_IN)
 public class Container {
-  private PrimeXboxController m_driverController;
+  private PrimeXboxController m_driverController, m_operatorController;
   //private double _voltage = 0;
 
   @Logged(name = "Vision", importance = Importance.CRITICAL)
@@ -36,18 +38,22 @@ public class Container {
   public DrivetrainSubsystem Drivetrain;
   @Logged(name = "LEDs", importance = Importance.CRITICAL)
   public PwmLEDs LEDs;
+  @Logged(name = "EndEffector", importance = Importance.CRITICAL)
+  public EndEffectorSubsystem EndEffector;
 
   public Container(boolean isReal) {
     try {
       System.out.println("Robot diameter: " + DriveMap.WheelBaseCircumferenceMeters);
       DriverDashboard.init(isReal);
       m_driverController = new PrimeXboxController(Controls.DRIVER_PORT);
+      m_operatorController = new PrimeXboxController(Controls.OPERATOR_PORT);
 
       // Create new subsystems
       LEDs = new PwmLEDs();
       Vision = new VisionSubsystem();
       Drivetrain = new DrivetrainSubsystem(isReal, LEDs::clearForegroundPattern,
           LEDs::setForegroundPattern, Vision::getAllLimelightInputs);
+      EndEffector = new EndEffectorSubsystem(isReal);
 
       // Register the named commands from each subsystem that may be used in
       // PathPlanner
@@ -102,6 +108,9 @@ public class Container {
     // While holding b, auto-aim the robot to the apriltag target using snap-to
     m_driverController.leftStick().whileTrue(Drivetrain.enableLockOnCommand())
         .onFalse(Drivetrain.disableSnapToCommand());
+
+    EndEffector.setDefaultCommand(
+        EndEffector.runEndEffectorCommand(m_operatorController.getTriggerSupplier(.05, 0).getAsDouble()));
 
     // Controls for Snap-To with field-relative setpoints
     m_driverController.x().onTrue(Drivetrain.disableSnapToCommand());

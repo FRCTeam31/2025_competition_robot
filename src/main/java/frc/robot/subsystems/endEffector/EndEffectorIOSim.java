@@ -1,7 +1,10 @@
 package frc.robot.subsystems.endEffector;
 
+import java.lang.invoke.VarHandle.VarHandleDesc;
+
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.maps.DriveMap;
 import frc.robot.maps.EndEffectorMap;
@@ -9,6 +12,7 @@ import frc.robot.maps.EndEffectorMap;
 public class EndEffectorIOSim implements IEndEffectorIO {
 
     public DCMotorSim endEffectorMotor;
+    public EndEffectorIOInputs m_inputs = new EndEffectorIOInputs();
 
     public EndEffectorIOSim() {
         endEffectorMotor = new DCMotorSim(
@@ -17,16 +21,17 @@ public class EndEffectorIOSim implements IEndEffectorIO {
 
     }
 
-    public void getInputs() {
-        double motorSpeed = endEffectorMotor.g
-
+    public EndEffectorIOInputs getInputs() {
+        double motorSpeed = endEffectorMotor.getAngularVelocityRadPerSec();
+        m_inputs.VelocityRadPerSec = motorSpeed;
+        return m_inputs;
     }
 
-    public void setMotorSpeed(double speed) {
-        endEffectorMotor.set(speed);
-    // }
+    public void setMotorSpeed(double speedRadians) {
+        endEffectorMotor.setAngularVelocity(speedRadians);
+    }
 
     public void stopMotors() {
-
+        endEffectorMotor.setAngularVelocity(0);
     }
 }

@@ -1,6 +1,10 @@
 package frc.robot.subsystems.endEffector;
 
+import frc.robot.maps.EndEffectorMap;
 import frc.robot.subsystems.endEffector.IEndEffectorIO;
+
+import java.util.Map;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -17,6 +21,18 @@ public class EndEffectorSubsystem extends SubsystemBase {
         return this.run(() -> {
             _endEffector.setMotorSpeed(speed);
         });
+    }
+
+    public Command stopEndEffectorCommand() {
+        return this.run(() -> {
+            _endEffector.setMotorSpeed(0);
+        });
+    }
+
+    public Map<String, Command> getNamedCommands() {
+        return Map.of("Stop Intake", stopEndEffectorCommand(), "Intake Coral",
+                runEndEffectorCommand(EndEffectorMap.endEffectorIntakeSpeed), "Eject Coral",
+                runEndEffectorCommand(EndEffectorMap.endEffectorEjectSpeed));
     }
 
 }

@@ -16,7 +16,7 @@ public class EndEffectorIOReal implements IEndEffectorIO {
 
     public EndEffectorIOInputs getInputs() {
         double motorSpeed = endEffectorMotor.getEncoder().getVelocity();
-        m_inputs.velocityRpm = motorSpeed;
+        m_inputs.VelocityRadPerSec = motorSpeed;
 
         return m_inputs;
     }
