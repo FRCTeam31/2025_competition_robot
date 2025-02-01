@@ -17,12 +17,16 @@ public class EndEffectorIOSim implements IEndEffectorIO {
 
     }
 
-    // public void getInputs() {
-    //     double motorSpeed = endEffectorMotor.gets
+    public void getInputs() {
+        double motorSpeed = endEffectorMotor.g
 
+    }
+
+    public void setMotorSpeed(double speed) {
+        endEffectorMotor.set(speed);
     // }
 
-    // public void setMotorSpeed(double speed) {
-    //     endEffectorMotor.set(speed);
-    // }
+    public void stopMotors() {
+
+    }
 }

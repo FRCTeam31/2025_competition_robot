@@ -1,6 +1,10 @@
 package frc.robot.subsystems.endEffector;
 
-public class EndEffectorIOOutputs implements IEndEffectorIO {
+import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.util.struct.StructSerializable;
+
+@Logged
+public class EndEffectorIOOutputs implements StructSerializable {
 
     public EndEffectorIOOutputs(double speed) {
         Speed = speed;
