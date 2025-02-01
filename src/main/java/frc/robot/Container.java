@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.*;
+import frc.robot.subsystems.climbing.ClimberSubsystem;
 import frc.robot.maps.DriveMap;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
@@ -36,6 +37,8 @@ public class Container {
   public DrivetrainSubsystem Drivetrain;
   @Logged(name = "LEDs", importance = Importance.CRITICAL)
   public PwmLEDs LEDs;
+  @Logged(name = "Climber", importance = Importance.CRITICAL)
+  private ClimberSubsystem Climber;
 
   public Container(boolean isReal) {
     try {
@@ -48,7 +51,7 @@ public class Container {
       Vision = new VisionSubsystem();
       Drivetrain = new DrivetrainSubsystem(isReal, LEDs::clearForegroundPattern,
           LEDs::setForegroundPattern, Vision::getAllLimelightInputs);
-
+      Climber = new ClimberSubsystem(isReal);
       // Register the named commands from each subsystem that may be used in
       // PathPlanner
       NamedCommands.registerCommands(Drivetrain.getNamedCommands());

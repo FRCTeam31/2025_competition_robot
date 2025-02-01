@@ -1,5 +1,6 @@
 package frc.robot.subsystems.climbing;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.Units;
@@ -10,6 +11,7 @@ import edu.wpi.first.wpilibj.simulation.DoubleSolenoidSim;
 import edu.wpi.first.wpilibj.simulation.PneumaticsBaseSim;
 import frc.robot.maps.ClimberMap;
 
+@Logged
 public class ClimberIOSim implements IClimberIO {
     public DCMotorSim climberMotorSim;
     public DoubleSolenoidSim climbSolenoidSim;

@@ -3,17 +3,22 @@ package frc.robot.subsystems.climbing;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import frc.robot.maps.ClimberMap;
 
+@Logged
 public class ClimberIOReal implements IClimberIO {
 
     public ClimberInputs m_inputs = new ClimberInputs();
 
     public SparkFlex climbMotor;
     public DoubleSolenoid climbPneumatics;
+    public DigitalInput climberBottomLimitSwitch;
+    public DigitalInput climberTopLimitSwitch;
 
     public ClimberIOReal() {
 
