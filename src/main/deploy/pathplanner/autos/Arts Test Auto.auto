@@ -7,25 +7,37 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Direct - Coral Reef"
+            "pathName": "Approach Algae IJ"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Direct - Instant Coral Grab"
+            "pathName": "Reversed Alt Source to IJ"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Direct - Coral place"
+            "pathName": "Alt Source to CD"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Direct - Possible End"
+            "pathName": "Reversed Alt Source to CD"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Alt Source to EF"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Reversed Alt Source to EF"
           }
         }
       ]

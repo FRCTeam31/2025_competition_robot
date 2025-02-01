@@ -7,25 +7,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Approach Algae LK"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Grab Coral"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 3.0
+            "pathName": "Approach Algae GH"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Approach Algae IJ"
+            "pathName": "Reversed Alt Source to GH"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Alt Source to EF"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Reversed Alt Source to EF"
           }
         }
       ]
