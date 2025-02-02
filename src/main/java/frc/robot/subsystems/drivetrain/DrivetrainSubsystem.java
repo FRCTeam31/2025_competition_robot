@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
@@ -90,6 +91,12 @@ public class DrivetrainSubsystem extends SubsystemBase {
             // Tell SysId to make generated commands require this subsystem, suffix test
             // state in WPILog with this subsystem's name
             this));
+  }
+
+  public Command driveSwerveVoltage(double voltage) {
+    return Commands.runOnce(() -> {
+      _swerveController.setDriveVoltages(Units.Volts.of(voltage));
+    }, this);
   }
 
   private void configurePathPlanner() {

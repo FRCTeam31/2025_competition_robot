@@ -15,6 +15,7 @@ import org.prime.util.BuildConstants;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 
 import edu.wpi.first.units.Units;
+import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;

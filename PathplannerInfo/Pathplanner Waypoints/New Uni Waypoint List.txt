@@ -1,0 +1,35 @@
+AB - U
+3.15, 4.05
+Rotation of 0.00
+
+CD - U
+3.82, 2.84
+Rotation of 60.00
+
+EF - U
+5.15, 2.80
+Rotation of 122.00
+
+GH - U
+5.80, 4.05
+Rotation of 180.00
+
+IJ - U
+5.175, 5.25
+Rotation of -120.00
+
+KL - U
+3.78, 5.25
+Rotation of -60.00
+
+Top Source - U
+1.10, 7.00
+Rotation of 120.00
+
+Bottom Source - U
+1.10, 1.10
+Rotation of -128.00
+
+Robot Start Point - U
+7.575, 6.035
+Rotation of 0.00
