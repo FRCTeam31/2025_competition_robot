@@ -25,6 +25,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.PrimePIDConstants;
+import org.prime.util.SwerveUtil;
 
 public class SwerveModuleReal implements ISwerveModule {
   private String _name;
@@ -55,7 +56,7 @@ public class SwerveModuleReal implements ISwerveModule {
     SparkMaxConfig config = new SparkMaxConfig();
     config.inverted(_map.SteerInverted); // CCW inversion
     config.idleMode(IdleMode.kBrake);
-    config.smartCurrentLimit(60, 50);
+    config.smartCurrentLimit(30, 20);
 
     _steeringMotor.clearFaults();
     _steeringMotor.configure(config, ResetMode.kResetSafeParameters,
@@ -64,7 +65,6 @@ public class SwerveModuleReal implements ISwerveModule {
     // Create a PID controller to calculate steering motor output
     _steeringPidController = pid.createPIDController(0.02);
     _steeringPidController.enableContinuousInput(0, 1); // 0 to 1 rotation
-    _steeringPidController.setTolerance((1 / 360.0) * 0.05);
   }
 
   @Override
@@ -82,7 +82,7 @@ public class SwerveModuleReal implements ISwerveModule {
   private void setupDriveMotor(PrimePIDConstants pid) {
     _driveMotor = new SparkFlex(_map.DriveMotorCanId, MotorType.kBrushless);
     SparkMaxConfig config = new SparkMaxConfig();
-    config.smartCurrentLimit(60, 50);
+    config.smartCurrentLimit(DriveMap.DriveStallCurrentLimit, DriveMap.DriveFreeCurrentLimit);
     config.openLoopRampRate(_map.DriveMotorRampRate);
     config.inverted(_map.DriveInverted);
     config.idleMode(IdleMode.kBrake);
@@ -95,7 +95,6 @@ public class SwerveModuleReal implements ISwerveModule {
 
     // Create a PID controller to calculate driving motor output
     _drivingPidController = pid.createPIDController(0.02);
-    _drivingPidController.setTolerance(0.001);
     _driveFeedForward = new SimpleMotorFeedforward(pid.kS, pid.kV, pid.kA);
   }
 
@@ -119,7 +118,7 @@ public class SwerveModuleReal implements ISwerveModule {
     // AbsoluteSensorRangeValue
     _encoder.getConfigurator()
         .apply(new CANcoderConfiguration()
-            .withMagnetSensor(new MagnetSensorConfigs().withAbsoluteSensorDiscontinuityPoint(0.5)
+            .withMagnetSensor(new MagnetSensorConfigs().withAbsoluteSensorDiscontinuityPoint(1)
                 .withMagnetOffset(-_map.CanCoderStartingOffset)));
   }
 
@@ -133,6 +132,7 @@ public class SwerveModuleReal implements ISwerveModule {
     inputs.ModuleState.speedMetersPerSecond = speedMps;
     inputs.ModulePosition.angle = rotation;
     inputs.ModulePosition.distanceMeters = distanceMeters.magnitude();
+    inputs.DriveMotorVoltage = _driveMotor.getAppliedOutput() * _driveMotor.getBusVoltage();
     Logger.recordOutput("Drive/" + _name + "/DriveMotorMeasuredVoltage",
         _driveMotor.getAppliedOutput() * _driveMotor.getBusVoltage());
   }
@@ -154,13 +154,11 @@ public class SwerveModuleReal implements ISwerveModule {
   /**
    * Sets the desired state of the module.
    *
-   * @param desiredState The optimized state of the module that we'd like to be at
-   *                     in this
-   *                     period
+   * @param desiredState The optimized state of the module that we'd like to be at in this period
    */
   public void setDesiredState(SwerveModuleState desiredState) {
     // Optimize the desired state
-    desiredState = optimize(desiredState);
+    desiredState = SwerveUtil.optimize(desiredState, getCurrentHeading());
 
     // Set the drive motor to the desired speed
     setDriveSpeed(desiredState.speedMetersPerSecond);
@@ -222,27 +220,13 @@ public class SwerveModuleReal implements ISwerveModule {
     return Units.MetersPerSecond.mutable(speedMps);
   }
 
+  /**
+   * Gets the distance the module has traveled
+   */
   private MutDistance getModuleDistance() {
     var distMeters = _driveMotor.getEncoder().getPosition()
         * (DriveMap.DriveGearRatio / DriveMap.DriveWheelCircumferenceMeters);
 
     return Meters.mutable(distMeters);
-  }
-
-  /**
-   * Optimizes the module angle & drive inversion to ensure the module takes the
-   * shortest path to drive at the desired angle
-   * 
-   * @param desiredState
-   */
-  private SwerveModuleState optimize(SwerveModuleState desiredState) {
-    Rotation2d currentAngle = getCurrentHeading();
-    var delta = desiredState.angle.minus(currentAngle);
-    if (Math.abs(delta.getDegrees()) > 90.0) {
-      return new SwerveModuleState(-desiredState.speedMetersPerSecond,
-          desiredState.angle.rotateBy(Rotation2d.fromDegrees(180.0)));
-    } else {
-      return desiredState;
-    }
   }
 }

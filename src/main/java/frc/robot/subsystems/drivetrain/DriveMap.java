@@ -13,10 +13,12 @@ import org.prime.control.PrimePIDConstants;
 
 public class DriveMap {
         public static class Chassis {
-                public static final double TrackWidthMeters = 0.51181;
-                public static final double WheelBaseMeters = 0.67945;
-                public static final double MaxSpeedMetersPerSecond = Units.feetToMeters(20);
-                public static final double MaxAngularSpeedRadians = Math.PI * 3;
+                // public static final double TrackWidthMeters = Units.inchesToMeters(24.75);
+                // public static final double WheelBaseMeters = Units.inchesToMeters(24.75);
+                public static final double TrackWidthMeters = Units.inchesToMeters(21.25);
+                public static final double WheelBaseMeters = Units.inchesToMeters(21.25);
+                public static final double MaxSpeedMetersPerSecond = 5.4;
+                public static final double MaxAngularSpeedRadians = Math.PI * 2;
         }
 
         public class Control {
@@ -25,18 +27,18 @@ public class DriveMap {
         }
 
         // PID Constants
-        public static final PrimePIDConstants DrivePID = new PrimePIDConstants(0.1, 0, 0, 0, 0.091, 0, 0.05);
-        public static final PrimePIDConstants SteeringPID = new PrimePIDConstants(3.25, 0, 0.02);
-        public static final PrimePIDConstants AutoAlignPID = new PrimePIDConstants(6, 0, 0);
-        public static final PrimePIDConstants PathPlannerTranslationPID = new PrimePIDConstants(0, 0, 0);
-        public static final PrimePIDConstants PathPlannerRotationPID = new PrimePIDConstants(0, 0, 0);
+        public static final PrimePIDConstants DrivePID = new PrimePIDConstants(0.01, 0, 0.000, 0.0, 0.096, 0, 0.14);
+        public static final PrimePIDConstants SteeringPID = new PrimePIDConstants(4, 0, 0.04);
+        public static final PrimePIDConstants AutoAlignPID = new PrimePIDConstants(3.75, 0, 0);
+        public static final PrimePIDConstants PathPlannerTranslationPID = new PrimePIDConstants(3, 0, 0);
+        public static final PrimePIDConstants PathPlannerRotationPID = new PrimePIDConstants(2, 0, 0);
 
         // Uniform Drive Constants
         public static final double DriveGearRatio = 5.9;
         public static final double DriveWheelDiameterMeters = Units.inchesToMeters(3.875);
         public static final double DriveWheelCircumferenceMeters = Math.PI * DriveWheelDiameterMeters;
-        public static final int DriveSupplyCurrentLimit = 40;
-        public static final int DriveSupplyCurrentLimitThreshold = 50;
+        public static final int DriveStallCurrentLimit = 40;
+        public static final int DriveFreeCurrentLimit = 30;
         public static final int DriveSupplyCurrentLimitDuration = 100;
 
         public static final int PigeonId = 10;
@@ -82,7 +84,7 @@ public class DriveMap {
                                         Chassis.MaxSpeedMetersPerSecond,
                                         1.0,
                                         DCMotor.getNeoVortex(1),
-                                        DriveSupplyCurrentLimit,
+                                        DriveStallCurrentLimit,
                                         1),
                         FrontLeftSwerveModule.ModuleLocation,
                         FrontRightSwerveModule.ModuleLocation,
