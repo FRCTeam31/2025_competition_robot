@@ -14,7 +14,7 @@ public class TestDashboardTab extends DashboardTabBase {
     public TestDashboardTab() {
         super("Test");
         _autoLayout = _tab.getLayout("Auto Routines", BuiltInLayouts.kList)
-                .withSize(4, 16)
+                .withSize(4, 10)
                 .withProperties(Map.of("Label position", "HIDDEN")); // hide labels for commands
     }
 

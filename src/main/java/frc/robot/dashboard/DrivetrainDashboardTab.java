@@ -13,8 +13,8 @@ public class DrivetrainDashboardTab extends DashboardTabBase {
     public DrivetrainDashboardTab() {
         super("Drivetrain");
 
-        _autoAlignEnabledEntry = createBooleanBox("AutoAlign Enabled", 0, 0, 2, 2);
-        _autoAlignTargetEntry = createGyro("AutoAlign Angle", 2, 0, 4, 5);
+        _autoAlignEnabledEntry = createBooleanBox("AutoAlign Enabled", 0, 0, 4, 1);
+        _autoAlignTargetEntry = createGyro("AutoAlign Angle", 0, 1, 4, 4);
     }
 
     public void setAutoAlignEnabled(boolean enabled) {

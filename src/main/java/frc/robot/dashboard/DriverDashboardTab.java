@@ -7,18 +7,16 @@ import edu.wpi.first.wpilibj.event.BooleanEvent;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+
 import frc.robot.Robot;
 import frc.robot.oi.PrimeAutoRoutine;
 
 import org.prime.dashboard.PrimeSendableChooser;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-
 public class DriverDashboardTab extends DashboardTabBase {
         private final Field2d _fieldWidget;
-        private SendableChooser<Command> _autoChooser;
+        private PrimeAutoRoutine _autoBuilder;
 
         // Widgets
         private GenericEntry _allianceBox;
@@ -35,11 +33,11 @@ public class DriverDashboardTab extends DashboardTabBase {
                 super("Driver");
                 _fieldWidget = new Field2d();
 
-                _allianceBox = createBooleanBox("Alliance", 15, 0, 2, 3, "#FF0000", "#0000FF");
+                _allianceBox = createBooleanBox("Alliance", 15, 0, 1, 3, "#FF0000", "#0000FF");
                 _headingGyro = createGyro("Current Heading", 12, 0, 3, 3);
                 _rearApTagIdField = createTextView("Rear APTag", 12, 3, 2, 1);
                 _frontApTagIdField = createTextView("Front APTag", 14, 3, 2, 1);
-                _rearApTagOffsetDial = createDial("Rear APTag X Offset", -29.8, 29.8, 12, 4, 2, 3);
+                _rearApTagOffsetDial = createDial("Rear APTag X Offset", -40, 40, 12, 4, 2, 2);
                 _frontPoseEstimationSwitch = createToggleSwitch("F Pose Est.", 14, 4, 2, 1);
                 _rearPoseEstimationSwitch = createToggleSwitch("R Pose Est.", 14, 5, 2, 1);
 
@@ -56,17 +54,19 @@ public class DriverDashboardTab extends DashboardTabBase {
                 var autoOptionChooser = new PrimeSendableChooser<String>();
                 _tab.add("Auto Options", autoOptionChooser)
                                 .withWidget(BuiltInWidgets.kComboBoxChooser)
-                                .withPosition(0, 6)
-                                .withSize(5, 2);
+                                .withPosition(4, 6)
+                                .withSize(3, 1);
                 autoBuilder.setChooser(autoOptionChooser);
                 _tab.add("PrimeAutoBuilder", autoBuilder)
                                 .withWidget("PrimeAutoBuilder")
                                 .withPosition(0, 6)
-                                .withSize(5, 5);
+                                .withSize(4, 4);
+                _autoBuilder = autoBuilder;
         }
 
         public Command getSelectedAuto() {
-                return _autoChooser.getSelected();
+                // return _autoChooser.getSelected();
+                return _autoBuilder.exportCombinedAutoRoutine();
         }
 
         public void setFieldRobotPose(Pose2d pose) {

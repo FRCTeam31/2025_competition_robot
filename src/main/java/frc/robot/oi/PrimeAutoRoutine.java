@@ -20,6 +20,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Robot;
 
+/**
+ * A dashboard widget for building autonomous routines from a base of Pathplanner paths and named commands.
+ */
 public class PrimeAutoRoutine implements Sendable {
 
     private List<String> _routineSteps = new ArrayList<>();
@@ -49,7 +52,13 @@ public class PrimeAutoRoutine implements Sendable {
         }
 
         for (var file : pathsPath.listFiles()) {
-            if (file.isFile() && file.getName().endsWith(".path")) {
+            if (!file.isFile() || !file.getName().endsWith(".path")) {
+                continue;
+            }
+
+            // Only add paths that are in the format "#-to-#"
+            var pathName = file.getName().replace(".path", "");
+            if (stepIsPath(pathName)) {
                 paths.add(file.getName().replace(".path", ""));
             }
         }
@@ -57,6 +66,9 @@ public class PrimeAutoRoutine implements Sendable {
         _pathNames = paths.toArray(new String[0]);
     }
 
+    /**
+     * Sets the chooser for selecting the next step in the routine.
+     */
     public void setChooser(PrimeSendableChooser<String> chooser) {
         _nextStepChooser = chooser;
         updateChooserOptions();
@@ -65,20 +77,20 @@ public class PrimeAutoRoutine implements Sendable {
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType("PrimeAutoRoutine");
-        builder.addStringArrayProperty("routineSteps", () -> _routineSteps.toArray(new String[0]), null);
+        builder.addStringArrayProperty("Routine Steps", () -> _routineSteps.toArray(new String[0]), null);
 
-        builder.addBooleanProperty("addStepButton", () -> _addStepIsPressed, (value) -> _addStepIsPressed = value);
+        builder.addBooleanProperty("Add Step", () -> _addStepIsPressed, (value) -> _addStepIsPressed = value);
         _addStepEvent = new BooleanEvent(Robot.EventLoop, () -> _addStepIsPressed)
                 .debounce(0.1);
         _addStepEvent.ifHigh(this::addRoutineStep);
 
-        builder.addBooleanProperty("removeLastStepButton", () -> _removeLastStepIsPressed,
+        builder.addBooleanProperty("Remove Last Step", () -> _removeLastStepIsPressed,
                 (value) -> _removeLastStepIsPressed = value);
         _removeLastStepEvent = new BooleanEvent(Robot.EventLoop, () -> _removeLastStepIsPressed)
                 .debounce(0.1);
         _removeLastStepEvent.ifHigh(this::removeLastStep);
 
-        builder.addBooleanProperty("clearRoutineButton", () -> _clearRoutineIsPressed,
+        builder.addBooleanProperty("Clear Routine", () -> _clearRoutineIsPressed,
                 (value) -> _clearRoutineIsPressed = value);
         _clearRoutineEvent = new BooleanEvent(Robot.EventLoop, () -> _clearRoutineIsPressed)
                 .debounce(0.1);
@@ -87,6 +99,9 @@ public class PrimeAutoRoutine implements Sendable {
         builder.update();
     }
 
+    /**
+     * Adds the selected step to the routine.
+     */
     private void addRoutineStep() {
         var newStep = _nextStepChooser.getSelected();
         if (newStep == null) {
@@ -94,7 +109,7 @@ public class PrimeAutoRoutine implements Sendable {
             return;
         }
 
-        if (_routineSteps.get(_routineSteps.size() - 1) == newStep) {
+        if (_routineSteps.size() > 0 && _routineSteps.get(_routineSteps.size() - 1) == newStep) {
             System.out.println("Cannot add the same step twice in a row");
             return;
         }
@@ -104,6 +119,9 @@ public class PrimeAutoRoutine implements Sendable {
         updateChooserOptions();
     }
 
+    /**
+     * Removes the last step from the routine.
+     */
     private void removeLastStep() {
         if (_routineSteps.isEmpty()) {
             System.out.println("No steps to remove");
@@ -116,6 +134,9 @@ public class PrimeAutoRoutine implements Sendable {
         updateChooserOptions();
     }
 
+    /**
+     * Clears the current routine.
+     */
     private void clearRoutine() {
         if (_routineSteps.isEmpty()) {
             System.out.println("Routine is already empty");
@@ -128,6 +149,11 @@ public class PrimeAutoRoutine implements Sendable {
         updateChooserOptions();
     }
 
+    /**
+     * Updates the options in the chooser based on the current routine steps.
+     * If the routine is empty, only paths that start with "S" are shown.
+     * If the routine is not empty, only paths that start with the last destination of the routine and commands are shown.
+     */
     private void updateChooserOptions() {
         _nextStepChooser.clearOptions();
 
@@ -154,16 +180,17 @@ public class PrimeAutoRoutine implements Sendable {
     public String getRoutineLastDestination() {
         for (int i = _routineSteps.size() - 1; i >= 0; i--) {
             var currentStep = _routineSteps.get(i);
-            if (currentStep.contains("-to-")) {
+            if (!stepIsCommand(currentStep)) {
                 return currentStep.split("-to-")[1];
-            } else {
-                continue;
             }
         }
 
         return "";
     }
 
+    /**
+     * Gets the combined list of paths and commands that can be added to the routine.
+     */
     public List<String> getCombinedRoutineOptions() {
         var options = new ArrayList<String>();
 
@@ -182,19 +209,32 @@ public class PrimeAutoRoutine implements Sendable {
      * Combines paths and commands into a single routine
      */
     public Command exportCombinedAutoRoutine() {
+        if (_routineSteps.isEmpty()) {
+            DriverStation.reportError("[AUTOBUILDER] No steps in routine", false);
+
+            return Commands.none();
+        }
+
         var autoCommand = Commands.none();
 
         for (var step : _routineSteps) {
-            if (step.contains("-to-")) {
-                // Step is a path
+            if (stepIsPath(step)) {
                 try {
+                    // Load path from file
                     var path = PathPlannerPath.fromPathFile(step);
-                    if (path == null)
+                    if (path == null) {
                         throw new Exception("Path not found");
+                    }
+
+                    // Flip path if on red alliance
+                    if (Robot.onRedAlliance()) {
+                        path = path.flipPath();
+                    }
 
                     var followPathCommand = AutoBuilder.followPath(path);
-                    if (followPathCommand == null)
+                    if (followPathCommand == null) {
                         throw new Exception("Failed to build path command");
+                    }
 
                     autoCommand = autoCommand.andThen(followPathCommand);
                 } catch (Exception e) {
@@ -202,7 +242,7 @@ public class PrimeAutoRoutine implements Sendable {
 
                     return null;
                 }
-            } else {
+            } else if (stepIsCommand(step)) {
                 // Step is a command
                 var command = _namedCommands.get(step);
                 if (command != null) {
@@ -212,9 +252,21 @@ public class PrimeAutoRoutine implements Sendable {
 
                     return null;
                 }
+            } else {
+                DriverStation.reportError("[AUTOBUILDER] Step " + step + "not found in paths or commands.", false);
+
+                return null;
             }
         }
 
         return autoCommand;
+    }
+
+    private boolean stepIsPath(String step) {
+        return step.contains("-to-");
+    }
+
+    private boolean stepIsCommand(String step) {
+        return _namedCommands.containsKey(step);
     }
 }

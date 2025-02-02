@@ -52,10 +52,14 @@ public class OperatorInterface {
         DriverController.leftStick().whileTrue(enableLockOnCommand).onFalse(disableSnapAngleCommand);
 
         DriverController.x().onTrue(disableSnapAngleCommand);
-        DriverController.pov(Controls.up).onTrue(setSnapToSetpointCommandFunc.apply(0));
-        DriverController.pov(Controls.left).onTrue(setSnapToSetpointCommandFunc.apply(270));
-        DriverController.pov(Controls.down).onTrue(setSnapToSetpointCommandFunc.apply(180));
-        DriverController.pov(Controls.right).onTrue(setSnapToSetpointCommandFunc.apply(90));
+        DriverController.pov(Controls.up).onTrue(setSnapToSetpointCommandFunc.apply(Controls.up));
+        DriverController.pov(Controls.upRight).onTrue(setSnapToSetpointCommandFunc.apply(Controls.upRight - 90));
+        DriverController.pov(Controls.right).onTrue(setSnapToSetpointCommandFunc.apply(Controls.right - 180));
+        DriverController.pov(Controls.downRight).onTrue(setSnapToSetpointCommandFunc.apply(Controls.downRight + 90));
+        DriverController.pov(Controls.down).onTrue(setSnapToSetpointCommandFunc.apply(Controls.down));
+        DriverController.pov(Controls.downLeft).onTrue(setSnapToSetpointCommandFunc.apply(Controls.downLeft - 90));
+        DriverController.pov(Controls.left).onTrue(setSnapToSetpointCommandFunc.apply(Controls.left - 180));
+        DriverController.pov(Controls.upLeft).onTrue(setSnapToSetpointCommandFunc.apply(Controls.upLeft + 90));
     }
 
     public void bindOperatorControls() {
