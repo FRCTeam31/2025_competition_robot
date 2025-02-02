@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 import frc.robot.oi.PrimeAutoRoutine;
 
+import org.prime.dashboard.PrimeSendableChooser;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 
 public class DriverDashboardTab extends DashboardTabBase {
@@ -46,11 +48,17 @@ public class DriverDashboardTab extends DashboardTabBase {
                                 .withWidget(BuiltInWidgets.kField)
                                 .withPosition(0, 0)
                                 .withSize(12, 6);
-                _autoChooser = AutoBuilder.buildAutoChooser("Default");
+                // _autoChooser = AutoBuilder.buildAutoChooser("Default");
                 // _tab.add(_autoChooser)
                 //                 .withWidget(BuiltInWidgets.kComboBoxChooser)
                 //                 .withPosition(0, 6)
                 //                 .withSize(5, 2);
+                var autoOptionChooser = new PrimeSendableChooser<String>();
+                _tab.add("Auto Options", autoOptionChooser)
+                                .withWidget(BuiltInWidgets.kComboBoxChooser)
+                                .withPosition(0, 6)
+                                .withSize(5, 2);
+                autoBuilder.setChooser(autoOptionChooser);
                 _tab.add("PrimeAutoBuilder", autoBuilder)
                                 .withWidget("PrimeAutoBuilder")
                                 .withPosition(0, 6)
