@@ -225,7 +225,7 @@ public class SwerveModuleReal implements ISwerveModule {
    */
   private MutDistance getModuleDistance() {
     var distMeters = _driveMotor.getEncoder().getPosition()
-        * (DriveMap.DriveGearRatio / DriveMap.DriveWheelCircumferenceMeters);
+        * (DriveMap.DriveWheelCircumferenceMeters / DriveMap.DriveGearRatio);
 
     return Meters.mutable(distMeters);
   }
