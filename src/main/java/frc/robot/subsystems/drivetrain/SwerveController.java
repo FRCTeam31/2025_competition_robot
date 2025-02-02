@@ -22,6 +22,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.simulation.AnalogGyroSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import frc.robot.Robot;
 import frc.robot.maps.DriveMap;
@@ -50,14 +51,14 @@ public class SwerveController {
       m_rearRightModule;
 
   @Logged(name = "ModuleInputs", importance = Logged.Importance.CRITICAL)
-  private SwerveModuleIOInputs[] m_moduleInputs =
-      new SwerveModuleIOInputs[] {new SwerveModuleIOInputs(), new SwerveModuleIOInputs(),
-          new SwerveModuleIOInputs(), new SwerveModuleIOInputs()};
+  private SwerveModuleIOInputs[] m_moduleInputs = new SwerveModuleIOInputs[] { new SwerveModuleIOInputs(),
+      new SwerveModuleIOInputs(),
+      new SwerveModuleIOInputs(), new SwerveModuleIOInputs() };
 
   @Logged(name = "ModuleOutputs", importance = Logged.Importance.CRITICAL)
-  private SwerveModuleIOOutputs[] m_moduleOutputs =
-      new SwerveModuleIOOutputs[] {new SwerveModuleIOOutputs(), new SwerveModuleIOOutputs(),
-          new SwerveModuleIOOutputs(), new SwerveModuleIOOutputs()};
+  private SwerveModuleIOOutputs[] m_moduleOutputs = new SwerveModuleIOOutputs[] { new SwerveModuleIOOutputs(),
+      new SwerveModuleIOOutputs(),
+      new SwerveModuleIOOutputs(), new SwerveModuleIOOutputs() };
 
   public SwerveController(boolean isReal) {
     _robotIsReal = isReal;
@@ -100,6 +101,9 @@ public class SwerveController {
     // Configure snap-to PID
     m_snapAngleController = DriveMap.SnapToPID.createPIDController(0.02);
     m_snapAngleController.enableContinuousInput(-Math.PI, Math.PI);
+
+    SmartDashboard.putData(m_snapAngleController);
+
   }
 
   public DrivetrainInputs getInputs() {
@@ -218,11 +222,14 @@ public class SwerveController {
    */
   private void driveRobotRelative(ChassisSpeeds desiredChassisSpeeds, boolean snapAngleEnabled) {
     // If snap-to is enabled, calculate and override the input rotational speed to
-    // reach the setpoint
+    // reach the setpoint 
+
     if (snapAngleEnabled) {
       if (_robotIsReal) {
         var currentRotationRadians = MathUtil.angleModulus(m_gyro.getRotation2d().getRadians());
-        var snapCorrection = m_snapAngleController.calculate(currentRotationRadians);
+
+        var snapCorrection = MathUtil.clamp(m_snapAngleController.calculate(currentRotationRadians),
+            -DriveMap.MaxAngularSpeedRadians * 0.9, DriveMap.MaxAngularSpeedRadians * 0.9);
         _inputs.SnapCorrectionRadiansPerSecond = snapCorrection;
         desiredChassisSpeeds.omegaRadiansPerSecond = snapCorrection;
 
@@ -260,8 +267,7 @@ public class SwerveController {
 
       // Convert the robot-relative speeds to field-relative speeds with the flipped
       // gyro
-      var fieldRelativeSpeeds =
-          ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeSpeeds, gyroAngle);
+      var fieldRelativeSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeSpeeds, gyroAngle);
 
       // Convert back to robot-relative speeds, also with the flipped gyro
       robotRelativeSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, gyroAngle);
@@ -289,8 +295,16 @@ public class SwerveController {
    */
   @Logged(importance = Importance.CRITICAL)
   public SwerveModuleState[] getModuleStates() {
-    return new SwerveModuleState[] {m_moduleInputs[0].ModuleState, m_moduleInputs[1].ModuleState,
-        m_moduleInputs[2].ModuleState, m_moduleInputs[3].ModuleState,};
+    return new SwerveModuleState[] { m_moduleInputs[0].ModuleState, m_moduleInputs[1].ModuleState,
+        m_moduleInputs[2].ModuleState, m_moduleInputs[3].ModuleState };
+  }
+
+  @Logged(importance = Importance.CRITICAL)
+  public SwerveModuleState[] getDesiredModuleStates() {
+    return new SwerveModuleState[] {
+        m_moduleOutputs[0].DesiredState, m_moduleOutputs[1].DesiredState, m_moduleOutputs[2].DesiredState,
+        m_moduleOutputs[3].DesiredState
+    };
   }
 
   /**
@@ -298,8 +312,8 @@ public class SwerveController {
    */
   @Logged(importance = Importance.CRITICAL)
   public SwerveModulePosition[] getModulePositions() {
-    return new SwerveModulePosition[] {m_moduleInputs[0].ModulePosition,
+    return new SwerveModulePosition[] { m_moduleInputs[0].ModulePosition,
         m_moduleInputs[1].ModulePosition, m_moduleInputs[2].ModulePosition,
-        m_moduleInputs[3].ModulePosition,};
+        m_moduleInputs[3].ModulePosition, };
   }
 }

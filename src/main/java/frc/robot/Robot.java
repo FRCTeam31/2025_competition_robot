@@ -12,6 +12,7 @@ import edu.wpi.first.epilogue.Logged.Importance;
 import edu.wpi.first.epilogue.Logged.Strategy;
 import edu.wpi.first.epilogue.logging.errors.ErrorHandler;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -39,7 +40,7 @@ public class Robot extends TimedRobot {
     DataLogManager.start();
     DataLogManager.logConsoleOutput(true);
     DataLogManager.logNetworkTables(true);
-    DriverStation.startDataLog(DataLogManager.getLog());
+    DriverStation.startDataLog(DataLogManager.getLog(), true);
     Epilogue.configure(config -> {
       if (isSimulation()) {
         // If running in simulation, then we'd want to re-throw any errors that

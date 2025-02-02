@@ -14,6 +14,8 @@ import edu.wpi.first.epilogue.Logged.Strategy;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.*;
 import frc.robot.maps.DriveMap;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
@@ -26,6 +28,7 @@ import org.prime.control.PrimeXboxController;
 @Logged(strategy = Strategy.OPT_IN)
 public class Container {
   private PrimeXboxController m_driverController;
+  //private double _voltage = 0;
 
   @Logged(name = "Vision", importance = Importance.CRITICAL)
   public VisionSubsystem Vision;
@@ -36,6 +39,7 @@ public class Container {
 
   public Container(boolean isReal) {
     try {
+      System.out.println("Robot diameter: " + DriveMap.WheelBaseCircumferenceMeters);
       DriverDashboard.init(isReal);
       m_driverController = new PrimeXboxController(Controls.DRIVER_PORT);
 
@@ -101,16 +105,65 @@ public class Container {
 
     // Controls for Snap-To with field-relative setpoints
     m_driverController.x().onTrue(Drivetrain.disableSnapToCommand());
-    m_driverController.pov(Controls.up).onTrue(Drivetrain.setSnapToSetpointCommand(0));
-    m_driverController.pov(Controls.left).onTrue(Drivetrain.setSnapToSetpointCommand(270));
-    m_driverController.pov(Controls.down).onTrue(Drivetrain.setSnapToSetpointCommand(180));
-    m_driverController.pov(Controls.right).onTrue(Drivetrain.setSnapToSetpointCommand(90));
+    m_driverController.pov(Controls.up)
+        .onTrue(Drivetrain.setSnapToSetpointCommand(Controls.up));
+    m_driverController.pov(Controls.upRight)
+        .onTrue(Drivetrain.setSnapToSetpointCommand(Controls.upRight - 90));
+    m_driverController.pov(Controls.right)
+        .onTrue(Drivetrain.setSnapToSetpointCommand(Controls.right - 180));
+    m_driverController.pov(Controls.downRight)
+        .onTrue(Drivetrain.setSnapToSetpointCommand(Controls.downRight + 90));
+    m_driverController.pov(Controls.down)
+        .onTrue(Drivetrain.setSnapToSetpointCommand(Controls.down));
+    m_driverController.pov(Controls.downLeft)
+        .onTrue(Drivetrain.setSnapToSetpointCommand(Controls.downLeft - 90));
+    m_driverController.pov(Controls.left)
+        .onTrue(Drivetrain.setSnapToSetpointCommand(Controls.left - 180));
+    m_driverController.pov(Controls.upLeft)
+        .onTrue(Drivetrain.setSnapToSetpointCommand(Controls.upLeft + 90));
 
     // Uncomment to enable SysID Routines.
-    // m_driverController.pov(Controls.up).onTrue(Drivetrain.runSysIdQuasistaticRoutineCommand(Direction.kForward));
-    // m_driverController.pov(Controls.down).onTrue(Drivetrain.runSysIdQuasistaticRoutineCommand(Direction.kReverse));
-    // m_driverController.pov(Controls.right).onTrue(Drivetrain.runSysIdDynamicRoutineCommand(Direction.kForward));
-    // m_driverController.pov(Controls.left).onTrue(Drivetrain.runSysIdDynamicRoutineCommand(Direction.kReverse));
+    // m_driverController.pov(Controls.up)
+    //     .onTrue(Drivetrain.runSysIdQuasistaticRoutineCommand(Direction.kForward))
+    //     .onFalse(Drivetrain.stopAllMotors());
+    // m_driverController.pov(Controls.down).onTrue(Drivetrain.runSysIdQuasistaticRoutineCommand(Direction.kReverse))
+    //     .onFalse(Drivetrain.stopAllMotors());
+
+    // m_driverController.pov(Controls.right).onTrue(Drivetrain.runSysIdDynamicRoutineCommand(Direction.kForward))
+    //     .onFalse(Drivetrain.stopAllMotors());
+
+    // m_driverController.pov(Controls.left).onTrue(Drivetrain.runSysIdDynamicRoutineCommand(Direction.kReverse))
+    //     .onFalse(Drivetrain.stopAllMotors());
+
+    // Uncomment below and voltage variable at the top of file to enable voltage step drive for kS testing
+    // m_driverController.pov(Controls.up)
+    //     .onTrue(Commands.runOnce(() -> {
+    //       _voltage += 0.05;
+    //       System.out.println("Set to voltage: " + _voltage);
+    //     }));
+
+    // m_driverController.pov(Controls.down)
+    //     .onTrue(Commands.runOnce(() -> {
+    //       _voltage -= 0.01;
+    //       System.out.println("Set to voltage: " + _voltage);
+    //     }));
+
+    // m_driverController.pov(Controls.right)
+    //     .onTrue(Commands.run(() -> {
+    //       Drivetrain.driveSwerveVoltage(_voltage);
+    //     }, Drivetrain).alongWith(Commands.runOnce(()->{
+    //       System.out.println("Voltage Step Enabled!");
+    //     })));
+
+    // m_driverController.pov(Controls.left)
+    //     .onTrue(Commands.runOnce(() -> {
+    //       _voltage = 0;
+    //       Drivetrain.driveSwerveVoltage(0);
+    //       System.out.println("Set to voltage: " + _voltage);
+    //     }, Drivetrain).alongWith(Commands.runOnce(()->{
+    //       System.out.println("Voltage Step Disabled!");
+    //     })));
+
   }
 
 }

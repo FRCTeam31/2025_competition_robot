@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -103,8 +104,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
     _driveSysIdRoutine = new SysIdRoutine(
         // Ramp up at 1 volt per second for quasistatic tests, step at 2 volts in
         // dynamic tests, run for 13 seconds.
-        new SysIdRoutine.Config(Units.Volts.of(0.5).per(Units.Second), Units.Volts.of(2),
-            Units.Seconds.of(10)),
+        new SysIdRoutine.Config(Units.Volts.of(2).per(Units.Second), Units.Volts.of(8),
+            Units.Seconds.of(15)),
         new SysIdRoutine.Mechanism(
             // Tell SysId how to plumb the driving voltage to the motors.
             _swerveController::setDriveVoltages,
@@ -114,6 +115,12 @@ public class DrivetrainSubsystem extends SubsystemBase {
             // Tell SysId to make generated commands require this subsystem, suffix test
             // state in WPILog with this subsystem's name
             this));
+  }
+
+  public Command driveSwerveVoltage(double voltage) {
+    return Commands.runOnce(() -> {
+      _swerveController.setDriveVoltages(Units.Volts.of(voltage));
+    }, this);
   }
 
   private void configurePathPlanner() {
@@ -184,7 +191,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   private void drivePathPlanner(ChassisSpeeds pathSpeeds) {
-    _outputs.ControlMode = DrivetrainControlMode.kPathFollowing;
+    //temporary until there is a drive method that drives path planner using limelight pose
+    _outputs.ControlMode = DrivetrainControlMode.kFieldRelative;
     _outputs.DesiredChassisSpeeds = pathSpeeds;
   }
 
@@ -243,9 +251,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
         _inputs.RobotRelativeChassisSpeeds.vxMetersPerSecond < 2
         && _inputs.RobotRelativeChassisSpeeds.vyMetersPerSecond < 2;
 
-    EstimatePoseUsingFrontCamera = DriverDashboard.FrontPoseEstimationSwitch.getBoolean(false);
-    if (EstimatePoseUsingFrontCamera)
-      evaluatePoseEstimation(WithinPoseEstimationVelocity, 0);
+    // EstimatePoseUsingFrontCamera = DriverDashboard.FrontPoseEstimationSwitch.getBoolean(false);
+    // if (EstimatePoseUsingFrontCamera)
+    //   evaluatePoseEstimation(WithinPoseEstimationVelocity, 0);
 
     // EstimatePoseUsingRearCamera =
     // DriverDashboard.RearPoseEstimationSwitch.getBoolean(false);
@@ -342,6 +350,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
    */
   public Command resetGyroCommand() {
     return Commands.runOnce(() -> resetGyro());
+  }
+
+  public Command stopAllMotors() {
+    return this.runOnce(() -> _swerveController.stopAllMotors());
   }
 
   /**
