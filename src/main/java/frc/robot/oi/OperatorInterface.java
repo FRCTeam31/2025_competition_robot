@@ -10,7 +10,7 @@ import org.prime.control.SwerveControlSuppliers;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
-import frc.robot.subsystems.drivetrain.DriveMap;
+import frc.robot.subsystems.drivetrain.SwerveMap;
 
 public class OperatorInterface {
     public static class OIMap {
@@ -41,8 +41,8 @@ public class OperatorInterface {
 
         var controlProfile = DriverController.getSwerveControlProfile(
                 OIMap.DefaultDriveControlStyle,
-                DriveMap.Control.DriveDeadband,
-                DriveMap.Control.DeadbandCurveWeight);
+                SwerveMap.Control.DriveDeadband,
+                SwerveMap.Control.DeadbandCurveWeight);
 
         setDefaultDrivetrainCommandConsumer.accept(getDriveCommandFunc.apply(controlProfile));
 

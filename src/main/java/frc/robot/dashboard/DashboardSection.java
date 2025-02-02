@@ -6,13 +6,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 /**
  * Base class for a SmartDashboard section that provides helper methods for creating values
  */
-public class GenericDashboardSection {
+public class DashboardSection {
     protected String _tabName;
 
     /**
      * Creates a new dashboard tab with the given name
      */
-    public GenericDashboardSection(String tabName) {
+    public DashboardSection(String tabName) {
         _tabName = tabName;
     }
 

@@ -18,7 +18,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.MutDistance;
 import edu.wpi.first.units.measure.MutLinearVelocity;
-import frc.robot.subsystems.drivetrain.DriveMap;
+import frc.robot.dashboard.DashboardSection;
+import frc.robot.subsystems.drivetrain.SwerveMap;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -30,6 +31,8 @@ import org.prime.util.SwerveUtil;
 public class SwerveModuleReal implements ISwerveModule {
   private String _name;
   private SwerveModuleMap _map;
+  private DashboardSection _dashboardSection;
+  private final String _optimizeModuleKey = "Optimize";
 
   // Devices
   private SparkFlex _steeringMotor;
@@ -42,9 +45,11 @@ public class SwerveModuleReal implements ISwerveModule {
   public SwerveModuleReal(String name, SwerveModuleMap moduleMap) {
     _name = name;
     _map = moduleMap;
+    _dashboardSection = new DashboardSection("Drive/" + _name);
+    _dashboardSection.putBoolean(_optimizeModuleKey, true);
 
-    setupSteeringMotor(DriveMap.SteeringPID);
-    setupDriveMotor(DriveMap.DrivePID);
+    setupSteeringMotor(SwerveMap.SteeringPID);
+    setupDriveMotor(SwerveMap.DrivePID);
     setupCanCoder();
   }
 
@@ -82,7 +87,7 @@ public class SwerveModuleReal implements ISwerveModule {
   private void setupDriveMotor(PrimePIDConstants pid) {
     _driveMotor = new SparkFlex(_map.DriveMotorCanId, MotorType.kBrushless);
     SparkMaxConfig config = new SparkMaxConfig();
-    config.smartCurrentLimit(DriveMap.DriveStallCurrentLimit, DriveMap.DriveFreeCurrentLimit);
+    config.smartCurrentLimit(SwerveMap.DriveStallCurrentLimit, SwerveMap.DriveFreeCurrentLimit);
     config.openLoopRampRate(_map.DriveMotorRampRate);
     config.inverted(_map.DriveInverted);
     config.idleMode(IdleMode.kBrake);
@@ -158,7 +163,11 @@ public class SwerveModuleReal implements ISwerveModule {
    */
   public void setDesiredState(SwerveModuleState desiredState) {
     // Optimize the desired state
-    desiredState = SwerveUtil.optimize(desiredState, getCurrentHeading());
+    var optimize = _dashboardSection.getBoolean(_optimizeModuleKey, true);
+    Logger.recordOutput("Drive/" + _name + "/Optimized", optimize);
+    if (optimize) {
+      desiredState = SwerveUtil.optimize(desiredState, getCurrentHeading());
+    }
 
     // Set the drive motor to the desired speed
     setDriveSpeed(desiredState.speedMetersPerSecond);
@@ -171,12 +180,12 @@ public class SwerveModuleReal implements ISwerveModule {
     // Convert the speed to rotations per second by dividing by the wheel
     // circumference and gear ratio
 
-    var desiredSpeedRotationsPerSecond = (desiredSpeedMetersPerSecond / DriveMap.DriveWheelCircumferenceMeters)
-        * DriveMap.DriveGearRatio;
+    var desiredSpeedRotationsPerSecond = (desiredSpeedMetersPerSecond / SwerveMap.DriveWheelCircumferenceMeters)
+        * SwerveMap.DriveGearRatio;
 
     var currentSpeedMetersPerSecond = getCurrentVelocity().in(MetersPerSecond);
-    var currentSpeedRotationsPerSecond = (currentSpeedMetersPerSecond / DriveMap.DriveWheelCircumferenceMeters)
-        * DriveMap.DriveGearRatio;
+    var currentSpeedRotationsPerSecond = (currentSpeedMetersPerSecond / SwerveMap.DriveWheelCircumferenceMeters)
+        * SwerveMap.DriveGearRatio;
 
     var pid = _drivingPidController.calculate(currentSpeedRotationsPerSecond, desiredSpeedRotationsPerSecond);
     var ff = _driveFeedForward.calculate(desiredSpeedRotationsPerSecond);
@@ -214,8 +223,8 @@ public class SwerveModuleReal implements ISwerveModule {
    * Gets the current velocity of the module
    */
   private MutLinearVelocity getCurrentVelocity() {
-    var speedMps = ((_driveMotor.getEncoder().getVelocity() / 60) / DriveMap.DriveGearRatio)
-        * DriveMap.DriveWheelCircumferenceMeters;
+    var speedMps = ((_driveMotor.getEncoder().getVelocity() / 60) / SwerveMap.DriveGearRatio)
+        * SwerveMap.DriveWheelCircumferenceMeters;
 
     return Units.MetersPerSecond.mutable(speedMps);
   }
@@ -225,7 +234,7 @@ public class SwerveModuleReal implements ISwerveModule {
    */
   private MutDistance getModuleDistance() {
     var distMeters = _driveMotor.getEncoder().getPosition()
-        * (DriveMap.DriveWheelCircumferenceMeters / DriveMap.DriveGearRatio);
+        * (SwerveMap.DriveWheelCircumferenceMeters / SwerveMap.DriveGearRatio);
 
     return Meters.mutable(distMeters);
   }

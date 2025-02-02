@@ -25,7 +25,10 @@ import frc.robot.subsystems.drivetrain.swervemodule.SwerveModuleInputsAutoLogged
 import frc.robot.subsystems.drivetrain.swervemodule.SwerveModuleReal;
 import frc.robot.subsystems.drivetrain.swervemodule.SwerveModuleSim;
 
-public class SwerveController {
+/**
+ * A class that controls the swerve modules and gyro
+ */
+public class SwerveIOController {
 
   public SwerveDriveKinematics Kinematics;
   private SwerveDrivePoseEstimator m_poseEstimator;
@@ -41,12 +44,12 @@ public class SwerveController {
       new SwerveModuleInputsAutoLogged()
   };
 
-  public SwerveController(boolean isReal) {
+  public SwerveIOController(boolean isReal) {
     // Create kinematics in order FL, FR, RL, RR
-    Kinematics = new SwerveDriveKinematics(DriveMap.FrontLeftSwerveModule.ModuleLocation,
-        DriveMap.FrontRightSwerveModule.ModuleLocation,
-        DriveMap.RearLeftSwerveModule.ModuleLocation,
-        DriveMap.RearRightSwerveModule.ModuleLocation);
+    Kinematics = new SwerveDriveKinematics(SwerveMap.FrontLeftSwerveModule.ModuleLocation,
+        SwerveMap.FrontRightSwerveModule.ModuleLocation,
+        SwerveMap.RearLeftSwerveModule.ModuleLocation,
+        SwerveMap.RearRightSwerveModule.ModuleLocation);
 
     _gyro = isReal
         ? new GyroReal()
@@ -54,39 +57,39 @@ public class SwerveController {
     _gyro.updateInputs(_gyroInputs, 0);
 
     _frontLeftModule = isReal
-        ? new SwerveModuleReal("FrontLeftModule", DriveMap.FrontLeftSwerveModule)
-        : new SwerveModuleSim("FrontLeftModule", DriveMap.FrontLeftSwerveModule);
+        ? new SwerveModuleReal("FrontLeftModule", SwerveMap.FrontLeftSwerveModule)
+        : new SwerveModuleSim("FrontLeftModule", SwerveMap.FrontLeftSwerveModule);
     _frontRightModule = isReal
-        ? new SwerveModuleReal("FrontRightModule", DriveMap.FrontRightSwerveModule)
-        : new SwerveModuleSim("FrontRightModule", DriveMap.FrontRightSwerveModule);
+        ? new SwerveModuleReal("FrontRightModule", SwerveMap.FrontRightSwerveModule)
+        : new SwerveModuleSim("FrontRightModule", SwerveMap.FrontRightSwerveModule);
     _rearLeftModule = isReal
-        ? new SwerveModuleReal("RearLeftModule", DriveMap.RearLeftSwerveModule)
-        : new SwerveModuleSim("RearLeftModule", DriveMap.RearLeftSwerveModule);
+        ? new SwerveModuleReal("RearLeftModule", SwerveMap.RearLeftSwerveModule)
+        : new SwerveModuleSim("RearLeftModule", SwerveMap.RearLeftSwerveModule);
     _rearRightModule = isReal
-        ? new SwerveModuleReal("RearRightModule", DriveMap.RearRightSwerveModule)
-        : new SwerveModuleSim("RearRightModule", DriveMap.RearRightSwerveModule);
+        ? new SwerveModuleReal("RearRightModule", SwerveMap.RearRightSwerveModule)
+        : new SwerveModuleSim("RearRightModule", SwerveMap.RearRightSwerveModule);
 
     // Create pose estimator
     m_poseEstimator = new SwerveDrivePoseEstimator(Kinematics, _gyroInputs.Rotation.toRotation2d(),
         getModulePositions(), new Pose2d());
 
     // Store current Drive and Steering PID values in Preferences
-    Preferences.initDouble("DriveKp", DriveMap.DrivePID.kP);
-    Preferences.initDouble("DriveKi", DriveMap.DrivePID.kI);
-    Preferences.initDouble("DriveKd", DriveMap.DrivePID.kD);
-    Preferences.initDouble("DriveKs", DriveMap.DrivePID.kS);
-    Preferences.initDouble("DriveKv", DriveMap.DrivePID.kV);
-    Preferences.initDouble("DriveKa", DriveMap.DrivePID.kA);
-    Preferences.initDouble("SteerKp", DriveMap.SteeringPID.kP);
-    Preferences.initDouble("SteerKi", DriveMap.SteeringPID.kI);
-    Preferences.initDouble("SteerKd", DriveMap.SteeringPID.kD);
+    Preferences.initDouble("DriveKp", SwerveMap.DrivePID.kP);
+    Preferences.initDouble("DriveKi", SwerveMap.DrivePID.kI);
+    Preferences.initDouble("DriveKd", SwerveMap.DrivePID.kD);
+    Preferences.initDouble("DriveKs", SwerveMap.DrivePID.kS);
+    Preferences.initDouble("DriveKv", SwerveMap.DrivePID.kV);
+    Preferences.initDouble("DriveKa", SwerveMap.DrivePID.kA);
+    Preferences.initDouble("SteerKp", SwerveMap.SteeringPID.kP);
+    Preferences.initDouble("SteerKi", SwerveMap.SteeringPID.kI);
+    Preferences.initDouble("SteerKd", SwerveMap.SteeringPID.kD);
   }
 
   /**
    * Called periodically to update the swerve modules and gyro
    * @param inputs
    */
-  public void updateInputs(SwerveControllerInputsAutoLogged inputs) {
+  public void updateInputs(SwerveSubsystemInputsAutoLogged inputs) {
     _frontLeftModule.updateInputs(m_moduleInputs[0]);
     Logger.processInputs("Drivetrain/FLModule", m_moduleInputs[0]);
     _frontRightModule.updateInputs(m_moduleInputs[1]);
@@ -113,39 +116,39 @@ public class SwerveController {
    * Checks the preferences for any changes and updates the PID values in each swerve module if necessary
    */
   private void checkPreferences() {
-    var driveKpChanged = Preferences.getDouble("DriveKp", DriveMap.DrivePID.kP) != DriveMap.DrivePID.kP;
-    var driveKiChanged = Preferences.getDouble("DriveKi", DriveMap.DrivePID.kI) != DriveMap.DrivePID.kI;
-    var driveKdChanged = Preferences.getDouble("DriveKd", DriveMap.DrivePID.kD) != DriveMap.DrivePID.kD;
-    var driveKsChanged = Preferences.getDouble("DriveKs", DriveMap.DrivePID.kS) != DriveMap.DrivePID.kS;
-    var driveKvChanged = Preferences.getDouble("DriveKv", DriveMap.DrivePID.kV) != DriveMap.DrivePID.kV;
-    var driveKaChanged = Preferences.getDouble("DriveKa", DriveMap.DrivePID.kA) != DriveMap.DrivePID.kA;
+    var driveKpChanged = Preferences.getDouble("DriveKp", SwerveMap.DrivePID.kP) != SwerveMap.DrivePID.kP;
+    var driveKiChanged = Preferences.getDouble("DriveKi", SwerveMap.DrivePID.kI) != SwerveMap.DrivePID.kI;
+    var driveKdChanged = Preferences.getDouble("DriveKd", SwerveMap.DrivePID.kD) != SwerveMap.DrivePID.kD;
+    var driveKsChanged = Preferences.getDouble("DriveKs", SwerveMap.DrivePID.kS) != SwerveMap.DrivePID.kS;
+    var driveKvChanged = Preferences.getDouble("DriveKv", SwerveMap.DrivePID.kV) != SwerveMap.DrivePID.kV;
+    var driveKaChanged = Preferences.getDouble("DriveKa", SwerveMap.DrivePID.kA) != SwerveMap.DrivePID.kA;
 
     if (driveKpChanged || driveKiChanged || driveKdChanged || driveKsChanged || driveKvChanged || driveKaChanged) {
-      DriveMap.DrivePID.kP = Preferences.getDouble("DriveKp", DriveMap.DrivePID.kP);
-      DriveMap.DrivePID.kI = Preferences.getDouble("DriveKi", DriveMap.DrivePID.kI);
-      DriveMap.DrivePID.kD = Preferences.getDouble("DriveKd", DriveMap.DrivePID.kD);
-      DriveMap.DrivePID.kS = Preferences.getDouble("DriveKs", DriveMap.DrivePID.kS);
-      DriveMap.DrivePID.kV = Preferences.getDouble("DriveKv", DriveMap.DrivePID.kV);
-      DriveMap.DrivePID.kA = Preferences.getDouble("DriveKa", DriveMap.DrivePID.kA);
+      SwerveMap.DrivePID.kP = Preferences.getDouble("DriveKp", SwerveMap.DrivePID.kP);
+      SwerveMap.DrivePID.kI = Preferences.getDouble("DriveKi", SwerveMap.DrivePID.kI);
+      SwerveMap.DrivePID.kD = Preferences.getDouble("DriveKd", SwerveMap.DrivePID.kD);
+      SwerveMap.DrivePID.kS = Preferences.getDouble("DriveKs", SwerveMap.DrivePID.kS);
+      SwerveMap.DrivePID.kV = Preferences.getDouble("DriveKv", SwerveMap.DrivePID.kV);
+      SwerveMap.DrivePID.kA = Preferences.getDouble("DriveKa", SwerveMap.DrivePID.kA);
 
-      _frontLeftModule.setDrivePID(DriveMap.DrivePID);
-      _frontRightModule.setDrivePID(DriveMap.DrivePID);
-      _rearLeftModule.setDrivePID(DriveMap.DrivePID);
-      _rearRightModule.setDrivePID(DriveMap.DrivePID);
+      _frontLeftModule.setDrivePID(SwerveMap.DrivePID);
+      _frontRightModule.setDrivePID(SwerveMap.DrivePID);
+      _rearLeftModule.setDrivePID(SwerveMap.DrivePID);
+      _rearRightModule.setDrivePID(SwerveMap.DrivePID);
     }
 
-    var steerKpChanged = Preferences.getDouble("SteerKp", DriveMap.SteeringPID.kP) != DriveMap.SteeringPID.kP;
-    var steerKiChanged = Preferences.getDouble("SteerKi", DriveMap.SteeringPID.kI) != DriveMap.SteeringPID.kI;
-    var steerKdChanged = Preferences.getDouble("SteerKd", DriveMap.SteeringPID.kD) != DriveMap.SteeringPID.kD;
+    var steerKpChanged = Preferences.getDouble("SteerKp", SwerveMap.SteeringPID.kP) != SwerveMap.SteeringPID.kP;
+    var steerKiChanged = Preferences.getDouble("SteerKi", SwerveMap.SteeringPID.kI) != SwerveMap.SteeringPID.kI;
+    var steerKdChanged = Preferences.getDouble("SteerKd", SwerveMap.SteeringPID.kD) != SwerveMap.SteeringPID.kD;
     if (steerKpChanged || steerKiChanged || steerKdChanged) {
-      DriveMap.SteeringPID.kP = Preferences.getDouble("SteerKp", DriveMap.SteeringPID.kP);
-      DriveMap.SteeringPID.kI = Preferences.getDouble("SteerKi", DriveMap.SteeringPID.kI);
-      DriveMap.SteeringPID.kD = Preferences.getDouble("SteerKd", DriveMap.SteeringPID.kD);
+      SwerveMap.SteeringPID.kP = Preferences.getDouble("SteerKp", SwerveMap.SteeringPID.kP);
+      SwerveMap.SteeringPID.kI = Preferences.getDouble("SteerKi", SwerveMap.SteeringPID.kI);
+      SwerveMap.SteeringPID.kD = Preferences.getDouble("SteerKd", SwerveMap.SteeringPID.kD);
 
-      _frontLeftModule.setSteeringPID(DriveMap.SteeringPID);
-      _frontRightModule.setSteeringPID(DriveMap.SteeringPID);
-      _rearLeftModule.setSteeringPID(DriveMap.SteeringPID);
-      _rearRightModule.setSteeringPID(DriveMap.SteeringPID);
+      _frontLeftModule.setSteeringPID(SwerveMap.SteeringPID);
+      _frontRightModule.setSteeringPID(SwerveMap.SteeringPID);
+      _rearLeftModule.setSteeringPID(SwerveMap.SteeringPID);
+      _rearRightModule.setSteeringPID(SwerveMap.SteeringPID);
     }
   }
 
@@ -161,6 +164,9 @@ public class SwerveController {
     _rearRightModule.setDesiredState(desiredStates[3]);
   }
 
+  /**
+   * Stops all motors on the swerve modules
+   */
   public void stopAllMotors() {
     _frontLeftModule.stopMotors();
     _frontRightModule.stopMotors();
@@ -168,6 +174,9 @@ public class SwerveController {
     _rearRightModule.stopMotors();
   }
 
+  /**
+   * Resets the gyro and pose estimator
+   */
   public void resetGyro() {
     _gyro.reset(Robot.onBlueAlliance() ? 180 : 0);
     _gyro.updateInputs(_gyroInputs, 0);
@@ -175,15 +184,29 @@ public class SwerveController {
         m_poseEstimator.getEstimatedPosition());
   }
 
+  /**
+   * Sets the pose estimator's pose
+   * @param pose
+   */
   public void setEstimatorPose(Pose2d pose) {
     m_poseEstimator.resetPosition(_gyroInputs.Rotation.toRotation2d(), getModulePositions(), pose);
   }
 
+  /**
+   * Adds a vision measurement to the pose estimator
+   * @param pose The estimated pose from vision
+   * @param timestamp The timestamp of the vision measurement
+   * @param stdDeviations The standard deviations of the vision measurement
+   */
   public void addPoseEstimatorVisionMeasurement(Pose2d pose, double timestamp,
       Matrix<N3, N1> stdDeviations) {
     m_poseEstimator.addVisionMeasurement(pose, timestamp, stdDeviations);
   }
 
+  /**
+   * Sets the modules to a specific voltage, and a heading of 0
+   * @param volts
+   */
   public void setDriveVoltages(Voltage volts) {
     var angle = Rotation2d.fromDegrees(0);
     _frontLeftModule.setDriveVoltage(volts.magnitude(), angle);
@@ -192,18 +215,20 @@ public class SwerveController {
     _rearRightModule.setDriveVoltage(volts.magnitude(), angle);
   }
 
+  /**
+   * Logs a sysid frame for the FL module
+   * @param log
+   */
   public void logSysIdDrive(SysIdRoutineLog log) {
     // Record a frame for the left motors. Since these share an encoder, we consider
     // the entire group to be one motor.
     log.motor("Front-Left-Module").voltage(Units.Volts.of(m_moduleInputs[0].DriveMotorVoltage)) // measured motor voltage
         .linearPosition(Units.Meters.of(m_moduleInputs[0].ModulePosition.distanceMeters)) // distance in meters
-        .linearVelocity(
-            Units.MetersPerSecond.of(m_moduleInputs[0].ModuleState.speedMetersPerSecond)); // speed in meters per second
-
+        .linearVelocity(Units.MetersPerSecond.of(m_moduleInputs[0].ModuleState.speedMetersPerSecond)); // speed in meters per second
   }
 
   /**
-   * Gets the instantaneous states for each swerve module in FL, FR, RL, RR order
+   * Gets the measured states for each swerve module in FL, FR, RL, RR order
    */
   public SwerveModuleState[] getModuleStates() {
     return new SwerveModuleState[] {
@@ -215,7 +240,7 @@ public class SwerveController {
   }
 
   /**
-   * Gets the cumulative positions for each swerve module in FL, FR, RL, RR order
+   * Gets the measured positions for each swerve module in FL, FR, RL, RR order
    */
   public SwerveModulePosition[] getModulePositions() {
     return new SwerveModulePosition[] {

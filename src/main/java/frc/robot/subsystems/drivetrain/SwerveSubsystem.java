@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.dashboard.DrivetrainDashboardSection;
 import frc.robot.Container;
 import frc.robot.Robot;
+import frc.robot.subsystems.drivetrain.util.AutoAlign;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
 import static edu.wpi.first.units.Units.DegreesPerSecond;
@@ -32,12 +33,12 @@ import org.littletonrobotics.junction.Logger;
 import org.prime.control.SwerveControlSuppliers;
 import org.prime.vision.LimelightInputs;
 
-public class DrivetrainSubsystem extends SubsystemBase {
+public class SwerveSubsystem extends SubsystemBase {
   private DrivetrainDashboardSection _drivetrainDashboardSection;
 
   // IO
-  private SwerveController _swerveController;
-  private SwerveControllerInputsAutoLogged _inputs = new SwerveControllerInputsAutoLogged();
+  private SwerveIOController _swerveController;
+  private SwerveSubsystemInputsAutoLogged _inputs = new SwerveSubsystemInputsAutoLogged();
 
   // SnapAngle
   private boolean _useAutoAlign = false;
@@ -60,15 +61,15 @@ public class DrivetrainSubsystem extends SubsystemBase {
   /**
    * Creates a new Drivetrain.
    */
-  public DrivetrainSubsystem(boolean isReal) {
+  public SwerveSubsystem(boolean isReal) {
     setName("Drivetrain");
 
     // Create swerve controller
-    _swerveController = new SwerveController(isReal);
+    _swerveController = new SwerveIOController(isReal);
     _swerveController.updateInputs(_inputs);
 
     // Configure AutoAlign
-    _autoAlign = new AutoAlign(DriveMap.AutoAlignPID);
+    _autoAlign = new AutoAlign(SwerveMap.AutoAlignPID);
 
     _drivetrainDashboardSection = new DrivetrainDashboardSection();
 
@@ -101,7 +102,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private void configurePathPlanner() {
     // Load the RobotConfig from the GUI settings, or use the default if an
     // exception occurs
-    RobotConfig config = DriveMap.PathPlannerRobotConfiguration;
+    RobotConfig config = SwerveMap.PathPlannerRobotConfiguration;
     try {
       config = RobotConfig.fromGUISettings();
     } catch (Exception e) {
@@ -121,8 +122,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
         () -> _inputs.RobotRelativeChassisSpeeds,
         (speeds, feedForwards) -> driveRobotRelative(speeds),
         new PPHolonomicDriveController(
-            DriveMap.PathPlannerTranslationPID.toPIDConstants(),
-            DriveMap.PathPlannerRotationPID.toPIDConstants()),
+            SwerveMap.PathPlannerTranslationPID.toPIDConstants(),
+            SwerveMap.PathPlannerRotationPID.toPIDConstants()),
         config, () -> {
           // Boolean supplier that controls when the path will be mirrored for the red
           // alliance
@@ -176,7 +177,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     // Calculate the module states from the chassis speeds
     var swerveModuleStates = _swerveController.Kinematics.toSwerveModuleStates(robotRelativeChassisSpeeds);
-    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, DriveMap.Chassis.MaxSpeedMetersPerSecond);
+    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, SwerveMap.Chassis.MaxSpeedMetersPerSecond);
 
     // Set the desired states for each module
     Logger.recordOutput("Drive/desiredStates", swerveModuleStates);

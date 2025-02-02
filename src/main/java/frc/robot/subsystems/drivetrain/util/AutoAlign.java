@@ -1,10 +1,11 @@
-package frc.robot.subsystems.drivetrain;
+package frc.robot.subsystems.drivetrain.util;
 
 import org.prime.control.PrimePIDConstants;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.subsystems.drivetrain.SwerveMap;
 
 /**
  * A class that uses a PID controller to calculate a rotational correction speed for the robot to face a setpoint angle
@@ -39,8 +40,8 @@ public class AutoAlign {
         var currentRotationRadians = MathUtil.angleModulus(currentAngle.getRadians());
         var correction = _pid.calculate(currentRotationRadians, _setpoint.getRadians());
 
-        return MathUtil.clamp(correction, -DriveMap.Chassis.MaxAngularSpeedRadians,
-                DriveMap.Chassis.MaxAngularSpeedRadians);
+        return MathUtil.clamp(correction, -SwerveMap.Chassis.MaxAngularSpeedRadians,
+                SwerveMap.Chassis.MaxAngularSpeedRadians);
     }
 
     /**

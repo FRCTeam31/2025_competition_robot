@@ -4,7 +4,7 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.robot.subsystems.drivetrain.DriveMap;
+import frc.robot.subsystems.drivetrain.SwerveMap;
 
 public class SwerveControlSuppliers {
 
@@ -34,9 +34,9 @@ public class SwerveControlSuppliers {
     }
 
     // Convert inputs to MPS
-    var inputXMPS = X.getAsDouble() * DriveMap.Chassis.MaxSpeedMetersPerSecond;
-    var inputYMPS = -Y.getAsDouble() * DriveMap.Chassis.MaxSpeedMetersPerSecond;
-    var inputRotationRadiansPS = -Z.getAsDouble() * DriveMap.Chassis.MaxAngularSpeedRadians; // CCW positive
+    var inputXMPS = X.getAsDouble() * SwerveMap.Chassis.MaxSpeedMetersPerSecond;
+    var inputYMPS = -Y.getAsDouble() * SwerveMap.Chassis.MaxSpeedMetersPerSecond;
+    var inputRotationRadiansPS = -Z.getAsDouble() * SwerveMap.Chassis.MaxAngularSpeedRadians; // CCW positive
 
     // Return the proper chassis speeds based on the control mode
     return robotRelative

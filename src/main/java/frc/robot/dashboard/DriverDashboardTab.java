@@ -12,7 +12,7 @@ import frc.robot.oi.PrimeAutoRoutine;
 
 import org.prime.dashboard.PrimeSendableChooser;
 
-public class DriverDashboardTab extends GenericDashboardSection {
+public class DriverDashboardTab extends DashboardSection {
         private final String _fieldName = "Field";
         private final Field2d _fieldWidget;
         private final String _autoBuilderName = "PrimeAutoBuilder";

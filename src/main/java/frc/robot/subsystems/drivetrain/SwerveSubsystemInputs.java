@@ -8,7 +8,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 @AutoLog
-public class SwerveControllerInputs {
+public class SwerveSubsystemInputs {
   public Rotation2d GyroAngle = new Rotation2d();
   public double GyroAccelX = 0;
   public double GyroAccelY = 0;

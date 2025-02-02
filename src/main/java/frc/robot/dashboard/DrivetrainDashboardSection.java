@@ -4,7 +4,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.event.BooleanEvent;
 import frc.robot.Robot;
 
-public class DrivetrainDashboardSection extends GenericDashboardSection {
+public class DrivetrainDashboardSection extends DashboardSection {
     private final String _autoAlignKey = "AutoAlign Enabled";
     private BooleanEvent _autoAlignEnabledEvent = null;
     private final String _autoAlignTargetKey = "AutoAlign Angle";

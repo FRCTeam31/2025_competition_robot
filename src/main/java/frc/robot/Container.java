@@ -9,20 +9,20 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.DriverStation;
 
 import frc.robot.dashboard.DriverDashboardTab;
-import frc.robot.dashboard.GenericDashboardSection;
+import frc.robot.dashboard.DashboardSection;
 import frc.robot.dashboard.TestDashboardSection;
 import frc.robot.oi.OperatorInterface;
 import frc.robot.oi.PrimeAutoRoutine;
 import frc.robot.subsystems.*;
-import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
+import frc.robot.subsystems.drivetrain.SwerveSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
 public class Container {
   public static DriverDashboardTab DriverDashboardSection;
   public static TestDashboardSection TestDashboardSection;
-  public static GenericDashboardSection CommandsDashboardSection;
+  public static DashboardSection CommandsDashboardSection;
 
-  public static DrivetrainSubsystem Drivetrain;
+  public static SwerveSubsystem Drivetrain;
   public static VisionSubsystem Vision;
   public static PwmLEDs LEDs;
   public static OperatorInterface OperatorInterface;
@@ -32,7 +32,7 @@ public class Container {
       // Create subsystems
       LEDs = new PwmLEDs();
       Vision = new VisionSubsystem();
-      Drivetrain = new DrivetrainSubsystem(isReal);
+      Drivetrain = new SwerveSubsystem(isReal);
 
       // Register the named commands from each subsystem that may be used in PathPlanner
       var namedCommandsMap = Drivetrain.getNamedCommands();
@@ -43,7 +43,7 @@ public class Container {
       var autoBuilder = new PrimeAutoRoutine(namedCommandsMap);
       DriverDashboardSection = new DriverDashboardTab(autoBuilder);
       TestDashboardSection = new TestDashboardSection();
-      CommandsDashboardSection = new GenericDashboardSection("Commands");
+      CommandsDashboardSection = new DashboardSection("Commands");
 
       // Configure controller bindings
       OperatorInterface = new OperatorInterface();

@@ -3,13 +3,13 @@ package frc.robot.subsystems.drivetrain.gyro;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
-import frc.robot.subsystems.drivetrain.DriveMap;
+import frc.robot.subsystems.drivetrain.SwerveMap;
 
 public class GyroReal implements IGyro {
     private Pigeon2 _gyro;
 
     public GyroReal() {
-        _gyro = new Pigeon2(DriveMap.PigeonId);
+        _gyro = new Pigeon2(SwerveMap.PigeonId);
         var config = new Pigeon2Configuration();
         _gyro.getConfigurator().apply(config);
     }

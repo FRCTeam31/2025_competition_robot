@@ -11,7 +11,7 @@ import frc.robot.subsystems.drivetrain.swervemodule.SwerveModuleMap;
 
 import org.prime.control.PrimePIDConstants;
 
-public class DriveMap {
+public class SwerveMap {
         public static class Chassis {
                 // public static final double TrackWidthMeters = Units.inchesToMeters(24.75);
                 // public static final double WheelBaseMeters = Units.inchesToMeters(24.75);

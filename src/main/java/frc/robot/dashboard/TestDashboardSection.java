@@ -3,7 +3,7 @@ package frc.robot.dashboard;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
-public class TestDashboardSection extends GenericDashboardSection {
+public class TestDashboardSection extends DashboardSection {
 
     public TestDashboardSection() {
         super("Test");
