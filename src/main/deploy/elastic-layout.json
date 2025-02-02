@@ -18,6 +18,20 @@
             },
             "children": [
               {
+                "title": "Routine Steps",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Driver/PrimeAutoBuilder/Routine Steps",
+                  "period": 0.06,
+                  "data_type": "string[]",
+                  "show_submit_button": false
+                }
+              },
+              {
                 "title": "Add Step",
                 "x": 0.0,
                 "y": 0.0,
@@ -25,20 +39,7 @@
                 "height": 128.0,
                 "type": "Toggle Button",
                 "properties": {
-                  "topic": "/Shuffleboard/Driver/PrimeAutoBuilder/addStepButton",
-                  "period": 0.06,
-                  "data_type": "boolean"
-                }
-              },
-              {
-                "title": "Clear Routine",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Toggle Button",
-                "properties": {
-                  "topic": "/Shuffleboard/Driver/PrimeAutoBuilder/clearRoutineButton",
+                  "topic": "/SmartDashboard/Driver/PrimeAutoBuilder/Add Step",
                   "period": 0.06,
                   "data_type": "boolean"
                 }
@@ -51,23 +52,22 @@
                 "height": 128.0,
                 "type": "Toggle Button",
                 "properties": {
-                  "topic": "/Shuffleboard/Driver/PrimeAutoBuilder/removeLastStepButton",
+                  "topic": "/SmartDashboard/Driver/PrimeAutoBuilder/Remove Last Step",
                   "period": 0.06,
                   "data_type": "boolean"
                 }
               },
               {
-                "title": "Routine Steps",
+                "title": "Clear Routine",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
-                "type": "Text Display",
+                "type": "Toggle Button",
                 "properties": {
-                  "topic": "/Shuffleboard/Driver/PrimeAutoBuilder/routineSteps",
+                  "topic": "/SmartDashboard/Driver/PrimeAutoBuilder/Clear Routine",
                   "period": 0.06,
-                  "data_type": "string[]",
-                  "show_submit_button": false
+                  "data_type": "boolean"
                 }
               }
             ]
@@ -82,7 +82,7 @@
             "height": 384.0,
             "type": "Boolean Box",
             "properties": {
-              "topic": "/Shuffleboard/Driver/Alliance",
+              "topic": "/SmartDashboard/Driver/Alliance",
               "period": 0.06,
               "data_type": "boolean",
               "true_color": 4294901764,
@@ -99,79 +99,35 @@
             "height": 384.0,
             "type": "Gyro",
             "properties": {
-              "topic": "/Shuffleboard/Driver/Current Heading",
+              "topic": "/SmartDashboard/Driver/Current Heading",
               "period": 0.06,
               "counter_clockwise_positive": false
             }
           },
           {
-            "title": "Rear APTag",
-            "x": 1536.0,
-            "y": 384.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/Shuffleboard/Driver/Rear APTag",
-              "period": 0.06,
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "Front APTag",
-            "x": 1792.0,
-            "y": 384.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/Shuffleboard/Driver/Front APTag",
-              "period": 0.06,
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "Rear APTag X Offset",
-            "x": 1536.0,
-            "y": 512.0,
-            "width": 256.0,
-            "height": 256.0,
-            "type": "Radial Gauge",
-            "properties": {
-              "topic": "/Shuffleboard/Driver/Rear APTag X Offset",
-              "period": 0.06,
-              "start_angle": -140.0,
-              "end_angle": 140.0,
-              "min_value": 0.0,
-              "max_value": 100.0,
-              "number_of_labels": 8,
-              "wrap_value": false,
-              "show_pointer": true,
-              "show_ticks": true
-            }
-          },
-          {
             "title": "F Pose Est.",
-            "x": 1792.0,
-            "y": 512.0,
+            "x": 1536.0,
+            "y": 384.0,
             "width": 256.0,
             "height": 128.0,
             "type": "Toggle Switch",
             "properties": {
-              "topic": "/Shuffleboard/Driver/F Pose Est.",
-              "period": 0.06
+              "topic": "/SmartDashboard/Driver/F Pose Est.",
+              "period": 0.06,
+              "data_type": "boolean"
             }
           },
           {
             "title": "R Pose Est.",
-            "x": 1792.0,
-            "y": 640.0,
+            "x": 1536.0,
+            "y": 512.0,
             "width": 256.0,
             "height": 128.0,
             "type": "Toggle Switch",
             "properties": {
-              "topic": "/Shuffleboard/Driver/R Pose Est.",
-              "period": 0.06
+              "topic": "/SmartDashboard/Driver/R Pose Est.",
+              "period": 0.06,
+              "data_type": "boolean"
             }
           },
           {
@@ -182,7 +138,7 @@
             "height": 768.0,
             "type": "Field",
             "properties": {
-              "topic": "/Shuffleboard/Driver/Field",
+              "topic": "/SmartDashboard/Driver/Field",
               "period": 0.06,
               "field_game": "Reefscape",
               "robot_width": 0.85,
@@ -202,9 +158,200 @@
             "height": 128.0,
             "type": "ComboBox Chooser",
             "properties": {
+              "topic": "/SmartDashboard/Driver/Auto Options",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Alerts",
+            "x": 896.0,
+            "y": 896.0,
+            "width": 384.0,
+            "height": 384.0,
+            "type": "Alerts",
+            "properties": {
+              "topic": "/SmartDashboard/Alerts",
+              "period": 0.06
+            }
+          },
+          {
+            "title": "BatteryVoltage",
+            "x": 1536.0,
+            "y": 768.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Graph",
+            "properties": {
+              "topic": "/AdvantageKit/SystemStats/BatteryVoltage",
+              "period": 0.033,
+              "data_type": "double",
+              "time_displayed": 5.0,
+              "color": 4278238420,
+              "line_width": 2.0
+            }
+          },
+          {
+            "title": "BrownedOut",
+            "x": 1408.0,
+            "y": 768.0,
+            "width": 128.0,
+            "height": 256.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/SystemStats/BrownedOut",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4294901764,
+              "false_color": 4283279437,
+              "true_icon": "None",
+              "false_icon": "X"
+            }
+          },
+          {
+            "title": "FMSInfo",
+            "x": 896.0,
+            "y": 768.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "FMSInfo",
+            "properties": {
+              "topic": "/FMSInfo",
+              "period": 0.06
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Auto",
+      "grid_layout": {
+        "layouts": [
+          {
+            "title": "PrimeAutoBuilder",
+            "x": 1152.0,
+            "y": 128.0,
+            "width": 384.0,
+            "height": 512.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Routine Steps",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Shuffleboard/Driver/PrimeAutoBuilder/Routine Steps",
+                  "period": 0.06,
+                  "data_type": "string[]",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Add Step",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Toggle Button",
+                "properties": {
+                  "topic": "/Shuffleboard/Driver/PrimeAutoBuilder/Add Step",
+                  "period": 0.06,
+                  "data_type": "boolean"
+                }
+              },
+              {
+                "title": "Remove Last Step",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Toggle Button",
+                "properties": {
+                  "topic": "/Shuffleboard/Driver/PrimeAutoBuilder/Remove Last Step",
+                  "period": 0.06,
+                  "data_type": "boolean"
+                }
+              },
+              {
+                "title": "Clear Routine",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Toggle Button",
+                "properties": {
+                  "topic": "/Shuffleboard/Driver/PrimeAutoBuilder/Clear Routine",
+                  "period": 0.06,
+                  "data_type": "boolean"
+                }
+              }
+            ]
+          }
+        ],
+        "containers": [
+          {
+            "title": "Field",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 1152.0,
+            "height": 640.0,
+            "type": "Field",
+            "properties": {
+              "topic": "/Shuffleboard/Driver/Field",
+              "period": 0.06,
+              "field_game": "Reefscape",
+              "robot_width": 0.85,
+              "robot_length": 0.85,
+              "show_other_objects": true,
+              "show_trajectories": true,
+              "field_rotation": 0.0,
+              "robot_color": 4294198070,
+              "trajectory_color": 4294967295
+            }
+          },
+          {
+            "title": "Auto Options",
+            "x": 1152.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
+            "properties": {
               "topic": "/Shuffleboard/Driver/Auto Options",
               "period": 0.06,
               "sort_options": false
+            }
+          },
+          {
+            "title": "F Pose Est.",
+            "x": 1536.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Toggle Switch",
+            "properties": {
+              "topic": "/Shuffleboard/Driver/F Pose Est.",
+              "period": 0.06,
+              "data_type": "boolean"
+            }
+          },
+          {
+            "title": "R Pose Est.",
+            "x": 1536.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Toggle Switch",
+            "properties": {
+              "topic": "/Shuffleboard/Driver/R Pose Est.",
+              "period": 0.06,
+              "data_type": "boolean"
             }
           }
         ]
@@ -223,8 +370,9 @@
             "height": 128.0,
             "type": "Boolean Box",
             "properties": {
-              "topic": "/Shuffleboard/Drivetrain/AutoAlign Enabled",
+              "topic": "/SmartDashboard/Drivetrain/AutoAlign Enabled",
               "period": 0.06,
+              "data_type": "boolean",
               "true_color": 4283215696,
               "false_color": 4294198070,
               "true_icon": "None",
@@ -239,9 +387,9 @@
             "height": 512.0,
             "type": "Gyro",
             "properties": {
-              "topic": "/Shuffleboard/Drivetrain/AutoAlign Angle",
+              "topic": "/SmartDashboard/Drivetrain/AutoAlign Angle",
               "period": 0.06,
-              "counter_clockwise_positive": false
+              "counter_clockwise_positive": true
             }
           }
         ]
@@ -255,16 +403,326 @@
             "title": "Auto Routines",
             "x": 0.0,
             "y": 0.0,
-            "width": 512.0,
+            "width": 384.0,
             "height": 1280.0,
             "type": "List Layout",
             "properties": {
               "label_position": "HIDDEN"
             },
-            "children": []
+            "children": [
+              {
+                "title": "2 meter 2 back",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Test/2 meter 2 back",
+                  "period": 0.06,
+                  "show_type": false
+                }
+              },
+              {
+                "title": "2 meter run",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Test/2 meter run",
+                  "period": 0.06,
+                  "show_type": false
+                }
+              },
+              {
+                "title": "3 Coral Auto 1.0",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Test/3 Coral Auto 1.0",
+                  "period": 0.06,
+                  "show_type": false
+                }
+              },
+              {
+                "title": "3 Coral Auto 2.0",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Test/3 Coral Auto 2.0",
+                  "period": 0.06,
+                  "show_type": false
+                }
+              },
+              {
+                "title": "5m",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Test/5m",
+                  "period": 0.06,
+                  "show_type": false
+                }
+              },
+              {
+                "title": "7m Auto 1",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Test/7m Auto 1",
+                  "period": 0.06,
+                  "show_type": false
+                }
+              },
+              {
+                "title": "Arts Test Auto",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Test/Arts Test Auto",
+                  "period": 0.06,
+                  "show_type": false
+                }
+              },
+              {
+                "title": "Drive forard, backward, and forward",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Test/Drive forard, backward, and forward",
+                  "period": 0.06,
+                  "show_type": false
+                }
+              },
+              {
+                "title": "Mystery Auto",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Test/Mystery Auto",
+                  "period": 0.06,
+                  "show_type": false
+                }
+              },
+              {
+                "title": "SQUARE",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Test/SQUARE",
+                  "period": 0.06,
+                  "show_type": false
+                }
+              },
+              {
+                "title": "Square Squared",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Test/Square Squared",
+                  "period": 0.06,
+                  "show_type": false
+                }
+              },
+              {
+                "title": "Useless Auto 1",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Test/Useless Auto 1",
+                  "period": 0.06,
+                  "show_type": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "RadioStatus",
+            "x": 1792.0,
+            "y": 128.0,
+            "width": 384.0,
+            "height": 384.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Connected",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/AdvantageKit/RadioStatus/Connected",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              }
+            ]
           }
         ],
-        "containers": []
+        "containers": [
+          {
+            "title": "Preferences",
+            "x": 384.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 896.0,
+            "type": "RobotPreferences",
+            "properties": {
+              "topic": "/Preferences",
+              "period": 0.06
+            }
+          },
+          {
+            "title": "FMSInfo",
+            "x": 1792.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "FMSInfo",
+            "properties": {
+              "topic": "/FMSInfo",
+              "period": 0.06
+            }
+          },
+          {
+            "title": "Console",
+            "x": 1792.0,
+            "y": 512.0,
+            "width": 384.0,
+            "height": 384.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/Console",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "FullCycleMS",
+            "x": 1664.0,
+            "y": 0.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/LoggedRobot/FullCycleMS",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "GCCounts",
+            "x": 1536.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/LoggedRobot/GCCounts",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "GCTimeMS",
+            "x": 1664.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/LoggedRobot/GCTimeMS",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "UserCodeMS",
+            "x": 1408.0,
+            "y": 0.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/LoggedRobot/UserCodeMS",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "LogPeriodicMS",
+            "x": 1536.0,
+            "y": 0.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/LoggedRobot/LogPeriodicMS",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "CAN %",
+            "x": 1408.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/SystemStats/CANBus/Utilization",
+              "period": 0.06,
+              "data_type": "float",
+              "show_submit_button": false
+            }
+          }
+        ]
       }
     }
   ]

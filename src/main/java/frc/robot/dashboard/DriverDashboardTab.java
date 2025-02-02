@@ -2,9 +2,7 @@ package frc.robot.dashboard;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.event.BooleanEvent;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -14,54 +12,45 @@ import frc.robot.oi.PrimeAutoRoutine;
 
 import org.prime.dashboard.PrimeSendableChooser;
 
-public class DriverDashboardTab extends DashboardTabBase {
+public class DriverDashboardTab extends GenericDashboardSection {
+        private final String _fieldName = "Field";
         private final Field2d _fieldWidget;
+        private final String _autoBuilderName = "PrimeAutoBuilder";
         private PrimeAutoRoutine _autoBuilder;
+        private final String _autoOptionChooserName = "Auto Options";
+        private PrimeSendableChooser<String> _autoOptionChooser;
 
         // Widgets
-        private GenericEntry _allianceBox;
-        private GenericEntry _headingGyro;
-        private GenericEntry _rearApTagIdField;
-        private GenericEntry _frontApTagIdField;
-        private GenericEntry _rearApTagOffsetDial;
-        private GenericEntry _frontPoseEstimationSwitch;
+        private final String _allianceBoxName = "Alliance";
+        private final String _headingGyroName = "Current Heading";
+        private final String _frontPoseEstimationSwitchName = "F Pose Est.";
         private BooleanEvent _frontPoseEstimationEvent = null;
-        private GenericEntry _rearPoseEstimationSwitch;
+        private final String _rearPoseEstimationSwitchName = "R Pose Est.";
         private BooleanEvent _rearPoseEstimationEvent = null;
 
         public DriverDashboardTab(PrimeAutoRoutine autoBuilder) {
                 super("Driver");
+
+                putBoolean(_allianceBoxName, false);
+                putDouble(_headingGyroName, 0.0);
+                putBoolean(_frontPoseEstimationSwitchName, false);
+                putBoolean(_rearPoseEstimationSwitchName, false);
+
+                // Add complex data like the field view
                 _fieldWidget = new Field2d();
+                putData(_fieldName, _fieldWidget);
 
-                _allianceBox = createBooleanBox("Alliance", 15, 0, 1, 3, "#FF0000", "#0000FF");
-                _headingGyro = createGyro("Current Heading", 12, 0, 3, 3);
-                _rearApTagIdField = createTextView("Rear APTag", 12, 3, 2, 1);
-                _frontApTagIdField = createTextView("Front APTag", 14, 3, 2, 1);
-                _rearApTagOffsetDial = createDial("Rear APTag X Offset", -40, 40, 12, 4, 2, 2);
-                _frontPoseEstimationSwitch = createToggleSwitch("F Pose Est.", 14, 4, 2, 1);
-                _rearPoseEstimationSwitch = createToggleSwitch("R Pose Est.", 14, 5, 2, 1);
-
-                // Add complex widgets like the field view
-                _tab.add("Field", _fieldWidget)
-                                .withWidget(BuiltInWidgets.kField)
-                                .withPosition(0, 0)
-                                .withSize(12, 6);
                 // _autoChooser = AutoBuilder.buildAutoChooser("Default");
                 // _tab.add(_autoChooser)
                 //                 .withWidget(BuiltInWidgets.kComboBoxChooser)
                 //                 .withPosition(0, 6)
                 //                 .withSize(5, 2);
-                var autoOptionChooser = new PrimeSendableChooser<String>();
-                _tab.add("Auto Options", autoOptionChooser)
-                                .withWidget(BuiltInWidgets.kComboBoxChooser)
-                                .withPosition(4, 6)
-                                .withSize(3, 1);
-                autoBuilder.setChooser(autoOptionChooser);
-                _tab.add("PrimeAutoBuilder", autoBuilder)
-                                .withWidget("PrimeAutoBuilder")
-                                .withPosition(0, 6)
-                                .withSize(4, 4);
+                _autoOptionChooser = new PrimeSendableChooser<String>();
+                putData(_autoOptionChooserName, _autoOptionChooser);
+
+                autoBuilder.setChooser(_autoOptionChooser);
                 _autoBuilder = autoBuilder;
+                putData(_autoBuilderName, _autoBuilder);
         }
 
         public Command getSelectedAuto() {
@@ -82,39 +71,27 @@ public class DriverDashboardTab extends DashboardTabBase {
         }
 
         public void setAllianceColor(boolean isRed) {
-                _allianceBox.setBoolean(isRed);
+                putBoolean(_allianceBoxName, isRed);
         }
 
         public void setGyroHeading(Rotation2d heading) {
-                _headingGyro.setDouble(heading.getDegrees());
-        }
-
-        public void setFrontAprilTagId(int id) {
-                _frontApTagIdField.setInteger(id);
-        }
-
-        public void setRearAprilTagId(int id) {
-                _rearApTagIdField.setInteger(id);
-        }
-
-        public void setRearAprilTagOffset(double offset) {
-                _rearApTagOffsetDial.setDouble(offset);
+                putDouble(_headingGyroName, heading.getDegrees());
         }
 
         public void setFrontPoseEstimationSwitch(boolean enabled) {
-                _frontPoseEstimationSwitch.setBoolean(enabled);
+                putBoolean(_frontPoseEstimationSwitchName, enabled);
         }
 
         public void setRearPoseEstimationSwitch(boolean enabled) {
-                _rearPoseEstimationSwitch.setBoolean(enabled);
+                putBoolean(_rearPoseEstimationSwitchName, enabled);
         }
 
         public boolean getFrontPoseEstimationSwitch() {
-                return _frontPoseEstimationSwitch.getBoolean(false);
+                return getBoolean(_frontPoseEstimationSwitchName, false);
         }
 
         public boolean getRearPoseEstimationSwitch() {
-                return _rearPoseEstimationSwitch.getBoolean(false);
+                return getBoolean(_rearPoseEstimationSwitchName, false);
         }
 
         public BooleanEvent getFrontPoseEstimationEvent() {

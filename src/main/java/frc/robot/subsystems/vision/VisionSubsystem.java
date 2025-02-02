@@ -3,7 +3,6 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Container;
 
 import org.littletonrobotics.junction.Logger;
 import org.prime.vision.LimelightInputs;
@@ -138,13 +137,6 @@ public class VisionSubsystem extends SubsystemBase {
             _limelights[i].updateInputs(_limelightInputs[i]);
             Logger.processInputs("Vision/LL" + i + "/TagID", _limelightInputs[i]);
         }
-
-        // Update Dashboard & logging
-        var frontInputs = getLimelightInputs(0);
-        var rearInputs = getLimelightInputs(1);
-        Container.DriverDashboardTab.setFrontAprilTagId(frontInputs.ApriltagId);
-        Container.DriverDashboardTab.setRearAprilTagId(rearInputs.ApriltagId);
-        Container.DriverDashboardTab.setRearAprilTagOffset(rearInputs.TargetHorizontalOffset.getDegrees());
     }
 
     public static boolean isAprilTagIdValid(int apriltagId) {
