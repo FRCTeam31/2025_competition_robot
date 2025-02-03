@@ -1,5 +1,6 @@
 package frc.robot.subsystems.algaeIntake;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
@@ -8,6 +9,7 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.DoubleSolenoidSim;
 import frc.robot.maps.AlgaeIntakeMap;
 
+@Logged
 public class AlgaeIntakeIOSim implements IAlgaeIntakeIO {
 
     public AlgaeIntakeInputs m_inputs = new AlgaeIntakeInputs();
