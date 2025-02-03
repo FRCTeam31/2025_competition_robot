@@ -1,13 +1,9 @@
 package frc.robot.subsystems.endEffector;
 
-import java.lang.invoke.VarHandle.VarHandleDesc;
-
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.maps.DriveMap;
-import frc.robot.maps.EndEffectorMap;
 
 public class EndEffectorIOSim implements IEndEffectorIO {
 
