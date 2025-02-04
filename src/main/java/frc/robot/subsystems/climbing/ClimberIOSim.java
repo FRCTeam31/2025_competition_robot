@@ -13,9 +13,9 @@ import frc.robot.maps.ClimberMap;
 
 @Logged
 public class ClimberIOSim implements IClimberIO {
-    public DCMotorSim climberMotorSim;
-    public DoubleSolenoidSim climbSolenoidSim;
-    public ClimberInputs m_Inputs = new ClimberInputs();
+    private DCMotorSim climberMotorSim;
+    private DoubleSolenoidSim climbSolenoidSim;
+    private ClimberInputs m_Inputs = new ClimberInputs();
 
     public ClimberIOSim() {
 

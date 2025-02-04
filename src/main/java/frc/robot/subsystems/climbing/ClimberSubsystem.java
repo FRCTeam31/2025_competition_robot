@@ -12,16 +12,12 @@ import frc.robot.maps.ClimberMap;
 @Logged
 public class ClimberSubsystem extends SubsystemBase {
     private IClimberIO Climber;
-    /**
-     * This is the climber inputs
-     * It is the inputs variable
-     */
-    private ClimberInputs _inputs = new ClimberInputs();
+    private ClimberInputs m_inputs;
 
     private enum ClimberPosition {
         /** The starting position of the climber (Up) */
         IN,
-        /** 𝓣𝓱𝓮 𝓮𝓷𝓭𝓲𝓷𝓰 𝓹𝓸𝓼𝓲𝓽𝓲𝓸𝓷 𝓸𝓯 𝓽𝓱𝓮 𝓬𝓵𝓲𝓶𝓫𝓮𝓻 */
+        /** 𝓣𝓱𝓮 𝓮𝓷𝓭𝓲𝓷𝓰 𝓹𝓸𝓼𝓲𝓽𝓲𝓸𝓷 𝓸𝓯 𝓽𝓱𝓮 𝓬𝓵𝓲𝓶𝓫𝓮𝓻 (Down) */
         OUT
     }
 
@@ -33,16 +29,18 @@ public class ClimberSubsystem extends SubsystemBase {
         } else {
             Climber = new ClimberIOSim();
         }
+
+        m_inputs = Climber.getInputs();
     }
 
     @Override
     public void periodic() {
-        _inputs = Climber.getInputs();
+        m_inputs = Climber.getInputs();
         checkLimitSwitches();
     }
 
-    public void checkLimitSwitches() {
-        if (_inputs.InLimitSwitch.get() || _inputs.OutLimitSwitch.get()) {
+    private void checkLimitSwitches() {
+        if (m_inputs.InLimitSwitch.get() || m_inputs.OutLimitSwitch.get()) {
             Climber.stopMotors();
         }
     }
@@ -64,18 +62,13 @@ public class ClimberSubsystem extends SubsystemBase {
 
     public Command toggleClimbersCommand() {
         return Commands.runOnce(() -> {
-            if (_inputs.OutLimitSwitch.get() || _climberPosition == ClimberPosition.OUT) {
+            if (m_inputs.OutLimitSwitch.get() || _climberPosition == ClimberPosition.OUT) {
                 setClimberSpeedCommand(ClimberMap.climberInSpeed);
                 _climberPosition = ClimberPosition.IN;
-            } else if (_inputs.InLimitSwitch.get() || _climberPosition == ClimberPosition.IN) {
+            } else if (m_inputs.InLimitSwitch.get() || _climberPosition == ClimberPosition.IN) {
                 setClimberSpeedCommand(ClimberMap.climberOutSpeed);
                 _climberPosition = ClimberPosition.OUT;
             }
         }, this);
-    }
-
-    public Map<String, Command> getNamedCommands() {
-        return Map.of("Stop Climbers", setClimberSpeedCommand(0), "Set Climber Position",
-                setClimberPositionCommand(Value.kForward));
     }
 }

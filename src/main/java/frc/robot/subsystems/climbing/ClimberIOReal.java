@@ -13,12 +13,12 @@ import frc.robot.maps.ClimberMap;
 @Logged
 public class ClimberIOReal implements IClimberIO {
 
-    public ClimberInputs m_inputs = new ClimberInputs();
+    private ClimberInputs m_inputs = new ClimberInputs();
 
-    public SparkFlex climbMotor;
-    public DoubleSolenoid climbPneumatics;
-    public DigitalInput climbOutLimitSwitch;
-    public DigitalInput climbInLimitSwitch;
+    private SparkFlex climbMotor;
+    private DoubleSolenoid climbPneumatics;
+    private DigitalInput climbOutLimitSwitch;
+    private DigitalInput climbInLimitSwitch;
 
     public ClimberIOReal() {
 
