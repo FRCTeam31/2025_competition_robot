@@ -13,12 +13,20 @@ public class AlgaeIntakeSubsystem extends SubsystemBase {
 
     private IAlgaeIntakeIO AlgaeIntake;
 
+    private AlgaeIntakeInputs _inputs;
+
     public AlgaeIntakeSubsystem(boolean isReal) {
         if (isReal) {
             AlgaeIntake = new AlgaeIntakeIOReal();
         } else {
             AlgaeIntake = new AlgaeIntakeIOSim();
         }
+
+        _inputs = AlgaeIntake.getInputs();
+    }
+
+    public void periodic() {
+        _inputs = AlgaeIntake.getInputs();
     }
 
     public Command setAlgaeIntakePositionCommand(Value algaeIntakePosition) {

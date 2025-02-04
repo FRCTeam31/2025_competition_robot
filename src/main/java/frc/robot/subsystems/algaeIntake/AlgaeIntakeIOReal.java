@@ -12,7 +12,7 @@ import frc.robot.maps.AlgaeIntakeMap;
 @Logged
 public class AlgaeIntakeIOReal implements IAlgaeIntakeIO {
 
-    public AlgaeIntakeInputs m_inputs = new AlgaeIntakeInputs();
+    private AlgaeIntakeInputs m_inputs = new AlgaeIntakeInputs();
 
     public SparkFlex algaeIntakeMotor;
     public DoubleSolenoid leftAlgaeSolenoid;
