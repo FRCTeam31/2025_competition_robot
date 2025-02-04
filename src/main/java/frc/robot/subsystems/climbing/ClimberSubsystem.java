@@ -47,7 +47,7 @@ public class ClimberSubsystem extends SubsystemBase {
         }
     }
 
-    public Command setClimberPosition(Value climberPosition) {
+    public Command setClimberPositionCommand(Value climberPosition) {
         return Commands.runOnce(() -> {
             Climber.setClimbersState(climberPosition);
 
@@ -55,27 +55,27 @@ public class ClimberSubsystem extends SubsystemBase {
 
     }
 
-    public Command setClimberSpeed(double speed) {
+    public Command setClimberSpeedCommand(double speed) {
         return Commands.runOnce(() -> {
             Climber.setMotorSpeed(speed);
         }, this);
 
     }
 
-    public Command toggleClimbers() {
+    public Command toggleClimbersCommand() {
         return Commands.runOnce(() -> {
             if (_inputs.OutLimitSwitch.get() || _climberPosition == ClimberPosition.OUT) {
-                setClimberSpeed(ClimberMap.climberInSpeed);
+                setClimberSpeedCommand(ClimberMap.climberInSpeed);
                 _climberPosition = ClimberPosition.IN;
             } else if (_inputs.InLimitSwitch.get() || _climberPosition == ClimberPosition.IN) {
-                setClimberSpeed(ClimberMap.climberOutSpeed);
+                setClimberSpeedCommand(ClimberMap.climberOutSpeed);
                 _climberPosition = ClimberPosition.OUT;
             }
         }, this);
     }
 
     public Map<String, Command> getNamedCommands() {
-        return Map.of("Stop Climbers", setClimberSpeed(0), "Set Climber Position",
-                setClimberPosition(Value.kForward));
+        return Map.of("Stop Climbers", setClimberSpeedCommand(0), "Set Climber Position",
+                setClimberPositionCommand(Value.kForward));
     }
 }
