@@ -17,15 +17,14 @@ public class ClimberIOReal implements IClimberIO {
 
     public SparkFlex climbMotor;
     public DoubleSolenoid climbPneumatics;
-    public DigitalInput climberBottomLimitSwitch;
-    public DigitalInput climberTopLimitSwitch;
+    public DigitalInput climbOutLimitSwitch;
+    public DigitalInput climbInLimitSwitch;
 
     public ClimberIOReal() {
 
         climbMotor = new SparkFlex(0, MotorType.kBrushless);
         climbPneumatics = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, ClimberMap.climberForwardChannel,
                 ClimberMap.climberReverseChannel);
-
     }
 
     public ClimberInputs getInputs() {
