@@ -217,6 +217,12 @@ public class PrimeAutoRoutine implements Sendable {
 
         var autoCommand = Commands.none();
 
+        if (!AutoBuilder.isConfigured()) {
+            DriverStation.reportError("[AUTOBUILDER] AutoBuilder is not configured", false);
+
+            return Commands.none();
+        }
+
         for (var step : _routineSteps) {
             if (stepIsPath(step)) {
                 try {
