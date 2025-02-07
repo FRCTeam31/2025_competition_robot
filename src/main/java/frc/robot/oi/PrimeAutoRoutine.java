@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.event.BooleanEvent;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Container;
 import frc.robot.Robot;
 
 /**
@@ -232,11 +233,20 @@ public class PrimeAutoRoutine implements Sendable {
                         throw new Exception("Path not found");
                     }
 
+                    // Set starting pose of the robot if path starts with "S"
+                    if (step.startsWith("S")) {
+                        // This resets the pose estimation to the first point of the starting path, instead of
+                        // letting it try to reach the ending position from where it *thinks* that it started.
+                        var startingPose = path.getPathPoses().get(0);
+                        Container.Swerve.setEstimatorPose(startingPose);
+                    }
+
                     // Flip path if on red alliance
-                    if (Robot.onRedAlliance()) {
+                    if (AutoBuilder.shouldFlip()) {
                         path = path.flipPath();
                     }
 
+                    // AutoBuilder.followPath uses the configured AutoBuilder settings during the command
                     var followPathCommand = AutoBuilder.followPath(path);
                     if (followPathCommand == null) {
                         throw new Exception("Failed to build path command");
