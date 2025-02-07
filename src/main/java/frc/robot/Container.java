@@ -22,7 +22,7 @@ public class Container {
   public static TestDashboardSection TestDashboardSection;
   public static DashboardSection CommandsDashboardSection;
 
-  public static SwerveSubsystem Drivetrain;
+  public static SwerveSubsystem Swerve;
   public static VisionSubsystem Vision;
   public static PwmLEDs LEDs;
   public static OperatorInterface OperatorInterface;
@@ -32,10 +32,10 @@ public class Container {
       // Create subsystems
       LEDs = new PwmLEDs();
       Vision = new VisionSubsystem();
-      Drivetrain = new SwerveSubsystem(isReal);
+      Swerve = new SwerveSubsystem(isReal);
 
       // Register the named commands from each subsystem that may be used in PathPlanner
-      var namedCommandsMap = Drivetrain.getNamedCommands();
+      var namedCommandsMap = Swerve.getNamedCommands();
       // ...add other named commands to the map using "otherNamedCommands.putAll(namedCommandsMap);"
       NamedCommands.registerCommands(namedCommandsMap);
 
@@ -48,12 +48,12 @@ public class Container {
       // Configure controller bindings
       OperatorInterface = new OperatorInterface();
       OperatorInterface.bindDriverControls(
-          Drivetrain.resetGyroCommand(),
-          Drivetrain.enableLockOnCommand(),
-          Drivetrain.disableAutoAlignCommand(),
-          Drivetrain::setAutoAlignSetpointCommand,
-          Drivetrain::setDefaultCommand,
-          Drivetrain::driveRobotRelativeCommand);
+          Swerve.resetGyroCommand(),
+          Swerve.enableLockOnCommand(),
+          Swerve.disableAutoAlignCommand(),
+          Swerve::setAutoAlignSetpointCommand,
+          Swerve::setDefaultCommand,
+          Swerve::driveRobotRelativeCommand);
     } catch (Exception e) {
       DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());
     }

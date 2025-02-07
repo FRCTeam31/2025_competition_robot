@@ -165,14 +165,14 @@ public class Robot extends LoggedRobot {
     // Exit without scheduling an auto command if none is selected
     if (_autonomousCommand == null || _autonomousCommand == Commands.none()) {
       DriverStation.reportError("[ERROR] >> No auto command selected", false);
-      Container.Drivetrain.resetGyro();
+      Container.Swerve.resetGyro();
     } else {
       // Schedule the auto command
-      Container.Drivetrain.EstimatePoseUsingFrontCamera = true;
-      Container.Drivetrain.EstimatePoseUsingRearCamera = true;
+      Container.Swerve.EstimatePoseUsingFrontCamera = true;
+      Container.Swerve.EstimatePoseUsingRearCamera = true;
 
       if (onRedAlliance())
-        Container.Drivetrain.resetGyro();
+        Container.Swerve.resetGyro();
 
       _autonomousCommand.schedule();
     }
@@ -189,6 +189,7 @@ public class Robot extends LoggedRobot {
       _autonomousCommand.cancel();
 
       // Stop any subsystems still running
+      Container.Swerve.stopAllMotors();
     }
 
     // Set teleop LED pattern
@@ -196,8 +197,8 @@ public class Robot extends LoggedRobot {
     Container.LEDs.setBackgroundPattern(telePattern);
     Container.LEDs.clearForegroundPattern();
 
-    Container.Drivetrain.EstimatePoseUsingFrontCamera = false;
-    Container.Drivetrain.EstimatePoseUsingRearCamera = false;
+    Container.Swerve.EstimatePoseUsingFrontCamera = false;
+    Container.Swerve.EstimatePoseUsingRearCamera = false;
   }
 
   /**

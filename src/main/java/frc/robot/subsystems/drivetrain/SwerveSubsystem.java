@@ -5,6 +5,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -102,7 +103,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private void configurePathPlanner() {
     // Load the RobotConfig from the GUI settings, or use the default if an
     // exception occurs
-    RobotConfig config = SwerveMap.PathPlannerRobotConfiguration;
+    RobotConfig config = SwerveMap.Chassis.PathPlannerRobotConfiguration;
     try {
       config = RobotConfig.fromGUISettings();
     } catch (Exception e) {
@@ -118,7 +119,9 @@ public class SwerveSubsystem extends SubsystemBase {
         .setLogActivePathCallback(poses -> Container.DriverDashboardSection.getFieldPath().setPoses(poses));
 
     // Configure PathPlanner holonomic control
-    AutoBuilder.configure(() -> _inputs.EstimatedRobotPose, _swerveController::setEstimatorPose,
+    AutoBuilder.configure(
+        () -> _inputs.EstimatedRobotPose,
+        _swerveController::setEstimatorPose,
         () -> _inputs.RobotRelativeChassisSpeeds,
         (speeds, feedForwards) -> driveRobotRelative(speeds),
         new PPHolonomicDriveController(
@@ -153,6 +156,14 @@ public class SwerveSubsystem extends SubsystemBase {
     _useAutoAlign = enabled;
     if (!enabled)
       Container.LEDs.clearForegroundPattern();
+  }
+
+  /**
+   * Sets the pose estimator's pose
+   * @param pose
+   */
+  public void setEstimatorPose(Pose2d pose) {
+    _swerveController.setEstimatorPose(pose);
   }
 
   /**

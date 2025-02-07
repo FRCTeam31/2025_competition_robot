@@ -19,6 +19,22 @@ public class SwerveMap {
                 public static final double WheelBaseMeters = Units.inchesToMeters(21.25);
                 public static final double MaxSpeedMetersPerSecond = 5.4;
                 public static final double MaxAngularSpeedRadians = Math.PI * 2;
+
+                public static final RobotConfig PathPlannerRobotConfiguration = new RobotConfig(
+                                Units.lbsToKilograms(50),
+                                MomentOfInertia.ofBaseUnits(3, edu.wpi.first.units.Units.KilogramSquareMeters)
+                                                .baseUnitMagnitude(),
+                                new ModuleConfig(
+                                                DriveWheelDiameterMeters / 2,
+                                                Chassis.MaxSpeedMetersPerSecond / 4,
+                                                1.0,
+                                                DCMotor.getNeoVortex(1).withReduction(DriveGearRatio),
+                                                DriveStallCurrentLimit,
+                                                1),
+                                FrontLeftSwerveModule.ModuleLocation,
+                                FrontRightSwerveModule.ModuleLocation,
+                                RearLeftSwerveModule.ModuleLocation,
+                                RearRightSwerveModule.ModuleLocation);
         }
 
         public class Control {
@@ -74,20 +90,4 @@ public class SwerveMap {
                         false,
                         false,
                         new Translation2d(-Chassis.TrackWidthMeters / 2, Chassis.WheelBaseMeters / 2));
-
-        public static final RobotConfig PathPlannerRobotConfiguration = new RobotConfig(
-                        Units.lbsToKilograms(120),
-                        MomentOfInertia.ofBaseUnits(6, edu.wpi.first.units.Units.KilogramSquareMeters)
-                                        .baseUnitMagnitude(),
-                        new ModuleConfig(
-                                        Units.inchesToMeters(4),
-                                        Chassis.MaxSpeedMetersPerSecond,
-                                        1.0,
-                                        DCMotor.getNeoVortex(1),
-                                        DriveStallCurrentLimit,
-                                        1),
-                        FrontLeftSwerveModule.ModuleLocation,
-                        FrontRightSwerveModule.ModuleLocation,
-                        RearLeftSwerveModule.ModuleLocation,
-                        RearRightSwerveModule.ModuleLocation);
 }
