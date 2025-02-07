@@ -46,33 +46,33 @@ public class SwerveMap {
                         1,
                         2,
                         14,
-                        0.673828,
-                        true,
-                        true,
+                        47 * 0.0025,
+                        false,
+                        false,
                         new Translation2d(Chassis.TrackWidthMeters / 2, Chassis.WheelBaseMeters / 2));
         public static final SwerveModuleMap FrontRightSwerveModule = new SwerveModuleMap(
                         7,
                         8,
                         13,
-                        0.113770,
+                        272 * 0.0025,
                         true,
-                        true,
+                        false,
                         new Translation2d(Chassis.TrackWidthMeters / 2, -(Chassis.WheelBaseMeters / 2)));
         public static final SwerveModuleMap RearRightSwerveModule = new SwerveModuleMap(
                         5,
                         6,
                         12,
-                        0.699951,
+                        278.75 * 0.0025,
                         true,
-                        true,
+                        false,
                         new Translation2d(-(Chassis.TrackWidthMeters / 2), -(Chassis.WheelBaseMeters / 2)));
         public static final SwerveModuleMap RearLeftSwerveModule = new SwerveModuleMap(
                         3,
                         4,
                         11,
-                        0.136963,
-                        true,
-                        true,
+                        55 * 0.0025,
+                        false,
+                        false,
                         new Translation2d(-Chassis.TrackWidthMeters / 2, Chassis.WheelBaseMeters / 2));
 
         public static final RobotConfig PathPlannerRobotConfiguration = new RobotConfig(

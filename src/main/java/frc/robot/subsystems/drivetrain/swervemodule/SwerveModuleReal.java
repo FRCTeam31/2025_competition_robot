@@ -74,9 +74,10 @@ public class SwerveModuleReal implements ISwerveModule {
 
   @Override
   public void setSteeringPID(PrimePIDConstants steeringPID) {
-    var currentSetpoint = _steeringPidController.getSetpoint();
-    _steeringPidController = steeringPID.createPIDController(0.02);
-    _steeringPidController.setSetpoint(currentSetpoint);
+    _steeringPidController.setP(steeringPID.kP);
+    _steeringPidController.setI(steeringPID.kI);
+    _steeringPidController.setD(steeringPID.kD);
+    System.out.println("Reset Steering PID " + _name);
   }
 
   /**
@@ -105,11 +106,11 @@ public class SwerveModuleReal implements ISwerveModule {
 
   @Override
   public void setDrivePID(PrimePIDConstants drivePID) {
-    var currentSetpoint = _drivingPidController.getSetpoint();
-    _drivingPidController = drivePID.createPIDController(0.02);
-    _drivingPidController.setSetpoint(currentSetpoint);
-
+    _drivingPidController.setP(drivePID.kP);
+    _drivingPidController.setI(drivePID.kI);
+    _drivingPidController.setD(drivePID.kD);
     _driveFeedForward = new SimpleMotorFeedforward(drivePID.kS, drivePID.kV, drivePID.kA);
+    System.out.println("Reset Drive PID " + _name);
   }
 
   /**

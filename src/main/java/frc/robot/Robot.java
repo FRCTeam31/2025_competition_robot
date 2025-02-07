@@ -47,8 +47,6 @@ public class Robot extends LoggedRobot {
   private Command _autonomousCommand;
 
   public Robot() {
-    super(0.02); // Run the robot loop at 50Hz
-
     // Set up pathfinding compatibility with AdvantageKit
     Pathfinding.setPathfinder(new LocalADStarADK());
 
