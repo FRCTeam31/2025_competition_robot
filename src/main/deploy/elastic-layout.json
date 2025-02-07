@@ -3,6 +3,13 @@
   "grid_size": 128,
   "tabs": [
     {
+      "name": "Autonomous",
+      "grid_layout": {
+        "layouts": [],
+        "containers": []
+      }
+    },
+    {
       "name": "Driver",
       "grid_layout": {
         "layouts": [
@@ -246,7 +253,7 @@
                 "height": 128.0,
                 "type": "Text Display",
                 "properties": {
-                  "topic": "/Shuffleboard/Driver/PrimeAutoBuilder/Routine Steps",
+                  "topic": "/SmartDashboard/Driver/PrimeAutoBuilder/Routine Steps",
                   "period": 0.06,
                   "data_type": "string[]",
                   "show_submit_button": false
@@ -260,7 +267,7 @@
                 "height": 128.0,
                 "type": "Toggle Button",
                 "properties": {
-                  "topic": "/Shuffleboard/Driver/PrimeAutoBuilder/Add Step",
+                  "topic": "/SmartDashboard/Driver/PrimeAutoBuilder/Add Step",
                   "period": 0.06,
                   "data_type": "boolean"
                 }
@@ -273,7 +280,7 @@
                 "height": 128.0,
                 "type": "Toggle Button",
                 "properties": {
-                  "topic": "/Shuffleboard/Driver/PrimeAutoBuilder/Remove Last Step",
+                  "topic": "/SmartDashboard/Driver/PrimeAutoBuilder/Remove Last Step",
                   "period": 0.06,
                   "data_type": "boolean"
                 }
@@ -286,7 +293,7 @@
                 "height": 128.0,
                 "type": "Toggle Button",
                 "properties": {
-                  "topic": "/Shuffleboard/Driver/PrimeAutoBuilder/Clear Routine",
+                  "topic": "/SmartDashboard/Driver/PrimeAutoBuilder/Clear Routine",
                   "period": 0.06,
                   "data_type": "boolean"
                 }
@@ -303,7 +310,7 @@
             "height": 640.0,
             "type": "Field",
             "properties": {
-              "topic": "/Shuffleboard/Driver/Field",
+              "topic": "/SmartDashboard/Driver/Field",
               "period": 0.06,
               "field_game": "Reefscape",
               "robot_width": 0.85,
@@ -323,7 +330,7 @@
             "height": 128.0,
             "type": "ComboBox Chooser",
             "properties": {
-              "topic": "/Shuffleboard/Driver/Auto Options",
+              "topic": "/SmartDashboard/Driver/Auto Options",
               "period": 0.06,
               "sort_options": false
             }
@@ -336,7 +343,7 @@
             "height": 128.0,
             "type": "Toggle Switch",
             "properties": {
-              "topic": "/Shuffleboard/Driver/F Pose Est.",
+              "topic": "/SmartDashboard/Driver/F Pose Est.",
               "period": 0.06,
               "data_type": "boolean"
             }
@@ -349,7 +356,7 @@
             "height": 128.0,
             "type": "Toggle Switch",
             "properties": {
-              "topic": "/Shuffleboard/Driver/R Pose Est.",
+              "topic": "/SmartDashboard/Driver/R Pose Est.",
               "period": 0.06,
               "data_type": "boolean"
             }
