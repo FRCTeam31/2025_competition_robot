@@ -4,166 +4,58 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 
-import edu.wpi.first.epilogue.Logged;
-import edu.wpi.first.epilogue.Logged.Importance;
-import edu.wpi.first.epilogue.Logged.Strategy;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+
+import frc.robot.dashboard.DriverDashboardTab;
+import frc.robot.dashboard.DashboardSection;
+import frc.robot.dashboard.TestDashboardSection;
+import frc.robot.oi.OperatorInterface;
+import frc.robot.oi.PrimeAutoRoutine;
 import frc.robot.subsystems.*;
-import frc.robot.maps.DriveMap;
-import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
+import frc.robot.subsystems.drivetrain.SwerveSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
-import org.prime.control.Controls;
-import org.prime.control.HolonomicControlStyle;
-import org.prime.control.PrimeXboxController;
-
-@Logged(strategy = Strategy.OPT_IN)
 public class Container {
-  private PrimeXboxController m_driverController;
-  //private double _voltage = 0;
+  public static DriverDashboardTab DriverDashboardSection;
+  public static TestDashboardSection TestDashboardSection;
+  public static DashboardSection CommandsDashboardSection;
 
-  @Logged(name = "Vision", importance = Importance.CRITICAL)
-  public VisionSubsystem Vision;
-  @Logged(name = "Drive", importance = Importance.CRITICAL)
-  public DrivetrainSubsystem Drivetrain;
-  @Logged(name = "LEDs", importance = Importance.CRITICAL)
-  public PwmLEDs LEDs;
+  public static SwerveSubsystem Swerve;
+  public static VisionSubsystem Vision;
+  public static PwmLEDs LEDs;
+  public static OperatorInterface OperatorInterface;
 
-  public Container(boolean isReal) {
+  public static void initialize(boolean isReal) {
     try {
-      System.out.println("Robot diameter: " + DriveMap.WheelBaseCircumferenceMeters);
-      DriverDashboard.init(isReal);
-      m_driverController = new PrimeXboxController(Controls.DRIVER_PORT);
-
-      // Create new subsystems
+      // Create subsystems
       LEDs = new PwmLEDs();
       Vision = new VisionSubsystem();
-      Drivetrain = new DrivetrainSubsystem(isReal, LEDs::clearForegroundPattern,
-          LEDs::setForegroundPattern, Vision::getAllLimelightInputs);
+      Swerve = new SwerveSubsystem(isReal);
 
-      // Register the named commands from each subsystem that may be used in
-      // PathPlanner
-      NamedCommands.registerCommands(Drivetrain.getNamedCommands());
+      // Register the named commands from each subsystem that may be used in PathPlanner
+      var namedCommandsMap = Swerve.getNamedCommands();
+      // ...add other named commands to the map using "otherNamedCommands.putAll(namedCommandsMap);"
+      NamedCommands.registerCommands(namedCommandsMap);
 
-      // Create Auto chooser and Auto tab in Shuffleboard
-      configAutonomousDashboardItems();
+      // Create our custom auto builder
+      var autoBuilder = new PrimeAutoRoutine(namedCommandsMap);
+      DriverDashboardSection = new DriverDashboardTab(autoBuilder);
+      TestDashboardSection = new TestDashboardSection();
+      CommandsDashboardSection = new DashboardSection("Commands");
 
-      // Reconfigure bindings
-      configureDriverControls();
+      // Configure controller bindings
+      OperatorInterface = new OperatorInterface();
+      OperatorInterface.bindDriverControls(
+          Swerve.resetGyroCommand(),
+          Swerve.enableLockOnCommand(),
+          Swerve.disableAutoAlignCommand(),
+          Swerve::setAutoAlignSetpointCommand,
+          Swerve::setDefaultCommand,
+          Swerve::driveRobotRelativeCommand);
     } catch (Exception e) {
-      DriverStation.reportError("[ERROR] >> Failed to configure robot: " + e.getMessage(),
-          e.getStackTrace());
+      DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());
     }
   }
-
-  /**
-   * Configures the autonomous dashboard items
-   */
-  public void configAutonomousDashboardItems() {
-    // Build an auto chooser. This will use Commands.none() as the default option.
-    DriverDashboard.addAutoChooser(AutoBuilder.buildAutoChooser("Straight Park"));
-
-    // Add all autos to the auto tab
-    var possibleAutos = AutoBuilder.getAllAutoNames();
-    for (int i = 0; i < possibleAutos.size(); i++) {
-      var autoCommand = new PathPlannerAuto(possibleAutos.get(i));
-      DriverDashboard.AutoTab.add(possibleAutos.get(i), autoCommand)
-          .withWidget(BuiltInWidgets.kCommand).withSize(2, 1);
-    }
-  }
-
-  /**
-   * Returns the selected autonomous command to run
-   * 
-   * @return
-   */
-  public Command getAutonomousCommand() {
-    return DriverDashboard.AutoChooser.getSelected();
-  }
-
-  /**
-   * Creates the controller and configures the driver's controls
-   */
-  public void configureDriverControls() {
-    // Controls for Driving
-    m_driverController.a().onTrue(Drivetrain.resetGyroCommand());
-    Drivetrain.setDefaultCommand(
-        Drivetrain.driveRobotRelativeCommand(m_driverController.getSwerveControlProfile(
-            HolonomicControlStyle.Drone, DriveMap.DriveDeadband, DriveMap.DeadbandCurveWeight)));
-
-    // While holding b, auto-aim the robot to the apriltag target using snap-to
-    m_driverController.leftStick().whileTrue(Drivetrain.enableLockOnCommand())
-        .onFalse(Drivetrain.disableSnapToCommand());
-
-    // Controls for Snap-To with field-relative setpoints
-    m_driverController.x().onTrue(Drivetrain.disableSnapToCommand());
-    m_driverController.pov(Controls.up)
-        .onTrue(Drivetrain.setSnapToSetpointCommand(Controls.up));
-    m_driverController.pov(Controls.upRight)
-        .onTrue(Drivetrain.setSnapToSetpointCommand(Controls.upRight - 90));
-    m_driverController.pov(Controls.right)
-        .onTrue(Drivetrain.setSnapToSetpointCommand(Controls.right - 180));
-    m_driverController.pov(Controls.downRight)
-        .onTrue(Drivetrain.setSnapToSetpointCommand(Controls.downRight + 90));
-    m_driverController.pov(Controls.down)
-        .onTrue(Drivetrain.setSnapToSetpointCommand(Controls.down));
-    m_driverController.pov(Controls.downLeft)
-        .onTrue(Drivetrain.setSnapToSetpointCommand(Controls.downLeft - 90));
-    m_driverController.pov(Controls.left)
-        .onTrue(Drivetrain.setSnapToSetpointCommand(Controls.left - 180));
-    m_driverController.pov(Controls.upLeft)
-        .onTrue(Drivetrain.setSnapToSetpointCommand(Controls.upLeft + 90));
-
-    // Uncomment to enable SysID Routines.
-    // m_driverController.pov(Controls.up)
-    //     .onTrue(Drivetrain.runSysIdQuasistaticRoutineCommand(Direction.kForward))
-    //     .onFalse(Drivetrain.stopAllMotors());
-    // m_driverController.pov(Controls.down).onTrue(Drivetrain.runSysIdQuasistaticRoutineCommand(Direction.kReverse))
-    //     .onFalse(Drivetrain.stopAllMotors());
-
-    // m_driverController.pov(Controls.right).onTrue(Drivetrain.runSysIdDynamicRoutineCommand(Direction.kForward))
-    //     .onFalse(Drivetrain.stopAllMotors());
-
-    // m_driverController.pov(Controls.left).onTrue(Drivetrain.runSysIdDynamicRoutineCommand(Direction.kReverse))
-    //     .onFalse(Drivetrain.stopAllMotors());
-
-    // Uncomment below and voltage variable at the top of file to enable voltage step drive for kS testing
-    // m_driverController.pov(Controls.up)
-    //     .onTrue(Commands.runOnce(() -> {
-    //       _voltage += 0.05;
-    //       System.out.println("Set to voltage: " + _voltage);
-    //     }));
-
-    // m_driverController.pov(Controls.down)
-    //     .onTrue(Commands.runOnce(() -> {
-    //       _voltage -= 0.01;
-    //       System.out.println("Set to voltage: " + _voltage);
-    //     }));
-
-    // m_driverController.pov(Controls.right)
-    //     .onTrue(Commands.run(() -> {
-    //       Drivetrain.driveSwerveVoltage(_voltage);
-    //     }, Drivetrain).alongWith(Commands.runOnce(()->{
-    //       System.out.println("Voltage Step Enabled!");
-    //     })));
-
-    // m_driverController.pov(Controls.left)
-    //     .onTrue(Commands.runOnce(() -> {
-    //       _voltage = 0;
-    //       Drivetrain.driveSwerveVoltage(0);
-    //       System.out.println("Set to voltage: " + _voltage);
-    //     }, Drivetrain).alongWith(Commands.runOnce(()->{
-    //       System.out.println("Voltage Step Disabled!");
-    //     })));
-
-  }
-
 }

@@ -1,14 +1,14 @@
 package org.prime.vision;
 
-import edu.wpi.first.epilogue.Logged;
+import org.littletonrobotics.junction.LogTable;
+import org.littletonrobotics.junction.inputs.LoggableInputs;
+
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.util.struct.StructSerializable;
 
-@Logged
-public class LimelightInputs implements StructSerializable {
+public class LimelightInputs implements LoggableInputs, Cloneable {
 
     /**
      * Horizontal Offset From Crosshair To Target 
@@ -95,6 +95,66 @@ public class LimelightInputs implements StructSerializable {
      */
     public LimelightPose RobotSpaceTargetPose = new LimelightPose();
 
-    /** Struct for serialization. */
-    public static final LimelightInputsStruct struct = new LimelightInputsStruct();
+    @Override
+    public void toLog(LogTable table) {
+        table.put("TargetHorizontalOffset", TargetHorizontalOffset);
+        table.put("TargetVerticalOffset", TargetVerticalOffset);
+        table.put("TargetArea", TargetArea);
+        table.put("PipelineLatencyMs", PipelineLatencyMs);
+        table.put("CapturePipelineLatencyMs", CapturePipelineLatencyMs);
+        table.put("TotalLatencyMs", TotalLatencyMs);
+        table.put("ApriltagId", ApriltagId);
+        table.put("TagCount", TagCount);
+        table.put("FieldSpaceRobotPose", FieldSpaceRobotPose);
+        table.put("RedAllianceOriginFieldSpaceRobotPose", RedAllianceOriginFieldSpaceRobotPose);
+        table.put("BlueAllianceOriginFieldSpaceRobotPose", BlueAllianceOriginFieldSpaceRobotPose);
+        table.put("TargetSpaceRobotPose", TargetSpaceRobotPose);
+        table.put("TargetSpaceCameraPose", TargetSpaceCameraPose);
+        table.put("RobotSpaceCameraPose", RobotSpaceCameraPose);
+        table.put("CameraSpaceTargetPose", CameraSpaceTargetPose);
+        table.put("RobotSpaceTargetPose", RobotSpaceTargetPose);
+    }
+
+    @Override
+    public void fromLog(LogTable table) {
+        TargetHorizontalOffset = table.get("TargetHorizontalOffset", TargetHorizontalOffset);
+        TargetVerticalOffset = table.get("TargetVerticalOffset", TargetVerticalOffset);
+        TargetArea = table.get("TargetArea", TargetArea);
+        PipelineLatencyMs = table.get("PipelineLatencyMs", PipelineLatencyMs);
+        CapturePipelineLatencyMs = table.get("CapturePipelineLatencyMs", CapturePipelineLatencyMs);
+        TotalLatencyMs = table.get("TotalLatencyMs", TotalLatencyMs);
+        ApriltagId = table.get("ApriltagId", ApriltagId);
+        TagCount = table.get("TagCount", TagCount);
+        FieldSpaceRobotPose = table.get("FieldSpaceRobotPose", FieldSpaceRobotPose);
+        RedAllianceOriginFieldSpaceRobotPose = table.get("RedAllianceOriginFieldSpaceRobotPose",
+                RedAllianceOriginFieldSpaceRobotPose);
+        BlueAllianceOriginFieldSpaceRobotPose = table.get("BlueAllianceOriginFieldSpaceRobotPose",
+                BlueAllianceOriginFieldSpaceRobotPose);
+        TargetSpaceRobotPose = table.get("TargetSpaceRobotPose", TargetSpaceRobotPose);
+        TargetSpaceCameraPose = table.get("TargetSpaceCameraPose", TargetSpaceCameraPose);
+        RobotSpaceCameraPose = table.get("RobotSpaceCameraPose", RobotSpaceCameraPose);
+        CameraSpaceTargetPose = table.get("CameraSpaceTargetPose", CameraSpaceTargetPose);
+        RobotSpaceTargetPose = table.get("RobotSpaceTargetPose", RobotSpaceTargetPose);
+    }
+
+    public LimelightInputs clone() {
+        LimelightInputs copy = new LimelightInputs();
+        copy.TargetHorizontalOffset = this.TargetHorizontalOffset;
+        copy.TargetVerticalOffset = this.TargetVerticalOffset;
+        copy.TargetArea = this.TargetArea;
+        copy.PipelineLatencyMs = this.PipelineLatencyMs;
+        copy.CapturePipelineLatencyMs = this.CapturePipelineLatencyMs;
+        copy.TotalLatencyMs = this.TotalLatencyMs;
+        copy.ApriltagId = this.ApriltagId;
+        copy.TagCount = this.TagCount;
+        copy.FieldSpaceRobotPose = this.FieldSpaceRobotPose;
+        copy.RedAllianceOriginFieldSpaceRobotPose = this.RedAllianceOriginFieldSpaceRobotPose;
+        copy.BlueAllianceOriginFieldSpaceRobotPose = this.BlueAllianceOriginFieldSpaceRobotPose;
+        copy.TargetSpaceRobotPose = this.TargetSpaceRobotPose;
+        copy.TargetSpaceCameraPose = this.TargetSpaceCameraPose;
+        copy.RobotSpaceCameraPose = this.RobotSpaceCameraPose;
+        copy.CameraSpaceTargetPose = this.CameraSpaceTargetPose;
+        copy.RobotSpaceTargetPose = this.RobotSpaceTargetPose;
+        return copy;
+    }
 }
