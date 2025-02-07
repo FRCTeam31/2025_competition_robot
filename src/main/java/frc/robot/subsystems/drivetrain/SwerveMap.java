@@ -12,29 +12,13 @@ import frc.robot.subsystems.drivetrain.swervemodule.SwerveModuleMap;
 import org.prime.control.PrimePIDConstants;
 
 public class SwerveMap {
-        public static class Chassis {
+        public class Chassis {
                 // public static final double TrackWidthMeters = Units.inchesToMeters(24.75);
                 // public static final double WheelBaseMeters = Units.inchesToMeters(24.75);
                 public static final double TrackWidthMeters = Units.inchesToMeters(21.25);
                 public static final double WheelBaseMeters = Units.inchesToMeters(21.25);
                 public static final double MaxSpeedMetersPerSecond = 5.4;
                 public static final double MaxAngularSpeedRadians = Math.PI * 2;
-
-                public static final RobotConfig PathPlannerRobotConfiguration = new RobotConfig(
-                                Units.lbsToKilograms(50),
-                                MomentOfInertia.ofBaseUnits(3, edu.wpi.first.units.Units.KilogramSquareMeters)
-                                                .baseUnitMagnitude(),
-                                new ModuleConfig(
-                                                DriveWheelDiameterMeters / 2,
-                                                Chassis.MaxSpeedMetersPerSecond / 4,
-                                                1.0,
-                                                DCMotor.getNeoVortex(1).withReduction(DriveGearRatio),
-                                                DriveStallCurrentLimit,
-                                                1),
-                                FrontLeftSwerveModule.ModuleLocation,
-                                FrontRightSwerveModule.ModuleLocation,
-                                RearLeftSwerveModule.ModuleLocation,
-                                RearRightSwerveModule.ModuleLocation);
         }
 
         public class Control {
@@ -90,4 +74,20 @@ public class SwerveMap {
                         false,
                         false,
                         new Translation2d(-Chassis.TrackWidthMeters / 2, Chassis.WheelBaseMeters / 2));
+
+        public static final RobotConfig PathPlannerRobotConfiguration = new RobotConfig(
+                        Units.lbsToKilograms(50),
+                        MomentOfInertia.ofBaseUnits(3, edu.wpi.first.units.Units.KilogramSquareMeters)
+                                        .baseUnitMagnitude(),
+                        new ModuleConfig(
+                                        DriveWheelDiameterMeters / 2,
+                                        Chassis.MaxSpeedMetersPerSecond / 4,
+                                        1.0,
+                                        DCMotor.getNeoVortex(1).withReduction(DriveGearRatio),
+                                        DriveStallCurrentLimit,
+                                        1),
+                        FrontLeftSwerveModule.ModuleLocation,
+                        FrontRightSwerveModule.ModuleLocation,
+                        RearLeftSwerveModule.ModuleLocation,
+                        RearRightSwerveModule.ModuleLocation);
 }

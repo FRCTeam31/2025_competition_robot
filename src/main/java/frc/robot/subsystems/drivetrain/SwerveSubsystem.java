@@ -103,7 +103,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private void configurePathPlanner() {
     // Load the RobotConfig from the GUI settings, or use the default if an
     // exception occurs
-    RobotConfig config = SwerveMap.Chassis.PathPlannerRobotConfiguration;
+    RobotConfig config = SwerveMap.PathPlannerRobotConfiguration;
     try {
       config = RobotConfig.fromGUISettings();
     } catch (Exception e) {

@@ -236,16 +236,13 @@ public class PrimeAutoRoutine implements Sendable {
                     if (step.startsWith("S")) {
                         // This resets the pose estimation to the first point of the starting path, instead of
                         // letting it try to reach the ending position from where it *thinks* that it started.
+                        // Replicates the PP Auto "Reset Odometry" flag
                         var startingPose = path.getPathPoses().get(0);
-                        AutoBuilder.resetOdom(startingPose);
+                        autoCommand = autoCommand.andThen(AutoBuilder.resetOdom(startingPose));
                     }
 
-                    // Flip path if on red alliance
-                    if (AutoBuilder.shouldFlip()) {
-                        path = path.flipPath();
-                    }
-
-                    // AutoBuilder.followPath uses the configured AutoBuilder settings during the command
+                    // AutoBuilder.followPath uses the configured AutoBuilder settings during the command, including
+                    // automatic path flipping, holonomic correction PID, and global constraints.
                     var followPathCommand = AutoBuilder.followPath(path);
                     if (followPathCommand == null) {
                         throw new Exception("Failed to build path command");
