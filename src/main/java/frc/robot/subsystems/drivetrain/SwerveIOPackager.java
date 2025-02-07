@@ -28,7 +28,7 @@ import frc.robot.subsystems.drivetrain.swervemodule.SwerveModuleSim;
 /**
  * A class that controls the swerve modules and gyro
  */
-public class SwerveIOController {
+public class SwerveIOPackager {
 
   public SwerveDriveKinematics Kinematics;
   private SwerveDrivePoseEstimator m_poseEstimator;
@@ -44,7 +44,7 @@ public class SwerveIOController {
       new SwerveModuleInputsAutoLogged()
   };
 
-  public SwerveIOController(boolean isReal) {
+  public SwerveIOPackager(boolean isReal) {
     // Create kinematics in order FL, FR, RL, RR
     Kinematics = new SwerveDriveKinematics(SwerveMap.FrontLeftSwerveModule.ModuleLocation,
         SwerveMap.FrontRightSwerveModule.ModuleLocation,

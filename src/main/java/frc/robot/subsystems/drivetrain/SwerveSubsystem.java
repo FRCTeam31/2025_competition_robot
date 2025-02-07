@@ -38,7 +38,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private DrivetrainDashboardSection _drivetrainDashboardSection;
 
   // IO
-  private SwerveIOController _swerveController;
+  private SwerveIOPackager _swervePackager;
   private SwerveSubsystemInputsAutoLogged _inputs = new SwerveSubsystemInputsAutoLogged();
 
   // SnapAngle
@@ -66,8 +66,8 @@ public class SwerveSubsystem extends SubsystemBase {
     setName("Drivetrain");
 
     // Create swerve controller
-    _swerveController = new SwerveIOController(isReal);
-    _swerveController.updateInputs(_inputs);
+    _swervePackager = new SwerveIOPackager(isReal);
+    _swervePackager.updateInputs(_inputs);
 
     // Configure AutoAlign
     _autoAlign = new AutoAlign(SwerveMap.AutoAlignPID);
@@ -85,10 +85,10 @@ public class SwerveSubsystem extends SubsystemBase {
             Units.Seconds.of(15)),
         new SysIdRoutine.Mechanism(
             // Tell SysId how to plumb the driving voltage to the motors.
-            _swerveController::setDriveVoltages,
+            _swervePackager::setDriveVoltages,
             // Tell SysId how to record a frame of data for each motor on the mechanism
             // being characterized.
-            _swerveController::logSysIdDrive,
+            _swervePackager::logSysIdDrive,
             // Tell SysId to make generated commands require this subsystem, suffix test
             // state in WPILog with this subsystem's name
             this));
@@ -96,7 +96,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public Command driveSwerveVoltage(double voltage) {
     return Commands.runOnce(() -> {
-      _swerveController.setDriveVoltages(Units.Volts.of(voltage));
+      _swervePackager.setDriveVoltages(Units.Volts.of(voltage));
     }, this);
   }
 
@@ -121,7 +121,7 @@ public class SwerveSubsystem extends SubsystemBase {
     // Configure PathPlanner holonomic control
     AutoBuilder.configure(
         () -> _inputs.EstimatedRobotPose,
-        _swerveController::setEstimatorPose,
+        _swervePackager::setEstimatorPose,
         () -> _inputs.RobotRelativeChassisSpeeds,
         (speeds, feedForwards) -> driveRobotRelative(speeds),
         new PPHolonomicDriveController(
@@ -146,7 +146,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * Resets the gyro angle
    */
   public void resetGyro() {
-    _swerveController.resetGyro();
+    _swervePackager.resetGyro();
   }
 
   /**
@@ -163,7 +163,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param pose
    */
   public void setEstimatorPose(Pose2d pose) {
-    _swerveController.setEstimatorPose(pose);
+    _swervePackager.setEstimatorPose(pose);
   }
 
   /**
@@ -187,12 +187,12 @@ public class SwerveSubsystem extends SubsystemBase {
     Logger.recordOutput("Drive/desiredChassisSpeeds", robotRelativeChassisSpeeds);
 
     // Calculate the module states from the chassis speeds
-    var swerveModuleStates = _swerveController.Kinematics.toSwerveModuleStates(robotRelativeChassisSpeeds);
+    var swerveModuleStates = _swervePackager.Kinematics.toSwerveModuleStates(robotRelativeChassisSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, SwerveMap.Chassis.MaxSpeedMetersPerSecond);
 
     // Set the desired states for each module
     Logger.recordOutput("Drive/desiredStates", swerveModuleStates);
-    _swerveController.setDesiredModuleStates(swerveModuleStates);
+    _swervePackager.setDesiredModuleStates(swerveModuleStates);
   }
 
   /**
@@ -247,7 +247,7 @@ public class SwerveSubsystem extends SubsystemBase {
         ? limelightInputs.BlueAllianceOriginFieldSpaceRobotPose
         : limelightInputs.RedAllianceOriginFieldSpaceRobotPose;
 
-    _swerveController.addPoseEstimatorVisionMeasurement(
+    _swervePackager.addPoseEstimatorVisionMeasurement(
         llPose.Pose.toPose2d(),
         llPose.Timestamp,
         llPose.getStdDeviations());
@@ -261,7 +261,7 @@ public class SwerveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // Get inputs
-    _swerveController.updateInputs(_inputs);
+    _swervePackager.updateInputs(_inputs);
     Logger.processInputs(getName(), _inputs);
 
     processVisionEstimations();
@@ -314,14 +314,14 @@ public class SwerveSubsystem extends SubsystemBase {
    * Command for stopping all motors
    */
   public Command stopAllMotors() {
-    return this.runOnce(() -> _swerveController.stopAllMotors());
+    return this.runOnce(() -> _swervePackager.stopAllMotors());
   }
 
   /**
    * Command for resetting the gyro
    */
   public Command resetGyroCommand() {
-    return Commands.runOnce(() -> _swerveController.resetGyro());
+    return Commands.runOnce(() -> _swervePackager.resetGyro());
   }
 
   /**
