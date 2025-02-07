@@ -7,25 +7,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Approach Algae GH"
+            "pathName": "S2-to-GH"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Reversed Alt Source to GH"
+            "pathName": "GH-to-SRC2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Alt Source to EF"
+            "pathName": "EF-to-SRC2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Reversed Alt Source to EF"
+            "pathName": "EF-to-SRC2"
           }
         }
       ]

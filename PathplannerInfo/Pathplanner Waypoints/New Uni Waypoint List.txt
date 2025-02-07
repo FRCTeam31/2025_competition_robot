@@ -8,7 +8,7 @@ Rotation of 60.00
 
 EF - U
 5.15, 2.80
-Rotation of 122.00
+Rotation of 120.00
 
 GH - U
 5.80, 4.05
