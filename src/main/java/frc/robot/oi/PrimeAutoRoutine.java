@@ -238,7 +238,7 @@ public class PrimeAutoRoutine implements Sendable {
                         // This resets the pose estimation to the first point of the starting path, instead of
                         // letting it try to reach the ending position from where it *thinks* that it started.
                         var startingPose = path.getPathPoses().get(0);
-                        Container.Swerve.setEstimatorPose(startingPose);
+                        AutoBuilder.resetOdom(startingPose);
                     }
 
                     // Flip path if on red alliance
