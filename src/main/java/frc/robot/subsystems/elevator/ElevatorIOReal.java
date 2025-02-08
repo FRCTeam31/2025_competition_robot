@@ -1,25 +1,46 @@
 package frc.robot.subsystems.elevator;
 
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+
+import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Enums.ElevatorLocation;
+import frc.robot.maps.ElevatorMap;
 
 public class ElevatorIOReal implements IElevatorIO {
 
-    @Override
+    private ElevatorInputs _inputs = new ElevatorInputs();
+
+    public SparkFlex leftElevatorMotor;
+    public SparkFlex rightElevatorMotor;
+    // public DigitalInput topElevatorLimitSwitch;
+    // public DigitalInput bottomElevatorLimitSwitch;
+
+    public ElevatorIOReal() {
+        leftElevatorMotor = new SparkFlex(ElevatorMap.leftElevatorMotorCANID, MotorType.kBrushless);
+        rightElevatorMotor = new SparkFlex(ElevatorMap.rightElevatorMotorCANID, MotorType.kBrushless);
+        // topElevatorLimitSwitch = new DigitalInput(ElevatorMap.topLimitSwitchChannel);
+        // bottomElevatorLimitSwitch = new DigitalInput(ElevatorMap.bottomLimitSwitchChannel);
+
+    }
+
     public ElevatorInputs getInputs() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getInputs'");
+        double leftMotorSpeed = leftElevatorMotor.get();
+        double rightMotorSpeed = rightElevatorMotor.get();
+
+        _inputs.LeftMotorSpeed = leftMotorSpeed;
+        _inputs.RightMotorSpeed = rightMotorSpeed;
+
+        return _inputs;
     }
 
-    @Override
     public void SetElevatorPosition(ElevatorLocation location) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'SetElevatorPosition'");
+
     }
 
-    @Override
     public void StopMotors() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'StopMotors'");
+        leftElevatorMotor.stopMotor();
+        rightElevatorMotor.stopMotor();
     }
 
 }
