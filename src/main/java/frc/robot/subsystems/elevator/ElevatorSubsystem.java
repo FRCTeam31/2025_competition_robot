@@ -1,0 +1,146 @@
+package frc.robot.subsystems.elevator;
+
+import java.util.Map;
+
+import org.prime.control.PrimePIDConstants;
+
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+
+public class ElevatorSubsystem extends SubsystemBase {
+    public static final class VMap {
+        public static final int leftElevatorMotorCANID = 20;
+        public static final int rightElevatorMotorCANID = 21;
+        public static final int cancoderCANID = 21;
+        public static final int topLimitSwitchChannel = 0;
+        public static final int bottomLimitSwitchChannel = 1;
+
+        public static final PrimePIDConstants PositionPID = new PrimePIDConstants(0, 0, 0, 0, 0, 0, 0);
+        public static final double FeedForwardKg = 0.0;
+
+        // TODO: Measure
+        public static final double OutputSprocketDiameterMeters = 0;
+        public static final double GearRatio = 0;
+    }
+
+    public enum ElevatorPosition {
+        kStarting,
+        kTrough,
+        kLow,
+        kMid,
+        kHigh
+    }
+
+    private Map<ElevatorPosition, Double> _positionMap = Map.of(
+            ElevatorPosition.kStarting, 0.0,
+            ElevatorPosition.kTrough, 1.0,
+            ElevatorPosition.kLow, 2.0,
+            ElevatorPosition.kMid, 3.0,
+            ElevatorPosition.kHigh, 4.0);
+
+    private ElevatorInputsAutoLogged _inputs = new ElevatorInputsAutoLogged();
+    private IElevator _elevatorIO;
+    private PIDController _positionPidController;
+    private ElevatorFeedforward _positionFeedforward;
+
+    private SysIdRoutine _sysId;
+
+    public ElevatorSubsystem(boolean isReal) {
+        _elevatorIO = isReal
+                ? new ElevatorReal()
+                : new ElevatorSim();
+
+        _positionPidController = VMap.PositionPID.createPIDController(0.02);
+        _positionFeedforward = new ElevatorFeedforward(VMap.PositionPID.kS, VMap.FeedForwardKg, VMap.PositionPID.kV);
+
+        // TODO: Remove when no longer needed
+        _sysId = new SysIdRoutine(
+                // Ramp up at 1 volt per second for quasistatic tests, step at 2 volts in
+                // dynamic tests, run for 13 seconds.
+                new SysIdRoutine.Config(Units.Volts.of(2).per(Units.Second), Units.Volts.of(4),
+                        Units.Seconds.of(7)),
+                new SysIdRoutine.Mechanism(
+                        // Tell SysId how to plumb the driving voltage to the motors.
+                        this::setMotorVoltages,
+                        // Tell SysId how to record a frame of data for each motor on the mechanism
+                        // being characterized.
+                        this::logSysIdFrame,
+                        // Tell SysId to make generated commands require this subsystem, suffix test
+                        // state in WPILog with this subsystem's name
+                        this));
+    }
+
+    //#region Control
+
+    private void setPositionSetpoint(ElevatorPosition pos) {
+        var setpoint = _positionMap.get(pos);
+        _positionPidController.setSetpoint(setpoint);
+    }
+
+    private void updateMotorSpeeds() {
+        // TODO: check this logic
+        var pid = _positionPidController.calculate(_inputs.ElevatorDistanceMeters);
+        var ff = _positionFeedforward.calculate(pid);
+        var finalOutput = MathUtil.clamp(pid + ff, -1, 1);
+
+        _elevatorIO.setMotorSpeeds(finalOutput);
+    }
+
+    private void setMotorVoltages(Voltage volts) {
+        _elevatorIO.setMotorVoltages(volts.magnitude());
+    }
+
+    @Override
+    public void periodic() {
+        _elevatorIO.updateInputs(_inputs);
+    }
+
+    /**
+    * Logs a sysid frame for the FL module
+    * @param log
+    */
+    public void logSysIdFrame(SysIdRoutineLog log) {
+        // Record a frame. Since these share an encoder, we consider
+        // the entire group to be one motor.
+        log.motor("Elevator-Output")
+                .voltage(Units.Volts.of(_inputs.LeftMotorVoltage)) // measured motor voltage
+                .linearPosition(Units.Meters.of(_inputs.ElevatorDistanceMeters)) // distance in meters
+                .linearVelocity(Units.MetersPerSecond.of(_inputs.ElevatorSpeedMetersPerSecond)); // speed in meters per second
+    }
+
+    //#endregion
+
+    //#region Commands
+
+    public Command runElevatorAutomaticSeekCommand() {
+        return this.run(this::updateMotorSpeeds);
+    }
+
+    public Command goToElevatorPositionCommand(ElevatorPosition pos) {
+        return this.runOnce(() -> setPositionSetpoint(pos));
+    }
+
+    public Command stopMotorsCommand() {
+        return this.runOnce(_elevatorIO::stopMotors);
+    }
+
+    // TODO: Remove when no longer needed
+    public Command runSysIdQuasistaticRoutineCommand(Direction dir) {
+        return _sysId.quasistatic(dir);
+    }
+
+    // TODO: Remove when no longer needed
+    public Command runSysIdDynamicRoutineCommand(Direction dir) {
+        return _sysId.dynamic(dir);
+    }
+
+    //#endregion
+}

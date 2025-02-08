@@ -2,6 +2,7 @@ package org.prime.control;
 
 import com.pathplanner.lib.config.PIDConstants;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
 public class PrimePIDConstants {
 
@@ -47,5 +48,9 @@ public class PrimePIDConstants {
 
   public PIDController createPIDController(double controllerPeriod) {
     return new PIDController(kP, kI, kD, controllerPeriod);
+  }
+
+  public SimpleMotorFeedforward createSimpleMotorFeedForward() {
+    return new SimpleMotorFeedforward(kS, kV, kA);
   }
 }
