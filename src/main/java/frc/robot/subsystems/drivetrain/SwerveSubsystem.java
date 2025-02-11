@@ -196,19 +196,6 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   /**
-   * Drives field-relative using a ChassisSpeeds
-   * 
-   * @param fieldChassisSpeeds The desired speeds of the robot
-   */
-  private void driveFieldRelative(ChassisSpeeds fieldChassisSpeeds) {
-    // Convert the field-relative speeds to robot-relative
-    var robotRelativeChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(fieldChassisSpeeds.vxMetersPerSecond,
-        fieldChassisSpeeds.vyMetersPerSecond, fieldChassisSpeeds.omegaRadiansPerSecond, _inputs.GyroAngle);
-
-    driveRobotRelative(robotRelativeChassisSpeeds);
-  }
-
-  /**
    * Processes vision estimations when within a certain velocity threshold
    */
   private void processVisionEstimations() {
@@ -292,10 +279,10 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param controlSuppliers Controller input suppliers
    */
   public Command driveFieldRelativeCommand(SwerveControlSuppliers controlSuppliers) {
-    return this.run(() -> driveFieldRelative(controlSuppliers.getChassisSpeeds(
-        false,
-        _inputs.GyroAngle,
-        () -> setAutoAlignEnabled(false))));
+    return this.run(() -> {
+      driveRobotRelative(controlSuppliers.getChassisSpeeds(false, _inputs.GyroAngle,
+          () -> setAutoAlignEnabled(false)));
+    });
   }
 
   /**
@@ -304,9 +291,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param controlSuppliers Controller input suppliers
    */
   public Command driveRobotRelativeCommand(SwerveControlSuppliers controlSuppliers) {
-    return this.run(() -> driveRobotRelative(controlSuppliers.getChassisSpeeds(
-        true,
-        _inputs.GyroAngle,
+    return this.run(() -> driveRobotRelative(controlSuppliers.getChassisSpeeds(true, _inputs.GyroAngle,
         () -> setAutoAlignEnabled(false))));
   }
 

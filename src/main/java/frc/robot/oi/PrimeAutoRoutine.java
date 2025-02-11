@@ -104,7 +104,7 @@ public class PrimeAutoRoutine implements Sendable {
      */
     private void addRoutineStep() {
         var newStep = _nextStepChooser.getSelected();
-        if (newStep == null) {
+        if (newStep == null || newStep.isBlank()) {
             System.out.println("No step selected");
             return;
         }
@@ -160,17 +160,26 @@ public class PrimeAutoRoutine implements Sendable {
         if (_routineSteps.isEmpty()) {
             Map<String, String> startingPaths = new java.util.HashMap<>();
             for (var path : _pathNames) {
-                if (path.startsWith("S") && path.contains("-to-")) {
+                var stepIsSourcePath = path.startsWith("SRC");
+                var stepBeginsWithS = path.startsWith("S");
+                var stepIsPath = stepIsPath(path);
+                if (stepIsPath && stepBeginsWithS && !stepIsSourcePath) {
                     startingPaths.put(path, path);
                 }
             }
-            _nextStepChooser.addOptions(startingPaths);
+
+            if (!startingPaths.isEmpty()) {
+                _nextStepChooser.addOptions(startingPaths);
+            }
         } else {
             var currentLocation = getRoutineLastDestination();
             var validNextSteps = getCombinedRoutineOptions().stream().filter(
                     step -> !step.contains("-to-") || (!step.startsWith("S") && step.startsWith(currentLocation)))
                     .collect(Collectors.toMap(step -> step, step -> step));
-            _nextStepChooser.addOptions(validNextSteps);
+
+            if (!validNextSteps.isEmpty()) {
+                _nextStepChooser.addOptions(validNextSteps);
+            }
         }
     }
 
