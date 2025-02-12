@@ -42,10 +42,12 @@ public class PrimeSendableChooser<V> implements Sendable, AutoCloseable {
     private final Map<String, V> m_map = new LinkedHashMap<>();
 
     private String m_defaultChoice = "";
-    private final int m_instance;
+    private String m_selected;
     private String m_previousVal;
-    private Consumer<V> m_listener;
+    private final int m_instance;
     private static final AtomicInteger s_instances = new AtomicInteger();
+    private Consumer<V> m_listener;
+    private final ReentrantLock m_mutex = new ReentrantLock();
 
     /** Instantiates a {@link SendableChooser}. */
     @SuppressWarnings("this-escape")
@@ -79,23 +81,31 @@ public class PrimeSendableChooser<V> implements Sendable, AutoCloseable {
      */
     public void addOptions(Map<String, V> map) {
         for (Map.Entry<String, V> entry : map.entrySet()) {
-            m_map.put(entry.getKey(), entry.getValue());
+            addOption(entry.getKey(), entry.getValue());
         }
     }
 
-    /**
-     * Removes the given object from the list of options.
-     * @param name
-     */
-    public void removeOption(String name) {
-        m_map.remove(name);
+    public void replaceAllOptions(Map<String, V> map) {
+        clearOptions();
+        addOptions(map);
+        m_selected = m_map.keySet().toArray(new String[0])[0];
+        m_defaultChoice = m_selected;
+        m_previousVal = m_selected;
     }
 
     /**
      * Removes all the options from the list.
      */
     public void clearOptions() {
-        m_map.clear();
+        m_mutex.lock();
+        try {
+            m_selected = null;
+            m_defaultChoice = "";
+            m_previousVal = "";
+            m_map.clear();
+        } finally {
+            m_mutex.unlock();
+        }
     }
 
     /**
@@ -131,6 +141,23 @@ public class PrimeSendableChooser<V> implements Sendable, AutoCloseable {
     }
 
     /**
+     * Returns the selected option's key. If there is none selected, it will return the default. If there is
+     * none selected and no default, then it will return {@code null}.
+     *
+     * @return the option selected
+     */
+    public String getSelectedKey() {
+        m_mutex.lock();
+        try {
+            return m_selected != null
+                    ? m_selected
+                    : m_defaultChoice;
+        } finally {
+            m_mutex.unlock();
+        }
+    }
+
+    /**
      * Bind a listener that's called when the selected value changes. Only one listener can be bound.
      * Calling this function will replace the previous listener.
      *
@@ -142,9 +169,6 @@ public class PrimeSendableChooser<V> implements Sendable, AutoCloseable {
         m_mutex.unlock();
     }
 
-    private String m_selected;
-    private final ReentrantLock m_mutex = new ReentrantLock();
-
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType("String Chooser");
@@ -153,22 +177,11 @@ public class PrimeSendableChooser<V> implements Sendable, AutoCloseable {
         builder.addStringArrayProperty(OPTIONS, () -> m_map.keySet().toArray(new String[0]), null);
         builder.addStringProperty(
                 ACTIVE,
-                () -> {
-                    m_mutex.lock();
-                    try {
-                        if (m_selected != null) {
-                            return m_selected;
-                        } else {
-                            return m_defaultChoice;
-                        }
-                    } finally {
-                        m_mutex.unlock();
-                    }
-                },
+                this::getSelectedKey,
                 null);
         builder.addStringProperty(
                 SELECTED,
-                null,
+                this::getSelectedKey,
                 val -> {
                     V choice;
                     Consumer<V> listener;

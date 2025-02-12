@@ -10,6 +10,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 import frc.robot.oi.PrimeAutoRoutine;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.prime.dashboard.PrimeSendableChooser;
 
 public class DriverDashboardTab extends DashboardSection {
@@ -68,6 +71,14 @@ public class DriverDashboardTab extends DashboardSection {
 
         public FieldObject2d getFieldPath() {
                 return _fieldWidget.getObject("path");
+        }
+
+        public void setFieldPath(List<Pose2d> poses) {
+                getFieldPath().setPoses(poses);
+        }
+
+        public void clearFieldPath() {
+                getFieldPath().setPoses(new ArrayList<>());
         }
 
         public void setAllianceColor(boolean isRed) {

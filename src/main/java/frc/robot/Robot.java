@@ -61,6 +61,8 @@ public class Robot extends LoggedRobot {
 
     // Schedule the LED patterns to run at 120Hz
     Container.LEDs.startUpdateLoop();
+
+    Elastic.selectTab("Auto");
   }
 
   /**
@@ -142,6 +144,7 @@ public class Robot extends LoggedRobot {
    */
   @Override
   public void autonomousInit() {
+    Elastic.selectTab("Auto");
     var autoPattern = LEDPattern.gradient(GradientType.kDiscontinuous, getAllianceColor(), Color.kBlack)
         .offsetBy(-PwmLEDs.VMap.PixelsPerStrip / 2)
         .scrollAtRelativeSpeed(Units.Hertz.of(2))
@@ -184,6 +187,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     DataLogManager.log("Teleop Enabled");
+    Elastic.selectTab("Driver");
     if (_autonomousCommand != null) {
       // Cancel the auto command if it's still running
       _autonomousCommand.cancel();
@@ -206,6 +210,8 @@ public class Robot extends LoggedRobot {
    */
   @Override
   public void testInit() {
+    Elastic.selectTab("Test");
+
     CommandScheduler.getInstance().cancelAll();
   }
 

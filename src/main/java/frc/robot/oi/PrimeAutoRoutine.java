@@ -2,9 +2,9 @@ package frc.robot.oi;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.prime.dashboard.PrimeSendableChooser;
 
@@ -18,6 +18,8 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.event.BooleanEvent;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.Container;
 import frc.robot.Robot;
 
 /**
@@ -71,6 +73,7 @@ public class PrimeAutoRoutine implements Sendable {
      */
     public void setChooser(PrimeSendableChooser<String> chooser) {
         _nextStepChooser = chooser;
+        _nextStepChooser.onChange(this::onChooserChangeEvent);
         updateChooserOptions();
     }
 
@@ -99,112 +102,6 @@ public class PrimeAutoRoutine implements Sendable {
         builder.update();
     }
 
-    /**
-     * Adds the selected step to the routine.
-     */
-    private void addRoutineStep() {
-        var newStep = _nextStepChooser.getSelected();
-        if (newStep == null) {
-            System.out.println("No step selected");
-            return;
-        }
-
-        if (_routineSteps.size() > 0 && _routineSteps.get(_routineSteps.size() - 1) == newStep) {
-            System.out.println("Cannot add the same step twice in a row");
-            return;
-        }
-
-        _routineSteps.add(newStep);
-        _addStepIsPressed = false;
-        updateChooserOptions();
-    }
-
-    /**
-     * Removes the last step from the routine.
-     */
-    private void removeLastStep() {
-        if (_routineSteps.isEmpty()) {
-            System.out.println("No steps to remove");
-            return;
-        }
-
-        _routineSteps.remove(_routineSteps.size() - 1);
-        System.out.println("Removed last step");
-        _removeLastStepIsPressed = false;
-        updateChooserOptions();
-    }
-
-    /**
-     * Clears the current routine.
-     */
-    private void clearRoutine() {
-        if (_routineSteps.isEmpty()) {
-            System.out.println("Routine is already empty");
-            return;
-        }
-
-        _routineSteps.clear();
-        System.out.println("Cleared routine");
-        _clearRoutineIsPressed = false;
-        updateChooserOptions();
-    }
-
-    /**
-     * Updates the options in the chooser based on the current routine steps.
-     * If the routine is empty, only paths that start with "S" are shown.
-     * If the routine is not empty, only paths that start with the last destination of the routine and commands are shown.
-     */
-    private void updateChooserOptions() {
-        _nextStepChooser.clearOptions();
-
-        if (_routineSteps.isEmpty()) {
-            Map<String, String> startingPaths = new java.util.HashMap<>();
-            for (var path : _pathNames) {
-                if (path.startsWith("S") && path.contains("-to-")) {
-                    startingPaths.put(path, path);
-                }
-            }
-            _nextStepChooser.addOptions(startingPaths);
-        } else {
-            var currentLocation = getRoutineLastDestination();
-            var validNextSteps = getCombinedRoutineOptions().stream().filter(
-                    step -> !step.contains("-to-") || (!step.startsWith("S") && step.startsWith(currentLocation)))
-                    .collect(Collectors.toMap(step -> step, step -> step));
-            _nextStepChooser.addOptions(validNextSteps);
-        }
-    }
-
-    /**
-     * Gets the last path location in the routine.
-     */
-    public String getRoutineLastDestination() {
-        for (int i = _routineSteps.size() - 1; i >= 0; i--) {
-            var currentStep = _routineSteps.get(i);
-            if (!stepIsCommand(currentStep)) {
-                return currentStep.split("-to-")[1];
-            }
-        }
-
-        return "";
-    }
-
-    /**
-     * Gets the combined list of paths and commands that can be added to the routine.
-     */
-    public List<String> getCombinedRoutineOptions() {
-        var options = new ArrayList<String>();
-
-        for (var path : _pathNames) {
-            options.add(path);
-        }
-
-        for (var command : _namedCommands.keySet()) {
-            options.add(command);
-        }
-
-        return options;
-    }
-
     /*
      * Combines paths and commands into a single routine
      */
@@ -212,17 +109,25 @@ public class PrimeAutoRoutine implements Sendable {
         if (_routineSteps.isEmpty()) {
             DriverStation.reportError("[AUTOBUILDER] No steps in routine", false);
 
-            return Commands.none();
+            return Commands.runOnce(() -> {
+                DriverStation.reportError("[AUTOBUILDER] Ran empty routine", false);
+            });
         }
 
-        var autoCommand = Commands.none();
-
+        // Make sure AutoBuilder is configured
         if (!AutoBuilder.isConfigured()) {
             DriverStation.reportError("[AUTOBUILDER] AutoBuilder is not configured", false);
 
             return Commands.none();
         }
 
+        // reserve a command for if the builder encounters an error
+        var errorCommand = Commands.runOnce(() -> {
+            DriverStation.reportError("[AUTOBUILDER] Builder encountered error. Running dummy command instead.", false);
+        });
+
+        // Start with a command that immediately completes, just to give us a starting point
+        Command autoCommand = new InstantCommand();
         for (var step : _routineSteps) {
             if (stepIsPath(step)) {
                 try {
@@ -252,7 +157,7 @@ public class PrimeAutoRoutine implements Sendable {
                 } catch (Exception e) {
                     DriverStation.reportError("[AUTOBUILDER] Failed to load path: " + step, false);
 
-                    return null;
+                    return errorCommand;
                 }
             } else if (stepIsCommand(step)) {
                 // Step is a command
@@ -262,16 +167,128 @@ public class PrimeAutoRoutine implements Sendable {
                 } else {
                     DriverStation.reportError("[AUTOBUILDER] Command not found: " + step, false);
 
-                    return null;
+                    return errorCommand;
                 }
             } else {
                 DriverStation.reportError("[AUTOBUILDER] Step " + step + "not found in paths or commands.", false);
 
-                return null;
+                return errorCommand;
             }
         }
 
+        Container.DriverDashboardSection.clearFieldPath();
         return autoCommand;
+    }
+
+    /**
+     * Adds the selected step to the routine.
+     */
+    private void addRoutineStep() {
+        var newStep = _nextStepChooser.getSelected();
+        if (newStep == null) {
+            System.out.println("No step selected");
+            _addStepIsPressed = false;
+            return;
+        }
+
+        if (_routineSteps.size() > 0 && _routineSteps.get(_routineSteps.size() - 1) == newStep) {
+            System.out.println("Cannot add the same step twice in a row");
+            _addStepIsPressed = false;
+            return;
+        }
+
+        _routineSteps.add(newStep);
+        _addStepIsPressed = false;
+        updateChooserOptions();
+    }
+
+    /**
+     * Removes the last step from the routine.
+     */
+    private void removeLastStep() {
+        if (_routineSteps.isEmpty()) {
+            System.out.println("No steps to remove");
+        } else {
+            _routineSteps.remove(_routineSteps.size() - 1);
+            Container.DriverDashboardSection.clearFieldPath();
+            System.out.println("Removed last step");
+            updateChooserOptions();
+        }
+
+        _removeLastStepIsPressed = false;
+    }
+
+    /**
+     * Clears the current routine.
+     */
+    private void clearRoutine() {
+        if (_routineSteps.isEmpty()) {
+            System.out.println("Routine is already empty");
+            return;
+        } else {
+            _routineSteps.clear();
+            Container.DriverDashboardSection.clearFieldPath();
+            System.out.println("Cleared routine");
+            updateChooserOptions();
+        }
+
+        _clearRoutineIsPressed = false;
+    }
+
+    /**
+     * Updates the options in the chooser based on the current routine steps.
+     * If the routine is empty, only paths that start with "S" are shown.
+     * If the routine is not empty, only paths that start with the last destination of the routine and commands are shown.
+     */
+    private void updateChooserOptions() {
+        try {
+            Map<String, String> validNextSteps = new HashMap<String, String>();
+            if (_routineSteps.isEmpty()) {
+                // If the routine is empty, only show starting paths as options
+                for (var path : _pathNames) {
+                    if (stepIsStartingPath(path)) {
+                        validNextSteps.put(path, path);
+                    }
+                }
+            } else {
+                // If the routine is not empty, show paths that start with the last destination of the routine and commands as options
+                for (var command : _namedCommands.keySet()) {
+                    validNextSteps.put(command, command);
+                }
+
+                var currentLocation = getRoutineLastDestination();
+                for (var path : _pathNames) {
+                    if (!stepIsStartingPath(path) && path.startsWith(currentLocation)) {
+                        validNextSteps.put(path, path);
+                    }
+                }
+            }
+
+            // If no valid next steps are found, throw an exception
+            if (validNextSteps.isEmpty()) {
+                throw new Exception("No valid next steps found");
+            }
+
+            // Update the chooser options
+            _nextStepChooser.clearOptions();
+            _nextStepChooser.addOptions(validNextSteps);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Gets the last path location in the routine.
+     */
+    private String getRoutineLastDestination() {
+        for (int i = _routineSteps.size() - 1; i >= 0; i--) {
+            var currentStep = _routineSteps.get(i);
+            if (!stepIsCommand(currentStep)) {
+                return currentStep.split("-to-")[1];
+            }
+        }
+
+        return "";
     }
 
     private boolean stepIsPath(String step) {
@@ -280,5 +297,29 @@ public class PrimeAutoRoutine implements Sendable {
 
     private boolean stepIsCommand(String step) {
         return _namedCommands.containsKey(step);
+    }
+
+    private boolean stepIsStartingPath(String step) {
+        return stepIsPath(step) && step.startsWith("S") && !step.startsWith("SRC");
+    }
+
+    private void onChooserChangeEvent(String newValue) {
+        System.out.println("Chooser selected value changed: " + newValue);
+        try {
+            if (stepIsPath(newValue)) {
+                // Clear the field path on each new selection
+                Container.DriverDashboardSection.clearFieldPath();
+
+                var path = PathPlannerPath.fromPathFile(newValue);
+                if (path == null) {
+                    System.out.println("Failed to load path: " + newValue);
+                    return;
+                }
+
+                Container.DriverDashboardSection.setFieldPath(path.getPathPoses());
+            }
+        } catch (Exception e) {
+            DriverStation.reportError("Failed to display path for \"" + newValue + "\"", e.getStackTrace());
+        }
     }
 }
