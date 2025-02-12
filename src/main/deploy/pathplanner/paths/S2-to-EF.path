@@ -4,12 +4,12 @@
     {
       "anchor": {
         "x": 7.575,
-        "y": 6.035
+        "y": 6.15
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.515227272727273,
-        "y": 3.523678977272727
+        "x": 6.7443333333333335,
+        "y": 3.8763333333333327
       },
       "isLocked": false,
       "linkedName": null
@@ -20,8 +20,8 @@
         "y": 2.8
       },
       "prevControl": {
-        "x": 6.914971590909092,
-        "y": 1.9723579545454537
+        "x": 7.064666666666668,
+        "y": 3.4513333333333325
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 119.99999999999999
   },
   "reversed": false,
-  "folder": null,
+  "folder": "S2 Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

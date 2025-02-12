@@ -20,7 +20,7 @@
         "y": 4.05
       },
       "prevControl": {
-        "x": 1.8773333333333326,
+        "x": 1.8773333333333324,
         "y": 6.499666666666668
       },
       "nextControl": null,
@@ -45,7 +45,7 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "AB Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 128.0

@@ -8,7 +8,7 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.317666666666665,
+        "x": 0.3176666666666649,
         "y": 0.20133333333333248
       },
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 119.99999999999999
   },
   "reversed": false,
-  "folder": null,
+  "folder": "EF Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 122.0
