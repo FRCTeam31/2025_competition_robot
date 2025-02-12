@@ -3,7 +3,7 @@ package org.prime.control;
 import com.pathplanner.lib.config.PIDConstants;
 import edu.wpi.first.math.controller.PIDController;
 
-public class PrimePIDConstants {
+public class ExtendedPIDConstants {
 
   public double kP;
   public double kI;
@@ -15,7 +15,7 @@ public class PrimePIDConstants {
   public double kA; // Voltage needed to induce a given acceleration in the system
   public double kS; // Voltage needed to overcome the system’s static friction
 
-  public PrimePIDConstants(double kP, double kI, double kD, double kF, double kV, double kA, double kS) {
+  public ExtendedPIDConstants(double kP, double kI, double kD, double kF, double kV, double kA, double kS) {
     this.kP = kP;
     this.kI = kI;
     this.kD = kD;
@@ -25,19 +25,19 @@ public class PrimePIDConstants {
     this.kS = kS;
   }
 
-  public PrimePIDConstants() {
+  public ExtendedPIDConstants() {
     this(0, 0, 0, 0, 0, 0, 0);
   }
 
-  public PrimePIDConstants(double kP, double kI, double kD) {
+  public ExtendedPIDConstants(double kP, double kI, double kD) {
     this(kP, kI, kD, 0, 0, 0, 0);
   }
 
-  public PrimePIDConstants(double kP, double kI, double kD, double kF) {
+  public ExtendedPIDConstants(double kP, double kI, double kD, double kF) {
     this(kP, kI, kD, kF, 0, 0, 0);
   }
 
-  public PrimePIDConstants(double kP, double kI, double kD, double kF, double kV) {
+  public ExtendedPIDConstants(double kP, double kI, double kD, double kF, double kV) {
     this(kP, kI, kD, kF, kV, 0, 0);
   }
 

@@ -41,7 +41,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private SwerveIOPackager _swervePackager;
   private SwerveSubsystemInputsAutoLogged _inputs = new SwerveSubsystemInputsAutoLogged();
 
-  // SnapAngle
+  // AutoAlign
   private boolean _useAutoAlign = false;
   private AutoAlign _autoAlign;
 
@@ -50,10 +50,10 @@ public class SwerveSubsystem extends SubsystemBase {
   public boolean EstimatePoseUsingRearCamera = true;
   public boolean WithinPoseEstimationVelocity = true;
 
-  private LEDPattern _snapOnTargetPattern = LEDPattern
+  private LEDPattern _alignOnTargetPattern = LEDPattern
       .solid(Color.kGreen)
       .blink(Units.Seconds.of(0.1));
-  private LEDPattern _snapOffTargetPattern = LEDPattern
+  private LEDPattern _alignOffTargetPattern = LEDPattern
       .steps(Map.of(0.0, Color.kRed, 0.25, Color.kBlack))
       .scrollAtRelativeSpeed(Units.Hertz.of(2));
 
@@ -112,11 +112,11 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     // Set up PP to feed current path poses to the dashboard's field widget
-    PathPlannerLogging.setLogCurrentPoseCallback(pose -> Container.DriverDashboardSection.setFieldRobotPose(pose));
+    PathPlannerLogging.setLogCurrentPoseCallback(pose -> Container.TeleopDashboardSection.setFieldRobotPose(pose));
     PathPlannerLogging
-        .setLogTargetPoseCallback(pose -> Container.DriverDashboardSection.getFieldTargetPose().setPose(pose));
+        .setLogTargetPoseCallback(pose -> Container.TeleopDashboardSection.getFieldTargetPose().setPose(pose));
     PathPlannerLogging
-        .setLogActivePathCallback(poses -> Container.DriverDashboardSection.getFieldPath().setPoses(poses));
+        .setLogActivePathCallback(poses -> Container.TeleopDashboardSection.getFieldPath().setPoses(poses));
 
     // Configure PathPlanner holonomic control
     AutoBuilder.configure(
@@ -136,7 +136,7 @@ public class SwerveSubsystem extends SubsystemBase {
         }, this);
 
     // Override PathPlanner's rotation feedback
-    // PPHolonomicDriveController.overrideRotationFeedback(this::getSnapAngleCorrection);
+    // PPHolonomicDriveController.overrideRotationFeedback(() -> _inputs.AutoAlignCorrection);
 
   }
 
@@ -150,7 +150,7 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   /**
-   * Enabled/disables snap-to control
+   * Enabled/disables AutoAlign control
    */
   private void setAutoAlignEnabled(boolean enabled) {
     _useAutoAlign = enabled;
@@ -172,13 +172,11 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param robotRelativeChassisSpeeds The desired speeds of the robot
    */
   private void driveRobotRelative(ChassisSpeeds robotRelativeChassisSpeeds) {
-    // If snap-to is enabled, calculate and override the input rotational speed to
-    // reach the setpoint
-    var autoAlignCorrection = _autoAlign.getCorrection(_inputs.GyroAngle);
-    Logger.recordOutput("Drive/autoAlignCorrection", autoAlignCorrection);
+    // If AutoAlign is enabled, override the input rotational speed to reach the setpoint
+    Logger.recordOutput("Drive/autoAlignCorrection", _inputs.AutoAlignCorrection);
 
     robotRelativeChassisSpeeds.omegaRadiansPerSecond = _useAutoAlign
-        ? autoAlignCorrection
+        ? _inputs.AutoAlignCorrection
         : robotRelativeChassisSpeeds.omegaRadiansPerSecond;
 
     // Correct drift by taking the input speeds and converting them to a desired
@@ -228,10 +226,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
     var limelightInputs = Container.Vision.getAllLimelightInputs();
 
-    if (Container.DriverDashboardSection.getFrontPoseEstimationSwitch())
+    if (Container.TeleopDashboardSection.getFrontPoseEstimationSwitch())
       evaluatePoseEstimation(limelightInputs[0]);
 
-    if (Container.DriverDashboardSection.getRearPoseEstimationSwitch())
+    if (Container.TeleopDashboardSection.getRearPoseEstimationSwitch())
       evaluatePoseEstimation(limelightInputs[1]);
   }
 
@@ -262,6 +260,7 @@ public class SwerveSubsystem extends SubsystemBase {
   public void periodic() {
     // Get inputs
     _swervePackager.updateInputs(_inputs);
+    _inputs.AutoAlignCorrection = _autoAlign.getCorrection(_inputs.GyroAngle);
     Logger.processInputs(getName(), _inputs);
 
     processVisionEstimations();
@@ -272,13 +271,13 @@ public class SwerveSubsystem extends SubsystemBase {
     Logger.recordOutput("Drive/autoAlignAtSetpoint", _autoAlign.atSetpoint());
     if (_useAutoAlign) {
       Container.LEDs.setForegroundPattern(_autoAlign.atSetpoint()
-          ? _snapOnTargetPattern
-          : _snapOffTargetPattern);
+          ? _alignOnTargetPattern
+          : _alignOffTargetPattern);
     }
 
     // Update shuffleboard
-    Container.DriverDashboardSection.setGyroHeading(_inputs.GyroAngle);
-    Container.DriverDashboardSection.setFieldRobotPose(_inputs.EstimatedRobotPose);
+    Container.TeleopDashboardSection.setGyroHeading(_inputs.GyroAngle);
+    Container.TeleopDashboardSection.setFieldRobotPose(_inputs.EstimatedRobotPose);
     Logger.recordOutput("Drive/estimatedRobotPose", _inputs.EstimatedRobotPose);
     _drivetrainDashboardSection.setAutoAlignEnabled(_useAutoAlign);
     _drivetrainDashboardSection.setAutoAlignTarget(_autoAlign.getSetpoint());
@@ -325,7 +324,7 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   /**
-   * Enables snap-to control and sets an angle setpoint
+   * Enables AutoAlign control and sets an angle setpoint
    * 
    * @param angle
    */
@@ -340,7 +339,7 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   /**
-   * Disables snap-to control
+   * Disables AutoAlign control
    */
   public Command disableAutoAlignCommand() {
     var cmd = Commands.runOnce(() -> setAutoAlignEnabled(false));
@@ -356,14 +355,14 @@ public class SwerveSubsystem extends SubsystemBase {
     var cmd = Commands.run(() -> {
       var rearLimelightInputs = Container.Vision.getLimelightInputs(1);
 
-      // If targeted AprilTag is in validTargets, snap to its offset
+      // If targeted AprilTag is in validTargets, align to its offset
       if (VisionSubsystem.isAprilTagIdValid(rearLimelightInputs.ApriltagId)) {
         // Calculate the target heading
         var horizontalOffsetDeg = rearLimelightInputs.TargetHorizontalOffset.getDegrees();
         var robotHeadingDeg = _inputs.GyroAngle.getDegrees();
         var targetHeadingDeg = robotHeadingDeg - horizontalOffsetDeg;
 
-        // Set the drivetrain to snap to the target heading
+        // Set the drivetrain to align to the target heading
         _autoAlign.setSetpoint(Rotation2d.fromDegrees(targetHeadingDeg));
         setAutoAlignEnabled(true);
       } else {
@@ -380,9 +379,9 @@ public class SwerveSubsystem extends SubsystemBase {
    * Enables AutoAlign for PathPlanner routines
    * @return
    */
-  public Command enablePathPlannerSnapRotationFeedbackCommand() {
-    var cmd = Commands.run(() -> {
-      PPHolonomicDriveController.overrideRotationFeedback(() -> _autoAlign.getCorrection(_inputs.GyroAngle));
+  public Command enablePathPlannerAutoAlignRotationFeedbackCommand() {
+    var cmd = Commands.runOnce(() -> {
+      PPHolonomicDriveController.overrideRotationFeedback(() -> _inputs.AutoAlignCorrection);
     });
     cmd.setName("EnableAutoAlignRotationFeedback");
 
@@ -393,10 +392,8 @@ public class SwerveSubsystem extends SubsystemBase {
    * Disables AutoAlign for PathPlanner routines
    * @return
    */
-  public Command disablePathPlannerSnapRotationFeedbackCommand() {
-    var cmd = Commands.run(() -> {
-      PPHolonomicDriveController.clearRotationFeedbackOverride();
-    });
+  public Command disablePathPlannerAutoAlignRotationFeedbackCommand() {
+    var cmd = Commands.runOnce(PPHolonomicDriveController::clearRotationFeedbackOverride);
     cmd.setName("DisableAutoAlignRotationFeedback");
 
     return cmd;
@@ -422,9 +419,9 @@ public class SwerveSubsystem extends SubsystemBase {
         "DisableAutoAlign",
         disableAutoAlignCommand(),
         "EnableAutoAlignRotationFeedback",
-        enablePathPlannerSnapRotationFeedbackCommand(),
+        enablePathPlannerAutoAlignRotationFeedbackCommand(),
         "DisableAutoAlignRotationFeedback",
-        disablePathPlannerSnapRotationFeedbackCommand());
+        disablePathPlannerAutoAlignRotationFeedbackCommand());
   }
   // #endregion
 }

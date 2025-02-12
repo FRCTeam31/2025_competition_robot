@@ -22,7 +22,7 @@ import edu.wpi.first.util.sendable.SendableRegistry;
  *
  * @param <V> The type of the values to be stored
  */
-public class PrimeSendableChooser<V> implements Sendable, AutoCloseable {
+public class ManagedSendableChooser<V> implements Sendable, AutoCloseable {
     /** The key for the default value. */
     private static final String DEFAULT = "default";
 
@@ -51,7 +51,7 @@ public class PrimeSendableChooser<V> implements Sendable, AutoCloseable {
 
     /** Instantiates a {@link SendableChooser}. */
     @SuppressWarnings("this-escape")
-    public PrimeSendableChooser() {
+    public ManagedSendableChooser() {
         m_instance = s_instances.getAndIncrement();
         SendableRegistry.add(this, "SendableChooser", m_instance);
     }

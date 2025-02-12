@@ -1,6 +1,6 @@
 package frc.robot.subsystems.drivetrain.util;
 
-import org.prime.control.PrimePIDConstants;
+import org.prime.control.ExtendedPIDConstants;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -14,7 +14,7 @@ public class AutoAlign {
     private Rotation2d _setpoint = Rotation2d.fromDegrees(0);
     private PIDController _pid;
 
-    public AutoAlign(PrimePIDConstants pidConstants) {
+    public AutoAlign(ExtendedPIDConstants pidConstants) {
         _pid = pidConstants.createPIDController(0.02);
         _pid.enableContinuousInput(-Math.PI, Math.PI);
         _pid.setTolerance(Math.PI / 180d);

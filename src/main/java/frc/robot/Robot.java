@@ -136,7 +136,7 @@ public class Robot extends LoggedRobot {
     CommandScheduler.getInstance().run();
     EventLoop.poll();
 
-    Container.DriverDashboardSection.setAllianceColor(onRedAlliance());
+    Container.TeleopDashboardSection.setAllianceColor(onRedAlliance());
   }
 
   /**
@@ -163,7 +163,7 @@ public class Robot extends LoggedRobot {
       // Stop any subsystems still running
     }
 
-    _autonomousCommand = Container.DriverDashboardSection.getSelectedAuto();
+    _autonomousCommand = Container.AutoBuilder.exportCombinedAutoRoutine();
 
     // Exit without scheduling an auto command if none is selected
     if (_autonomousCommand == null || _autonomousCommand == Commands.none()) {

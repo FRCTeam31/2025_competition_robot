@@ -8,20 +8,15 @@ import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import frc.robot.Robot;
-import frc.robot.oi.PrimeAutoRoutine;
+import frc.robot.oi.BuildableAutoRoutine;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.prime.dashboard.PrimeSendableChooser;
-
-public class DriverDashboardTab extends DashboardSection {
+public class TeleopDashboardTab extends DashboardSection {
         private final String _fieldName = "Field";
         private final Field2d _fieldWidget;
-        private final String _autoBuilderName = "PrimeAutoBuilder";
-        private PrimeAutoRoutine _autoBuilder;
-        private final String _autoOptionChooserName = "Auto Options";
-        private PrimeSendableChooser<String> _autoOptionChooser;
+        private BuildableAutoRoutine _autoBuilder;
 
         // Widgets
         private final String _allianceBoxName = "Alliance";
@@ -31,7 +26,7 @@ public class DriverDashboardTab extends DashboardSection {
         private final String _rearPoseEstimationSwitchName = "R Pose Est.";
         private BooleanEvent _rearPoseEstimationEvent = null;
 
-        public DriverDashboardTab(PrimeAutoRoutine autoBuilder) {
+        public TeleopDashboardTab() {
                 super("Driver");
 
                 putBoolean(_allianceBoxName, false);
@@ -48,12 +43,6 @@ public class DriverDashboardTab extends DashboardSection {
                 //                 .withWidget(BuiltInWidgets.kComboBoxChooser)
                 //                 .withPosition(0, 6)
                 //                 .withSize(5, 2);
-                _autoOptionChooser = new PrimeSendableChooser<String>();
-                putData(_autoOptionChooserName, _autoOptionChooser);
-
-                autoBuilder.setChooser(_autoOptionChooser);
-                _autoBuilder = autoBuilder;
-                putData(_autoBuilderName, _autoBuilder);
         }
 
         public Command getSelectedAuto() {
@@ -67,6 +56,10 @@ public class DriverDashboardTab extends DashboardSection {
 
         public FieldObject2d getFieldTargetPose() {
                 return _fieldWidget.getObject("target pose");
+        }
+
+        public void setFieldTargetPose(Pose2d pose) {
+                getFieldTargetPose().setPose(pose);
         }
 
         public FieldObject2d getFieldPath() {

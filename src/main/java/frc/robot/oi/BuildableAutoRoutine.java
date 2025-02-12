@@ -6,7 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.prime.dashboard.PrimeSendableChooser;
+import org.prime.dashboard.Button;
+import org.prime.dashboard.ManagedSendableChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
@@ -15,42 +16,57 @@ import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.event.BooleanEvent;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Container;
-import frc.robot.Robot;
 
 /**
  * A dashboard widget for building autonomous routines from a base of Pathplanner paths and named commands.
  */
-public class PrimeAutoRoutine implements Sendable {
+public class BuildableAutoRoutine {
 
     private List<String> _routineSteps = new ArrayList<>();
     private String[] _pathNames = new String[0];
     private Map<String, Command> _namedCommands;
 
-    private PrimeSendableChooser<String> _nextStepChooser;
+    private ManagedSendableChooser<String> _nextStepChooser;
 
-    private boolean _addStepIsPressed;
-    private BooleanEvent _addStepEvent;
+    private Button _addStepButton;
+    private Button _removeLastStepButton;
+    private Button _clearRoutineButton;
 
-    private boolean _removeLastStepIsPressed;
-    private BooleanEvent _removeLastStepEvent;
-
-    private boolean _clearRoutineIsPressed;
-    private BooleanEvent _clearRoutineEvent;
-
-    public PrimeAutoRoutine(Map<String, Command> commands) {
+    public BuildableAutoRoutine(Map<String, Command> commands) {
         _namedCommands = commands;
+        _pathNames = discoverPaths();
 
+        _nextStepChooser = new ManagedSendableChooser<String>();
+        _nextStepChooser.onChange(this::onChooserChangeEvent);
+        Container.AutoDashboardSection.putData("Routine/Next Step Options", _nextStepChooser);
+        updateChooserOptions();
+
+        _addStepButton = new Button("Add Step", this::addRoutineStep);
+        Container.AutoDashboardSection.putData("Routine/Add Step", _addStepButton);
+
+        _removeLastStepButton = new Button("Remove Last Step", this::removeLastStep);
+        Container.AutoDashboardSection.putData("Routine/Remove Last Step", _removeLastStepButton);
+
+        _clearRoutineButton = new Button("Clear Routine", this::clearRoutine);
+        Container.AutoDashboardSection.putData("Routine/Clear Routine", _clearRoutineButton);
+
+        Container.AutoDashboardSection.putStringArray("Routine/Steps", _routineSteps.toArray(new String[0]));
+    }
+
+    /**
+     * Find all available paths from the deploy/pathplanner/paths directory
+     */
+    private String[] discoverPaths() {
         List<String> paths = new ArrayList<>();
         var pathsPath = new File(Filesystem.getDeployDirectory(), "pathplanner/paths");
         if (!pathsPath.exists() || !pathsPath.isDirectory()) {
             DriverStation.reportError("[AUTOBUILDER] No paths found for PrimeAutoRoutine!", false);
 
-            return;
+            return new String[0];
         }
 
         for (var file : pathsPath.listFiles()) {
@@ -65,41 +81,7 @@ public class PrimeAutoRoutine implements Sendable {
             }
         }
 
-        _pathNames = paths.toArray(new String[0]);
-    }
-
-    /**
-     * Sets the chooser for selecting the next step in the routine.
-     */
-    public void setChooser(PrimeSendableChooser<String> chooser) {
-        _nextStepChooser = chooser;
-        _nextStepChooser.onChange(this::onChooserChangeEvent);
-        updateChooserOptions();
-    }
-
-    @Override
-    public void initSendable(SendableBuilder builder) {
-        builder.setSmartDashboardType("PrimeAutoRoutine");
-        builder.addStringArrayProperty("Routine Steps", () -> _routineSteps.toArray(new String[0]), null);
-
-        builder.addBooleanProperty("Add Step", () -> _addStepIsPressed, (value) -> _addStepIsPressed = value);
-        _addStepEvent = new BooleanEvent(Robot.EventLoop, () -> _addStepIsPressed)
-                .debounce(0.1);
-        _addStepEvent.ifHigh(this::addRoutineStep);
-
-        builder.addBooleanProperty("Remove Last Step", () -> _removeLastStepIsPressed,
-                (value) -> _removeLastStepIsPressed = value);
-        _removeLastStepEvent = new BooleanEvent(Robot.EventLoop, () -> _removeLastStepIsPressed)
-                .debounce(0.1);
-        _removeLastStepEvent.ifHigh(this::removeLastStep);
-
-        builder.addBooleanProperty("Clear Routine", () -> _clearRoutineIsPressed,
-                (value) -> _clearRoutineIsPressed = value);
-        _clearRoutineEvent = new BooleanEvent(Robot.EventLoop, () -> _clearRoutineIsPressed)
-                .debounce(0.1);
-        _clearRoutineEvent.ifHigh(this::clearRoutine);
-
-        builder.update();
+        return paths.toArray(new String[0]);
     }
 
     /*
@@ -176,7 +158,7 @@ public class PrimeAutoRoutine implements Sendable {
             }
         }
 
-        Container.DriverDashboardSection.clearFieldPath();
+        Container.TeleopDashboardSection.clearFieldPath();
         return autoCommand;
     }
 
@@ -187,18 +169,15 @@ public class PrimeAutoRoutine implements Sendable {
         var newStep = _nextStepChooser.getSelected();
         if (newStep == null) {
             System.out.println("No step selected");
-            _addStepIsPressed = false;
             return;
         }
 
         if (_routineSteps.size() > 0 && _routineSteps.get(_routineSteps.size() - 1) == newStep) {
             System.out.println("Cannot add the same step twice in a row");
-            _addStepIsPressed = false;
             return;
         }
 
         _routineSteps.add(newStep);
-        _addStepIsPressed = false;
         updateChooserOptions();
     }
 
@@ -210,12 +189,10 @@ public class PrimeAutoRoutine implements Sendable {
             System.out.println("No steps to remove");
         } else {
             _routineSteps.remove(_routineSteps.size() - 1);
-            Container.DriverDashboardSection.clearFieldPath();
+            Container.TeleopDashboardSection.clearFieldPath();
             System.out.println("Removed last step");
             updateChooserOptions();
         }
-
-        _removeLastStepIsPressed = false;
     }
 
     /**
@@ -227,20 +204,20 @@ public class PrimeAutoRoutine implements Sendable {
             return;
         } else {
             _routineSteps.clear();
-            Container.DriverDashboardSection.clearFieldPath();
+            Container.TeleopDashboardSection.clearFieldPath();
             System.out.println("Cleared routine");
             updateChooserOptions();
         }
-
-        _clearRoutineIsPressed = false;
     }
 
     /**
      * Updates the options in the chooser based on the current routine steps.
-     * If the routine is empty, only paths that start with "S" are shown.
+     * If the routine is empty, only starting paths are shown.
      * If the routine is not empty, only paths that start with the last destination of the routine and commands are shown.
      */
     private void updateChooserOptions() {
+        Container.AutoDashboardSection.putStringArray("Routine/Steps", _routineSteps.toArray(new String[0]));
+
         try {
             Map<String, String> validNextSteps = new HashMap<String, String>();
             if (_routineSteps.isEmpty()) {
@@ -270,8 +247,7 @@ public class PrimeAutoRoutine implements Sendable {
             }
 
             // Update the chooser options
-            _nextStepChooser.clearOptions();
-            _nextStepChooser.addOptions(validNextSteps);
+            _nextStepChooser.replaceAllOptions(validNextSteps);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -307,16 +283,19 @@ public class PrimeAutoRoutine implements Sendable {
         System.out.println("Chooser selected value changed: " + newValue);
         try {
             if (stepIsPath(newValue)) {
-                // Clear the field path on each new selection
-                Container.DriverDashboardSection.clearFieldPath();
-
                 var path = PathPlannerPath.fromPathFile(newValue);
                 if (path == null) {
                     System.out.println("Failed to load path: " + newValue);
                     return;
                 }
 
-                Container.DriverDashboardSection.setFieldPath(path.getPathPoses());
+                if (AutoBuilder.shouldFlip()) {
+                    path = path.flipPath();
+                }
+
+                var finalPose = path.getPathPoses().get(path.getPathPoses().size() - 1);
+                Container.TeleopDashboardSection.setFieldPath(path.getPathPoses());
+                Container.TeleopDashboardSection.setFieldTargetPose(finalPose);
             }
         } catch (Exception e) {
             DriverStation.reportError("Failed to display path for \"" + newValue + "\"", e.getStackTrace());
