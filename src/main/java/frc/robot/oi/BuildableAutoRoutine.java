@@ -6,35 +6,40 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.prime.dashboard.Button;
+import org.prime.dashboard.SendableButton;
 import org.prime.dashboard.ManagedSendableChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Container;
+import frc.robot.Elastic;
 
 /**
  * A dashboard widget for building autonomous routines from a base of Pathplanner paths and named commands.
  */
 public class BuildableAutoRoutine {
-
+    // Internal state
     private List<String> _routineSteps = new ArrayList<>();
     private String[] _pathNames = new String[0];
     private Map<String, Command> _namedCommands;
 
+    // Dashboard widgets
     private ManagedSendableChooser<String> _nextStepChooser;
+    private SendableButton _addStepButton;
+    private SendableButton _removeLastStepButton;
+    private SendableButton _clearRoutineButton;
 
-    private Button _addStepButton;
-    private Button _removeLastStepButton;
-    private Button _clearRoutineButton;
+    // History management
+    private AutoRoutineHistory _routineHistory;
+    private SendableChooser<String> _historyChooser;
+    private SendableButton _applyHistoryButton;
 
     public BuildableAutoRoutine(Map<String, Command> commands) {
         _namedCommands = commands;
@@ -45,16 +50,22 @@ public class BuildableAutoRoutine {
         Container.AutoDashboardSection.putData("Routine/Next Step Options", _nextStepChooser);
         updateChooserOptions();
 
-        _addStepButton = new Button("Add Step", this::addRoutineStep);
+        _addStepButton = new SendableButton("Add Step", this::addRoutineStep);
         Container.AutoDashboardSection.putData("Routine/Add Step", _addStepButton);
 
-        _removeLastStepButton = new Button("Remove Last Step", this::removeLastStep);
+        _removeLastStepButton = new SendableButton("Remove Last Step", this::removeLastStep);
         Container.AutoDashboardSection.putData("Routine/Remove Last Step", _removeLastStepButton);
 
-        _clearRoutineButton = new Button("Clear Routine", this::clearRoutine);
+        _clearRoutineButton = new SendableButton("Clear Routine", this::clearRoutine);
         Container.AutoDashboardSection.putData("Routine/Clear Routine", _clearRoutineButton);
 
         Container.AutoDashboardSection.putStringArray("Routine/Steps", _routineSteps.toArray(new String[0]));
+
+        _routineHistory = new AutoRoutineHistory();
+        _historyChooser = _routineHistory.getSendableChooser();
+        Container.AutoDashboardSection.putData("Routine/History Options", _historyChooser);
+        _applyHistoryButton = new SendableButton("Apply History", this::applyHistory);
+        Container.AutoDashboardSection.putData("Routine/Apply History", _applyHistoryButton);
     }
 
     /**
@@ -159,6 +170,11 @@ public class BuildableAutoRoutine {
         }
 
         Container.TeleopDashboardSection.clearFieldPath();
+        String routineName = DriverStation.isFMSAttached()
+                ? DriverStation.getEventName() + " " + DriverStation.getMatchNumber()
+                : "TestAuto" + System.currentTimeMillis();
+        _routineHistory.addRoutineToHistory(routineName, _routineSteps);
+        _historyChooser.addOption(routineName + " - " + String.join(", ", _routineSteps), routineName);
         return autoCommand;
     }
 
@@ -168,12 +184,12 @@ public class BuildableAutoRoutine {
     private void addRoutineStep() {
         var newStep = _nextStepChooser.getSelected();
         if (newStep == null) {
-            System.out.println("No step selected");
+            Elastic.sendWarning("Auto Routine", "No step selected");
             return;
         }
 
         if (_routineSteps.size() > 0 && _routineSteps.get(_routineSteps.size() - 1) == newStep) {
-            System.out.println("Cannot add the same step twice in a row");
+            Elastic.sendWarning("Auto Routine", "Cannot add the same step twice in a row");
             return;
         }
 
@@ -186,11 +202,11 @@ public class BuildableAutoRoutine {
      */
     private void removeLastStep() {
         if (_routineSteps.isEmpty()) {
-            System.out.println("No steps to remove");
+            Elastic.sendWarning("Auto Routine", "No steps to remove");
         } else {
             _routineSteps.remove(_routineSteps.size() - 1);
             Container.TeleopDashboardSection.clearFieldPath();
-            System.out.println("Removed last step");
+            Elastic.sendInfo("Auto Routine", "Removed last routine step");
             updateChooserOptions();
         }
     }
@@ -200,14 +216,45 @@ public class BuildableAutoRoutine {
      */
     private void clearRoutine() {
         if (_routineSteps.isEmpty()) {
-            System.out.println("Routine is already empty");
+            Elastic.sendWarning("Auto Routine", "Routine is already empty");
             return;
         } else {
             _routineSteps.clear();
             Container.TeleopDashboardSection.clearFieldPath();
             System.out.println("Cleared routine");
+            Elastic.sendInfo("Auto Routine", "Cleared routine");
             updateChooserOptions();
         }
+    }
+
+    /**
+     * Overwrites the current routine steps with the steps from the selected historical routine.
+     */
+    private void applyHistory() {
+        var selectedRoutineName = _historyChooser.getSelected();
+        if (selectedRoutineName == null) {
+            Elastic.sendWarning("Auto Routine", "No routine selected");
+            return;
+        }
+
+        var prevRoutineSteps = _routineHistory.getRoutine(selectedRoutineName);
+        if (prevRoutineSteps == null || prevRoutineSteps.length == 0) {
+            Elastic.sendError("Auto Routine", "Failed to get routine steps for " + selectedRoutineName);
+            return;
+        }
+
+        if (!_routineSteps.isEmpty()) {
+            _routineSteps.clear();
+        }
+
+        Container.TeleopDashboardSection.clearFieldPath();
+        for (var step : prevRoutineSteps) {
+            _routineSteps.add(step);
+        }
+
+        Elastic.sendInfo("Auto Routine", "Applied historical routine: " + selectedRoutineName);
+
+        updateChooserOptions();
     }
 
     /**
@@ -285,7 +332,7 @@ public class BuildableAutoRoutine {
             if (stepIsPath(newValue)) {
                 var path = PathPlannerPath.fromPathFile(newValue);
                 if (path == null) {
-                    System.out.println("Failed to load path: " + newValue);
+                    Elastic.sendError("Auto Routine", "Failed to load path: " + newValue);
                     return;
                 }
 
@@ -298,6 +345,7 @@ public class BuildableAutoRoutine {
                 Container.TeleopDashboardSection.setFieldTargetPose(finalPose);
             }
         } catch (Exception e) {
+            Elastic.sendWarning("Auto Routine", "Failed to display path for \"" + newValue + "\"");
             DriverStation.reportError("Failed to display path for \"" + newValue + "\"", e.getStackTrace());
         }
     }

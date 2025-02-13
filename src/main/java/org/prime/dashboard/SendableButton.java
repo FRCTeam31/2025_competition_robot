@@ -5,12 +5,12 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.event.BooleanEvent;
 import frc.robot.Robot;
 
-public class Button implements Sendable {
+public class SendableButton implements Sendable {
     private String _name;
     private boolean _isPressed = false;
     private BooleanEvent _pressedEvent;
 
-    public Button(String name, Runnable action) {
+    public SendableButton(String name, Runnable action) {
         _name = name;
         _pressedEvent = new BooleanEvent(Robot.EventLoop, () -> _isPressed)
                 .debounce(0.1);

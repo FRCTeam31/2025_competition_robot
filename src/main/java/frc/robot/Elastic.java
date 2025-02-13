@@ -39,6 +39,27 @@ public final class Elastic {
     }
 
     /**
+     * Sends a warning notification to the Elastic dashboard with the given title and description.
+     */
+    public static void sendWarning(String title, String description) {
+        sendNotification(new Notification(Notification.NotificationLevel.WARNING, title, description));
+    }
+
+    /**
+     * Sends an error notification to the Elastic dashboard with the given title and description.
+     */
+    public static void sendError(String title, String description) {
+        sendNotification(new Notification(Notification.NotificationLevel.ERROR, title, description));
+    }
+
+    /**
+     * Sends an info notification to the Elastic dashboard with the given title and description.
+     */
+    public static void sendInfo(String title, String description) {
+        sendNotification(new Notification(Notification.NotificationLevel.INFO, title, description));
+    }
+
+    /**
      * Selects the tab of the dashboard with the given name. If no tab matches the name, this will
      * have no effect on the widgets or tabs in view.
      *

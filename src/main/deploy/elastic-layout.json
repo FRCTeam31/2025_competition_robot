@@ -3,13 +3,6 @@
   "grid_size": 128,
   "tabs": [
     {
-      "name": "Autonomous",
-      "grid_layout": {
-        "layouts": [],
-        "containers": []
-      }
-    },
-    {
       "name": "Driver",
       "grid_layout": {
         "layouts": [
@@ -233,106 +226,26 @@
     {
       "name": "Auto",
       "grid_layout": {
-        "layouts": [
-          {
-            "title": "PrimeAutoBuilder",
-            "x": 1152.0,
-            "y": 128.0,
-            "width": 384.0,
-            "height": 512.0,
-            "type": "List Layout",
-            "properties": {
-              "label_position": "TOP"
-            },
-            "children": [
-              {
-                "title": "Routine Steps",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/SmartDashboard/Driver/PrimeAutoBuilder/Routine Steps",
-                  "period": 0.06,
-                  "data_type": "string[]",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "Add Step",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Toggle Button",
-                "properties": {
-                  "topic": "/SmartDashboard/Driver/PrimeAutoBuilder/Add Step",
-                  "period": 0.06,
-                  "data_type": "boolean"
-                }
-              },
-              {
-                "title": "Remove Last Step",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Toggle Button",
-                "properties": {
-                  "topic": "/SmartDashboard/Driver/PrimeAutoBuilder/Remove Last Step",
-                  "period": 0.06,
-                  "data_type": "boolean"
-                }
-              },
-              {
-                "title": "Clear Routine",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Toggle Button",
-                "properties": {
-                  "topic": "/SmartDashboard/Driver/PrimeAutoBuilder/Clear Routine",
-                  "period": 0.06,
-                  "data_type": "boolean"
-                }
-              }
-            ]
-          }
-        ],
+        "layouts": [],
         "containers": [
           {
             "title": "Field",
             "x": 0.0,
             "y": 0.0,
-            "width": 1152.0,
-            "height": 640.0,
+            "width": 896.0,
+            "height": 512.0,
             "type": "Field",
             "properties": {
               "topic": "/SmartDashboard/Driver/Field",
               "period": 0.06,
               "field_game": "Reefscape",
-              "robot_width": 0.85,
-              "robot_length": 0.85,
+              "robot_width": 0.53975,
+              "robot_length": 0.53975,
               "show_other_objects": true,
               "show_trajectories": true,
               "field_rotation": 0.0,
               "robot_color": 4294198070,
               "trajectory_color": 4294967295
-            }
-          },
-          {
-            "title": "Auto Options",
-            "x": 1152.0,
-            "y": 0.0,
-            "width": 384.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Driver/Auto Options",
-              "period": 0.06,
-              "sort_options": false
             }
           },
           {
@@ -343,7 +256,7 @@
             "height": 128.0,
             "type": "Toggle Switch",
             "properties": {
-              "topic": "/SmartDashboard/Driver/F Pose Est.",
+              "topic": "/Shuffleboard/Driver/F Pose Est.",
               "period": 0.06,
               "data_type": "boolean"
             }
@@ -356,7 +269,99 @@
             "height": 128.0,
             "type": "Toggle Switch",
             "properties": {
-              "topic": "/SmartDashboard/Driver/R Pose Est.",
+              "topic": "/Shuffleboard/Driver/R Pose Est.",
+              "period": 0.06,
+              "data_type": "boolean"
+            }
+          },
+          {
+            "title": "Steps",
+            "x": 0.0,
+            "y": 640.0,
+            "width": 1408.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Auto/Routine/Steps",
+              "period": 0.06,
+              "data_type": "string[]",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Next Step Options",
+            "x": 896.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Auto/Routine/Next Step Options",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Add Step",
+            "x": 896.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Toggle Button",
+            "properties": {
+              "topic": "/SmartDashboard/Auto/Routine/Add Step/Add Step",
+              "period": 0.06,
+              "data_type": "boolean"
+            }
+          },
+          {
+            "title": "Clear Routine",
+            "x": 896.0,
+            "y": 256.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Toggle Button",
+            "properties": {
+              "topic": "/SmartDashboard/Auto/Routine/Clear Routine/Clear Routine",
+              "period": 0.06,
+              "data_type": "boolean"
+            }
+          },
+          {
+            "title": "Remove Last Step",
+            "x": 1152.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Toggle Button",
+            "properties": {
+              "topic": "/SmartDashboard/Auto/Routine/Remove Last Step/Remove Last Step",
+              "period": 0.06,
+              "data_type": "boolean"
+            }
+          },
+          {
+            "title": "History Options",
+            "x": 0.0,
+            "y": 512.0,
+            "width": 1152.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Auto/Routine/History Options",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Apply History",
+            "x": 1152.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Toggle Button",
+            "properties": {
+              "topic": "/SmartDashboard/Auto/Routine/Apply History/Apply History",
               "period": 0.06,
               "data_type": "boolean"
             }
