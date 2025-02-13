@@ -3,6 +3,7 @@ package frc.robot.subsystems.drivetrain;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -46,8 +47,6 @@ public class SwerveSubsystem extends SubsystemBase {
   private AutoAlign _autoAlign;
 
   // Vision, Kinematics, odometry
-  public boolean EstimatePoseUsingFrontCamera = true;
-  public boolean EstimatePoseUsingRearCamera = true;
   public boolean WithinPoseEstimationVelocity = true;
 
   private LEDPattern _alignOnTargetPattern = LEDPattern
@@ -194,19 +193,6 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   /**
-   * Drives field-relative using a ChassisSpeeds
-   * 
-   * @param fieldChassisSpeeds The desired speeds of the robot
-   */
-  private void driveFieldRelative(ChassisSpeeds fieldChassisSpeeds) {
-    // Convert the field-relative speeds to robot-relative
-    var robotRelativeChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(fieldChassisSpeeds.vxMetersPerSecond,
-        fieldChassisSpeeds.vyMetersPerSecond, fieldChassisSpeeds.omegaRadiansPerSecond, _inputs.GyroAngle);
-
-    driveRobotRelative(robotRelativeChassisSpeeds);
-  }
-
-  /**
    * Processes vision estimations when within a certain velocity threshold
    */
   private void processVisionEstimations() {
@@ -291,7 +277,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param controlSuppliers Controller input suppliers
    */
   public Command driveFieldRelativeCommand(SwerveControlSuppliers controlSuppliers) {
-    return this.run(() -> driveFieldRelative(controlSuppliers.getChassisSpeeds(
+    return this.run(() -> driveRobotRelative(controlSuppliers.getChassisSpeeds(
         false,
         _inputs.GyroAngle,
         () -> setAutoAlignEnabled(false))));
@@ -397,6 +383,15 @@ public class SwerveSubsystem extends SubsystemBase {
     cmd.setName("DisableAutoAlignRotationFeedback");
 
     return cmd;
+  }
+
+  public Command pathfindToPoseCommand(Pose2d pose) {
+    var pathConstraints = new PathConstraints(SwerveMap.Chassis.MaxSpeedMetersPerSecond / 2,
+        SwerveMap.Chassis.MaxSpeedMetersPerSecond / 4,
+        SwerveMap.Chassis.MaxAngularSpeedRadians,
+        SwerveMap.Chassis.MaxAngularSpeedRadians / 2);
+
+    return AutoBuilder.pathfindToPoseFlipped(pose, pathConstraints);
   }
 
   // TODO: Remove when no longer needed

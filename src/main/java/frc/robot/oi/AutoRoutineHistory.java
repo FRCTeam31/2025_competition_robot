@@ -8,6 +8,7 @@ import java.util.Map;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import frc.robot.Robot;
 
 public class AutoRoutineHistory {
     private final String HISTORY_FILE_NAME = "autoroutine-history.txt";
@@ -59,7 +60,8 @@ public class AutoRoutineHistory {
     }
 
     private File getHistoryFile() {
-        var file = new File(".\\" + HISTORY_FILE_NAME);
+        var fileName = Robot.isReal() ? "/U/" + HISTORY_FILE_NAME : HISTORY_FILE_NAME;
+        var file = new File(".\\" + fileName);
 
         if (!file.exists()) {
             if (!file.canWrite()) {

@@ -12,6 +12,8 @@ import org.prime.dashboard.ManagedSendableChooser;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -25,6 +27,13 @@ import frc.robot.Elastic;
  * A dashboard widget for building autonomous routines from a base of Pathplanner paths and named commands.
  */
 public class BuildableAutoRoutine {
+    public static class VMap {
+        public static Pose2d S1WaypointBlue = new Pose2d(7.575, 7.250, Rotation2d.fromDegrees(0));
+        public static Pose2d S1RWaypointBlue = new Pose2d(7.575, 7.250, Rotation2d.fromDegrees(180));
+        public static Pose2d S2WaypointBlue = new Pose2d(7.575, 6.150, Rotation2d.fromDegrees(0));
+        public static Pose2d S2RWaypointBlue = new Pose2d(7.575, 6.150, Rotation2d.fromDegrees(180));
+    }
+
     // Internal state
     private List<String> _routineSteps = new ArrayList<>();
     private String[] _pathNames = new String[0];
@@ -35,6 +44,11 @@ public class BuildableAutoRoutine {
     private SendableButton _addStepButton;
     private SendableButton _removeLastStepButton;
     private SendableButton _clearRoutineButton;
+    private SendableButton _runRoutineManuallyButton;
+    private SendableButton _returnToS1Button;
+    private SendableButton _returnToS1RButton;
+    private SendableButton _returnToS2Button;
+    private SendableButton _returnToS2RButton;
 
     // History management
     private AutoRoutineHistory _routineHistory;
@@ -58,6 +72,18 @@ public class BuildableAutoRoutine {
 
         _clearRoutineButton = new SendableButton("Clear Routine", this::clearRoutine);
         Container.AutoDashboardSection.putData("Routine/Clear Routine", _clearRoutineButton);
+
+        _runRoutineManuallyButton = new SendableButton("Run Manually (Teleop)", this::runRoutineManually);
+        Container.AutoDashboardSection.putData("Routine/Run Manually", _runRoutineManuallyButton);
+
+        _returnToS1Button = new SendableButton("Return to S1", () -> pathfindToPose(VMap.S1WaypointBlue));
+        Container.AutoDashboardSection.putData("Routine/Return to S1", _returnToS1Button);
+        _returnToS1RButton = new SendableButton("Return to S1R", () -> pathfindToPose(VMap.S1RWaypointBlue));
+        Container.AutoDashboardSection.putData("Routine/Return to S1R", _returnToS1RButton);
+        _returnToS2Button = new SendableButton("Return to S2", () -> pathfindToPose(VMap.S2WaypointBlue));
+        Container.AutoDashboardSection.putData("Routine/Return to S2", _returnToS2Button);
+        _returnToS2RButton = new SendableButton("Return to S2R", () -> pathfindToPose(VMap.S2RWaypointBlue));
+        Container.AutoDashboardSection.putData("Routine/Return to S2R", _returnToS2RButton);
 
         Container.AutoDashboardSection.putStringArray("Routine/Steps", _routineSteps.toArray(new String[0]));
 
@@ -99,25 +125,24 @@ public class BuildableAutoRoutine {
      * Combines paths and commands into a single routine
      */
     public Command exportCombinedAutoRoutine() {
-        if (_routineSteps.isEmpty()) {
-            DriverStation.reportError("[AUTOBUILDER] No steps in routine", false);
+        // reserve a command for if the builder encounters an error
+        var errorCommand = Commands.runOnce(() -> {
+            DriverStation.reportError("[AUTOBUILDER] Builder encountered an error. Running dummy command instead.",
+                    false);
+        });
 
-            return Commands.runOnce(() -> {
-                DriverStation.reportError("[AUTOBUILDER] Ran empty routine", false);
-            });
+        if (_routineSteps.isEmpty()) {
+            Elastic.sendError("Auto Routine", "No steps in routine");
+
+            return errorCommand;
         }
 
         // Make sure AutoBuilder is configured
         if (!AutoBuilder.isConfigured()) {
-            DriverStation.reportError("[AUTOBUILDER] AutoBuilder is not configured", false);
+            Elastic.sendError("Auto Routine", "AutoBuilder is not configured");
 
-            return Commands.none();
+            return errorCommand;
         }
-
-        // reserve a command for if the builder encounters an error
-        var errorCommand = Commands.runOnce(() -> {
-            DriverStation.reportError("[AUTOBUILDER] Builder encountered error. Running dummy command instead.", false);
-        });
 
         // Start with a command that immediately completes, just to give us a starting point
         Command autoCommand = new InstantCommand();
@@ -228,6 +253,19 @@ public class BuildableAutoRoutine {
     }
 
     /**
+     * Runs the current routine manually.
+     */
+    private void runRoutineManually() {
+        if (!DriverStation.isTeleopEnabled()) {
+            Elastic.sendWarning("Auto Routine", "Robot is not enabled in Teleop mode");
+            return;
+        }
+
+        var autoCommand = exportCombinedAutoRoutine();
+        autoCommand.schedule();
+    }
+
+    /**
      * Overwrites the current routine steps with the steps from the selected historical routine.
      */
     private void applyHistory() {
@@ -255,6 +293,24 @@ public class BuildableAutoRoutine {
         Elastic.sendInfo("Auto Routine", "Applied historical routine: " + selectedRoutineName);
 
         updateChooserOptions();
+    }
+
+    /**
+     * Returns the robot to a starting position
+     * @param startingPose
+     */
+    private void pathfindToPose(Pose2d startingPose) {
+        if (!DriverStation.isTeleopEnabled()) {
+            Elastic.sendWarning("Auto Routine", "Robot is not enabled in Teleop mode");
+            return;
+        }
+
+        try {
+            var pathfindCommand = Container.Swerve.pathfindToPoseCommand(startingPose);
+            pathfindCommand.schedule();
+        } catch (Exception e) {
+            Elastic.sendError("Auto Routine", "Failed to pathfind to starting pose: " + e.getMessage());
+        }
     }
 
     /**

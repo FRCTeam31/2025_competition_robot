@@ -101,6 +101,7 @@ public class SwerveIOPackager {
 
     inputs.ModuleStates = getModuleStates();
     inputs.RobotRelativeChassisSpeeds = Kinematics.toChassisSpeeds(getModuleStates());
+    _gyro.updateInputs(_gyroInputs, 0);
     inputs.GyroAngle = _gyroInputs.Rotation.toRotation2d();
     inputs.GyroAccelX = _gyroInputs.AccelerationX;
     inputs.GyroAccelY = _gyroInputs.AccelerationY;

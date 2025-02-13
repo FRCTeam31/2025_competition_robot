@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 import frc.robot.dashboard.TeleopDashboardTab;
 import frc.robot.dashboard.DashboardSection;
-import frc.robot.dashboard.TestDashboardSection;
 import frc.robot.oi.OperatorInterface;
 import frc.robot.oi.BuildableAutoRoutine;
 import frc.robot.subsystems.*;
@@ -19,7 +18,6 @@ import frc.robot.subsystems.vision.VisionSubsystem;
 
 public class Container {
   public static TeleopDashboardTab TeleopDashboardSection;
-  public static TestDashboardSection TestDashboardSection;
   public static DashboardSection CommandsDashboardSection;
   public static DashboardSection AutoDashboardSection;
   public static BuildableAutoRoutine AutoBuilder;
@@ -45,7 +43,6 @@ public class Container {
       AutoDashboardSection = new DashboardSection("Auto");
       AutoBuilder = new BuildableAutoRoutine(namedCommandsMap);
       TeleopDashboardSection = new TeleopDashboardTab();
-      TestDashboardSection = new TestDashboardSection();
       CommandsDashboardSection = new DashboardSection("Commands");
 
       // Configure controller bindings

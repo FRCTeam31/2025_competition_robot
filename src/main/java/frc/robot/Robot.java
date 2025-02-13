@@ -161,22 +161,22 @@ public class Robot extends LoggedRobot {
       _autonomousCommand.cancel();
 
       // Stop any subsystems still running
+      Container.Swerve.stopAllMotors();
     }
 
     _autonomousCommand = Container.AutoBuilder.exportCombinedAutoRoutine();
 
-    // Exit without scheduling an auto command if none is selected
     if (_autonomousCommand == null || _autonomousCommand == Commands.none()) {
+      // Exit without scheduling an auto command if none is selected
       DriverStation.reportError("[ERROR] >> No auto command selected", false);
       Container.Swerve.resetGyro();
     } else {
-      // Schedule the auto command
-      Container.Swerve.EstimatePoseUsingFrontCamera = true;
-      Container.Swerve.EstimatePoseUsingRearCamera = true;
-
-      if (onRedAlliance())
+      // Reset the gyro if we're on the red alliance
+      if (onRedAlliance()) {
         Container.Swerve.resetGyro();
+      }
 
+      // Schedule the auto command
       _autonomousCommand.schedule();
     }
   }
@@ -187,7 +187,11 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     DataLogManager.log("Teleop Enabled");
-    Elastic.selectTab("Driver");
+
+    if (DriverStation.isFMSAttached()) {
+      Elastic.selectTab("Teleop");
+    }
+
     if (_autonomousCommand != null) {
       // Cancel the auto command if it's still running
       _autonomousCommand.cancel();
@@ -200,9 +204,6 @@ public class Robot extends LoggedRobot {
     var telePattern = LEDPattern.solid(getAllianceColor()).scrollAtRelativeSpeed(Units.Hertz.of(2));
     Container.LEDs.setBackgroundPattern(telePattern);
     Container.LEDs.clearForegroundPattern();
-
-    Container.Swerve.EstimatePoseUsingFrontCamera = false;
-    Container.Swerve.EstimatePoseUsingRearCamera = false;
   }
 
   /**
