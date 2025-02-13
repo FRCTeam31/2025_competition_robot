@@ -8,11 +8,11 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.8506868573990518,
-        "y": 4.986755828015186
+        "x": 0.8446363975552549,
+        "y": 6.6489272087992894
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "KL"
     },
     {
       "anchor": {
@@ -20,12 +20,12 @@
         "y": 7.0
       },
       "prevControl": {
-        "x": 2.3807788509351067,
-        "y": 6.170198395823169
+        "x": 3.84798798174571,
+        "y": 5.314191621371496
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "SRC1"
     }
   ],
   "rotationTargets": [],
@@ -34,7 +34,7 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
-    "maxAcceleration": 2.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -45,7 +45,7 @@
     "rotation": 128.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "KL Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": -59.99999999999999

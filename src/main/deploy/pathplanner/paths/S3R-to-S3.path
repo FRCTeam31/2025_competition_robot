@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.1,
-        "y": 1.1
+        "x": 7.575,
+        "y": 5.07
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.2699999999999996,
-        "y": 1.9323333333333323
+        "x": 7.825,
+        "y": 5.07
       },
       "isLocked": false,
-      "linkedName": "SRC2"
+      "linkedName": "S3R"
     },
     {
       "anchor": {
-        "x": 3.82,
-        "y": 2.84
+        "x": 7.575,
+        "y": 5.07
       },
       "prevControl": {
-        "x": 1.7016532782527167,
-        "y": 2.233280803809034
+        "x": 7.325,
+        "y": 5.07
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "CD"
+      "linkedName": "S3"
     }
   ],
   "rotationTargets": [],
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 59.99999999999999
+    "rotation": 0.0
   },
   "reversed": false,
-  "folder": "CD Paths",
+  "folder": "Test Rotate Paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -128.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }
