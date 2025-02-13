@@ -30,7 +30,9 @@ public class SwerveMap {
         public static final PrimePIDConstants DrivePID = new PrimePIDConstants(0.01, 0, 0.000, 0.0, 0.096, 0, 0.14);
         public static final PrimePIDConstants SteeringPID = new PrimePIDConstants(4, 0, 0.04);
         public static final PrimePIDConstants AutoAlignPID = new PrimePIDConstants(3.75, 0, 0);
-        public static final PrimePIDConstants PathPlannerTranslationPID = new PrimePIDConstants(3, 0, 0);
+        // public static final PrimePIDConstants PathPlannerTranslationPID = new PrimePIDConstants(3, 0, 0);
+        // public static final PrimePIDConstants PathPlannerRotationPID = new PrimePIDConstants(2, 0, 0);
+        public static final PrimePIDConstants PathPlannerTranslationPID = new PrimePIDConstants(4, 0, 0);
         public static final PrimePIDConstants PathPlannerRotationPID = new PrimePIDConstants(2, 0, 0);
 
         // Uniform Drive Constants
@@ -81,7 +83,7 @@ public class SwerveMap {
                                         .baseUnitMagnitude(),
                         new ModuleConfig(
                                         DriveWheelDiameterMeters / 2,
-                                        Chassis.MaxSpeedMetersPerSecond / 4,
+                                        Chassis.MaxSpeedMetersPerSecond / 10,
                                         1.0,
                                         DCMotor.getNeoVortex(1).withReduction(DriveGearRatio),
                                         DriveStallCurrentLimit,
