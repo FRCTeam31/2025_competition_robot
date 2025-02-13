@@ -277,9 +277,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param controlSuppliers Controller input suppliers
    */
   public Command driveFieldRelativeCommand(SwerveControlSuppliers controlSuppliers) {
-    return this.run(() -> driveRobotRelative(controlSuppliers.getChassisSpeeds(
-        false,
-        _inputs.GyroAngle,
+    return this.run(() -> driveRobotRelative(controlSuppliers.getChassisSpeeds(false, _inputs.GyroAngle,
         () -> setAutoAlignEnabled(false))));
   }
 
@@ -289,9 +287,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param controlSuppliers Controller input suppliers
    */
   public Command driveRobotRelativeCommand(SwerveControlSuppliers controlSuppliers) {
-    return this.run(() -> driveRobotRelative(controlSuppliers.getChassisSpeeds(
-        true,
-        _inputs.GyroAngle,
+    return this.run(() -> driveRobotRelative(controlSuppliers.getChassisSpeeds(true, _inputs.GyroAngle,
         () -> setAutoAlignEnabled(false))));
   }
 

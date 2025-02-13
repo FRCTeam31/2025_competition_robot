@@ -53,7 +53,7 @@ public class Container {
           Swerve.disableAutoAlignCommand(),
           Swerve::setAutoAlignSetpointCommand,
           Swerve::setDefaultCommand,
-          Swerve::driveRobotRelativeCommand);
+          Swerve::driveFieldRelativeCommand);
     } catch (Exception e) {
       DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());
     }

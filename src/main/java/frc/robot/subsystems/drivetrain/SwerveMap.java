@@ -31,7 +31,9 @@ public class SwerveMap {
                         0.14);
         public static final ExtendedPIDConstants SteeringPID = new ExtendedPIDConstants(4, 0, 0.04);
         public static final ExtendedPIDConstants AutoAlignPID = new ExtendedPIDConstants(3.75, 0, 0);
-        public static final ExtendedPIDConstants PathPlannerTranslationPID = new ExtendedPIDConstants(3, 0, 0);
+        // public static final ExtendedPIDConstants PathPlannerTranslationPID = new ExtendedPIDConstants(3, 0, 0);
+        // public static final ExtendedPIDConstants PathPlannerRotationPID = new ExtendedPIDConstants(2, 0, 0);
+        public static final ExtendedPIDConstants PathPlannerTranslationPID = new ExtendedPIDConstants(4, 0, 0);
         public static final ExtendedPIDConstants PathPlannerRotationPID = new ExtendedPIDConstants(2, 0, 0);
 
         // Uniform Drive Constants
@@ -82,7 +84,7 @@ public class SwerveMap {
                                         .baseUnitMagnitude(),
                         new ModuleConfig(
                                         DriveWheelDiameterMeters / 2,
-                                        Chassis.MaxSpeedMetersPerSecond / 4,
+                                        Chassis.MaxSpeedMetersPerSecond / 10,
                                         1.0,
                                         DCMotor.getNeoVortex(1).withReduction(DriveGearRatio),
                                         DriveStallCurrentLimit,
