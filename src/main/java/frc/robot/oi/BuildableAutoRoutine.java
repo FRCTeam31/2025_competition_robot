@@ -195,11 +195,11 @@ public class BuildableAutoRoutine {
         }
 
         Container.TeleopDashboardSection.clearFieldPath();
-        String routineName = DriverStation.isFMSAttached()
-                ? DriverStation.getEventName() + " " + DriverStation.getMatchNumber()
-                : "TestAuto" + System.currentTimeMillis();
-        _routineHistory.addRoutineToHistory(routineName, _routineSteps);
-        _historyChooser.addOption(routineName + " - " + String.join(", ", _routineSteps), routineName);
+        // String routineName = DriverStation.isFMSAttached()
+        //         ? DriverStation.getEventName() + " " + DriverStation.getMatchNumber()
+        //         : "TestAuto" + System.currentTimeMillis();
+        // _routineHistory.addRoutineToHistory(routineName, _routineSteps);
+        // _historyChooser.addOption(routineName + " - " + String.join(", ", _routineSteps), routineName);
         return autoCommand;
     }
 

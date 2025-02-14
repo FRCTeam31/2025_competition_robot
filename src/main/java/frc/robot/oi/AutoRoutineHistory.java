@@ -60,16 +60,10 @@ public class AutoRoutineHistory {
     }
 
     private File getHistoryFile() {
-        var fileName = Robot.isReal() ? "/U/" + HISTORY_FILE_NAME : HISTORY_FILE_NAME;
-        var file = new File(".\\" + fileName);
+        var fileName = Robot.isReal() ? "/U/logs/" + HISTORY_FILE_NAME : ".\\" + HISTORY_FILE_NAME;
+        var file = new File(fileName);
 
         if (!file.exists()) {
-            if (!file.canWrite()) {
-                DriverStation.reportError("[AutoRoutineHistory] Cannot write new history file", false);
-
-                return null;
-            }
-
             try {
                 file.createNewFile();
             } catch (Exception e) {
