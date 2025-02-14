@@ -38,6 +38,7 @@ public class BuildableAutoRoutine {
     private List<String> _routineSteps = new ArrayList<>();
     private String[] _pathNames = new String[0];
     private Map<String, Command> _namedCommands;
+    private boolean _filterEnabled = true;
 
     // Dashboard widgets
     private ManagedSendableChooser<String> _nextStepChooser;
@@ -49,6 +50,7 @@ public class BuildableAutoRoutine {
     private SendableButton _returnToS1RButton;
     private SendableButton _returnToS2Button;
     private SendableButton _returnToS2RButton;
+    private SendableButton _toggleFilterSwitch;
 
     // History management
     private AutoRoutineHistory _routineHistory;
@@ -92,7 +94,18 @@ public class BuildableAutoRoutine {
         Container.AutoDashboardSection.putData("Routine/History Options", _historyChooser);
         _applyHistoryButton = new SendableButton("Apply History", this::applyHistory);
         Container.AutoDashboardSection.putData("Routine/Apply History", _applyHistoryButton);
+
+        // _toggleFilterSwitch = new SendableButton("Disable Filter", this::toggleFilter);
+        // Container.AutoDashboardSection.putData("Routine/Disable Filter", _toggleFilterSwitch);
     }
+
+    // private void toggleFilter() {
+    //     if (_filterEnabled == true) {
+    //         _filterEnabled = false;
+    //     } else {
+    //         _filterEnabled = true;
+    //     }
+    // }
 
     /**
      * Find all available paths from the deploy/pathplanner/paths directory
@@ -326,7 +339,7 @@ public class BuildableAutoRoutine {
             if (_routineSteps.isEmpty()) {
                 // If the routine is empty, only show starting paths as options
                 for (var path : _pathNames) {
-                    if (stepIsStartingPath(path)) {
+                    if (stepIsStartingPath(path) || !_filterEnabled) {
                         validNextSteps.put(path, path);
                     }
                 }
@@ -338,7 +351,7 @@ public class BuildableAutoRoutine {
 
                 var currentLocation = getRoutineLastDestination();
                 for (var path : _pathNames) {
-                    if (!stepIsStartingPath(path) && path.startsWith(currentLocation)) {
+                    if ((!stepIsStartingPath(path) && path.startsWith(currentLocation)) || !_filterEnabled) {
                         validNextSteps.put(path, path);
                     }
                 }

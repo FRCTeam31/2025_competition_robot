@@ -1,21 +1,24 @@
 package frc.robot.oi;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import frc.robot.Robot;
 
 public class AutoRoutineHistory {
-    private final String HISTORY_FILE_NAME = "autoroutine-history.txt";
-    private LinkedHashMap<String, String[]> _history;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    private final String HISTORY_PREF_KEY = "autoroutine-history";
+    private Map<String, String[]> _history;
 
     public AutoRoutineHistory() {
-        _history = readSavedHistory();
+        readSavedHistory();
     }
 
     /**
@@ -56,98 +59,55 @@ public class AutoRoutineHistory {
      */
     public void addRoutineToHistory(String routineName, List<String> routineSteps) {
         _history.put(routineName, routineSteps.toArray(new String[0]));
-        saveHistoryToFile();
-    }
-
-    private File getHistoryFile() {
-        var fileName = Robot.isReal() ? "/U/" + HISTORY_FILE_NAME : HISTORY_FILE_NAME;
-        var file = new File(".\\" + fileName);
-
-        if (!file.exists()) {
-            if (!file.canWrite()) {
-                DriverStation.reportError("[AutoRoutineHistory] Cannot write new history file", false);
-
-                return null;
-            }
-
-            try {
-                file.createNewFile();
-            } catch (Exception e) {
-                DriverStation.reportError("[AutoRoutineHistory] Error creating history file", e.getStackTrace());
-
-                return null;
-            }
-        }
-
-        if (!file.isFile()) {
-            DriverStation.reportError("[AutoRoutineHistory] History file is not a file", false);
-
-            return null;
-        }
-
-        if (!file.canWrite()) {
-            DriverStation.reportError("[AutoRoutineHistory] History file is not writable", false);
-
-            return null;
-        }
-
-        if (!file.canRead()) {
-            DriverStation.reportError("[AutoRoutineHistory] History file is not readable", false);
-
-            return null;
-        }
-
-        return file;
+        saveHistory();
     }
 
     /**
      * Reads the history of auto routines from the file in order of oldest to newest
      */
-    private LinkedHashMap<String, String[]> readSavedHistory() {
-        LinkedHashMap<String, String[]> history = new LinkedHashMap<>();
-        var file = getHistoryFile();
-        if (file != null) {
-            try {
-                // Read file
-                var lines = Files.readAllLines(file.toPath());
-                for (var line : lines) {
-                    var routineName = line.split("-")[0];
-                    var lineWithoutName = line.replaceFirst(routineName + "-", "");
-                    history.put(routineName, lineWithoutName.split(","));
-                }
+    private void readSavedHistory() {
+        var historyFromPreferences = Preferences.getString(HISTORY_PREF_KEY, null);
+        if (historyFromPreferences == null) {
+            _history = new HashMap<>();
+            saveHistory();
 
-                return history;
-            } catch (Exception e) {
-                DriverStation.reportError("[AutoRoutineHistory] Error reading history file", false);
-            }
-        } else {
-            DriverStation.reportError("[AutoRoutineHistory] Failed to read history. File not found", false);
+            historyFromPreferences = Preferences.getString(HISTORY_PREF_KEY, null);
         }
 
-        return history;
+        if (historyFromPreferences != null && !historyFromPreferences.isBlank()) {
+            try {
+                // Read string
+                var parsedHistory = objectMapper.readValue(historyFromPreferences,
+                        new TypeReference<Map<String, String[]>>() {
+                        });
+
+                if (parsedHistory == null) {
+                    throw new Exception("Failed to read history object from preferences");
+                }
+
+                _history = parsedHistory;
+            } catch (Exception e) {
+                DriverStation.reportError("[AutoRoutineHistory] Error reading history", false);
+            }
+        } else {
+            _history = new HashMap<>();
+            DriverStation.reportWarning("[AutoRoutineHistory] Started new routine history", false);
+        }
     }
 
     /**
      * Saves the current history to the on-disk file in order of oldest to newest
      */
-    private void saveHistoryToFile() {
-        var file = getHistoryFile();
-        if (file != null) {
+    private void saveHistory() {
+        if (_history != null) {
             try {
-                var writer = Files.newBufferedWriter(file.toPath());
-                for (var entry : _history.entrySet()) {
-                    var routineName = entry.getKey();
-                    var routineSteps = entry.getValue();
-                    var line = routineName + "-" + String.join(",", routineSteps);
-                    writer.write(line);
-                    writer.newLine();
-                }
-                writer.close();
+                var historyAsString = objectMapper.writeValueAsString(_history);
+                Preferences.setString(HISTORY_PREF_KEY, historyAsString);
             } catch (Exception e) {
-                DriverStation.reportError("[AutoRoutineHistory] Error saving history file", false);
+                DriverStation.reportError("[AutoRoutineHistory] Error saving history to Preferences", false);
             }
         } else {
-            DriverStation.reportError("[AutoRoutineHistory] Failed to save history file. File not found", false);
+            DriverStation.reportError("[AutoRoutineHistory] Failed to save history. Internal history is [null]", false);
         }
     }
 }
