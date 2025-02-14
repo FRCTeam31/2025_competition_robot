@@ -8,11 +8,11 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.3176666666666649,
-        "y": 0.20133333333333248
+        "x": 3.5409999999999995,
+        "y": 1.8186666666666655
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "SRC2"
     },
     {
       "anchor": {
@@ -25,7 +25,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "EF"
     }
   ],
   "rotationTargets": [],
@@ -34,7 +34,7 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
-    "maxAcceleration": 2.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -48,7 +48,7 @@
   "folder": "EF Paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 122.0
+    "rotation": -128.0
   },
   "useDefaultConstraints": true
 }

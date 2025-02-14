@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.1,
-        "y": 1.1
+        "x": 3.78,
+        "y": 5.25
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.2699999999999996,
-        "y": 1.9323333333333323
+        "x": 2.693666666666666,
+        "y": 5.280333333333333
       },
       "isLocked": false,
-      "linkedName": "SRC2"
+      "linkedName": "KL"
     },
     {
       "anchor": {
-        "x": 3.82,
-        "y": 2.84
+        "x": 1.1,
+        "y": 1.1
       },
       "prevControl": {
-        "x": 1.7016532782527167,
-        "y": 2.233280803809034
+        "x": 2.2389999999999994,
+        "y": 0.8576666666666654
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "CD"
+      "linkedName": "SRC2"
     }
   ],
   "rotationTargets": [],
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 59.99999999999999
+    "rotation": -128.0
   },
   "reversed": false,
-  "folder": "CD Paths",
+  "folder": "KL Paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -128.0
+    "rotation": -59.99999999999999
   },
   "useDefaultConstraints": true
 }
