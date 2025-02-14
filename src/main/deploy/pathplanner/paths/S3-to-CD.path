@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.1,
-        "y": 1.1
+        "x": 7.575,
+        "y": 5.07
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.2699999999999996,
-        "y": 1.9323333333333323
+        "x": 5.483666666666666,
+        "y": 1.8806666666666647
       },
       "isLocked": false,
-      "linkedName": "SRC2"
+      "linkedName": "S3"
     },
     {
       "anchor": {
@@ -20,8 +20,8 @@
         "y": 2.84
       },
       "prevControl": {
-        "x": 1.7016532782527167,
-        "y": 2.233280803809034
+        "x": 5.246,
+        "y": 2.1079999999999983
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,10 +45,10 @@
     "rotation": 59.99999999999999
   },
   "reversed": false,
-  "folder": "CD Paths",
+  "folder": "S3 Paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -128.0
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

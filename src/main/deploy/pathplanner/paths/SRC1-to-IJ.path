@@ -8,11 +8,11 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.839800006876966,
-        "y": 6.080117058860169
+        "x": 1.7429999999999992,
+        "y": 6.2413333333333325
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "SRC1"
     },
     {
       "anchor": {
@@ -20,12 +20,12 @@
         "y": 5.25
       },
       "prevControl": {
-        "x": 5.745487602718579,
-        "y": 5.562184465235081
+        "x": 4.088666666666666,
+        "y": 5.993333333333332
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "IJ"
     }
   ],
   "rotationTargets": [],
@@ -34,7 +34,7 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
-    "maxAcceleration": 2.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -119.16761337957787
+    "rotation": -119.99999999999999
   },
   "reversed": false,
   "folder": "IJ Paths",
