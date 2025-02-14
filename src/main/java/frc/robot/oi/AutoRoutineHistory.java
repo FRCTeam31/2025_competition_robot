@@ -1,5 +1,6 @@
 package frc.robot.oi;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 public class AutoRoutineHistory {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final String HISTORY_PREF_KEY = "autoroutine-history.txt";
+    private final String HISTORY_PREF_KEY = "autoroutine-history";
     private Map<String, String[]> _history;
 
     public AutoRoutineHistory() {
@@ -66,7 +67,14 @@ public class AutoRoutineHistory {
      */
     private void readSavedHistory() {
         var historyFromPreferences = Preferences.getString(HISTORY_PREF_KEY, null);
-        if (historyFromPreferences != null) {
+        if (historyFromPreferences == null) {
+            _history = new HashMap<>();
+            saveHistory();
+
+            historyFromPreferences = Preferences.getString(HISTORY_PREF_KEY, null);
+        }
+
+        if (historyFromPreferences != null && !historyFromPreferences.isBlank()) {
             try {
                 // Read string
                 var parsedHistory = objectMapper.readValue(historyFromPreferences,
@@ -74,15 +82,16 @@ public class AutoRoutineHistory {
                         });
 
                 if (parsedHistory == null) {
-                    throw new Exception("Failed to ready history object");
+                    throw new Exception("Failed to read history object from preferences");
                 }
 
                 _history = parsedHistory;
             } catch (Exception e) {
-                DriverStation.reportError("[AutoRoutineHistory] Error reading history file", false);
+                DriverStation.reportError("[AutoRoutineHistory] Error reading history", false);
             }
         } else {
-            DriverStation.reportError("[AutoRoutineHistory] Failed to read history. File not found", false);
+            _history = new HashMap<>();
+            DriverStation.reportWarning("[AutoRoutineHistory] Started new routine history", false);
         }
     }
 
@@ -95,10 +104,10 @@ public class AutoRoutineHistory {
                 var historyAsString = objectMapper.writeValueAsString(_history);
                 Preferences.setString(HISTORY_PREF_KEY, historyAsString);
             } catch (Exception e) {
-                DriverStation.reportError("[AutoRoutineHistory] Error saving history file", false);
+                DriverStation.reportError("[AutoRoutineHistory] Error saving history to Preferences", false);
             }
         } else {
-            DriverStation.reportError("[AutoRoutineHistory] Failed to save history file. File not found", false);
+            DriverStation.reportError("[AutoRoutineHistory] Failed to save history. Internal history is [null]", false);
         }
     }
 }
