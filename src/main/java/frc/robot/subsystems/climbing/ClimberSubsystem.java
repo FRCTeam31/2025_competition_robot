@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.maps.ClimberMap;
+import frc.robot.subsystems.climbing.ClimberMap;
 
 @Logged
 public class ClimberSubsystem extends SubsystemBase {

@@ -7,11 +7,14 @@ package frc.robot;
 import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj2.command.Command;
+
+import frc.robot.dashboard.DriverDashboardTab;
+import frc.robot.dashboard.DashboardSection;
+import frc.robot.dashboard.TestDashboardSection;
+import frc.robot.oi.OperatorInterface;
+import frc.robot.oi.PrimeAutoRoutine;
 import frc.robot.subsystems.*;
-import frc.robot.maps.DriveMap;
-import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
+import frc.robot.subsystems.drivetrain.SwerveSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
 public class Container {
@@ -30,7 +33,7 @@ public class Container {
       LEDs = new PwmLEDs();
       Vision = new VisionSubsystem();
       Swerve = new SwerveSubsystem(isReal);
-      Climber = new ClimberSubsystem(isReal);
+
       // Register the named commands from each subsystem that may be used in PathPlanner
       var namedCommandsMap = Swerve.getNamedCommands();
       // ...add other named commands to the map using "otherNamedCommands.putAll(namedCommandsMap);"

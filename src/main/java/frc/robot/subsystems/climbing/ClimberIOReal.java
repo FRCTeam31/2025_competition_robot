@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import frc.robot.maps.ClimberMap;
+import frc.robot.subsystems.climbing.ClimberMap;
 
 @Logged
 public class ClimberIOReal implements IClimberIO {
