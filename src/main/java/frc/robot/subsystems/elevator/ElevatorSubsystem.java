@@ -36,7 +36,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         kTrough,
         kLow,
         kMid,
-        kHigh
+        kHigh,
+        kSource
     }
 
     private Map<ElevatorPosition, Double> _positionMap = Map.of(
@@ -44,7 +45,8 @@ public class ElevatorSubsystem extends SubsystemBase {
             ElevatorPosition.kTrough, 1.0,
             ElevatorPosition.kLow, 2.0,
             ElevatorPosition.kMid, 3.0,
-            ElevatorPosition.kHigh, 4.0);
+            ElevatorPosition.kHigh, 4.0,
+            ElevatorPosition.kSource, 2.5);
 
     private ElevatorInputsAutoLogged _inputs = new ElevatorInputsAutoLogged();
     private IElevator _elevatorIO;
@@ -111,7 +113,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         // Record a frame. Since these share an encoder, we consider
         // the entire group to be one motor.
         log.motor("Elevator-Output")
-                .voltage(Units.Volts.of(_inputs.LeftMotorVoltage)) // measured motor voltage
+                .voltage(Units.Volts.of(_inputs.MotorVoltage)) // measured motor voltage
                 .linearPosition(Units.Meters.of(_inputs.ElevatorDistanceMeters)) // distance in meters
                 .linearVelocity(Units.MetersPerSecond.of(_inputs.ElevatorSpeedMetersPerSecond)); // speed in meters per second
     }

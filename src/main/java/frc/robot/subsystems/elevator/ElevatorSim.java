@@ -14,15 +14,13 @@ public class ElevatorSim implements IElevator {
                 LinearSystemId.createDCMotorSystem(
                         ElevatorSubsystem.VMap.PositionPID.kV,
                         ElevatorSubsystem.VMap.PositionPID.kA),
-                DCMotor.getNeoVortex(2)
+                DCMotor.getNeoVortex(1)
                         .withReduction(ElevatorSubsystem.VMap.GearRatio));
     }
 
     public void updateInputs(ElevatorInputsAutoLogged inputs) {
 
-        inputs.LeftMotorSpeed = _gearboxSim.getAngularVelocity().in(Units.RotationsPerSecond);
-        inputs.RightMotorSpeed = inputs.LeftMotorSpeed;
-
+        inputs.MotorSpeed = _gearboxSim.getAngularVelocity().in(Units.RotationsPerSecond);
         inputs.TopLimitSwitch = false;
         inputs.BottomLimitSwitch = false;
     }

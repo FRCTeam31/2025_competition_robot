@@ -9,15 +9,13 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 public class ElevatorReal implements IElevator {
 
-    public SparkFlex _leftElevatorMotor;
-    public SparkFlex _rightElevatorMotor;
+    public SparkFlex _elevatorMotor;
     public CANcoder _outputEncoder;
     public DigitalInput _topElevatorLimitSwitch;
     public DigitalInput _bottomElevatorLimitSwitch;
 
     public ElevatorReal() {
-        _leftElevatorMotor = new SparkFlex(ElevatorSubsystem.VMap.leftElevatorMotorCANID, MotorType.kBrushless);
-        _rightElevatorMotor = new SparkFlex(ElevatorSubsystem.VMap.rightElevatorMotorCANID, MotorType.kBrushless);
+        _elevatorMotor = new SparkFlex(ElevatorSubsystem.VMap.leftElevatorMotorCANID, MotorType.kBrushless);
 
         _outputEncoder = new CANcoder(ElevatorSubsystem.VMap.cancoderCANID);
 
@@ -26,11 +24,9 @@ public class ElevatorReal implements IElevator {
     }
 
     public void updateInputs(ElevatorInputsAutoLogged inputs) {
-        inputs.LeftMotorSpeed = _leftElevatorMotor.get();
-        inputs.RightMotorSpeed = _rightElevatorMotor.get();
+        inputs.MotorSpeed = _elevatorMotor.get();
 
-        inputs.LeftMotorVoltage = _leftElevatorMotor.getBusVoltage() * _leftElevatorMotor.getAppliedOutput();
-        inputs.RightMotorVoltage = _rightElevatorMotor.getBusVoltage() * _rightElevatorMotor.getAppliedOutput();
+        inputs.MotorVoltage = _elevatorMotor.getBusVoltage() * _elevatorMotor.getAppliedOutput();
         inputs.ElevatorDistanceMeters = getElevatorDistance();
         inputs.ElevatorSpeedMetersPerSecond = getElevatorSpeedMetersPerSecond();
 
@@ -39,8 +35,7 @@ public class ElevatorReal implements IElevator {
     }
 
     public void setMotorVoltages(double volts) {
-        _leftElevatorMotor.setVoltage(volts);
-        _rightElevatorMotor.setVoltage(volts);
+        _elevatorMotor.setVoltage(volts);
     }
 
     public void setMotorSpeeds(double output) {
@@ -54,13 +49,11 @@ public class ElevatorReal implements IElevator {
             return;
         }
 
-        _leftElevatorMotor.set(output);
-        _rightElevatorMotor.set(output);
+        _elevatorMotor.set(output);
     }
 
     public void stopMotors() {
-        _leftElevatorMotor.stopMotor();
-        _rightElevatorMotor.stopMotor();
+        _elevatorMotor.stopMotor();
     }
 
     public double getElevatorDistance() {
