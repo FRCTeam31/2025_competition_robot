@@ -175,8 +175,8 @@ public class BuildableAutoRoutine {
                         throw new Exception("Path not found");
                     }
 
-                    // Set starting pose of the robot if path starts with "S"
-                    if (step.startsWith("S")) {
+                    // Set starting pose of the robot if path is a starting path
+                    if (step.matches("^S\\dR?-to-.+")) {
                         // This resets the pose estimation to the first point of the starting path, instead of
                         // letting it try to reach the ending position from where it *thinks* that it started.
                         // Replicates the PP Auto "Reset Odometry" flag
