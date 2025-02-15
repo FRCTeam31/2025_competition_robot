@@ -343,24 +343,35 @@ public class BuildableAutoRoutine {
 
         try {
             Map<String, String> validNextSteps = new HashMap<String, String>();
-            if (_routineSteps.isEmpty()) {
-                // If the routine is empty, only show starting paths as options
-                for (var path : _pathNames) {
-                    if (stepIsStartingPath(path) || !_filterEnabled) {
-                        validNextSteps.put(path, path);
+            if (_filterEnabled) {
+                if (_routineSteps.isEmpty()) {
+                    // If the routine is empty, only show starting paths as options
+                    for (var path : _pathNames) {
+                        if (stepIsStartingPath(path)) {
+                            validNextSteps.put(path, path);
+                        }
+                    }
+                } else {
+                    // If the routine is not empty, show paths that start with the last destination of the routine and commands as options
+                    for (var command : _namedCommands.keySet()) {
+                        validNextSteps.put(command, command);
+                    }
+
+                    var currentLocation = getRoutineLastDestination();
+                    for (var path : _pathNames) {
+                        if (!stepIsStartingPath(path) && path.startsWith(currentLocation)) {
+                            validNextSteps.put(path, path);
+                        }
                     }
                 }
             } else {
-                // If the routine is not empty, show paths that start with the last destination of the routine and commands as options
+                // Adds all paths and commands as options if filter is disabled
                 for (var command : _namedCommands.keySet()) {
                     validNextSteps.put(command, command);
                 }
 
-                var currentLocation = getRoutineLastDestination();
                 for (var path : _pathNames) {
-                    if ((!stepIsStartingPath(path) && path.startsWith(currentLocation)) || !_filterEnabled) {
-                        validNextSteps.put(path, path);
-                    }
+                    validNextSteps.put(path, path);
                 }
             }
 
