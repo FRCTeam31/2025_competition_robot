@@ -13,10 +13,7 @@ import frc.robot.dashboard.DashboardSection;
 import frc.robot.dashboard.TestDashboardSection;
 import frc.robot.oi.OperatorInterface;
 import frc.robot.oi.PrimeAutoRoutine;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.*;
-import frc.robot.maps.EndEffectorMap;
 import frc.robot.subsystems.drivetrain.SwerveSubsystem;
 import frc.robot.subsystems.endEffector.EndEffectorSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
@@ -27,6 +24,7 @@ public class Container {
   public static DashboardSection CommandsDashboardSection;
 
   public static SwerveSubsystem Swerve;
+  public static EndEffectorSubsystem EndEffector;
   public static VisionSubsystem Vision;
   public static PwmLEDs LEDs;
   public static OperatorInterface OperatorInterface;

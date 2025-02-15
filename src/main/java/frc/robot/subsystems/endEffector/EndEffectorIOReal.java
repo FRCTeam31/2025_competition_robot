@@ -2,7 +2,6 @@ package frc.robot.subsystems.endEffector;
 
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import frc.robot.maps.EndEffectorMap;
 
 public class EndEffectorIOReal implements IEndEffectorIO {
 

@@ -3,7 +3,7 @@ package frc.robot.subsystems.endEffector;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import frc.robot.maps.DriveMap;
+import frc.robot.subsystems.drivetrain.SwerveMap;
 
 public class EndEffectorIOSim implements IEndEffectorIO {
 
@@ -12,7 +12,7 @@ public class EndEffectorIOSim implements IEndEffectorIO {
 
     public EndEffectorIOSim() {
         endEffectorMotor = new DCMotorSim(
-                LinearSystemId.createDCMotorSystem(DCMotor.getNeoVortex(1), 0.001, DriveMap.DriveGearRatio),
+                LinearSystemId.createDCMotorSystem(DCMotor.getNeoVortex(1), 0.001, SwerveMap.DriveGearRatio),
                 DCMotor.getNeoVortex(1));
 
     }

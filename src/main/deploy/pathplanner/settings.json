@@ -3,7 +3,7 @@
   "robotLength": 0.686,
   "holonomicMode": true,
   "pathFolders": [
-    "Source to Reef""Testing paths"
+    "Source to Reef"
   ],
   "autoFolders": [],
   "defaultMaxVel": 3.0,
