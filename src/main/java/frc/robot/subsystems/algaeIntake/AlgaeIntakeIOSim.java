@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.DoubleSolenoidSim;
-import frc.robot.maps.AlgaeIntakeMap;
+import frc.robot.subsystems.algaeIntake.AlgaeIntakeMap;
 
 @Logged
 public class AlgaeIntakeIOSim implements IAlgaeIntakeIO {

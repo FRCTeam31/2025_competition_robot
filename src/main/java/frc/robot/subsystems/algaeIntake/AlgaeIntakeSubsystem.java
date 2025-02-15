@@ -6,7 +6,7 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.maps.AlgaeIntakeMap;
+import frc.robot.subsystems.algaeIntake.AlgaeIntakeMap;
 
 @Logged
 public class AlgaeIntakeSubsystem extends SubsystemBase {

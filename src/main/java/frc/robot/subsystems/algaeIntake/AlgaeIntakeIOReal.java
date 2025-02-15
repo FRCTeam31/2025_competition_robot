@@ -7,7 +7,7 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import frc.robot.maps.AlgaeIntakeMap;
+import frc.robot.subsystems.algaeIntake.AlgaeIntakeMap;
 
 @Logged
 public class AlgaeIntakeIOReal implements IAlgaeIntakeIO {
