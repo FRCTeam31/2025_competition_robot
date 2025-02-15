@@ -18,26 +18,22 @@ public class LimeLightNT implements AutoCloseable {
     private NetworkTable m_limelightTable;
     private ExecutorService m_executorService = Executors.newSingleThreadExecutor();
 
-    private LimelightInputs m_inputs = new LimelightInputs();
-
     public LimeLightNT(NetworkTableInstance instance, String tableName) {
         m_limelightTable = instance.getTable(tableName);
     }
 
-    public LimelightInputs getInputs() {
-        m_inputs.TargetHorizontalOffset = getHorizontalOffsetFromTarget();
-        m_inputs.TargetVerticalOffset = getVerticalOffsetFromTarget();
-        m_inputs.TargetArea = getTargetArea();
-        m_inputs.PipelineLatencyMs = getPipelineLatencyMs();
-        m_inputs.CapturePipelineLatencyMs = getCapturePipelineLatencyMs();
-        m_inputs.TotalLatencyMs = getTotalLatencyMs();
-        m_inputs.ApriltagId = getApriltagId();
-        m_inputs.TagCount = getTagCount();
-        m_inputs.FieldSpaceRobotPose = getRobotPose();
-        m_inputs.RedAllianceOriginFieldSpaceRobotPose = getRobotPose(Alliance.Red);
-        m_inputs.BlueAllianceOriginFieldSpaceRobotPose = getRobotPose(Alliance.Blue);
-
-        return m_inputs;
+    public void updateInputs(LimelightInputs inputs) {
+        inputs.TargetHorizontalOffset = getHorizontalOffsetFromTarget();
+        inputs.TargetVerticalOffset = getVerticalOffsetFromTarget();
+        inputs.TargetArea = getTargetArea();
+        inputs.PipelineLatencyMs = getPipelineLatencyMs();
+        inputs.CapturePipelineLatencyMs = getCapturePipelineLatencyMs();
+        inputs.TotalLatencyMs = getTotalLatencyMs();
+        inputs.ApriltagId = getApriltagId();
+        inputs.TagCount = getTagCount();
+        inputs.FieldSpaceRobotPose = getRobotPose();
+        inputs.RedAllianceOriginFieldSpaceRobotPose = getRobotPose(Alliance.Red);
+        inputs.BlueAllianceOriginFieldSpaceRobotPose = getRobotPose(Alliance.Blue);
     }
 
     //#region Basic Targeting Data

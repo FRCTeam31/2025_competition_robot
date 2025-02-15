@@ -1,6 +1,8 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.epilogue.Logged;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Dimensionless;
 import edu.wpi.first.wpilibj.AddressableLED;
@@ -13,7 +15,6 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-@Logged(strategy = Logged.Strategy.OPT_IN)
 public class PwmLEDs extends SubsystemBase {
     public static class VMap {
         public static final int PwmPort = 9;
@@ -21,13 +22,13 @@ public class PwmLEDs extends SubsystemBase {
         public static final double BackgroundDimAmount = 0.5;
     }
 
+    private final ScheduledExecutorService _updateLoopExecutor = Executors.newScheduledThreadPool(1);
     private AddressableLED m_led;
     private AddressableLEDBuffer m_ledBuffer;
-    @Logged(name = "LoopErrorCounter", importance = Logged.Importance.CRITICAL)
     public byte _loopErrorCounter = 0;
+    private final byte _maxLoopErrors = 3;
 
-    private LEDPattern m_backgroundPattern =
-            LEDPattern.solid(Color.kGhostWhite).breathe(Units.Seconds.of(4));
+    private LEDPattern m_backgroundPattern = LEDPattern.solid(Color.kGhostWhite).breathe(Units.Seconds.of(4));
     private LEDPattern m_foregroundPattern = null;
 
     private Alert m_loopStoppedAlert;
@@ -40,19 +41,34 @@ public class PwmLEDs extends SubsystemBase {
         m_led.setLength(m_ledBuffer.getLength());
         m_led.start();
 
+        _updateLoopExecutor.scheduleAtFixedRate(this::updateLedStrip, 0, 8, java.util.concurrent.TimeUnit.MILLISECONDS);
+
         // Apply a default pattern to the LED strip
         m_backgroundPattern.applyTo(m_ledBuffer);
 
         // Setup the warning for when the loop stops
-        m_loopStoppedAlert =
-                new Alert("[LEDs:ERROR] LED update loop failed.", Alert.AlertType.kWarning);
+        m_loopStoppedAlert = new Alert("[LEDs:ERROR] LED update loop failed.", Alert.AlertType.kWarning);
         m_loopStoppedAlert.set(false);
     }
 
-    public void updateLedStrip() {
-        // If we're not running on a real robot, or we've failed too many times, do nothing.
-        if (_loopErrorCounter > 3)
-            return;
+    public void stopUpdateLoop() {
+        _updateLoopExecutor.shutdown();
+        m_loopStoppedAlert.set(true);
+    }
+
+    public void startUpdateLoop() {
+        _loopErrorCounter = 0;
+        _updateLoopExecutor.scheduleAtFixedRate(this::updateLedStrip, 0, 8, java.util.concurrent.TimeUnit.MILLISECONDS);
+    }
+
+    private void updateLedStrip() {
+        // If we've failed too many times, stop the loop and alert the user
+        if (_loopErrorCounter > _maxLoopErrors) {
+            var msg = "[LEDs:ERROR] LED update loop has failed 3 times. Stopping loop.";
+            DriverStation.reportError(msg, false);
+            System.out.println(msg);
+            stopUpdateLoop();
+        }
 
         try {
             if (m_foregroundPattern == null) {
@@ -72,14 +88,6 @@ public class PwmLEDs extends SubsystemBase {
             DataLogManager.log("[LEDs:ERROR] Failed to update LEDs: " + e.getMessage());
             DriverStation.reportError("[LEDs:ERROR] Failed to update LEDs: " + e.getMessage(),
                     e.getStackTrace());
-
-            // If we've failed too many times, stop the loop and alert the user
-            if (_loopErrorCounter > 3) {
-                var msg = "[LEDs:ERROR] LED update loop has failed 3 times. Stopping loop.";
-                DriverStation.reportError(msg, false);
-                System.out.println(msg);
-                m_loopStoppedAlert.set(true);
-            }
         }
     }
 

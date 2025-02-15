@@ -92,6 +92,13 @@ public class PrimeXboxController extends CommandXboxController {
     return () -> getRawAxis(Controls.LEFT_TRIGGER) - getRawAxis(Controls.RIGHT_TRIGGER);
   }
 
+  /**
+   * Returns cubic-scaled suppliers for the SwerveDrive control inputs
+   * @param style
+   * @param driveDeadband
+   * @param curveWeight
+   * @return
+   */
   public SwerveControlSuppliers getSwerveControlProfile(
       HolonomicControlStyle style,
       double driveDeadband,
