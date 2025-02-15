@@ -50,7 +50,7 @@ public class BuildableAutoRoutine {
     private SendableButton _returnToS1RButton;
     private SendableButton _returnToS2Button;
     private SendableButton _returnToS2RButton;
-    private SendableButton _toggleFilterSwitch;
+    private SendableChooser<Boolean> _toggleFilterSwitch;
 
     // History management
     private AutoRoutineHistory _routineHistory;
@@ -95,17 +95,24 @@ public class BuildableAutoRoutine {
         _applyHistoryButton = new SendableButton("Apply History", this::applyHistory);
         Container.AutoDashboardSection.putData("Routine/Apply History", _applyHistoryButton);
 
-        // _toggleFilterSwitch = new SendableButton("Disable Filter", this::toggleFilter);
-        // Container.AutoDashboardSection.putData("Routine/Disable Filter", _toggleFilterSwitch);
+        _toggleFilterSwitch = new SendableChooser<>();
+        _toggleFilterSwitch.setDefaultOption("Enable", true);
+        _toggleFilterSwitch.addOption("Disable", false);
+        _toggleFilterSwitch.onChange(this::toggleFilter);
+        Container.AutoDashboardSection.putData("Routine/Filter Status", _toggleFilterSwitch);
     }
 
-    // private void toggleFilter() {
-    //     if (_filterEnabled == true) {
-    //         _filterEnabled = false;
-    //     } else {
-    //         _filterEnabled = true;
-    //     }
-    // }
+    private void toggleFilter(Boolean newValue) {
+        _filterEnabled = _toggleFilterSwitch.getSelected();
+        updateChooserOptions();
+
+        if (_filterEnabled) {
+            Elastic.sendInfo("Filter Status", "Filter enabled");
+        } else {
+            Elastic.sendWarning("Filter Status",
+                    "Filter disabled, this may cause unexpected behavior if path enpoints are not connected");
+        }
+    }
 
     /**
      * Find all available paths from the deploy/pathplanner/paths directory
