@@ -1,0 +1,49 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Approach Algae IJ"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Reversed Alt Source to IJ"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Alt Source to CD"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Reversed Alt Source to CD"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Alt Source to EF"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Reversed Alt Source to EF"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

@@ -138,6 +138,7 @@ $RECYCLE.BIN/
 ### Gradle ###
 .gradle
 /build/
+/shuffleboardPlugin/primeautobuilder/build/
 
 # Ignore Gradle GUI config
 gradle-app.setting
@@ -171,7 +172,6 @@ out/
 # Simulation GUI and other tools window save file
 networktables.json
 simgui.json
-*-window.json
 
 # Simulation data log directory
 logs/
@@ -182,4 +182,4 @@ ctre_sim/
 # clangd
 /.cache
 compile_commands.json
-build/reports/problems/problems-report.html
+problems-report.html
