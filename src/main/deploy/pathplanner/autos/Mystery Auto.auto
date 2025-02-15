@@ -1,0 +1,37 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Approach Algae GH"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Reversed Alt Source to GH"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Alt Source to EF"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Reversed Alt Source to EF"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

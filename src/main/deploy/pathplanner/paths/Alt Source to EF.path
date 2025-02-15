@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.2,
-        "y": 1.05
+        "x": 1.1,
+        "y": 1.1
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.3549999999999995,
-        "y": 1.8029999999999986
+        "x": 3.022884745717544,
+        "y": 2.3634429419289242
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.344772727272727,
-        "y": 2.5741335227272724
+        "x": 5.15,
+        "y": 2.8
       },
       "prevControl": {
-        "x": 3.8819999999999997,
-        "y": 1.1056666666666657
+        "x": 1.5845038221374175,
+        "y": 1.3143220155874886
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,10 +42,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 122.12499844038751
+    "rotation": 119.99999999999999
   },
   "reversed": false,
-  "folder": "Source to Reef",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": -128.0
