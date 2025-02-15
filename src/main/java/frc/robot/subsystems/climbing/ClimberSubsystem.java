@@ -1,13 +1,10 @@
 package frc.robot.subsystems.climbing;
 
-import java.util.Map;
-
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.climbing.ClimberMap;
 
 @Logged
 public class ClimberSubsystem extends SubsystemBase {

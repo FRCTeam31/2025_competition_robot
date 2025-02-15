@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.DoubleSolenoidSim;
 import edu.wpi.first.wpilibj.simulation.PneumaticsBaseSim;
-import frc.robot.subsystems.climbing.ClimberMap;
 
 @Logged
 public class ClimberIOSim implements IClimberIO {
