@@ -265,8 +265,10 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     // Update shuffleboard
-    Container.TeleopDashboardSection.setGyroHeading(_inputs.GyroAngle);
-    Container.TeleopDashboardSection.setFieldRobotPose(_inputs.EstimatedRobotPose);
+    if (DriverStation.isEnabled()) {
+      Container.TeleopDashboardSection.setFieldRobotPose(_inputs.EstimatedRobotPose);
+      Container.TeleopDashboardSection.setGyroHeading(_inputs.GyroAngle);
+    }
     Logger.recordOutput("Drive/estimatedRobotPose", _inputs.EstimatedRobotPose);
     _drivetrainDashboardSection.setAutoAlignEnabled(_useAutoAlign);
     _drivetrainDashboardSection.setAutoAlignTarget(_autoAlign.getSetpoint());

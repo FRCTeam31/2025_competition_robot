@@ -14,6 +14,7 @@ import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -110,7 +111,8 @@ public class BuildableAutoRoutine {
             Elastic.sendInfo("Filter Status", "Filter enabled");
         } else {
             Elastic.sendWarning("Filter Status",
-                    "Filter disabled, this may cause unexpected behavior if path enpoints are not connected");
+                    "Filter disabled, this may cause unexpected behavior if path endpoints are not connected!",
+                    8);
         }
     }
 
@@ -176,7 +178,7 @@ public class BuildableAutoRoutine {
                     }
 
                     // Set starting pose of the robot if path is a starting path
-                    if (step.matches("^S\\dR?-to-.+")) {
+                    if (stepIsStartingPath(step)) {
                         // This resets the pose estimation to the first point of the starting path, instead of
                         // letting it try to reach the ending position from where it *thinks* that it started.
                         // Replicates the PP Auto "Reset Odometry" flag
@@ -410,7 +412,7 @@ public class BuildableAutoRoutine {
     }
 
     private boolean stepIsStartingPath(String step) {
-        return stepIsPath(step) && step.startsWith("S") && !step.startsWith("SRC");
+        return step.matches("^S\\dR?-to-.+");
     }
 
     private void onChooserChangeEvent(String newValue) {
@@ -427,9 +429,19 @@ public class BuildableAutoRoutine {
                     path = path.flipPath();
                 }
 
-                var finalPose = path.getPathPoses().get(path.getPathPoses().size() - 1);
+                var startingPose = path.getPathPoses().get(0)
+                        .transformBy(new Transform2d(0, 0, path.getIdealStartingState().rotation()));
+                var finalPose = path.getPathPoses().get(path.getPathPoses().size() - 1)
+                        .transformBy(new Transform2d(0, 0, path.getGoalEndState().rotation()));
                 Container.TeleopDashboardSection.setFieldPath(path.getPathPoses());
+                Container.TeleopDashboardSection.setFieldRobotPose(startingPose);
                 Container.TeleopDashboardSection.setFieldTargetPose(finalPose);
+
+                var currentLocation = getRoutineLastDestination();
+                if (!stepIsStartingPath(path.name) && !path.name.startsWith(currentLocation)) {
+                    Elastic.sendWarning("Auto Routine",
+                            "Path does not start where the routine left off, unexpected behavior may occur", 7);
+                }
             }
         } catch (Exception e) {
             Elastic.sendWarning("Auto Routine", "Failed to display path for \"" + newValue + "\"");

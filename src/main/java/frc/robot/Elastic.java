@@ -46,6 +46,14 @@ public final class Elastic {
     }
 
     /**
+     * Sends a warning notification to the Elastic dashboard with the given title and description.
+     */
+    public static void sendWarning(String title, String description, double displayTimeSeconds) {
+        sendNotification(new Notification(Notification.NotificationLevel.WARNING, title, description)
+                .withDisplaySeconds(displayTimeSeconds));
+    }
+
+    /**
      * Sends an error notification to the Elastic dashboard with the given title and description.
      */
     public static void sendError(String title, String description) {
@@ -53,10 +61,26 @@ public final class Elastic {
     }
 
     /**
+     * Sends an error notification to the Elastic dashboard with the given title and description.
+     */
+    public static void sendError(String title, String description, double displayTimeSeconds) {
+        sendNotification(new Notification(Notification.NotificationLevel.ERROR, title, description)
+                .withDisplaySeconds(displayTimeSeconds));
+    }
+
+    /**
      * Sends an info notification to the Elastic dashboard with the given title and description.
      */
     public static void sendInfo(String title, String description) {
         sendNotification(new Notification(Notification.NotificationLevel.INFO, title, description));
+    }
+
+    /**
+     * Sends an info notification to the Elastic dashboard with the given title and description.
+     */
+    public static void sendInfo(String title, String description, double displayTimeSeconds) {
+        sendNotification(new Notification(Notification.NotificationLevel.INFO, title, description)
+                .withDisplaySeconds(displayTimeSeconds));
     }
 
     /**
