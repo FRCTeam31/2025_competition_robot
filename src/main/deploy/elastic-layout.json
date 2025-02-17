@@ -3,6 +3,20 @@
   "grid_size": 128,
   "tabs": [
     {
+      "name": "Teleoperated",
+      "grid_layout": {
+        "layouts": [],
+        "containers": []
+      }
+    },
+    {
+      "name": "Autonomous",
+      "grid_layout": {
+        "layouts": [],
+        "containers": []
+      }
+    },
+    {
       "name": "Driver",
       "grid_layout": {
         "layouts": [
@@ -218,96 +232,6 @@
             "properties": {
               "topic": "/FMSInfo",
               "period": 0.06
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "Drivetrain",
-      "grid_layout": {
-        "layouts": [],
-        "containers": [
-          {
-            "title": "AutoAlign Enabled",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 512.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/Drivetrain/AutoAlign Enabled",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "AutoAlign Angle",
-            "x": 0.0,
-            "y": 128.0,
-            "width": 512.0,
-            "height": 512.0,
-            "type": "Gyro",
-            "properties": {
-              "topic": "/SmartDashboard/Drivetrain/AutoAlign Angle",
-              "period": 0.06,
-              "counter_clockwise_positive": true
-            }
-          },
-          {
-            "title": "FL Optimize",
-            "x": 512.0,
-            "y": 0.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/SmartDashboard/Drivetrain/FrontLeftModule/Optimize",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
-          },
-          {
-            "title": "FR Optimize",
-            "x": 640.0,
-            "y": 0.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/SmartDashboard/Drivetrain/FrontRightModule/Optimize",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
-          },
-          {
-            "title": "RL Optimize",
-            "x": 512.0,
-            "y": 128.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/SmartDashboard/Drivetrain/RearLeftModule/Optimize",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
-          },
-          {
-            "title": "RR Optimize",
-            "x": 640.0,
-            "y": 128.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/SmartDashboard/Drivetrain/RearRightModule/Optimize",
-              "period": 0.06,
-              "data_type": "boolean"
             }
           }
         ]
@@ -531,6 +455,108 @@
             "properties": {
               "topic": "/SmartDashboard/Auto/Routine/Filter Status",
               "period": 0.06
+            }
+          },
+          {
+            "title": "Routine Preview Mode",
+            "x": 1536.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Split Button Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Auto/Routine/Routine Preview Mode",
+              "period": 0.06
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Drivetrain",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "AutoAlign Enabled",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Drivetrain/AutoAlign Enabled",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "AutoAlign Angle",
+            "x": 0.0,
+            "y": 128.0,
+            "width": 512.0,
+            "height": 512.0,
+            "type": "Gyro",
+            "properties": {
+              "topic": "/SmartDashboard/Drivetrain/AutoAlign Angle",
+              "period": 0.06,
+              "counter_clockwise_positive": true
+            }
+          },
+          {
+            "title": "FL Optimize",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Toggle Switch",
+            "properties": {
+              "topic": "/SmartDashboard/Drivetrain/FrontLeftModule/Optimize",
+              "period": 0.06,
+              "data_type": "boolean"
+            }
+          },
+          {
+            "title": "FR Optimize",
+            "x": 640.0,
+            "y": 0.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Toggle Switch",
+            "properties": {
+              "topic": "/SmartDashboard/Drivetrain/FrontRightModule/Optimize",
+              "period": 0.06,
+              "data_type": "boolean"
+            }
+          },
+          {
+            "title": "RL Optimize",
+            "x": 512.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Toggle Switch",
+            "properties": {
+              "topic": "/SmartDashboard/Drivetrain/RearLeftModule/Optimize",
+              "period": 0.06,
+              "data_type": "boolean"
+            }
+          },
+          {
+            "title": "RR Optimize",
+            "x": 640.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Toggle Switch",
+            "properties": {
+              "topic": "/SmartDashboard/Drivetrain/RearRightModule/Optimize",
+              "period": 0.06,
+              "data_type": "boolean"
             }
           }
         ]

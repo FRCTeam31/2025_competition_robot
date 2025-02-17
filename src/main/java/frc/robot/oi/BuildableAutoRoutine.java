@@ -37,9 +37,17 @@ public class BuildableAutoRoutine {
 
     // Internal state
     private List<String> _routineSteps = new ArrayList<>();
+    private List<Pose2d> _combinedRoutinePoses = new ArrayList<>();
     private String[] _pathNames = new String[0];
     private Map<String, Command> _namedCommands;
     private boolean _filterEnabled = true;
+    private _previewMode _currentPreviewMode = _previewMode.kSingle;
+
+    private enum _previewMode {
+        kSingle,
+        kFull,
+        kAfterImage
+    }
 
     // Dashboard widgets
     private ManagedSendableChooser<String> _nextStepChooser;
@@ -52,6 +60,7 @@ public class BuildableAutoRoutine {
     private SendableButton _returnToS2Button;
     private SendableButton _returnToS2RButton;
     private SendableChooser<Boolean> _toggleFilterSwitch;
+    private SendableChooser<_previewMode> _toggleRoutinePreviewMode;
 
     // History management
     private AutoRoutineHistory _routineHistory;
@@ -101,8 +110,19 @@ public class BuildableAutoRoutine {
         _toggleFilterSwitch.addOption("Disable", false);
         _toggleFilterSwitch.onChange(this::toggleFilter);
         Container.AutoDashboardSection.putData("Routine/Filter Status", _toggleFilterSwitch);
+
+        _toggleRoutinePreviewMode = new SendableChooser<>();
+        _toggleRoutinePreviewMode.setDefaultOption("Single", _previewMode.kSingle);
+        _toggleRoutinePreviewMode.addOption("Full", _previewMode.kFull);
+        _toggleRoutinePreviewMode.addOption("After Image", _previewMode.kAfterImage);
+        _toggleRoutinePreviewMode.onChange(this::togglePreviewMode);
+        Container.AutoDashboardSection.putData("Routine/Routine Preview Mode", _toggleRoutinePreviewMode);
     }
 
+    /**
+     * Toggles the filter for the next step chooser.
+     * @param newValue
+     */
     private void toggleFilter(Boolean newValue) {
         _filterEnabled = _toggleFilterSwitch.getSelected();
         updateChooserOptions();
@@ -113,6 +133,27 @@ public class BuildableAutoRoutine {
             Elastic.sendWarning("Filter Status",
                     "Filter disabled, this may cause unexpected behavior if path endpoints are not connected!",
                     8);
+        }
+    }
+
+    /**
+     * Toggles the preview mode for the field view.
+     * @param newValue
+     */
+    private void togglePreviewMode(_previewMode newValue) {
+        _currentPreviewMode = _toggleRoutinePreviewMode.getSelected();
+        onChooserChangeEvent(_nextStepChooser.getSelected());
+
+        switch (_currentPreviewMode) {
+            case kSingle:
+                Elastic.sendInfo("Preview Mode", "Previewing single path");
+                break;
+            case kFull:
+                Elastic.sendInfo("Preview Mode", "Previewing full routine");
+                break;
+            case kAfterImage:
+                Elastic.sendInfo("Preview Mode", "Previewing after image");
+                break;
         }
     }
 
@@ -420,6 +461,8 @@ public class BuildableAutoRoutine {
         try {
             if (stepIsPath(newValue)) {
                 var path = PathPlannerPath.fromPathFile(newValue);
+                _combinedRoutinePoses.clear();
+
                 if (path == null) {
                     Elastic.sendError("Auto Routine", "Failed to load path: " + newValue);
                     return;
@@ -429,11 +472,34 @@ public class BuildableAutoRoutine {
                     path = path.flipPath();
                 }
 
+                for (var step : _routineSteps) {
+                    var stepPath = PathPlannerPath.fromPathFile(step);
+                    var isLastStep = _routineSteps.indexOf(step) == _routineSteps.size() - 1;
+
+                    if (stepPath == null) {
+                        Elastic.sendError("Auto Routine", "Failed to load path: " + newValue);
+                        return;
+                    }
+
+                    if ((isLastStep && _currentPreviewMode == _previewMode.kAfterImage)
+                            || _currentPreviewMode == _previewMode.kFull) {
+                        try {
+                            _combinedRoutinePoses.addAll(stepPath.getPathPoses());
+                        } catch (Exception e) {
+                            Elastic.sendError("Auto Routine", "Failed to load poses for path: " + step);
+                        }
+                    }
+                }
+
+                _combinedRoutinePoses.addAll(path.getPathPoses());
+
                 var startingPose = path.getPathPoses().get(0)
                         .transformBy(new Transform2d(0, 0, path.getIdealStartingState().rotation()));
                 var finalPose = path.getPathPoses().get(path.getPathPoses().size() - 1)
                         .transformBy(new Transform2d(0, 0, path.getGoalEndState().rotation()));
-                Container.TeleopDashboardSection.setFieldPath(path.getPathPoses());
+                Container.TeleopDashboardSection
+                        .setFieldPath(_currentPreviewMode == _previewMode.kSingle ? path.getPathPoses()
+                                : _combinedRoutinePoses);
                 Container.TeleopDashboardSection.setFieldRobotPose(startingPose);
                 Container.TeleopDashboardSection.setFieldTargetPose(finalPose);
 
