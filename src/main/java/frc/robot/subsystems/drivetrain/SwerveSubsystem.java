@@ -190,6 +190,9 @@ public class SwerveSubsystem extends SubsystemBase {
     // Set the desired states for each module
     Logger.recordOutput("Drive/desiredStates", swerveModuleStates);
     _swervePackager.setDesiredModuleStates(swerveModuleStates);
+
+    // Update the gyro omega for simulation purposes
+    _swervePackager.setSimGyroOmega(robotRelativeChassisSpeeds.omegaRadiansPerSecond);
   }
 
   /**

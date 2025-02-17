@@ -34,6 +34,7 @@ public class SwerveIOPackager {
   private SwerveDrivePoseEstimator m_poseEstimator;
 
   private IGyro _gyro;
+  private double _simGyroOmega = 0;
   private ISwerveModule _frontLeftModule, _frontRightModule, _rearLeftModule, _rearRightModule;
 
   private GyroInputsAutoLogged _gyroInputs = new GyroInputsAutoLogged();
@@ -102,7 +103,7 @@ public class SwerveIOPackager {
     swerveInputs.ModuleStates = getModuleStates();
     swerveInputs.RobotRelativeChassisSpeeds = Kinematics.toChassisSpeeds(getModuleStates());
 
-    _gyro.updateInputs(_gyroInputs, 0);
+    _gyro.updateInputs(_gyroInputs, _simGyroOmega);
     swerveInputs.GyroAngle = _gyroInputs.Rotation;
     swerveInputs.GyroAccelX = _gyroInputs.AccelerationX;
     swerveInputs.GyroAccelY = _gyroInputs.AccelerationY;
@@ -164,6 +165,17 @@ public class SwerveIOPackager {
     _frontRightModule.setDesiredState(desiredStates[1]);
     _rearLeftModule.setDesiredState(desiredStates[2]);
     _rearRightModule.setDesiredState(desiredStates[3]);
+  }
+
+  /**
+   * Sets the omega of the gyro sim for simulation purposes
+   * 
+   * @param omega
+   */
+  public void setSimGyroOmega(double omega) {
+    if (_gyro instanceof GyroSim) {
+      _simGyroOmega = omega;
+    }
   }
 
   /**
