@@ -1,6 +1,8 @@
 package frc.robot.subsystems.elevator;
 
 import com.ctre.phoenix6.hardware.CANcoder;
+import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
@@ -9,18 +11,16 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 public class ElevatorReal implements IElevator {
 
-    public SparkFlex _elevatorMotor;
-    public CANcoder _outputEncoder;
-    public DigitalInput _topElevatorLimitSwitch;
-    public DigitalInput _bottomElevatorLimitSwitch;
+    private SparkFlex _elevatorMotor;
+    private DigitalInput _topElevatorLimitSwitch;
+    private DigitalInput _bottomElevatorLimitSwitch;
+    private RelativeEncoder _outputEncoder;
 
     public ElevatorReal() {
         _elevatorMotor = new SparkFlex(ElevatorSubsystem.VMap.leftElevatorMotorCANID, MotorType.kBrushless);
-
-        _outputEncoder = new CANcoder(ElevatorSubsystem.VMap.cancoderCANID);
-
         _topElevatorLimitSwitch = new DigitalInput(ElevatorSubsystem.VMap.topLimitSwitchChannel);
         _bottomElevatorLimitSwitch = new DigitalInput(ElevatorSubsystem.VMap.bottomLimitSwitchChannel);
+        _outputEncoder = _elevatorMotor.getEncoder();
     }
 
     public void updateInputs(ElevatorInputsAutoLogged inputs) {
@@ -57,12 +57,12 @@ public class ElevatorReal implements IElevator {
     }
 
     public double getElevatorDistance() {
-        var rotations = _outputEncoder.getPosition().getValueAsDouble();
+        var rotations = _outputEncoder.getPosition();
         return rotations * Math.PI * ElevatorSubsystem.VMap.OutputSprocketDiameterMeters;
     }
 
     public double getElevatorSpeedMetersPerSecond() {
-        var speedRPS = _outputEncoder.getVelocity().getValueAsDouble();
+        var speedRPS = _outputEncoder.getVelocity();
         return speedRPS * Math.PI * ElevatorSubsystem.VMap.OutputSprocketDiameterMeters;
     }
 }

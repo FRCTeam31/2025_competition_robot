@@ -19,7 +19,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     public static final class VMap {
         public static final int leftElevatorMotorCANID = 20;
         public static final int rightElevatorMotorCANID = 21;
-        public static final int cancoderCANID = 21;
         public static final int topLimitSwitchChannel = 0;
         public static final int bottomLimitSwitchChannel = 1;
 
@@ -32,21 +31,19 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public enum ElevatorPosition {
-        kStarting,
+        kSource,
         kTrough,
         kLow,
         kMid,
-        kHigh,
-        kSource
+        kHigh
     }
 
     private Map<ElevatorPosition, Double> _positionMap = Map.of(
-            ElevatorPosition.kStarting, 0.0,
+            ElevatorPosition.kSource, 0.0,
             ElevatorPosition.kTrough, 1.0,
             ElevatorPosition.kLow, 2.0,
             ElevatorPosition.kMid, 3.0,
-            ElevatorPosition.kHigh, 4.0,
-            ElevatorPosition.kSource, 2.5);
+            ElevatorPosition.kHigh, 4.0);
 
     private ElevatorInputsAutoLogged _inputs = new ElevatorInputsAutoLogged();
     private IElevator _elevatorIO;
