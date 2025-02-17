@@ -70,5 +70,13 @@
     "properties": {
       "persistent": true
     }
+  },
+  {
+    "name": "/Preferences/autoroutine-history",
+    "type": "string",
+    "value": "{}",
+    "properties": {
+      "persistent": true
+    }
   }
 ]
