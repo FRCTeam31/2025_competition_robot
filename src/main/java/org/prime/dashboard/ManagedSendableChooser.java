@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.util.sendable.SendableRegistry;
+import edu.wpi.first.wpilibj.DriverStation;
 
 /**
  * The {@link SendableChooser} class is a useful tool for presenting a selection of options to the
@@ -48,6 +49,7 @@ public class ManagedSendableChooser<V> implements Sendable, AutoCloseable {
     private static final AtomicInteger s_instances = new AtomicInteger();
     private Consumer<V> m_listener;
     private final ReentrantLock m_mutex = new ReentrantLock();
+    private Boolean m_hasHadInteraction = false;
 
     /** Instantiates a {@link SendableChooser}. */
     @SuppressWarnings("this-escape")
@@ -102,6 +104,7 @@ public class ManagedSendableChooser<V> implements Sendable, AutoCloseable {
             m_selected = null;
             m_defaultChoice = "";
             m_previousVal = "";
+            m_hasHadInteraction = false;
             m_map.clear();
         } finally {
             m_mutex.unlock();
@@ -134,6 +137,30 @@ public class ManagedSendableChooser<V> implements Sendable, AutoCloseable {
                 return m_map.get(m_selected);
             } else {
                 return m_map.get(m_defaultChoice);
+            }
+        } finally {
+            m_mutex.unlock();
+        }
+    }
+
+    /**
+     * Returns the selected option. If the user has not made a selection, regardless of what is currently shown as
+     * selected, it will return {@code null} rather than the default value.
+     *
+     * @return the option selected
+     */
+    public V getUserSelected() {
+        m_mutex.lock();
+        try {
+            if (m_selected != null && m_hasHadInteraction) {
+                return m_map.get(m_selected);
+            } else if (!m_hasHadInteraction) {
+                return null;
+            } else {
+                DriverStation.reportError(
+                        "[SENDABLE CHOOSER] Tried to fetch the user's selection but it was null and there had previously been an interaction",
+                        false);
+                return null;
             }
         } finally {
             m_mutex.unlock();
@@ -191,6 +218,7 @@ public class ManagedSendableChooser<V> implements Sendable, AutoCloseable {
                         if (!m_selected.equals(m_previousVal) && m_listener != null) {
                             choice = m_map.get(val);
                             listener = m_listener;
+                            m_hasHadInteraction = true;
                         } else {
                             choice = null;
                             listener = null;

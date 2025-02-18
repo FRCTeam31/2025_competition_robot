@@ -37,7 +37,8 @@ public class BuildableAutoRoutine {
 
     // Internal state
     private List<String> _routineSteps = new ArrayList<>();
-    private List<Pose2d> _combinedRoutinePoses = new ArrayList<>();
+    // Same as logic for updating the field view, this will be deleted in the next commit but I wanted to leave this here for reference if needed.
+    // private List<Pose2d> _combinedRoutinePoses = new ArrayList<>();
     private String[] _pathNames = new String[0];
     private Map<String, Command> _namedCommands;
     private boolean _filterEnabled = true;
@@ -179,7 +180,7 @@ public class BuildableAutoRoutine {
      */
     private void togglePreviewMode(_previewMode newValue) {
         _currentPreviewMode = _toggleRoutinePreviewMode.getSelected();
-        onChooserChangeEvent(_nextStepChooser.getSelected());
+        updateFieldView(_nextStepChooser.getUserSelected());
 
         switch (_currentPreviewMode) {
             case kSingle:
@@ -191,6 +192,7 @@ public class BuildableAutoRoutine {
             case kAfterImage:
                 Elastic.sendInfo("Preview Mode", "Previewing after image");
                 break;
+
         }
     }
 
@@ -375,9 +377,16 @@ public class BuildableAutoRoutine {
             Elastic.sendWarning("Auto Routine", "No steps to remove");
         } else {
             _routineSteps.remove(_routineSteps.size() - 1);
-            Container.TeleopDashboardSection.clearFieldPath();
             Elastic.sendInfo("Auto Routine", "Removed last routine step");
             updateChooserOptions();
+
+            if (_routineSteps.isEmpty()) {
+                Container.TeleopDashboardSection.clearFieldPath();
+                Container.TeleopDashboardSection.setFieldRobotPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+                Container.TeleopDashboardSection.setFieldTargetPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+            } else {
+                updateFieldView(_nextStepChooser.getUserSelected());
+            }
         }
     }
 
@@ -391,6 +400,8 @@ public class BuildableAutoRoutine {
         } else {
             _routineSteps.clear();
             Container.TeleopDashboardSection.clearFieldPath();
+            Container.TeleopDashboardSection.setFieldRobotPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+            Container.TeleopDashboardSection.setFieldTargetPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
             System.out.println("Cleared routine");
             Elastic.sendInfo("Auto Routine", "Cleared routine");
             updateChooserOptions();
@@ -438,6 +449,7 @@ public class BuildableAutoRoutine {
         Elastic.sendInfo("Auto Routine", "Applied historical routine: " + selectedRoutineName);
 
         updateChooserOptions();
+        updateFieldView(_nextStepChooser.getUserSelected());
     }
 
     /**
@@ -535,6 +547,44 @@ public class BuildableAutoRoutine {
         return "";
     }
 
+    /**
+     * Returns the name of the last path in the routine.
+     * @return
+     */
+    private String getRoutineLastPath() {
+        for (int i = _routineSteps.size() - 1; i >= 0; i--) {
+            var currentStep = _routineSteps.get(i);
+            if (stepIsPath(currentStep)) {
+                return currentStep;
+            }
+        }
+
+        return "";
+    }
+
+    /**
+     * Returns the name of the last path in the routine, but overlooks a certain number of paths.
+     * (Skips the number given by {@code overlook}, 1 is second to last, 2 is third from last,
+     * etc.)
+     * @param overlook
+     * @return
+     */
+    private String getRoutineLastPath(int overlook) {
+        for (int i = _routineSteps.size() - 1; i >= 0; i--) {
+            var currentStep = _routineSteps.get(i);
+            if (stepIsPath(currentStep)) {
+                if (overlook > 0) {
+                    overlook--;
+                    continue;
+                }
+
+                return currentStep;
+            }
+        }
+
+        return "";
+    }
+
     private boolean stepIsPath(String step) {
         return step.contains("-to-");
     }
@@ -549,57 +599,170 @@ public class BuildableAutoRoutine {
 
     private void onChooserChangeEvent(String newValue) {
         System.out.println("Chooser selected value changed: " + newValue);
+        updateFieldView(newValue);
+    }
+
+    // Old logic for updating the field view. This will be deleted in the next commit but I wanted to leave this here for reference if needed.
+    // The logic below works fine but I wanted to simplify it and make it easier to read.
+
+    // private void updateFieldView(String newValue) {
+    //     try {
+    //         _combinedRoutinePoses.clear();
+
+    //         for (var step : _routineSteps) {
+    //             if (stepIsPath(step)) {
+    //                 var stepPath = PathPlannerPath.fromPathFile(step);
+    //                 var isLastPath = step == getRoutineLastPath();
+    //                 var isSecondToLastPath = step == getRoutineLastPath(1);
+
+    //                 if (stepPath == null) {
+    //                     Elastic.sendError("Auto Routine", "Failed to load path: " + newValue);
+    //                     return;
+    //                 }
+
+    //                 if (DriverStation.getAlliance().orElse(null) == DriverStation.Alliance.Red) {
+    //                     stepPath = stepPath.flipPath();
+    //                 }
+
+    //                 if ((isLastPath && _currentPreviewMode == _previewMode.kAfterImage)
+    //                         || _currentPreviewMode == _previewMode.kFull
+    //                         || ((((isLastPath || isSecondToLastPath) && _currentPreviewMode == _previewMode.kAfterImage)
+    //                                 || (isLastPath && _currentPreviewMode == _previewMode.kSingle))
+    //                                 && newValue == null)) {
+    //                     try {
+    //                         _combinedRoutinePoses.addAll(stepPath.getPathPoses());
+    //                     } catch (Exception e) {
+    //                         Elastic.sendError("Auto Routine", "Failed to load poses for path: " + step);
+    //                     }
+    //                 }
+    //             }
+    //         }
+
+    //         if (newValue != null && stepIsPath(newValue)) {
+    //             var path = PathPlannerPath.fromPathFile(newValue);
+
+    //             if (path == null) {
+    //                 Elastic.sendError("Auto Routine", "Failed to load path: " + newValue);
+    //                 return;
+    //             }
+
+    //             if (AutoBuilder.shouldFlip()) {
+    //                 path = path.flipPath();
+    //             }
+
+    //             _combinedRoutinePoses.addAll(path.getPathPoses());
+
+    //             var startingPose = path.getPathPoses().get(0)
+    //                     .transformBy(new Transform2d(0, 0, path.getIdealStartingState().rotation()));
+    //             var finalPose = path.getPathPoses().get(path.getPathPoses().size() - 1)
+    //                     .transformBy(new Transform2d(0, 0, path.getGoalEndState().rotation()));
+
+    //             Container.TeleopDashboardSection
+    //                     .setFieldPath(_currentPreviewMode == _previewMode.kSingle ? path.getPathPoses()
+    //                             : _combinedRoutinePoses);
+    //             Container.TeleopDashboardSection.setFieldRobotPose(startingPose);
+    //             Container.TeleopDashboardSection.setFieldTargetPose(finalPose);
+
+    //             var currentLocation = getRoutineLastDestination();
+    //             if (!stepIsStartingPath(path.name) && !path.name.startsWith(currentLocation)) {
+    //                 Elastic.sendWarning("Auto Routine",
+    //                         "Path does not start where the routine left off, unexpected behavior may occur", 7);
+    //             }
+    //         } else if (newValue == null) {
+    //             var path = PathPlannerPath.fromPathFile(getRoutineLastPath());
+
+    //             var startingPose = path.getPathPoses().get(0)
+    //                     .transformBy(new Transform2d(0, 0, path.getIdealStartingState().rotation()));
+    //             var finalPose = path.getPathPoses().get(path.getPathPoses().size() - 1)
+    //                     .transformBy(new Transform2d(0, 0, path.getGoalEndState().rotation()));
+
+    //             Container.TeleopDashboardSection.setFieldPath(_combinedRoutinePoses);
+    //             Container.TeleopDashboardSection.setFieldRobotPose(startingPose);
+    //             Container.TeleopDashboardSection.setFieldTargetPose(finalPose);
+    //         }
+    //     } catch (Exception e) {
+    //         Elastic.sendWarning("Auto Routine", "Failed to display path for \"" + newValue + "\"");
+    //         DriverStation.reportError("Failed to display path for \"" + newValue + "\"", e.getStackTrace());
+    //     }
+    // }
+
+    private void updateFieldView(String newValue) {
+        List<PathPlannerPath> _combinedRoutinePaths = new ArrayList<>();
+        List<PathPlannerPath> _trimmedRoutinePaths = new ArrayList<>();
+        List<Pose2d> _finalCombinedRoutinePoses = new ArrayList<>();
+
         try {
-            if (stepIsPath(newValue)) {
-                var path = PathPlannerPath.fromPathFile(newValue);
-                _combinedRoutinePoses.clear();
+            _combinedRoutinePaths.clear();
+            _trimmedRoutinePaths.clear();
 
-                if (path == null) {
-                    Elastic.sendError("Auto Routine", "Failed to load path: " + newValue);
-                    return;
-                }
-
-                if (AutoBuilder.shouldFlip()) {
-                    path = path.flipPath();
-                }
-
-                for (var step : _routineSteps) {
+            for (var step : _routineSteps) {
+                if (stepIsPath(step)) {
                     var stepPath = PathPlannerPath.fromPathFile(step);
-                    var isLastStep = _routineSteps.indexOf(step) == _routineSteps.size() - 1;
 
                     if (stepPath == null) {
                         Elastic.sendError("Auto Routine", "Failed to load path: " + newValue);
                         return;
                     }
 
-                    if ((isLastStep && _currentPreviewMode == _previewMode.kAfterImage)
-                            || _currentPreviewMode == _previewMode.kFull) {
-                        try {
-                            _combinedRoutinePoses.addAll(stepPath.getPathPoses());
-                        } catch (Exception e) {
-                            Elastic.sendError("Auto Routine", "Failed to load poses for path: " + step);
-                        }
+                    if (DriverStation.getAlliance().orElse(null) == DriverStation.Alliance.Red) {
+                        stepPath = stepPath.flipPath();
                     }
-                }
 
-                _combinedRoutinePoses.addAll(path.getPathPoses());
+                    try {
+                        _combinedRoutinePaths.add(stepPath);
+                    } catch (Exception e) {
+                        Elastic.sendError("Auto Routine", "Failed to load poses for path: " + step);
+                    }
 
-                var startingPose = path.getPathPoses().get(0)
-                        .transformBy(new Transform2d(0, 0, path.getIdealStartingState().rotation()));
-                var finalPose = path.getPathPoses().get(path.getPathPoses().size() - 1)
-                        .transformBy(new Transform2d(0, 0, path.getGoalEndState().rotation()));
-                Container.TeleopDashboardSection
-                        .setFieldPath(_currentPreviewMode == _previewMode.kSingle ? path.getPathPoses()
-                                : _combinedRoutinePoses);
-                Container.TeleopDashboardSection.setFieldRobotPose(startingPose);
-                Container.TeleopDashboardSection.setFieldTargetPose(finalPose);
-
-                var currentLocation = getRoutineLastDestination();
-                if (!stepIsStartingPath(path.name) && !path.name.startsWith(currentLocation)) {
-                    Elastic.sendWarning("Auto Routine",
-                            "Path does not start where the routine left off, unexpected behavior may occur", 7);
                 }
             }
+
+            PathPlannerPath path = null;
+
+            if (newValue != null && stepIsPath(newValue)) {
+                path = PathPlannerPath.fromPathFile(newValue);
+                _combinedRoutinePaths.add(path);
+            } else {
+                path = PathPlannerPath.fromPathFile(getRoutineLastPath());
+            }
+
+            if (path == null) {
+                Elastic.sendError("Auto Routine", "Failed to load path: " + newValue);
+                return;
+            }
+
+            if (AutoBuilder.shouldFlip()) {
+                path = path.flipPath();
+            }
+
+            var startingPose = path.getPathPoses().get(0)
+                    .transformBy(new Transform2d(0, 0, path.getIdealStartingState().rotation()));
+            var finalPose = path.getPathPoses().get(path.getPathPoses().size() - 1)
+                    .transformBy(new Transform2d(0, 0, path.getGoalEndState().rotation()));
+
+            switch (_currentPreviewMode) {
+                case kSingle:
+                    _trimmedRoutinePaths.add(path);
+                    break;
+                case kFull:
+                    _trimmedRoutinePaths.addAll(_combinedRoutinePaths);
+                    break;
+                case kAfterImage:
+                    _trimmedRoutinePaths.addAll(_combinedRoutinePaths);
+                    if (_trimmedRoutinePaths.size() > 2) {
+                        _trimmedRoutinePaths.subList(0, _trimmedRoutinePaths.size() - 2).clear();
+                    }
+                    break;
+            }
+
+            for (var finalPath : _trimmedRoutinePaths) {
+                _finalCombinedRoutinePoses.addAll(finalPath.getPathPoses());
+            }
+
+            Container.TeleopDashboardSection.setFieldPath(_finalCombinedRoutinePoses);
+            Container.TeleopDashboardSection.setFieldRobotPose(startingPose);
+            Container.TeleopDashboardSection.setFieldTargetPose(finalPose);
+
         } catch (Exception e) {
             Elastic.sendWarning("Auto Routine", "Failed to display path for \"" + newValue + "\"");
             DriverStation.reportError("Failed to display path for \"" + newValue + "\"", e.getStackTrace());
