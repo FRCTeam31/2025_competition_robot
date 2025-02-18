@@ -37,7 +37,7 @@ public class ClimberSubsystem extends SubsystemBase {
     }
 
     private void checkLimitSwitches() {
-        if (m_inputs.InLimitSwitch.get() || m_inputs.OutLimitSwitch.get()) {
+        if (m_inputs.InLimitSwitch || m_inputs.OutLimitSwitch) {
             Climber.stopMotors();
         }
     }
@@ -59,10 +59,10 @@ public class ClimberSubsystem extends SubsystemBase {
 
     public Command toggleClimbersCommand() {
         return Commands.runOnce(() -> {
-            if (m_inputs.OutLimitSwitch.get() || _climberPosition == ClimberPosition.OUT) {
+            if (m_inputs.OutLimitSwitch || _climberPosition == ClimberPosition.OUT) {
                 setClimberSpeedCommand(ClimberMap.climberInSpeed);
                 _climberPosition = ClimberPosition.IN;
-            } else if (m_inputs.InLimitSwitch.get() || _climberPosition == ClimberPosition.IN) {
+            } else if (m_inputs.InLimitSwitch || _climberPosition == ClimberPosition.IN) {
                 setClimberSpeedCommand(ClimberMap.climberOutSpeed);
                 _climberPosition = ClimberPosition.OUT;
             }
