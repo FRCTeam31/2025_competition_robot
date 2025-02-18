@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
 public interface IClimberIO {
 
-    public ClimberInputs getInputs();
+    public ClimberInputs updateInputs();
 
     public void setMotorSpeed(double Speed);
 

@@ -9,11 +9,14 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.DoubleSolenoidSim;
 import edu.wpi.first.wpilibj.simulation.PneumaticsBaseSim;
+import edu.wpi.first.wpilibj.simulation.DIOSim;
 
 @Logged
 public class ClimberIOSim implements IClimberIO {
     private DCMotorSim climberMotorSim;
     private DoubleSolenoidSim climbSolenoidSim;
+    private DIOSim climbOutLimitSwitchSim;
+    private DIOSim climbInLimitSwitchSim;
     private ClimberInputs m_Inputs = new ClimberInputs();
 
     public ClimberIOSim() {
@@ -25,13 +28,17 @@ public class ClimberIOSim implements IClimberIO {
                 PneumaticsBaseSim.getForType(ClimberMap.climbPneumaticsCANID, PneumaticsModuleType.CTREPCM),
                 ClimberMap.climberForwardChannel,
                 ClimberMap.climberReverseChannel);
+        climbOutLimitSwitchSim = new DIOSim(ClimberMap.climberOutLimitSwitchChannel);
+        climbInLimitSwitchSim = new DIOSim(ClimberMap.climberInLimitSwitchChannel);
     }
 
-    public ClimberInputs getInputs() {
+    public ClimberInputs updateInputs() {
         double ClimbMotorSpeed = climberMotorSim.getAngularVelocity().in(Units.RotationsPerSecond);
         Value ClimbSolenoidPosition = climbSolenoidSim.get();
         m_Inputs.ClimbMotorSpeed = ClimbMotorSpeed;
         m_Inputs.ClimbSolenoidPosition = ClimbSolenoidPosition;
+        m_Inputs.OutLimitSwitch = climbOutLimitSwitchSim.getValue();
+        m_Inputs.InLimitSwitch = climbInLimitSwitchSim.getValue();
         return m_Inputs;
 
     }

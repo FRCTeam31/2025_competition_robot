@@ -9,15 +9,15 @@ public class ClimberInputs {
 
     public double ClimbMotorSpeed = 0;
     public Value ClimbSolenoidPosition;
-    public DigitalInput InLimitSwitch;
-    public DigitalInput OutLimitSwitch;
+    public boolean InLimitSwitch;
+    public boolean OutLimitSwitch;
 
     public ClimberInputs() {
 
     }
 
-    public ClimberInputs(double climbMotorSpeed, Value climbSolenoidPosition, DigitalInput inLimitSwitch,
-            DigitalInput outLimitSwitch) {
+    public ClimberInputs(double climbMotorSpeed, Value climbSolenoidPosition, boolean inLimitSwitch,
+            boolean outLimitSwitch) {
         ClimbMotorSpeed = climbMotorSpeed;
         ClimbSolenoidPosition = climbSolenoidPosition;
         InLimitSwitch = inLimitSwitch;

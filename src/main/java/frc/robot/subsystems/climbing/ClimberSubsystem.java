@@ -27,12 +27,12 @@ public class ClimberSubsystem extends SubsystemBase {
             Climber = new ClimberIOSim();
         }
 
-        m_inputs = Climber.getInputs();
+        m_inputs = Climber.updateInputs();
     }
 
     @Override
     public void periodic() {
-        m_inputs = Climber.getInputs();
+        m_inputs = Climber.updateInputs();
         checkLimitSwitches();
     }
 
