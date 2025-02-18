@@ -37,8 +37,6 @@ public class BuildableAutoRoutine {
 
     // Internal state
     private List<String> _routineSteps = new ArrayList<>();
-    // Same as logic for updating the field view, this will be deleted in the next commit but I wanted to leave this here for reference if needed.
-    // private List<Pose2d> _combinedRoutinePoses = new ArrayList<>();
     private String[] _pathNames = new String[0];
     private Map<String, Command> _namedCommands;
     private boolean _filterEnabled = true;
@@ -565,7 +563,7 @@ public class BuildableAutoRoutine {
     /**
      * Returns the name of the last path in the routine, but overlooks a certain number of paths.
      * (Skips the number given by {@code overlook}, 1 is second to last, 2 is third from last,
-     * etc.)
+     * etc.) This is left over from previous logic and is no longer needed, but may prove useful in the future.
      * @param overlook
      * @return
      */
@@ -602,99 +600,24 @@ public class BuildableAutoRoutine {
         updateFieldView(newValue);
     }
 
-    // Old logic for updating the field view. This will be deleted in the next commit but I wanted to leave this here for reference if needed.
-    // The logic below works fine but I wanted to simplify it and make it easier to read.
-
-    // private void updateFieldView(String newValue) {
-    //     try {
-    //         _combinedRoutinePoses.clear();
-
-    //         for (var step : _routineSteps) {
-    //             if (stepIsPath(step)) {
-    //                 var stepPath = PathPlannerPath.fromPathFile(step);
-    //                 var isLastPath = step == getRoutineLastPath();
-    //                 var isSecondToLastPath = step == getRoutineLastPath(1);
-
-    //                 if (stepPath == null) {
-    //                     Elastic.sendError("Auto Routine", "Failed to load path: " + newValue);
-    //                     return;
-    //                 }
-
-    //                 if (DriverStation.getAlliance().orElse(null) == DriverStation.Alliance.Red) {
-    //                     stepPath = stepPath.flipPath();
-    //                 }
-
-    //                 if ((isLastPath && _currentPreviewMode == _previewMode.kAfterImage)
-    //                         || _currentPreviewMode == _previewMode.kFull
-    //                         || ((((isLastPath || isSecondToLastPath) && _currentPreviewMode == _previewMode.kAfterImage)
-    //                                 || (isLastPath && _currentPreviewMode == _previewMode.kSingle))
-    //                                 && newValue == null)) {
-    //                     try {
-    //                         _combinedRoutinePoses.addAll(stepPath.getPathPoses());
-    //                     } catch (Exception e) {
-    //                         Elastic.sendError("Auto Routine", "Failed to load poses for path: " + step);
-    //                     }
-    //                 }
-    //             }
-    //         }
-
-    //         if (newValue != null && stepIsPath(newValue)) {
-    //             var path = PathPlannerPath.fromPathFile(newValue);
-
-    //             if (path == null) {
-    //                 Elastic.sendError("Auto Routine", "Failed to load path: " + newValue);
-    //                 return;
-    //             }
-
-    //             if (AutoBuilder.shouldFlip()) {
-    //                 path = path.flipPath();
-    //             }
-
-    //             _combinedRoutinePoses.addAll(path.getPathPoses());
-
-    //             var startingPose = path.getPathPoses().get(0)
-    //                     .transformBy(new Transform2d(0, 0, path.getIdealStartingState().rotation()));
-    //             var finalPose = path.getPathPoses().get(path.getPathPoses().size() - 1)
-    //                     .transformBy(new Transform2d(0, 0, path.getGoalEndState().rotation()));
-
-    //             Container.TeleopDashboardSection
-    //                     .setFieldPath(_currentPreviewMode == _previewMode.kSingle ? path.getPathPoses()
-    //                             : _combinedRoutinePoses);
-    //             Container.TeleopDashboardSection.setFieldRobotPose(startingPose);
-    //             Container.TeleopDashboardSection.setFieldTargetPose(finalPose);
-
-    //             var currentLocation = getRoutineLastDestination();
-    //             if (!stepIsStartingPath(path.name) && !path.name.startsWith(currentLocation)) {
-    //                 Elastic.sendWarning("Auto Routine",
-    //                         "Path does not start where the routine left off, unexpected behavior may occur", 7);
-    //             }
-    //         } else if (newValue == null) {
-    //             var path = PathPlannerPath.fromPathFile(getRoutineLastPath());
-
-    //             var startingPose = path.getPathPoses().get(0)
-    //                     .transformBy(new Transform2d(0, 0, path.getIdealStartingState().rotation()));
-    //             var finalPose = path.getPathPoses().get(path.getPathPoses().size() - 1)
-    //                     .transformBy(new Transform2d(0, 0, path.getGoalEndState().rotation()));
-
-    //             Container.TeleopDashboardSection.setFieldPath(_combinedRoutinePoses);
-    //             Container.TeleopDashboardSection.setFieldRobotPose(startingPose);
-    //             Container.TeleopDashboardSection.setFieldTargetPose(finalPose);
-    //         }
-    //     } catch (Exception e) {
-    //         Elastic.sendWarning("Auto Routine", "Failed to display path for \"" + newValue + "\"");
-    //         DriverStation.reportError("Failed to display path for \"" + newValue + "\"", e.getStackTrace());
-    //     }
-    // }
-
+    /**
+     * Updates the field view based on the current routine steps and the user's selection.
+     * Takes in a string for the user's current selection (This will most likely be {@code _nextStepChooser.getUserSelected()}).
+     * @param newValue
+     */
     private void updateFieldView(String newValue) {
         List<PathPlannerPath> _combinedRoutinePaths = new ArrayList<>();
         List<PathPlannerPath> _trimmedRoutinePaths = new ArrayList<>();
         List<Pose2d> _finalCombinedRoutinePoses = new ArrayList<>();
 
         try {
+            // Clears the lists to ensure that they are empty before adding new values, even though they should
+            // be empty at this point.
             _combinedRoutinePaths.clear();
             _trimmedRoutinePaths.clear();
 
+            // Loops through every step in the routine picking out only the paths, does a few checks,
+            // then combines them all into a single list.
             for (var step : _routineSteps) {
                 if (stepIsPath(step)) {
                     var stepPath = PathPlannerPath.fromPathFile(step);
@@ -717,12 +640,16 @@ public class BuildableAutoRoutine {
                 }
             }
 
+            // Creates a null PathPlannerPath object that is updated based on different conditions.
             PathPlannerPath path = null;
 
+            // Decides weather path should be loaded from the user's selection or the last path in the routine, and weather
+            // it should be added to the end of the combined paths list.
             if (newValue != null && stepIsPath(newValue)) {
                 path = PathPlannerPath.fromPathFile(newValue);
                 _combinedRoutinePaths.add(path);
             } else {
+                // In this case, the path is already included in the combined paths list so it does not need to be added.
                 path = PathPlannerPath.fromPathFile(getRoutineLastPath());
             }
 
@@ -735,11 +662,16 @@ public class BuildableAutoRoutine {
                 path = path.flipPath();
             }
 
+            // Defines the starting and ending poses of the path (either the user's selection or the last path in the routine).
             var startingPose = path.getPathPoses().get(0)
                     .transformBy(new Transform2d(0, 0, path.getIdealStartingState().rotation()));
             var finalPose = path.getPathPoses().get(path.getPathPoses().size() - 1)
                     .transformBy(new Transform2d(0, 0, path.getGoalEndState().rotation()));
 
+            // Does post-processing on the combined paths list based on the current preview mode.
+            // Any new preview modes will be implemented here by creating a new case for that mode and
+            // defining how the list of all paths (including the current selection) should be altered
+            // to achieve the desired look / outcome (_trimmedRoutinePaths is what will be shown / the output).
             switch (_currentPreviewMode) {
                 case kSingle:
                     _trimmedRoutinePaths.add(path);
@@ -755,10 +687,15 @@ public class BuildableAutoRoutine {
                     break;
             }
 
+            // Takes all paths from the post-processed list and creates a list of all their poses.
+            // Theres should be little to no post-processing past this point as it is harder to
+            // manipulate the poses than the paths.
             for (var finalPath : _trimmedRoutinePaths) {
                 _finalCombinedRoutinePoses.addAll(finalPath.getPathPoses());
             }
 
+            // Updates the field view with the combined poses of the routine (after post-processing),
+            // the starting pose of the robot, and the ending pose of the path.
             Container.TeleopDashboardSection.setFieldPath(_finalCombinedRoutinePoses);
             Container.TeleopDashboardSection.setFieldRobotPose(startingPose);
             Container.TeleopDashboardSection.setFieldTargetPose(finalPose);
