@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -43,6 +44,7 @@ public class BuildableAutoRoutine {
     private _startingLocationFilter _filteredStart = _startingLocationFilter.kNone;
     private _startingDirectionFilter _filteredStartDirection = _startingDirectionFilter.kNone;
     private _previewMode _currentPreviewMode = _previewMode.kSingle;
+    private List<RecordableUndoEntry> _undoRecord = new ArrayList<>();
 
     private enum _previewMode {
         kSingle,
@@ -67,6 +69,136 @@ public class BuildableAutoRoutine {
         kReversed
     }
 
+    private enum _recordableAction {
+        kAdd,
+        kRemove,
+        kClear,
+        kLoad;
+
+        /**
+         * Undoes an action by passing in the routine in the form of a list and the {@code RecordableUndoEntry}
+         * for the change you want to undo. Data from the {@code RecordableUndoEntry} is used to alter the routine
+         * to match its state before the change.
+         * @param routine
+         * @param undoEntry
+         * @return
+         */
+        private List<String> performInverse(List<String> routine, RecordableUndoEntry undoEntry) {
+            switch (this) {
+                case kAdd:
+                    routine.remove(routine.size() - 1);
+                    break;
+                case kRemove:
+                    routine.addAll(undoEntry.getUnpackedStep());
+                    break;
+                case kClear:
+                    routine.addAll(undoEntry.getUnpackedStep());
+                    break;
+                case kLoad:
+                    routine.clear();
+                    routine.addAll(undoEntry.getUnpackedStep());
+                    break;
+            }
+            return routine;
+        }
+
+        /**
+         * Currently unimplemented. Could be used as a "redo" to preform an action based on the
+         * {@code RecordableUndoEntry}.
+         * @param routine
+         * @param undoEntry
+         * @return
+         */
+        private List<String> performAction(List<String> routine, RecordableUndoEntry undoEntry) {
+            switch (this) {
+                case kAdd:
+                    routine.addAll(undoEntry.getUnpackedStep());
+                    break;
+                case kRemove:
+                    routine.remove(routine.size() - 1);
+                    break;
+                case kClear:
+                    routine.clear();
+                    break;
+                case kLoad:
+                    routine.clear();
+                    routine.addAll(undoEntry.getStep().getLoadedStep());
+                    break;
+            }
+
+            return routine;
+        }
+    }
+
+    /**
+     * Used to store data required for a undo entry.
+     * There is an action, an enum that defines the action that was performed,
+     * and a step, a {@code RecordableStepEntry} that stores data about the routine.
+     * This data can be used to both undo an action (how it is currently used), or
+     * reconstruct an action (redo, currently not implemented).
+     */
+    private class RecordableUndoEntry {
+        private _recordableAction action;
+        private RecordableStepEntry step;
+
+        private RecordableUndoEntry(_recordableAction action, RecordableStepEntry step) {
+            this.action = action;
+            this.step = step;
+        }
+
+        private _recordableAction getAction() {
+            return this.action;
+        }
+
+        private RecordableStepEntry getStep() {
+            return this.step;
+        }
+
+        private List<String> getUnpackedStep() {
+            return this.step.getStep();
+        }
+
+    }
+
+    /**
+     * Used to store data about an auto routine, for use as part of a {@code RecordableUndoEntry}.
+     * This stores both a {@code parts} list that references the thing that was added, removed, or the entire routine before
+     * it was cleared, and a {@code loadedParts} list that is used when loading to save multiple routine parts (before and after a load).
+     */
+    private class RecordableStepEntry {
+        private List<String> parts = new ArrayList<>();
+        private List<String> loadedParts = new ArrayList<>();
+
+        private RecordableStepEntry(List<String> step) {
+            this.parts.clear();
+            this.parts.addAll(step);
+        }
+
+        private RecordableStepEntry(String step) {
+            this.parts.clear();
+            this.parts.add(step);
+        }
+
+        private RecordableStepEntry(List<String> stepPrior, List<String> stepLoaded) {
+            this.parts.clear();
+            this.loadedParts.clear();
+            this.parts.addAll(stepPrior);
+            this.loadedParts.addAll(stepLoaded);
+        }
+
+        private List<String> getStep() {
+            return this.parts;
+        }
+
+        private List<String> getLoadedStep() {
+            return this.loadedParts;
+        }
+
+        private void addPart(String part) {
+            this.parts.add(part);
+        }
+    }
+
     // Dashboard widgets
     private ManagedSendableChooser<String> _nextStepChooser;
     private SendableButton _addStepButton;
@@ -77,6 +209,7 @@ public class BuildableAutoRoutine {
     private SendableButton _returnToS1RButton;
     private SendableButton _returnToS2Button;
     private SendableButton _returnToS2RButton;
+    private SendableButton _undoLastChangeButton;
     private SendableChooser<Boolean> _toggleFilterSwitch;
     private SendableChooser<_previewMode> _toggleRoutinePreviewMode;
     private SendableChooser<_startingLocationFilter> _toggleStartingFilterLocation;
@@ -86,6 +219,11 @@ public class BuildableAutoRoutine {
     private AutoRoutineHistory _routineHistory;
     private SendableChooser<String> _historyChooser;
     private SendableButton _applyHistoryButton;
+
+    // Preloader management
+    private SendableButton _preloadRoutineLoadButton;
+    private SendableButton _preloadRoutineButton;
+    private AutoRoutinePreloader _preloadedRoutine;
 
     public BuildableAutoRoutine(Map<String, Command> commands) {
         _namedCommands = commands;
@@ -153,6 +291,16 @@ public class BuildableAutoRoutine {
         _toggleStartingFilterDirection.onChange(this::toggleStartingFilterDirection);
         Container.AutoDashboardSection.putData("Routine/Starting Filter/Direction",
                 _toggleStartingFilterDirection);
+
+        _undoLastChangeButton = new SendableButton("Undo", this::undoLastChange);
+        Container.AutoDashboardSection.putData("Routine/Undo", _undoLastChangeButton);
+
+        _preloadedRoutine = new AutoRoutinePreloader();
+        _preloadRoutineButton = new SendableButton("Preload Routine", this::preloadRoutine);
+        Container.AutoDashboardSection.putData("Routine/Preloader/Preload Routine", _preloadRoutineButton);
+
+        _preloadRoutineLoadButton = new SendableButton("Load", this::loadPreloadedRoutine);
+        Container.AutoDashboardSection.putData("Routine/Preloader/Load", _preloadRoutineLoadButton);
     }
 
     /**
@@ -236,6 +384,26 @@ public class BuildableAutoRoutine {
             case kReversed:
                 Elastic.sendInfo("Starting Filter", "Filtering for reversed starting direction");
                 break;
+        }
+    }
+
+    /**
+     * Handles undoing a previous change
+     */
+    private void undoLastChange() {
+        Elastic.sendInfo("Undo", "Removed the last change made");
+
+        try {
+            var lastUndoRecord = _undoRecord.get(_undoRecord.size() - 1);
+
+            _routineSteps = lastUndoRecord.getAction().performInverse(_routineSteps, lastUndoRecord);
+
+            updateFieldView(_nextStepChooser.getUserSelected());
+            updateChooserOptions();
+
+            _undoRecord.remove(lastUndoRecord);
+        } catch (Exception e) {
+            Elastic.sendWarning("Undo", "Nothing to undo");
         }
     }
 
@@ -363,6 +531,7 @@ public class BuildableAutoRoutine {
             return;
         }
 
+        _undoRecord.add(new RecordableUndoEntry(_recordableAction.kAdd, new RecordableStepEntry(newStep)));
         _routineSteps.add(newStep);
         updateChooserOptions();
     }
@@ -374,6 +543,8 @@ public class BuildableAutoRoutine {
         if (_routineSteps.isEmpty()) {
             Elastic.sendWarning("Auto Routine", "No steps to remove");
         } else {
+            _undoRecord.add(new RecordableUndoEntry(_recordableAction.kRemove,
+                    new RecordableStepEntry(_routineSteps.get(_routineSteps.size() - 1))));
             _routineSteps.remove(_routineSteps.size() - 1);
             Elastic.sendInfo("Auto Routine", "Removed last routine step");
             updateChooserOptions();
@@ -396,6 +567,7 @@ public class BuildableAutoRoutine {
             Elastic.sendWarning("Auto Routine", "Routine is already empty");
             return;
         } else {
+            _undoRecord.add(new RecordableUndoEntry(_recordableAction.kClear, new RecordableStepEntry(_routineSteps)));
             _routineSteps.clear();
             Container.TeleopDashboardSection.clearFieldPath();
             Container.TeleopDashboardSection.setFieldRobotPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
@@ -435,6 +607,9 @@ public class BuildableAutoRoutine {
             return;
         }
 
+        _undoRecord.add(new RecordableUndoEntry(_recordableAction.kLoad,
+                new RecordableStepEntry(_routineSteps, List.of(prevRoutineSteps))));
+
         if (!_routineSteps.isEmpty()) {
             _routineSteps.clear();
         }
@@ -448,6 +623,40 @@ public class BuildableAutoRoutine {
 
         updateChooserOptions();
         updateFieldView(_nextStepChooser.getUserSelected());
+    }
+
+    /**
+     * Handles preloading a routine (saving to preferences)
+     */
+    private void preloadRoutine() {
+        if (_routineSteps.isEmpty()) {
+            Elastic.sendWarning("Routine Preloader", "You cannot preload an empty routine");
+        } else {
+            _preloadedRoutine.saveToPreferences(_routineSteps);
+            Elastic.sendInfo("Routine Preloader",
+                    "Preloaded routine, you can load it later by clicking load (this persists through power-cycles)",
+                    8);
+        }
+    }
+
+    /**
+     * Handles loading a preloaded routine from preferences
+     */
+    private void loadPreloadedRoutine() {
+        if (!_preloadedRoutine.readSavedRoutine().isEmpty()) {
+            _undoRecord.add(new RecordableUndoEntry(_recordableAction.kLoad,
+                    new RecordableStepEntry(_routineSteps, _preloadedRoutine.readSavedRoutine())));
+
+            _routineSteps.clear();
+            _routineSteps.addAll(_preloadedRoutine.readSavedRoutine());
+
+            Elastic.sendInfo("Routine Preloader", "Loaded a preloaded routine");
+
+            updateChooserOptions();
+            updateFieldView(_nextStepChooser.getUserSelected());
+        } else {
+            Elastic.sendInfo("Routine Preloader", "No routine preloaded");
+        }
     }
 
     /**

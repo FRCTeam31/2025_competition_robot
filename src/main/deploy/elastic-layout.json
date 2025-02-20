@@ -244,7 +244,7 @@
           {
             "title": "Starting Filter",
             "x": 1536.0,
-            "y": 384.0,
+            "y": 256.0,
             "width": 256.0,
             "height": 256.0,
             "type": "List Layout",
@@ -276,6 +276,45 @@
                   "topic": "/SmartDashboard/Auto/Routine/Starting Filter/Location",
                   "period": 0.06,
                   "sort_options": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "Preloader",
+            "x": 1536.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Preload Routine",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Toggle Button",
+                "properties": {
+                  "topic": "/SmartDashboard/Auto/Routine/Preloader/Preload Routine/Preload Routine",
+                  "period": 0.06,
+                  "data_type": "boolean"
+                }
+              },
+              {
+                "title": "Load",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Toggle Button",
+                "properties": {
+                  "topic": "/SmartDashboard/Auto/Routine/Preloader/Load/Load",
+                  "period": 0.06,
+                  "data_type": "boolean"
                 }
               }
             ]
@@ -507,6 +546,19 @@
             "properties": {
               "topic": "/SmartDashboard/Auto/Routine/Routine Preview Mode",
               "period": 0.06
+            }
+          },
+          {
+            "title": "Undo",
+            "x": 1152.0,
+            "y": 640.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Toggle Button",
+            "properties": {
+              "topic": "/SmartDashboard/Auto/Routine/Undo/Undo",
+              "period": 0.06,
+              "data_type": "boolean"
             }
           }
         ]
