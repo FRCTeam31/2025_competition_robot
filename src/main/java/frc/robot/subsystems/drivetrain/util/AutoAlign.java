@@ -40,6 +40,8 @@ public class AutoAlign {
         var currentRotationRadians = MathUtil.angleModulus(currentAngle.getRadians());
         var correction = _pid.calculate(currentRotationRadians, _setpoint.getRadians());
 
+        correction = MathUtil.applyDeadband(correction, 0.01);
+
         return MathUtil.clamp(correction, -SwerveMap.Chassis.MaxAngularSpeedRadians,
                 SwerveMap.Chassis.MaxAngularSpeedRadians);
     }

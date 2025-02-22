@@ -199,6 +199,8 @@ public class Robot extends LoggedRobot {
 
       // Stop any subsystems still running
       Container.Swerve.stopAllMotors();
+    } else {
+      Container.Swerve.resetGyro();
     }
 
     // Set teleop LED pattern
