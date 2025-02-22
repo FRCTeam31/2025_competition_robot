@@ -15,6 +15,9 @@ public class AutoRoutinePreloader {
     private List<String> _preloaded = new ArrayList<>();
     private String _fullRoutine = "";
 
+    /**
+     * Handles reading the saved routine if it exists, or creating a new preference if it does not.
+     */
     public AutoRoutinePreloader() {
         if (!readSavedRoutine().isEmpty()) {
             readSavedRoutine();
@@ -23,6 +26,11 @@ public class AutoRoutinePreloader {
         }
     }
 
+    /**
+     * Takes in a list of strings, an autonomus routine, and saves it to the robot's preferences.
+     * This can then be loaded later though Elastic.
+     * @param routine
+     */
     public void saveToPreferences(List<String> routine) {
         _fullRoutine = "";
 
@@ -37,6 +45,10 @@ public class AutoRoutinePreloader {
         Preferences.setString(PRELOADER_PREF_KEY, _fullRoutine);
     }
 
+    /**
+     * Returns a list of strings, an autonomus routine, that is read from the robot's preferences.
+     * @return
+     */
     public List<String> readSavedRoutine() {
         var savedRoutine = Preferences.getString(PRELOADER_PREF_KEY, "");
         _preloaded.clear();

@@ -46,29 +46,47 @@ public class BuildableAutoRoutine {
     private _previewMode _currentPreviewMode = _previewMode.kSingle;
     private List<RecordableUndoEntry> _undoRecord = new ArrayList<>();
 
+    /**
+     * Different view modes for previewing an autonomus routine.
+     */
     private enum _previewMode {
         kSingle,
         kFull,
         kAfterImage
     }
 
+    /**
+     * Different locations for filtering starting locations when building an autonomus routine.
+     * kNone is no filtering.
+     */
     private enum _startingLocationFilter {
         kNone,
         kS1,
         kS2,
         kS3;
 
+        /**
+         * Returns the name of the starting location enum without the k. (S1 instead of kS1)
+         * @return
+         */
         private String asName() {
             return this.toString().replace("k", "");
         }
     }
 
+    /**
+     * Different directions for filtering starting direction while building an autonomus routine.
+     * kNone is no filtering.
+     */
     private enum _startingDirectionFilter {
         kNone,
         kRegular,
         kReversed
     }
 
+    /**
+     * Different types of actions that can occur, used in the construction of a {@code RecordableUndoEntry}.
+     */
     private enum _recordableAction {
         kAdd,
         kRemove,
@@ -169,16 +187,31 @@ public class BuildableAutoRoutine {
         private List<String> parts = new ArrayList<>();
         private List<String> loadedParts = new ArrayList<>();
 
+        /**
+         * Creates a {@code RecordableStepEntry} from a list of steps (paths or commands)
+         * @param step
+         */
         private RecordableStepEntry(List<String> step) {
             this.parts.clear();
             this.parts.addAll(step);
         }
 
+        /**
+         * Creates a {@code RecordableStepEntry} from single step (path or command)
+         * @param step
+         */
         private RecordableStepEntry(String step) {
             this.parts.clear();
             this.parts.add(step);
         }
 
+        /**
+         * Mainly used for a {@code RecordableUndoEntry} with an action of {@code kLoad}
+         * Creates a {@code RecordableStepEntry} from two lists of steps, one for the routine before the load and one for
+         * the routine that is being loaded.
+         * @param stepPrior
+         * @param stepLoaded
+         */
         private RecordableStepEntry(List<String> stepPrior, List<String> stepLoaded) {
             this.parts.clear();
             this.loadedParts.clear();
@@ -186,16 +219,20 @@ public class BuildableAutoRoutine {
             this.loadedParts.addAll(stepLoaded);
         }
 
+        /**
+         * Gets the step(s) in the {@code RecordableStepEntry} as a list of Strings.
+         * @return
+         */
         private List<String> getStep() {
             return this.parts;
         }
 
+        /**
+         * Gets the loaded step(s) in the {@code RecordableStepEntry} as a list of Strings.
+         * @return
+         */
         private List<String> getLoadedStep() {
             return this.loadedParts;
-        }
-
-        private void addPart(String part) {
-            this.parts.add(part);
         }
     }
 
@@ -219,6 +256,7 @@ public class BuildableAutoRoutine {
     private AutoRoutineHistory _routineHistory;
     private SendableChooser<String> _historyChooser;
     private SendableButton _applyHistoryButton;
+    private SendableButton _clearHistoryButton;
 
     // Preloader management
     private SendableButton _preloadRoutineLoadButton;
@@ -262,6 +300,8 @@ public class BuildableAutoRoutine {
         Container.AutoDashboardSection.putData("Routine/History Options", _historyChooser);
         _applyHistoryButton = new SendableButton("Apply History", this::applyHistory);
         Container.AutoDashboardSection.putData("Routine/Apply History", _applyHistoryButton);
+        _clearHistoryButton = new SendableButton("Clear History", _routineHistory::clearHistory);
+        Container.AutoDashboardSection.putData("Routine/Clear History", _clearHistoryButton);
 
         _toggleFilterSwitch = new SendableChooser<>();
         _toggleFilterSwitch.setDefaultOption("Enable", true);

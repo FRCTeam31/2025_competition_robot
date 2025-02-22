@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import frc.robot.Elastic;
 
 public class AutoRoutineHistory {
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -109,5 +110,14 @@ public class AutoRoutineHistory {
         } else {
             DriverStation.reportError("[AutoRoutineHistory] Failed to save history. Internal history is [null]", false);
         }
+    }
+
+    /**
+     * Clears the saved history
+     */
+    public void clearHistory() {
+        _history = new HashMap<>();
+        saveHistory();
+        Elastic.sendInfo("Auto Routine History", "Cleared auto routine history");
     }
 }

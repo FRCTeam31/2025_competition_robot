@@ -126,6 +126,7 @@ public class Robot extends LoggedRobot {
     var disabledPattern = LEDPattern.solid(getAllianceColor()).breathe(Units.Seconds.of(2.0));
     Container.LEDs.setBackgroundPattern(disabledPattern);
     Container.LEDs.clearForegroundPattern();
+    Container.Swerve.disableAutoAlignCommand().schedule();
   }
 
   /**
@@ -156,6 +157,7 @@ public class Robot extends LoggedRobot {
         .blend(autoPattern);
     Container.LEDs.setBackgroundPattern(combinedPattern);
     Container.LEDs.clearForegroundPattern();
+    Container.Swerve.disableAutoAlignCommand().schedule();
 
     // Cancel any auto command that's still running and reset the subsystem states
     if (_autonomousCommand != null) {
@@ -207,6 +209,7 @@ public class Robot extends LoggedRobot {
     var telePattern = LEDPattern.solid(getAllianceColor()).scrollAtRelativeSpeed(Units.Hertz.of(2));
     Container.LEDs.setBackgroundPattern(telePattern);
     Container.LEDs.clearForegroundPattern();
+    Container.Swerve.disableAutoAlignCommand().schedule();
   }
 
   /**
@@ -217,6 +220,7 @@ public class Robot extends LoggedRobot {
     Elastic.selectTab("Test");
 
     CommandScheduler.getInstance().cancelAll();
+    Container.Swerve.disableAutoAlignCommand().schedule();
   }
 
   public static boolean onRedAlliance() {

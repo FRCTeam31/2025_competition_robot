@@ -50,7 +50,7 @@
   {
     "name": "/Preferences/SteerKp",
     "type": "double",
-    "value": 4.1,
+    "value": 4.0,
     "properties": {
       "persistent": true
     }
@@ -67,6 +67,14 @@
     "name": "/Preferences/SteerKd",
     "type": "double",
     "value": 0.04,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/autoroutine-history",
+    "type": "string",
+    "value": "{\"TestAuto1740265219290\":[\"S2R-to-GH\",\"GH-to-SRC2\",\"EnableAutoAlignRotationFeedback\"]}",
     "properties": {
       "persistent": true
     }
