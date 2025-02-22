@@ -190,6 +190,9 @@ public class SwerveSubsystem extends SubsystemBase {
     // Set the desired states for each module
     Logger.recordOutput("Drive/desiredStates", swerveModuleStates);
     _swervePackager.setDesiredModuleStates(swerveModuleStates);
+
+    // Update the gyro omega for simulation purposes
+    _swervePackager.setSimGyroOmega(robotRelativeChassisSpeeds.omegaRadiansPerSecond);
   }
 
   /**
@@ -262,8 +265,10 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     // Update shuffleboard
-    Container.TeleopDashboardSection.setGyroHeading(_inputs.GyroAngle);
-    Container.TeleopDashboardSection.setFieldRobotPose(_inputs.EstimatedRobotPose);
+    if (DriverStation.isEnabled()) {
+      Container.TeleopDashboardSection.setFieldRobotPose(_inputs.EstimatedRobotPose);
+      Container.TeleopDashboardSection.setGyroHeading(_inputs.GyroAngle);
+    }
     Logger.recordOutput("Drive/estimatedRobotPose", _inputs.EstimatedRobotPose);
     _drivetrainDashboardSection.setAutoAlignEnabled(_useAutoAlign);
     _drivetrainDashboardSection.setAutoAlignTarget(_autoAlign.getSetpoint());
