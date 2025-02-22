@@ -20,7 +20,7 @@ public class GyroSim implements IGyro {
 
         _gyroSim.setAngle(newGyroAngle.getDegrees());
 
-        inputs.Rotation = new Rotation3d(Rotation2d.fromDegrees(_gyroSim.getAngle()));
+        inputs.Rotation = Rotation2d.fromDegrees(_gyroSim.getAngle());
         inputs.AccelerationX = 0;
         inputs.AccelerationY = 0;
         inputs.AccelerationZ = 0;
