@@ -12,6 +12,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.prime.util.BuildConstants;
 
+import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 
 import edu.wpi.first.net.WebServer;
@@ -62,6 +63,8 @@ public class Robot extends LoggedRobot {
 
     // Schedule the LED patterns to run at 120Hz
     Container.LEDs.startUpdateLoop();
+
+    Elastic.selectTab("Auto");
   }
 
   /**
@@ -124,6 +127,7 @@ public class Robot extends LoggedRobot {
     var disabledPattern = LEDPattern.solid(getAllianceColor()).breathe(Units.Seconds.of(2.0));
     Container.LEDs.setBackgroundPattern(disabledPattern);
     Container.LEDs.clearForegroundPattern();
+    Container.Swerve.disableAutoAlignCommand().schedule();
   }
 
   /**
@@ -135,7 +139,7 @@ public class Robot extends LoggedRobot {
     CommandScheduler.getInstance().run();
     EventLoop.poll();
 
-    Container.DriverDashboardSection.setAllianceColor(onRedAlliance());
+    Container.TeleopDashboardSection.setAllianceColor(onRedAlliance());
   }
 
   /**
@@ -143,6 +147,7 @@ public class Robot extends LoggedRobot {
    */
   @Override
   public void autonomousInit() {
+    Elastic.selectTab("Auto");
     var autoPattern = LEDPattern.gradient(GradientType.kDiscontinuous, getAllianceColor(), Color.kBlack)
         .offsetBy(-PwmLEDs.VMap.PixelsPerStrip / 2)
         .scrollAtRelativeSpeed(Units.Hertz.of(2))
@@ -153,28 +158,29 @@ public class Robot extends LoggedRobot {
         .blend(autoPattern);
     Container.LEDs.setBackgroundPattern(combinedPattern);
     Container.LEDs.clearForegroundPattern();
+    Container.Swerve.disableAutoAlignCommand().schedule();
 
     // Cancel any auto command that's still running and reset the subsystem states
     if (_autonomousCommand != null) {
       _autonomousCommand.cancel();
 
       // Stop any subsystems still running
+      Container.Swerve.stopAllMotors();
     }
 
-    _autonomousCommand = Container.DriverDashboardSection.getSelectedAuto();
+    _autonomousCommand = Container.AutoBuilder.exportCombinedAutoRoutine();
 
-    // Exit without scheduling an auto command if none is selected
     if (_autonomousCommand == null || _autonomousCommand == Commands.none()) {
+      // Exit without scheduling an auto command if none is selected
       DriverStation.reportError("[ERROR] >> No auto command selected", false);
       Container.Swerve.resetGyro();
     } else {
-      // Schedule the auto command
-      Container.Swerve.EstimatePoseUsingFrontCamera = true;
-      Container.Swerve.EstimatePoseUsingRearCamera = true;
-
-      if (onRedAlliance())
+      // Reset the gyro if we're on the red alliance
+      if (onRedAlliance()) {
         Container.Swerve.resetGyro();
+      }
 
+      // Schedule the auto command
       _autonomousCommand.schedule();
     }
   }
@@ -185,21 +191,26 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     DataLogManager.log("Teleop Enabled");
+
+    if (DriverStation.isFMSAttached()) {
+      Elastic.selectTab("Teleop");
+    }
+
     if (_autonomousCommand != null) {
       // Cancel the auto command if it's still running
       _autonomousCommand.cancel();
 
       // Stop any subsystems still running
       Container.Swerve.stopAllMotors();
+    } else {
+      Container.Swerve.resetGyro();
     }
 
     // Set teleop LED pattern
     var telePattern = LEDPattern.solid(getAllianceColor()).scrollAtRelativeSpeed(Units.Hertz.of(2));
     Container.LEDs.setBackgroundPattern(telePattern);
     Container.LEDs.clearForegroundPattern();
-
-    Container.Swerve.EstimatePoseUsingFrontCamera = false;
-    Container.Swerve.EstimatePoseUsingRearCamera = false;
+    Container.Swerve.disableAutoAlignCommand().schedule();
   }
 
   /**
@@ -207,7 +218,10 @@ public class Robot extends LoggedRobot {
    */
   @Override
   public void testInit() {
+    Elastic.selectTab("Test");
+
     CommandScheduler.getInstance().cancelAll();
+    Container.Swerve.disableAutoAlignCommand().schedule();
   }
 
   public static boolean onRedAlliance() {

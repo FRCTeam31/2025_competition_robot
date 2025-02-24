@@ -60,5 +60,6 @@
   "editor.formatOnSave": true,
   "java.format.settings.url": "formatter.xml",
   "java.format.comments.enabled": false,
-  "java.format.settings.profile": "GoogleStyle"
+  "java.format.settings.profile": "GoogleStyle",
+  "wpilib.autoStartRioLog": false
 }

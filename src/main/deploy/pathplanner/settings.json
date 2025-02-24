@@ -3,7 +3,16 @@
   "robotLength": 0.686,
   "holonomicMode": true,
   "pathFolders": [
-    "Source to Reef"
+    "AB Paths",
+    "CD Paths",
+    "EF Paths",
+    "GH Paths",
+    "IJ Paths",
+    "KL Paths",
+    "S1 Paths",
+    "S2 Paths",
+    "S3 Paths",
+    "Good For Nothing Test Paths"
   ],
   "autoFolders": [],
   "defaultMaxVel": 3.0,
