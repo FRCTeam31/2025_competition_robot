@@ -41,6 +41,10 @@ public class DashboardSection {
         SmartDashboard.putString(tabbedKey(title), defaultValue);
     }
 
+    public void putStringArray(String title, String[] value) {
+        SmartDashboard.putStringArray(tabbedKey(title), value);
+    }
+
     public String getString(String title, String defaultValue) {
         return SmartDashboard.getString(tabbedKey(title), defaultValue);
     }

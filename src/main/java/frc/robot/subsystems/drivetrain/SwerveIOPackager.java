@@ -34,6 +34,7 @@ public class SwerveIOPackager {
   private SwerveDrivePoseEstimator m_poseEstimator;
 
   private IGyro _gyro;
+  private double _simGyroOmega = 0;
   private ISwerveModule _frontLeftModule, _frontRightModule, _rearLeftModule, _rearRightModule;
 
   private GyroInputsAutoLogged _gyroInputs = new GyroInputsAutoLogged();
@@ -70,7 +71,7 @@ public class SwerveIOPackager {
         : new SwerveModuleSim("RearRightModule", SwerveMap.RearRightSwerveModule);
 
     // Create pose estimator
-    m_poseEstimator = new SwerveDrivePoseEstimator(Kinematics, _gyroInputs.Rotation.toRotation2d(),
+    m_poseEstimator = new SwerveDrivePoseEstimator(Kinematics, _gyroInputs.Rotation,
         getModulePositions(), new Pose2d());
 
     // Store current Drive and Steering PID values in Preferences
@@ -87,9 +88,9 @@ public class SwerveIOPackager {
 
   /**
    * Called periodically to update the swerve modules and gyro
-   * @param inputs
+   * @param swerveInputs
    */
-  public void updateInputs(SwerveSubsystemInputsAutoLogged inputs) {
+  public void updateInputs(SwerveSubsystemInputsAutoLogged swerveInputs) {
     _frontLeftModule.updateInputs(m_moduleInputs[0]);
     Logger.processInputs("Drivetrain/FLModule", m_moduleInputs[0]);
     _frontRightModule.updateInputs(m_moduleInputs[1]);
@@ -99,15 +100,17 @@ public class SwerveIOPackager {
     _rearRightModule.updateInputs(m_moduleInputs[3]);
     Logger.processInputs("Drivetrain/RRModule", m_moduleInputs[3]);
 
-    inputs.ModuleStates = getModuleStates();
-    inputs.RobotRelativeChassisSpeeds = Kinematics.toChassisSpeeds(getModuleStates());
-    inputs.GyroAngle = _gyroInputs.Rotation.toRotation2d();
-    inputs.GyroAccelX = _gyroInputs.AccelerationX;
-    inputs.GyroAccelY = _gyroInputs.AccelerationY;
-    inputs.GyroAccelZ = _gyroInputs.AccelerationZ;
+    swerveInputs.ModuleStates = getModuleStates();
+    swerveInputs.RobotRelativeChassisSpeeds = Kinematics.toChassisSpeeds(getModuleStates());
+
+    _gyro.updateInputs(_gyroInputs, _simGyroOmega);
+    swerveInputs.GyroAngle = _gyroInputs.Rotation;
+    swerveInputs.GyroAccelX = _gyroInputs.AccelerationX;
+    swerveInputs.GyroAccelY = _gyroInputs.AccelerationY;
+    swerveInputs.GyroAccelZ = _gyroInputs.AccelerationZ;
 
     var modulePositions = getModulePositions();
-    inputs.EstimatedRobotPose = m_poseEstimator.update(inputs.GyroAngle, modulePositions);
+    swerveInputs.EstimatedRobotPose = m_poseEstimator.update(swerveInputs.GyroAngle, modulePositions);
 
     checkPreferences();
   }
@@ -165,6 +168,17 @@ public class SwerveIOPackager {
   }
 
   /**
+   * Sets the omega of the gyro sim for simulation purposes
+   * 
+   * @param omega
+   */
+  public void setSimGyroOmega(double omega) {
+    if (_gyro instanceof GyroSim) {
+      _simGyroOmega = omega;
+    }
+  }
+
+  /**
    * Stops all motors on the swerve modules
    */
   public void stopAllMotors() {
@@ -180,7 +194,7 @@ public class SwerveIOPackager {
   public void resetGyro() {
     _gyro.reset(Robot.onBlueAlliance() ? 180 : 0);
     _gyro.updateInputs(_gyroInputs, 0);
-    m_poseEstimator.resetPosition(_gyroInputs.Rotation.toRotation2d(), getModulePositions(),
+    m_poseEstimator.resetPosition(_gyroInputs.Rotation, getModulePositions(),
         m_poseEstimator.getEstimatedPosition());
   }
 
@@ -189,7 +203,7 @@ public class SwerveIOPackager {
    * @param pose
    */
   public void setEstimatorPose(Pose2d pose) {
-    m_poseEstimator.resetPosition(_gyroInputs.Rotation.toRotation2d(), getModulePositions(), pose);
+    m_poseEstimator.resetPosition(_gyroInputs.Rotation, getModulePositions(), pose);
   }
 
   /**

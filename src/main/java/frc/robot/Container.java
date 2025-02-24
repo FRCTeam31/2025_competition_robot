@@ -8,19 +8,19 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.wpilibj.DriverStation;
 
-import frc.robot.dashboard.DriverDashboardTab;
+import frc.robot.dashboard.TeleopDashboardTab;
 import frc.robot.dashboard.DashboardSection;
-import frc.robot.dashboard.TestDashboardSection;
 import frc.robot.oi.OperatorInterface;
-import frc.robot.oi.PrimeAutoRoutine;
+import frc.robot.oi.BuildableAutoRoutine;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.drivetrain.SwerveSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
 public class Container {
-  public static DriverDashboardTab DriverDashboardSection;
-  public static TestDashboardSection TestDashboardSection;
+  public static TeleopDashboardTab TeleopDashboardSection;
   public static DashboardSection CommandsDashboardSection;
+  public static DashboardSection AutoDashboardSection;
+  public static BuildableAutoRoutine AutoBuilder;
 
   public static SwerveSubsystem Swerve;
   public static VisionSubsystem Vision;
@@ -40,9 +40,9 @@ public class Container {
       NamedCommands.registerCommands(namedCommandsMap);
 
       // Create our custom auto builder
-      var autoBuilder = new PrimeAutoRoutine(namedCommandsMap);
-      DriverDashboardSection = new DriverDashboardTab(autoBuilder);
-      TestDashboardSection = new TestDashboardSection();
+      AutoDashboardSection = new DashboardSection("Auto");
+      AutoBuilder = new BuildableAutoRoutine(namedCommandsMap);
+      TeleopDashboardSection = new TeleopDashboardTab();
       CommandsDashboardSection = new DashboardSection("Commands");
 
       // Configure controller bindings
@@ -53,7 +53,7 @@ public class Container {
           Swerve.disableAutoAlignCommand(),
           Swerve::setAutoAlignSetpointCommand,
           Swerve::setDefaultCommand,
-          Swerve::driveRobotRelativeCommand);
+          Swerve::driveFieldRelativeCommand);
     } catch (Exception e) {
       DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());
     }

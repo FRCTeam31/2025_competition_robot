@@ -5,7 +5,7 @@ import java.util.function.Function;
 
 import org.prime.control.Controls;
 import org.prime.control.HolonomicControlStyle;
-import org.prime.control.PrimeXboxController;
+import org.prime.control.SupplierXboxController;
 import org.prime.control.SwerveControlSuppliers;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -17,10 +17,10 @@ public class OperatorInterface {
         public static final HolonomicControlStyle DefaultDriveControlStyle = HolonomicControlStyle.Drone;
     }
 
-    public PrimeXboxController DriverController;
+    public SupplierXboxController DriverController;
 
     public OperatorInterface() {
-        DriverController = new PrimeXboxController(Controls.DRIVER_PORT);
+        DriverController = new SupplierXboxController(Controls.DRIVER_PORT);
     }
 
     /**
