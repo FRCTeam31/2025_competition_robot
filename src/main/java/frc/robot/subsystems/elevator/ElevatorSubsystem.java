@@ -2,7 +2,7 @@ package frc.robot.subsystems.elevator;
 
 import java.util.Map;
 
-import org.prime.control.PrimePIDConstants;
+import org.prime.control.ExtendedPIDConstants;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
@@ -22,7 +22,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         public static final int topLimitSwitchChannel = 0;
         public static final int bottomLimitSwitchChannel = 1;
 
-        public static final PrimePIDConstants PositionPID = new PrimePIDConstants(0, 0, 0, 0, 0, 0, 0);
+        public static final ExtendedPIDConstants PositionPID = new ExtendedPIDConstants(0, 0, 0, 0, 0, 0, 0);
         public static final double FeedForwardKg = 0.0;
 
         // TODO: Measure
