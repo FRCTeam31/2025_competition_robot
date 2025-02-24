@@ -25,7 +25,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import org.littletonrobotics.junction.Logger;
-import org.prime.control.PrimePIDConstants;
+import org.prime.control.ExtendedPIDConstants;
 import org.prime.util.SwerveUtil;
 
 public class SwerveModuleReal implements ISwerveModule {
@@ -56,7 +56,7 @@ public class SwerveModuleReal implements ISwerveModule {
   /**
    * Configures the steering motor and PID controller
    */
-  private void setupSteeringMotor(PrimePIDConstants pid) {
+  private void setupSteeringMotor(ExtendedPIDConstants pid) {
     _steeringMotor = new SparkFlex(_map.SteeringMotorCanId, MotorType.kBrushless);
     SparkMaxConfig config = new SparkMaxConfig();
     config.inverted(_map.SteerInverted); // CCW inversion
@@ -73,7 +73,7 @@ public class SwerveModuleReal implements ISwerveModule {
   }
 
   @Override
-  public void setSteeringPID(PrimePIDConstants steeringPID) {
+  public void setSteeringPID(ExtendedPIDConstants steeringPID) {
     _steeringPidController.setP(steeringPID.kP);
     _steeringPidController.setI(steeringPID.kI);
     _steeringPidController.setD(steeringPID.kD);
@@ -85,7 +85,7 @@ public class SwerveModuleReal implements ISwerveModule {
    * 
    * @param pid
    */
-  private void setupDriveMotor(PrimePIDConstants pid) {
+  private void setupDriveMotor(ExtendedPIDConstants pid) {
     _driveMotor = new SparkFlex(_map.DriveMotorCanId, MotorType.kBrushless);
     SparkMaxConfig config = new SparkMaxConfig();
     config.smartCurrentLimit(SwerveMap.DriveStallCurrentLimit, SwerveMap.DriveFreeCurrentLimit);
@@ -105,7 +105,7 @@ public class SwerveModuleReal implements ISwerveModule {
   }
 
   @Override
-  public void setDrivePID(PrimePIDConstants drivePID) {
+  public void setDrivePID(ExtendedPIDConstants drivePID) {
     _drivingPidController.setP(drivePID.kP);
     _drivingPidController.setI(drivePID.kI);
     _drivingPidController.setD(drivePID.kD);

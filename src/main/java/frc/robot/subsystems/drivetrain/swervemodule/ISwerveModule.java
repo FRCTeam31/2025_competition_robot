@@ -1,6 +1,6 @@
 package frc.robot.subsystems.drivetrain.swervemodule;
 
-import org.prime.control.PrimePIDConstants;
+import org.prime.control.ExtendedPIDConstants;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -31,10 +31,10 @@ public interface ISwerveModule {
   /**
    * Reconfigures the drive PID and FF
    */
-  public void setDrivePID(PrimePIDConstants drivePID);
+  public void setDrivePID(ExtendedPIDConstants drivePID);
 
   /**
    * Reconfigures the steering PID
    */
-  public void setSteeringPID(PrimePIDConstants steeringPID);
+  public void setSteeringPID(ExtendedPIDConstants steeringPID);
 }

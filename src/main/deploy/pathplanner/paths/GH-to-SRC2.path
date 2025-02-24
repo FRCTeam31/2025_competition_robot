@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.8,
+        "y": 4.05
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 8.501,
+        "y": 4.0506666666666655
+      },
+      "isLocked": false,
+      "linkedName": "GH"
+    },
+    {
+      "anchor": {
+        "x": 1.1,
+        "y": 1.1
+      },
+      "prevControl": {
+        "x": 1.5793333333333344,
+        "y": 1.1109999999999993
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "SRC2"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -128.0
+  },
+  "reversed": false,
+  "folder": "GH Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "useDefaultConstraints": true
+}

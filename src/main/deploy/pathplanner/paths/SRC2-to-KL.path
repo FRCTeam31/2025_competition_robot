@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 1.1,
+        "y": 1.1
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.8669999999999993,
+        "y": 0.7749999999999989
+      },
+      "isLocked": false,
+      "linkedName": "SRC2"
+    },
+    {
+      "anchor": {
+        "x": 3.78,
+        "y": 5.25
+      },
+      "prevControl": {
+        "x": 2.693666666666666,
+        "y": 5.238999999999999
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "KL"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -59.99999999999999
+  },
+  "reversed": false,
+  "folder": "KL Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -128.0
+  },
+  "useDefaultConstraints": true
+}

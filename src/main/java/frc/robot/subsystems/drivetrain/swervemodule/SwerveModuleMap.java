@@ -11,7 +11,7 @@ public class SwerveModuleMap {
   public Translation2d ModuleLocation;
   public boolean DriveInverted;
   public boolean SteerInverted;
-  public double DriveMotorRampRate = 0.5;
+  public double DriveMotorRampRate = 0.75;
 
   public SwerveModuleMap(int driveMotorCanId, int steeringMotorCanId, int canCoderCanId,
       double canCoderStartingOffset, boolean driveInverted, boolean steerInverted,

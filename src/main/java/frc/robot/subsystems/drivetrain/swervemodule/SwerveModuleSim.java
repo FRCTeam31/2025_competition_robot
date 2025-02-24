@@ -13,7 +13,7 @@ import frc.robot.dashboard.DashboardSection;
 import frc.robot.subsystems.drivetrain.SwerveMap;
 
 import org.littletonrobotics.junction.Logger;
-import org.prime.control.PrimePIDConstants;
+import org.prime.control.ExtendedPIDConstants;
 import org.prime.util.SwerveUtil;
 
 public class SwerveModuleSim implements ISwerveModule {
@@ -64,7 +64,7 @@ public class SwerveModuleSim implements ISwerveModule {
   }
 
   @Override
-  public void setDrivePID(PrimePIDConstants drivePID) {
+  public void setDrivePID(ExtendedPIDConstants drivePID) {
     var currentSetpoint = _drivingPidController.getSetpoint();
     _drivingPidController = drivePID.createPIDController(0.02);
     _drivingPidController.setSetpoint(currentSetpoint);
@@ -73,7 +73,7 @@ public class SwerveModuleSim implements ISwerveModule {
   }
 
   @Override
-  public void setSteeringPID(PrimePIDConstants steeringPID) {
+  public void setSteeringPID(ExtendedPIDConstants steeringPID) {
     // Not implemented
   }
 
@@ -82,7 +82,7 @@ public class SwerveModuleSim implements ISwerveModule {
    * 
    * @param pid
    */
-  private void setupDriveMotor(PrimePIDConstants pid) {
+  private void setupDriveMotor(ExtendedPIDConstants pid) {
     _driveMotorSim = new DCMotorSim(
         LinearSystemId.createDCMotorSystem(DCMotor.getNeoVortex(1), 0.001, SwerveMap.DriveGearRatio),
         DCMotor.getNeoVortex(1));

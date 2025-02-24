@@ -9,7 +9,7 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 
 import frc.robot.subsystems.drivetrain.swervemodule.SwerveModuleMap;
 
-import org.prime.control.PrimePIDConstants;
+import org.prime.control.ExtendedPIDConstants;
 
 public class SwerveMap {
         public class Chassis {
@@ -27,11 +27,14 @@ public class SwerveMap {
         }
 
         // PID Constants
-        public static final PrimePIDConstants DrivePID = new PrimePIDConstants(0.01, 0, 0.000, 0.0, 0.096, 0, 0.14);
-        public static final PrimePIDConstants SteeringPID = new PrimePIDConstants(4, 0, 0.04);
-        public static final PrimePIDConstants AutoAlignPID = new PrimePIDConstants(3.75, 0, 0);
-        public static final PrimePIDConstants PathPlannerTranslationPID = new PrimePIDConstants(3, 0, 0);
-        public static final PrimePIDConstants PathPlannerRotationPID = new PrimePIDConstants(2, 0, 0);
+        public static final ExtendedPIDConstants DrivePID = new ExtendedPIDConstants(0.01, 0, 0.000, 0.0, 0.096, 0,
+                        0.14);
+        public static final ExtendedPIDConstants SteeringPID = new ExtendedPIDConstants(4.1, 0, 0.04);
+        public static final ExtendedPIDConstants AutoAlignPID = new ExtendedPIDConstants(4, 0, 0.08);
+        // public static final ExtendedPIDConstants PathPlannerTranslationPID = new ExtendedPIDConstants(3, 0, 0);
+        // public static final ExtendedPIDConstants PathPlannerRotationPID = new ExtendedPIDConstants(2, 0, 0);
+        public static final ExtendedPIDConstants PathPlannerTranslationPID = new ExtendedPIDConstants(4, 0, 0);
+        public static final ExtendedPIDConstants PathPlannerRotationPID = new ExtendedPIDConstants(2, 0, 0);
 
         // Uniform Drive Constants
         public static final double DriveGearRatio = 5.9;
@@ -81,7 +84,7 @@ public class SwerveMap {
                                         .baseUnitMagnitude(),
                         new ModuleConfig(
                                         DriveWheelDiameterMeters / 2,
-                                        Chassis.MaxSpeedMetersPerSecond / 4,
+                                        Chassis.MaxSpeedMetersPerSecond / 10,
                                         1.0,
                                         DCMotor.getNeoVortex(1).withReduction(DriveGearRatio),
                                         DriveStallCurrentLimit,

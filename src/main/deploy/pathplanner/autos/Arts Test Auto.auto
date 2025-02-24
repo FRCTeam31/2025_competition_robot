@@ -7,37 +7,37 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Approach Algae IJ"
+            "pathName": "S2-to-IJ"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Reversed Alt Source to IJ"
+            "pathName": "IJ-to-SRC2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Alt Source to CD"
+            "pathName": "SRC2-to-CD"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Reversed Alt Source to CD"
+            "pathName": "CD-to-SRC2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Alt Source to EF"
+            "pathName": "SRC2-to-EF"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Reversed Alt Source to EF"
+            "pathName": "EF-to-SRC2"
           }
         }
       ]

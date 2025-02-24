@@ -1,0 +1,82 @@
+[
+  {
+    "name": "/Preferences/DriveKp",
+    "type": "double",
+    "value": 0.01,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DriveKi",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DriveKd",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DriveKs",
+    "type": "double",
+    "value": 0.14,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DriveKv",
+    "type": "double",
+    "value": 0.096,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DriveKa",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/SteerKp",
+    "type": "double",
+    "value": 4.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/SteerKi",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/SteerKd",
+    "type": "double",
+    "value": 0.04,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/autoroutine-history",
+    "type": "string",
+    "value": "{\"TestAuto1740265219290\":[\"S2R-to-GH\",\"GH-to-SRC2\",\"EnableAutoAlignRotationFeedback\"]}",
+    "properties": {
+      "persistent": true
+    }
+  }
+]
