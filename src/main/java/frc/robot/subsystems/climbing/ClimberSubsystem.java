@@ -11,7 +11,7 @@ public class ClimberSubsystem extends SubsystemBase {
     private IClimberIO Climber;
     private ClimberInputs m_inputs;
 
-    private enum ClimberPosition {
+    public enum ClimberPosition {
         /** The starting position of the climber (Up) */
         IN,
         /** 𝓣𝓱𝓮 𝓮𝓷𝓭𝓲𝓷𝓰 𝓹𝓸𝓼𝓲𝓽𝓲𝓸𝓷 𝓸𝓯 𝓽𝓱𝓮 𝓬𝓵𝓲𝓶𝓫𝓮𝓻 (Down) */
