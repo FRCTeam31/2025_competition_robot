@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 7.575,
+        "y": 3.03
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.438221946720054,
+        "y": 4.216777922671902
+      },
+      "isLocked": false,
+      "linkedName": "S4R"
+    },
+    {
+      "anchor": {
+        "x": 5.175,
+        "y": 5.25
+      },
+      "prevControl": {
+        "x": 6.005745377847726,
+        "y": 4.576019379622176
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "IJ"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -119.99999999999999
+  },
+  "reversed": false,
+  "folder": "S4 Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "useDefaultConstraints": true
+}
