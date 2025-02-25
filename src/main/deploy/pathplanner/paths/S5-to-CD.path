@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 7.575,
+        "y": 1.9
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.811882967029368,
+        "y": 2.106672556957882
+      },
+      "isLocked": false,
+      "linkedName": "S5"
+    },
+    {
+      "anchor": {
+        "x": 3.82,
+        "y": 2.84
+      },
+      "prevControl": {
+        "x": 5.0542763157894735,
+        "y": 2.2008333333333336
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "CD"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 59.99999999999999
+  },
+  "reversed": false,
+  "folder": "S5 Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}
