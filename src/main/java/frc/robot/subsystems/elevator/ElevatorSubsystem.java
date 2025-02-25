@@ -1,3 +1,4 @@
+
 package frc.robot.subsystems.elevator;
 
 import java.util.Map;
@@ -21,6 +22,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         public static final int rightElevatorMotorCANID = 21;
         public static final int topLimitSwitchChannel = 0;
         public static final int bottomLimitSwitchChannel = 1;
+        public static final int maxPercentOutput = 1;
 
         public static final ExtendedPIDConstants PositionPID = new ExtendedPIDConstants(0, 0, 0, 0, 0, 0, 0);
         public static final double FeedForwardKg = 0.0;
@@ -88,13 +90,21 @@ public class ElevatorSubsystem extends SubsystemBase {
         // TODO: check this logic
         var pid = _positionPidController.calculate(_inputs.ElevatorDistanceMeters);
         var ff = _positionFeedforward.calculate(pid);
-        var finalOutput = MathUtil.clamp(pid + ff, -1, 1);
+        var finalOutput = MathUtil.clamp(pid + ff, -VMap.maxPercentOutput, VMap.maxPercentOutput);
 
+        if (_inputs.TopLimitSwitch && finalOutput > 0) {
+            finalOutput = MathUtil.clamp(finalOutput, -VMap.maxPercentOutput, 0);
+
+        } else if (_inputs.BottomLimitSwitch && finalOutput < 0) {
+            finalOutput = MathUtil.clamp(finalOutput, 0, VMap.maxPercentOutput);
+
+        }
         _elevatorIO.setMotorSpeeds(finalOutput);
     }
 
     private void setMotorVoltages(Voltage volts) {
         _elevatorIO.setMotorVoltages(volts.magnitude());
+
     }
 
     @Override
