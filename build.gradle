@@ -125,6 +125,9 @@ dependencies {
 
     def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
     annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
+
+    // Gson - Used for writing JSON files in Java
+    implementation 'com.google.code.gson:gson:2.8.9'
 }
 
 test {

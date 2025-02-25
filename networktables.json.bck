@@ -74,7 +74,7 @@
   {
     "name": "/Preferences/autoroutine-history",
     "type": "string",
-    "value": "{\"TestAuto1740265219290\":[\"S2R-to-GH\",\"GH-to-SRC2\",\"EnableAutoAlignRotationFeedback\"]}",
+    "value": "{}",
     "properties": {
       "persistent": true
     }
