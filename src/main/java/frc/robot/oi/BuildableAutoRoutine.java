@@ -263,6 +263,11 @@ public class BuildableAutoRoutine {
     private SendableButton _preloadRoutineButton;
     private AutoRoutinePreloader _preloadedRoutine;
 
+    // Preproduction management
+    private SendableButton _preproductionLoadButton;
+    private SendableButton _preproductionSaveButton;
+    private AutoRoutinePreproduction _preproduction;
+
     public BuildableAutoRoutine(Map<String, Command> commands) {
         _namedCommands = commands;
         _pathNames = discoverPaths();
@@ -341,6 +346,13 @@ public class BuildableAutoRoutine {
 
         _preloadRoutineLoadButton = new SendableButton("Load", this::loadPreloadedRoutine);
         Container.AutoDashboardSection.putData("Routine/Preloader/Load", _preloadRoutineLoadButton);
+
+        _preproduction = new AutoRoutinePreproduction();
+        _preproductionLoadButton = new SendableButton("Save Routine", this::savePreproductionRoutine);
+        Container.AutoDashboardSection.putData("Routine/Preproduction/Save Routine", _preproductionLoadButton);
+
+        _preloadRoutineLoadButton = new SendableButton("Load", this::loadPreproductionRoutine);
+        Container.AutoDashboardSection.putData("Routine/Preproduction/Load", _preloadRoutineLoadButton);
     }
 
     /**
@@ -667,8 +679,7 @@ public class BuildableAutoRoutine {
 
         Elastic.sendInfo("Auto Routine", "Applied historical routine: " + selectedRoutineName);
 
-        updateChooserOptions();
-        updateFieldView(_nextStepChooser.getUserSelected());
+        updateAllViews();
     }
 
     /**
@@ -698,11 +709,26 @@ public class BuildableAutoRoutine {
 
             Elastic.sendInfo("Routine Preloader", "Loaded a preloaded routine");
 
-            updateChooserOptions();
-            updateFieldView(_nextStepChooser.getUserSelected());
+            updateAllViews();
         } else {
             Elastic.sendInfo("Routine Preloader", "No routine preloaded");
         }
+    }
+
+    private void loadPreproductionRoutine() {
+        List<String> _routine = _preproduction.readRoutineFromJSON();
+
+        _undoRecord.add(
+                new RecordableUndoEntry(_recordableAction.kClear,
+                        new RecordableStepEntry(_routineSteps, _routine)));
+        _routineSteps.clear();
+        _routineSteps.addAll(_routine);
+
+        updateAllViews();
+    }
+
+    private void savePreproductionRoutine() {
+        _preproduction.writeRoutineToJSON(_routineSteps);
     }
 
     /**
@@ -959,5 +985,10 @@ public class BuildableAutoRoutine {
             Elastic.sendWarning("Auto Routine", "Failed to display path for \"" + newValue + "\"");
             DriverStation.reportError("Failed to display path for \"" + newValue + "\"", e.getStackTrace());
         }
+    }
+
+    private void updateAllViews() {
+        updateChooserOptions();
+        updateFieldView(_nextStepChooser.getUserSelected());
     }
 }
