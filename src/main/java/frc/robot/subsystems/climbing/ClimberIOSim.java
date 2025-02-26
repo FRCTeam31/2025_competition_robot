@@ -5,53 +5,52 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.DoubleSolenoidSim;
 import edu.wpi.first.wpilibj.simulation.PneumaticsBaseSim;
+import frc.robot.subsystems.climbing.ClimberSubsystem.ServoPosition;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
 
 @Logged
 public class ClimberIOSim implements IClimberIO {
-    private DCMotorSim climberMotorSim;
-    private DoubleSolenoidSim climbSolenoidSim;
-    private DIOSim climbOutLimitSwitchSim;
-    private DIOSim climbInLimitSwitchSim;
-    private ClimberInputs m_Inputs = new ClimberInputs();
+    private DCMotorSim _climberMotorSim;
+    // private DoubleSolenoidSim climbSolenoidSim;
+    private double _climbServoSimValue = ClimberMap.climberServoInValue;
+    private DIOSim _climbOutLimitSwitchSim;
+    private DIOSim _climbInLimitSwitchSim;
+    private ClimberInputs _inputs = new ClimberInputs();
 
     public ClimberIOSim() {
 
-        climberMotorSim = new DCMotorSim(
+        _climberMotorSim = new DCMotorSim(
                 LinearSystemId.createDCMotorSystem(DCMotor.getNeoVortex(1), 0.001, ClimberMap.climberGearRatio),
                 DCMotor.getNeoVortex(1));
-        climbSolenoidSim = new DoubleSolenoidSim(
-                PneumaticsBaseSim.getForType(ClimberMap.climbPneumaticsCANID, PneumaticsModuleType.CTREPCM),
-                ClimberMap.climberForwardChannel,
-                ClimberMap.climberReverseChannel);
-        climbOutLimitSwitchSim = new DIOSim(ClimberMap.climberOutLimitSwitchChannel);
-        climbInLimitSwitchSim = new DIOSim(ClimberMap.climberInLimitSwitchChannel);
+
+        _climbOutLimitSwitchSim = new DIOSim(ClimberMap.climberOutLimitSwitchChannel);
+        _climbInLimitSwitchSim = new DIOSim(ClimberMap.climberInLimitSwitchChannel);
     }
 
     public ClimberInputs updateInputs() {
-        double ClimbMotorSpeed = climberMotorSim.getAngularVelocity().in(Units.RotationsPerSecond);
-        Value ClimbSolenoidPosition = climbSolenoidSim.get();
-        m_Inputs.ClimbMotorSpeed = ClimbMotorSpeed;
-        m_Inputs.ClimbSolenoidPosition = ClimbSolenoidPosition;
-        m_Inputs.OutLimitSwitch = climbOutLimitSwitchSim.getValue();
-        m_Inputs.InLimitSwitch = climbInLimitSwitchSim.getValue();
-        return m_Inputs;
+        double ClimbMotorSpeed = _climberMotorSim.getAngularVelocity().in(Units.RotationsPerSecond);
+        _inputs.ClimbMotorSpeed = ClimbMotorSpeed;
+        _inputs.OutLimitSwitch = _climbOutLimitSwitchSim.getValue();
+        _inputs.InLimitSwitch = _climbInLimitSwitchSim.getValue();
+        return _inputs;
 
     }
 
     public void setMotorSpeed(double speed) {
-        climberMotorSim.setAngularVelocity(speed);
+        _climberMotorSim.setAngularVelocity(speed);
     }
 
     public void stopMotors() {
-        climberMotorSim.setAngularVelocity(0);
+        _climberMotorSim.setAngularVelocity(0);
     }
 
-    public void setClimbersState(Value climberState) {
-        climbSolenoidSim.set(climberState);
+    public void setHooksState(ServoPosition hooksCommandedOut) {
+        _climbServoSimValue = (hooksCommandedOut == ServoPosition.IN ? ClimberMap.climberServoInValue
+                : ClimberMap.climberServoOutValue);
     }
 }

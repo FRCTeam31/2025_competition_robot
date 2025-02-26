@@ -1,6 +1,7 @@
 package frc.robot.subsystems.climbing;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import frc.robot.subsystems.climbing.ClimberSubsystem.ServoPosition;
 
 public interface IClimberIO {
 
@@ -10,6 +11,6 @@ public interface IClimberIO {
 
     public void stopMotors();
 
-    public void setClimbersState(Value climberState);
+    public void setHooksState(ServoPosition hooksCommandedOut);
 
 }

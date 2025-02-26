@@ -11,5 +11,9 @@ public class ClimberMap {
     public static final double climberOutSpeed = -0.5;
     public static final int climberOutLimitSwitchChannel = 0;
     public static final int climberInLimitSwitchChannel = 0;
+    public static final int climberServoPWMID = 0;
+    public static final double climberServoInValue = 0;
+    public static final double climberServoOutValue = 0;
+    public static final double maxMotorPercentOutput = 1;
 
 }
