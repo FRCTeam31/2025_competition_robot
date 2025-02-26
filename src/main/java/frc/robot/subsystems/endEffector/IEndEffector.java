@@ -1,8 +1,8 @@
 package frc.robot.subsystems.endEffector;
 
-public interface IEndEffectorIO {
+public interface IEndEffector {
 
-    public EndEffectorIOInputs getInputs();
+    public void updateInputs(EndEffectorInputsAutoLogged inputs);
 
     public void setMotorSpeed(double speed);
 

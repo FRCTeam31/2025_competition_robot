@@ -6,11 +6,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class EndEffectorSubsystem extends SubsystemBase {
 
-    private IEndEffectorIO _endEffector;
-    private EndEffectorIOInputs _inputs;
+    private IEndEffector _endEffector;
+    private EndEffectorInputsAutoLogged _inputs = new EndEffectorInputsAutoLogged();
 
     public EndEffectorSubsystem(boolean isReal) {
-        _endEffector = isReal ? new EndEffectorIOReal() : new EndEffectorIOSim();
+        _endEffector = isReal ? new EndEffectorReal() : new EndEffectorSim();
     }
 
     public Command runEndEffectorCommand(double speed) {
@@ -21,14 +21,14 @@ public class EndEffectorSubsystem extends SubsystemBase {
 
     public Command stopEndEffectorCommand() {
         return this.run(() -> {
-            _endEffector.setMotorSpeed(0);
+            _endEffector.stopMotors();
         });
     }
 
     public Map<String, Command> getNamedCommands() {
         return Map.of("Stop Intake", stopEndEffectorCommand(), "Intake Coral",
-                runEndEffectorCommand(EndEffectorMap.endEffectorIntakeSpeed), "Eject Coral",
-                runEndEffectorCommand(EndEffectorMap.endEffectorEjectSpeed));
+                runEndEffectorCommand(EndEffectorMap.IntakeSpeed), "Eject Coral",
+                runEndEffectorCommand(EndEffectorMap.EjectSpeed));
     }
 
 }
