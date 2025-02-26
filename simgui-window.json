@@ -12,7 +12,7 @@
       "userScale": "2",
       "width": "1920",
       "xpos": "0",
-      "ypos": "29"
+      "ypos": "23"
     }
   },
   "Table": {
@@ -45,17 +45,17 @@
   "Window": {
     "###FMS": {
       "Collapsed": "0",
-      "Pos": "23,440",
+      "Pos": "6,385",
       "Size": "283,140"
     },
     "###Joysticks": {
       "Collapsed": "0",
-      "Pos": "280,819",
+      "Pos": "280,933",
       "Size": "796,73"
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "249,322",
+      "Pos": "332,331",
       "Size": "750,590"
     },
     "###NetworkTables Info": {
@@ -65,7 +65,7 @@
     },
     "###Other Devices": {
       "Collapsed": "0",
-      "Pos": "1025,20",
+      "Pos": "1335,19",
       "Size": "250,695"
     },
     "###System Joysticks": {

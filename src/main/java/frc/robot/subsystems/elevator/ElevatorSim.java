@@ -23,6 +23,7 @@ public class ElevatorSim implements IElevator {
         _bottomLimitSwitchSim = new DIOSim(ElevatorSubsystem.VMap.bottomLimitSwitchChannel);
     }
 
+    @Override
     public void updateInputs(ElevatorInputsAutoLogged inputs) {
 
         inputs.MotorSpeed = _gearboxSim.getAngularVelocity().in(Units.RotationsPerSecond);
@@ -30,15 +31,18 @@ public class ElevatorSim implements IElevator {
         inputs.BottomLimitSwitch = _topLimitSwitchSim.getValue();
     }
 
+    @Override
     public void setMotorVoltages(double volts) {
         _gearboxSim.setInputVoltage(volts);
     }
 
+    @Override
     public void setMotorSpeeds(double output) {
         var voltage = output * 12.0;
         _gearboxSim.setInputVoltage(voltage);
     }
 
+    @Override
     public void stopMotors() {
         _gearboxSim.setAngularVelocity(0);
     }

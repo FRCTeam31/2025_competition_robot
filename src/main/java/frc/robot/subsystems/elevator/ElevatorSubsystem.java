@@ -3,7 +3,9 @@ package frc.robot.subsystems.elevator;
 
 import java.util.Map;
 
+import org.littletonrobotics.junction.Logger;
 import org.prime.control.ExtendedPIDConstants;
+import org.prime.dashboard.SendableButton;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
@@ -15,22 +17,16 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.Container;
 
 public class ElevatorSubsystem extends SubsystemBase {
-    public static final class VMap {
-        public static final int leftElevatorMotorCANID = 20;
-        public static final int rightElevatorMotorCANID = 21;
-        public static final int topLimitSwitchChannel = 0;
-        public static final int bottomLimitSwitchChannel = 1;
-        public static final int maxPercentOutput = 1;
 
-        public static final ExtendedPIDConstants PositionPID = new ExtendedPIDConstants(0, 0, 0, 0, 0, 0, 0);
-        public static final double FeedForwardKg = 0.0;
-
-        // TODO: Measure
-        public static final double OutputSprocketDiameterMeters = 0;
-        public static final double GearRatio = 0;
-    }
+    private SendableButton _stopMotorsButton;
+    private SendableButton _sourcePosButton;
+    private SendableButton _troughPosButton;
+    private SendableButton _lowPosButton;
+    private SendableButton _midPosButton;
+    private SendableButton _highPosButton;
 
     public enum ElevatorPosition {
         kSource,
@@ -55,12 +51,17 @@ public class ElevatorSubsystem extends SubsystemBase {
     private SysIdRoutine _sysId;
 
     public ElevatorSubsystem(boolean isReal) {
+        setName("Elevator");
+
+        _elevatorIO.updateInputs(_inputs);
+
         _elevatorIO = isReal
                 ? new ElevatorReal()
                 : new ElevatorSim();
 
-        _positionPidController = VMap.PositionPID.createPIDController(0.02);
-        _positionFeedforward = new ElevatorFeedforward(VMap.PositionPID.kS, VMap.FeedForwardKg, VMap.PositionPID.kV);
+        _positionPidController = ElevatorMap.PositionPID.createPIDController(0.02);
+        _positionFeedforward = new ElevatorFeedforward(ElevatorMap.PositionPID.kS, ElevatorMap.FeedForwardKg,
+                ElevatorMap.PositionPID.kV);
 
         // TODO: Remove when no longer needed
         _sysId = new SysIdRoutine(
@@ -77,6 +78,22 @@ public class ElevatorSubsystem extends SubsystemBase {
                         // Tell SysId to make generated commands require this subsystem, suffix test
                         // state in WPILog with this subsystem's name
                         this));
+
+        _stopMotorsButton = new SendableButton("Stop Elevator Motors", () -> stopMotorsCommand());
+        Container.TestDashboardSection.putData("Elevator/Stop Motors", _stopMotorsButton);
+        _sourcePosButton = new SendableButton("Source Position",
+                () -> goToElevatorPositionCommand(ElevatorPosition.kSource));
+        Container.TestDashboardSection.putData("Elevator/Source Position", _sourcePosButton);
+        _troughPosButton = new SendableButton("Trough Position",
+                () -> goToElevatorPositionCommand(ElevatorPosition.kTrough));
+        Container.TestDashboardSection.putData("Elevator/Trough Position", _troughPosButton);
+        _lowPosButton = new SendableButton("Low Position", () -> goToElevatorPositionCommand(ElevatorPosition.kLow));
+        Container.TestDashboardSection.putData("Elevator/Low Position", _lowPosButton);
+        _midPosButton = new SendableButton("Middle Position", () -> goToElevatorPositionCommand(ElevatorPosition.kMid));
+        Container.TestDashboardSection.putData("Elevator/Middle Position", _midPosButton);
+        _highPosButton = new SendableButton("High Position", () -> goToElevatorPositionCommand(ElevatorPosition.kHigh));
+        Container.TestDashboardSection.putData("Elevator/High Position", _highPosButton);
+
     }
 
     //#region Control
@@ -90,13 +107,13 @@ public class ElevatorSubsystem extends SubsystemBase {
         // TODO: check this logic
         var pid = _positionPidController.calculate(_inputs.ElevatorDistanceMeters);
         var ff = _positionFeedforward.calculate(pid);
-        var finalOutput = MathUtil.clamp(pid + ff, -VMap.maxPercentOutput, VMap.maxPercentOutput);
+        var finalOutput = MathUtil.clamp(pid + ff, -ElevatorMap.maxPercentOutput, ElevatorMap.maxPercentOutput);
 
         if (_inputs.TopLimitSwitch && finalOutput > 0) {
-            finalOutput = MathUtil.clamp(finalOutput, -VMap.maxPercentOutput, 0);
+            finalOutput = MathUtil.clamp(finalOutput, -ElevatorMap.maxPercentOutput, 0);
 
         } else if (_inputs.BottomLimitSwitch && finalOutput < 0) {
-            finalOutput = MathUtil.clamp(finalOutput, 0, VMap.maxPercentOutput);
+            finalOutput = MathUtil.clamp(finalOutput, 0, ElevatorMap.maxPercentOutput);
 
         }
         _elevatorIO.setMotorSpeeds(finalOutput);
@@ -110,6 +127,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         _elevatorIO.updateInputs(_inputs);
+        Logger.processInputs(getName(), _inputs);
     }
 
     /**

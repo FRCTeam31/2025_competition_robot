@@ -23,6 +23,7 @@ public class ElevatorReal implements IElevator {
         _outputEncoder = _elevatorMotor.getEncoder();
     }
 
+    @Override
     public void updateInputs(ElevatorInputsAutoLogged inputs) {
         inputs.MotorSpeed = _elevatorMotor.get();
 
@@ -38,6 +39,7 @@ public class ElevatorReal implements IElevator {
         _elevatorMotor.setVoltage(volts);
     }
 
+    @Override
     public void setMotorSpeeds(double output) {
         var reachedTopLimit = _topElevatorLimitSwitch.get();
         var reachedBottomLimit = _bottomElevatorLimitSwitch.get();
@@ -52,6 +54,7 @@ public class ElevatorReal implements IElevator {
         _elevatorMotor.set(output);
     }
 
+    @Override
     public void stopMotors() {
         _elevatorMotor.stopMotor();
     }
