@@ -14,15 +14,18 @@ import frc.robot.oi.OperatorInterface;
 import frc.robot.oi.BuildableAutoRoutine;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.drivetrain.SwerveSubsystem;
+import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
 public class Container {
   public static TeleopDashboardTab TeleopDashboardSection;
   public static DashboardSection CommandsDashboardSection;
   public static DashboardSection AutoDashboardSection;
+  public static DashboardSection TestDashboardSection;
   public static BuildableAutoRoutine AutoBuilder;
 
   public static SwerveSubsystem Swerve;
+  public static ElevatorSubsystem Elevator;
   public static VisionSubsystem Vision;
   public static PwmLEDs LEDs;
   public static OperatorInterface OperatorInterface;
@@ -33,6 +36,7 @@ public class Container {
       LEDs = new PwmLEDs();
       Vision = new VisionSubsystem();
       Swerve = new SwerveSubsystem(isReal);
+      Elevator = new ElevatorSubsystem(isReal);
 
       // Register the named commands from each subsystem that may be used in PathPlanner
       var namedCommandsMap = Swerve.getNamedCommands();
@@ -44,6 +48,7 @@ public class Container {
       AutoBuilder = new BuildableAutoRoutine(namedCommandsMap);
       TeleopDashboardSection = new TeleopDashboardTab();
       CommandsDashboardSection = new DashboardSection("Commands");
+      TestDashboardSection = new DashboardSection("Test");
 
       // Configure controller bindings
       OperatorInterface = new OperatorInterface();
