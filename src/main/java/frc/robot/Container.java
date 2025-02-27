@@ -13,6 +13,7 @@ import frc.robot.dashboard.DashboardSection;
 import frc.robot.oi.OperatorInterface;
 import frc.robot.oi.BuildableAutoRoutine;
 import frc.robot.subsystems.*;
+import frc.robot.subsystems.climbing.ClimberSubsystem;
 import frc.robot.subsystems.drivetrain.SwerveSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
@@ -24,6 +25,7 @@ public class Container {
 
   public static SwerveSubsystem Swerve;
   public static VisionSubsystem Vision;
+  public static ClimberSubsystem Climber;
   public static PwmLEDs LEDs;
   public static OperatorInterface OperatorInterface;
 
@@ -33,6 +35,7 @@ public class Container {
       LEDs = new PwmLEDs();
       Vision = new VisionSubsystem();
       Swerve = new SwerveSubsystem(isReal);
+      Climber = new ClimberSubsystem(isReal);
 
       // Register the named commands from each subsystem that may be used in PathPlanner
       var namedCommandsMap = Swerve.getNamedCommands();

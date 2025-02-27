@@ -12,9 +12,10 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Servo;
-import frc.robot.subsystems.climbing.ClimberSubsystem.ServoPosition;
 import frc.robot.subsystems.drivetrain.SwerveMap;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import frc.robot.subsystems.climbing.ClimberInputs.ClimberPosition;
+import frc.robot.subsystems.climbing.ClimberInputs.ServoPosition;
 
 @Logged
 public class ClimberIOReal implements IClimberIO {
@@ -29,9 +30,9 @@ public class ClimberIOReal implements IClimberIO {
 
     public ClimberIOReal() {
 
-        _climbOutLimitSwitch = new DigitalInput(ClimberMap.climberOutLimitSwitchChannel);
-        _climbInLimitSwitch = new DigitalInput(ClimberMap.climberInLimitSwitchChannel);
-        _climbServo = new Servo(ClimberMap.climberServoPWMID);
+        _climbOutLimitSwitch = new DigitalInput(ClimberMap.ClimberOutLimitSwitchChannel);
+        _climbInLimitSwitch = new DigitalInput(ClimberMap.ClimberInLimitSwitchChannel);
+        _climbServo = new Servo(ClimberMap.ClimberServoPWMID);
         climbMotorConfig();
     }
 
@@ -39,12 +40,12 @@ public class ClimberIOReal implements IClimberIO {
 
         SparkMaxConfig leftMotorConfig = new SparkMaxConfig();
         SparkMaxConfig rightMotorConfig = new SparkMaxConfig();
-        leftMotorConfig.follow(ClimberMap.climberRightMotorCANID, true);
+        leftMotorConfig.follow(ClimberMap.ClimberRightMotorCANID, true);
         leftMotorConfig.idleMode(IdleMode.kBrake);
         rightMotorConfig.idleMode(IdleMode.kBrake);
 
-        _climbLeftMotor = new SparkFlex(ClimberMap.climberLeftMotorCANID, MotorType.kBrushless);
-        _climbRightMotor = new SparkFlex(ClimberMap.climberRightMotorCANID, MotorType.kBrushless);
+        _climbLeftMotor = new SparkFlex(ClimberMap.ClimberLeftMotorCANID, MotorType.kBrushless);
+        _climbRightMotor = new SparkFlex(ClimberMap.ClimberRightMotorCANID, MotorType.kBrushless);
         _climbLeftMotor.configure(leftMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         _climbRightMotor.configure(rightMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -69,9 +70,9 @@ public class ClimberIOReal implements IClimberIO {
         _climbRightMotor.stopMotor();
     }
 
-    public void setHooksState(ServoPosition hooksCommandedOut) {
-        _climbServo.set(hooksCommandedOut == ServoPosition.IN ? ClimberMap.climberServoInValue
-                : ClimberMap.climberServoOutValue);
+    public void setHooksState(ServoPosition hooksCommmandedPosition) {
+        _climbServo.set(hooksCommmandedPosition == ServoPosition.CLOSED ? ClimberMap.ClimberServoClosedValue
+                : ClimberMap.ClimberServoOpenValue);
     }
 
 }

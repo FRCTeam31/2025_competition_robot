@@ -6,9 +6,26 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
 @Logged
 public class ClimberInputs {
+    public enum ClimberPosition {
+        /** The starting position of the climber (Up) */
+        IN,
+        /** 𝓣𝓱𝓮 𝓮𝓷𝓭𝓲𝓷𝓰 𝓹𝓸𝓼𝓲𝓸𝓷 𝓸𝓯 𝓽𝓱𝓮 𝓬𝓵𝓲𝓶𝓫𝓮𝓻 (Down) */
+        OUT
+    }
+
+    public enum ServoPosition {
+        /** The servo arms  will be open */
+        OPEN,
+        /** The servo arms  will be closed) */
+        CLOSED
+    }
+
     public double ClimbMotorSpeed = 0;
+    // Limit Switches. If the boolean is true the limit switch is pressed if it is false the limit switch is not pressed
     public boolean InLimitSwitch;
     public boolean OutLimitSwitch;
     public boolean HooksCommandedOut = false;
+    public ClimberPosition CommandedClimberPosition = ClimberPosition.IN;
+    public ServoPosition CommandedServoPosition = ServoPosition.CLOSED;
 
 }
