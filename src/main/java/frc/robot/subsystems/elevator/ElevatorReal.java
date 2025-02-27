@@ -17,9 +17,9 @@ public class ElevatorReal implements IElevator {
     private RelativeEncoder _outputEncoder;
 
     public ElevatorReal() {
-        _elevatorMotor = new SparkFlex(ElevatorSubsystem.VMap.leftElevatorMotorCANID, MotorType.kBrushless);
-        _topElevatorLimitSwitch = new DigitalInput(ElevatorSubsystem.VMap.topLimitSwitchChannel);
-        _bottomElevatorLimitSwitch = new DigitalInput(ElevatorSubsystem.VMap.bottomLimitSwitchChannel);
+        _elevatorMotor = new SparkFlex(ElevatorMap.leftElevatorMotorCANID, MotorType.kBrushless);
+        _topElevatorLimitSwitch = new DigitalInput(ElevatorMap.topLimitSwitchChannel);
+        _bottomElevatorLimitSwitch = new DigitalInput(ElevatorMap.bottomLimitSwitchChannel);
         _outputEncoder = _elevatorMotor.getEncoder();
     }
 
@@ -61,11 +61,11 @@ public class ElevatorReal implements IElevator {
 
     public double getElevatorDistance() {
         var rotations = _outputEncoder.getPosition();
-        return rotations * Math.PI * ElevatorSubsystem.VMap.OutputSprocketDiameterMeters;
+        return rotations * Math.PI * ElevatorMap.OutputSprocketDiameterMeters;
     }
 
     public double getElevatorSpeedMetersPerSecond() {
         var speedRPS = _outputEncoder.getVelocity();
-        return speedRPS * Math.PI * ElevatorSubsystem.VMap.OutputSprocketDiameterMeters;
+        return speedRPS * Math.PI * ElevatorMap.OutputSprocketDiameterMeters;
     }
 }
