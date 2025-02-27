@@ -14,5 +14,6 @@ public class ClimberMap {
     public static final double MaxMotorPercentOutput = 1;
     public static final double ClimberMotorsReelingInSpeed = 0.5;
     public static final double ClimberMotorsReelingOutSpeed = -0.5;
+    public static final double MaxChangeClimberStateTime = 5;
 
 }

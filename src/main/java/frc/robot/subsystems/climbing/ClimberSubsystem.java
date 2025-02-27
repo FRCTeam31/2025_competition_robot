@@ -11,6 +11,7 @@ import frc.robot.subsystems.climbing.ClimberInputs.ServoPosition;
 public class ClimberSubsystem extends SubsystemBase {
     private IClimberIO _climber;
     private ClimberInputs _inputs;
+    private boolean allowedToChangeCooksState = true;
 
     public ClimberSubsystem(Boolean isReal) {
         if (isReal) {
@@ -87,14 +88,33 @@ public class ClimberSubsystem extends SubsystemBase {
             _inputs.CommandedServoPosition = ServoPosition.CLOSED;
 
             setClimberState(ClimberPosition.OUT);
-        }, this).until(() -> _inputs.OutLimitSwitch).withTimeout(5).andThen(stopClimbingMotorsCommand());
+        }, this).until(() -> _inputs.OutLimitSwitch).withTimeout(ClimberMap.MaxChangeClimberStateTime)
+                .andThen(stopClimbingMotorsCommand());
     }
 
     public Command setClimberInCommand() {
         return Commands.run(() -> {
             _climber.setHooksState(ServoPosition.OPEN);
             setClimberState(ClimberPosition.IN);
-        }, this).until(() -> _inputs.InLimitSwitch).withTimeout(5).andThen(stopClimbingMotorsCommand());
+        }, this).until(() -> _inputs.InLimitSwitch).withTimeout(ClimberMap.MaxChangeClimberStateTime)
+                .andThen(stopClimbingMotorsCommand());
     }
 
+    public Command climbUpCommand() {
+        // Only allowed to climb if the hooks are closed and the climber is in the out position
+        return Commands.runOnce(() -> {
+            if (_inputs.OutLimitSwitch && _inputs.CommandedServoPosition == ServoPosition.CLOSED) {
+                _climber.setMotorSpeed(ClimberMap.ClimberMotorsReelingInSpeed);
+            }
+        }, this);
+    }
+
+    public Command climbDownCommand() {
+        // Only allowed to climb if the hooks are closed and the climber is in the out position
+        return Commands.runOnce(() -> {
+            if (_inputs.OutLimitSwitch && _inputs.CommandedServoPosition == ServoPosition.CLOSED) {
+                _climber.setMotorSpeed(ClimberMap.ClimberMotorsReelingOutSpeed);
+            }
+        }, this);
+    }
 }
