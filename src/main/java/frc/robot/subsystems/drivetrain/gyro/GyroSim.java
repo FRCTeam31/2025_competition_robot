@@ -24,6 +24,7 @@ public class GyroSim implements IGyro {
         inputs.AccelerationX = 0;
         inputs.AccelerationY = 0;
         inputs.AccelerationZ = 0;
+        inputs.Pitch = 0;
     }
 
     public void reset() {

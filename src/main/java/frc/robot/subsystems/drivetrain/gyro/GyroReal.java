@@ -3,6 +3,7 @@ package frc.robot.subsystems.drivetrain.gyro;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.subsystems.drivetrain.SwerveMap;
 
@@ -21,6 +22,7 @@ public class GyroReal implements IGyro {
         inputs.AccelerationX = _gyro.getAccelerationX().getValueAsDouble();
         inputs.AccelerationY = _gyro.getAccelerationY().getValueAsDouble();
         inputs.AccelerationZ = _gyro.getAccelerationZ().getValueAsDouble();
+        inputs.Pitch = _gyro.getPitch().getValueAsDouble();
     }
 
     public void reset() {
@@ -32,5 +34,9 @@ public class GyroReal implements IGyro {
         var statusCode = _gyro.setYaw(angle);
 
         DriverStation.reportWarning("Reset gyro to " + angle + ": " + statusCode.toString(), false);
+    }
+
+    public double getPitch() {
+        return _gyro.getPitch().getValueAsDouble();
     }
 }

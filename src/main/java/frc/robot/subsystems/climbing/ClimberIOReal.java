@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Servo;
 import frc.robot.subsystems.drivetrain.SwerveMap;
+import frc.robot.subsystems.drivetrain.gyro.IGyro;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import frc.robot.subsystems.climbing.ClimberInputs.ClimberPosition;
 import frc.robot.subsystems.climbing.ClimberInputs.HooksPosition;
@@ -32,6 +33,7 @@ public class ClimberIOReal implements IClimberIO {
     private DigitalInput _climbInLimitSwitch;
     private DigitalInput _hooksOutLimitSwitch;
     private DigitalInput _hooksInLimitSwitch;
+    private IGyro _gyro;
 
     public ClimberIOReal() {
 
@@ -39,6 +41,7 @@ public class ClimberIOReal implements IClimberIO {
         _climbInLimitSwitch = new DigitalInput(ClimberMap.ClimberInLimitSwitchChannel);
         _hooksOutLimitSwitch = new DigitalInput(ClimberMap.HooksOutLimitSwitchChannel);
         _hooksInLimitSwitch = new DigitalInput(ClimberMap.HooksInLimitSwitchChannel);
+
         climbMotorsConfig();
     }
 

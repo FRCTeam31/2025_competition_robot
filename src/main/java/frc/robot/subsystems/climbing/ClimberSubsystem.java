@@ -8,18 +8,22 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.climbing.ClimberInputs.ClimberPosition;
 import frc.robot.subsystems.climbing.ClimberInputs.HooksPosition;
+import frc.robot.subsystems.drivetrain.gyro.GyroReal;
 
 @Logged
 public class ClimberSubsystem extends SubsystemBase {
     private IClimberIO _climber;
     private ClimberInputs _inputs;
+    private double _gyroPitch = 0;
     private boolean allowedToChangeCooksState = true;
 
     public ClimberSubsystem(Boolean isReal) {
         if (isReal) {
             _climber = new ClimberIOReal();
+
         } else {
             _climber = new ClimberIOSim();
+
         }
 
         _inputs = _climber.updateInputs();
@@ -28,6 +32,7 @@ public class ClimberSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         _inputs = _climber.updateInputs();
+
     }
 
     public void setHooksState(HooksPosition hooksPosition) {
