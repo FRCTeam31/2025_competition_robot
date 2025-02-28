@@ -1,16 +1,18 @@
 package frc.robot.subsystems.climbing;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import frc.robot.subsystems.climbing.ClimberInputs.ServoPosition;
+import frc.robot.subsystems.climbing.ClimberInputs.HooksPosition;
 
 public interface IClimberIO {
 
     public ClimberInputs updateInputs();
 
-    public void setMotorSpeed(double Speed);
+    public void setClimbingWenchSpeed(double Speed);
 
-    public void stopMotors();
+    public void setHookMotorSpeed(double Speed);
 
-    public void setHooksState(ServoPosition hooksCommmandedPosition);
+    public void stopWenchMotors();
+
+    public void stopHooksMotors();
 
 }

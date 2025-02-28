@@ -13,19 +13,23 @@ public class ClimberInputs {
         OUT
     }
 
-    public enum ServoPosition {
+    public enum HooksPosition {
         /** The servo arms  will be open */
         OPEN,
         /** The servo arms  will be closed) */
         CLOSED
     }
 
-    public double ClimbMotorSpeed = 0;
+    public double ClimbWenchMotorSpeed = 0;
+    public double HooksMotorSpeed = 0;
     // Limit Switches. If the boolean is true the limit switch is pressed if it is false the limit switch is not pressed
-    public boolean InLimitSwitch;
-    public boolean OutLimitSwitch;
+    public boolean ClimbWenchInLimitSwitch;
+    public boolean ClimbWenchOutLimitSwitch;
+    public boolean HooksOpenLimitSwitch;
+    public boolean HooksClosedLimitSwitch;
+
     public boolean HooksCommandedOut = false;
     public ClimberPosition CommandedClimberPosition = ClimberPosition.IN;
-    public ServoPosition CommandedServoPosition = ServoPosition.CLOSED;
+    public HooksPosition CommandedHooksPosition = HooksPosition.CLOSED;
 
 }
