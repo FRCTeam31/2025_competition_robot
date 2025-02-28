@@ -21,6 +21,22 @@ import frc.robot.Container;
 
 public class ElevatorSubsystem extends SubsystemBase {
 
+    public static class ElevatorMap {
+        public static final int leftElevatorMotorCANID = 20;
+        public static final int rightElevatorMotorCANID = 21;
+        public static final int topLimitSwitchChannel = 0;
+        public static final int bottomLimitSwitchChannel = 1;
+        public static final int maxPercentOutput = 1;
+
+        public static final ExtendedPIDConstants PositionPID = new ExtendedPIDConstants(0.01, 0, 0, 0, 0.01, 0.01,
+                0.01);
+        public static final double FeedForwardKg = 0.0;
+
+        // TODO: Measure
+        public static final double OutputSprocketDiameterMeters = 0;
+        public static final double GearRatio = 0;
+    }
+
     private SendableButton _stopMotorsButton;
     private SendableButton _sourcePosButton;
     private SendableButton _troughPosButton;
@@ -52,8 +68,6 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public ElevatorSubsystem(boolean isReal) {
         setName("Elevator");
-
-        _elevatorIO.updateInputs(_inputs);
 
         _elevatorIO = isReal
                 ? new ElevatorReal()
@@ -101,6 +115,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     private void setPositionSetpoint(ElevatorPosition pos) {
         var setpoint = _positionMap.get(pos);
         _positionPidController.setSetpoint(setpoint);
+        System.out.println(setpoint);
     }
 
     private void updateMotorSpeeds() {

@@ -32,11 +32,11 @@ public class Container {
 
   public static void initialize(boolean isReal) {
     try {
+
       // Create subsystems
       LEDs = new PwmLEDs();
       Vision = new VisionSubsystem();
       Swerve = new SwerveSubsystem(isReal);
-      Elevator = new ElevatorSubsystem(isReal);
 
       // Register the named commands from each subsystem that may be used in PathPlanner
       var namedCommandsMap = Swerve.getNamedCommands();
@@ -49,6 +49,9 @@ public class Container {
       TeleopDashboardSection = new TeleopDashboardTab();
       CommandsDashboardSection = new DashboardSection("Commands");
       TestDashboardSection = new DashboardSection("Test");
+
+      // Create Elevator Subsystem
+      Elevator = new ElevatorSubsystem(isReal);
 
       // Configure controller bindings
       OperatorInterface = new OperatorInterface();
