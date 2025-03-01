@@ -15,7 +15,7 @@ public class ClimberSubsystem extends SubsystemBase {
     private IClimberIO _climber;
     private ClimberInputs _inputs;
     private double _gyroPitch = 0;
-    private boolean allowedToChangeCooksState = true;
+    private boolean _isClimbing = false;
 
     public ClimberSubsystem(Boolean isReal) {
         if (isReal) {
@@ -37,10 +37,12 @@ public class ClimberSubsystem extends SubsystemBase {
 
     public void setHooksState(HooksPosition hooksPosition) {
         double hooksMotorSpeed = 0;
+        boolean allowedToChangeHooksState = _inputs.ClimbWenchOutLimitSwitch
+                && _gyroPitch > ClimberMap.ClimbingPitchThresholdDegrees;
 
         _inputs.CommandedHooksPosition = hooksPosition;
         // Only Allow the hooks to change state if the climber is  out
-        if (_inputs.ClimbWenchOutLimitSwitch) {
+        if (allowedToChangeHooksState) {
             if (hooksPosition == HooksPosition.CLOSED) {
                 if (!_inputs.HooksClosedLimitSwitch) {
                     hooksMotorSpeed = ClimberMap.HooksCloseSpeed;

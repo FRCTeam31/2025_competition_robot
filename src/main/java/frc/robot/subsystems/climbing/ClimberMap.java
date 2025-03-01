@@ -20,5 +20,6 @@ public class ClimberMap {
     public static final double HooksOpenSpeed = 0.5;
     public static final double HooksCloseSpeed = -0.5;
     public static final double MaxChangeHookStateTime = 5;
+    public static final double ClimbingPitchThresholdDegrees = 5;
 
 }

@@ -7,7 +7,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 @AutoLog
 public class GyroInputs {
     public Rotation2d Rotation;
-    public double Pitch;
     public double AccelerationX;
     public double AccelerationY;
     public double AccelerationZ;
