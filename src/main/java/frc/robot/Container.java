@@ -14,21 +14,25 @@ import frc.robot.oi.OperatorInterface;
 import frc.robot.oi.BuildableAutoRoutine;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.drivetrain.SwerveSubsystem;
+import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
 public class Container {
   public static TeleopDashboardTab TeleopDashboardSection;
   public static DashboardSection CommandsDashboardSection;
   public static DashboardSection AutoDashboardSection;
+  public static DashboardSection TestDashboardSection;
   public static BuildableAutoRoutine AutoBuilder;
 
   public static SwerveSubsystem Swerve;
+  public static ElevatorSubsystem Elevator;
   public static VisionSubsystem Vision;
   public static PwmLEDs LEDs;
   public static OperatorInterface OperatorInterface;
 
   public static void initialize(boolean isReal) {
     try {
+
       // Create subsystems
       LEDs = new PwmLEDs();
       Vision = new VisionSubsystem();
@@ -44,6 +48,12 @@ public class Container {
       AutoBuilder = new BuildableAutoRoutine(namedCommandsMap);
       TeleopDashboardSection = new TeleopDashboardTab();
       CommandsDashboardSection = new DashboardSection("Commands");
+      TestDashboardSection = new DashboardSection("Test");
+
+      // Create Elevator Subsystem
+      Elevator = new ElevatorSubsystem(isReal);
+
+      Elevator.setDefaultCommand(Elevator.runElevatorAutomaticSeekCommand());
 
       // Configure controller bindings
       OperatorInterface = new OperatorInterface();
