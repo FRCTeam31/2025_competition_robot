@@ -2,7 +2,7 @@ package frc.robot.subsystems.climbing;
 
 public interface IClimberIO {
 
-    public void updateInputs();
+    public void updateInputs(ClimberInputsAutoLogged inputs);
 
     public void setClimbingWenchSpeed(double Speed);
 

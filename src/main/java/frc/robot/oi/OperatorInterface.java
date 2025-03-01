@@ -64,10 +64,10 @@ public class OperatorInterface {
         DriverController.pov(Controls.upLeft).onTrue(setSnapToSetpointCommandFunc.apply(Controls.upLeft + 90));
     }
 
-    public void bindOperatorControls(Command toggleHooksState, Command setClimbersOut, Command setClimbersIn) {
+    public void bindOperatorControls(Command toggleHooksState, Command setClimberOut, Command setClimberIn) {
         // Not implemented yet
         DriverController.x().onTrue(toggleHooksState);
-        DriverController.y().onTrue(setClimbersOut);
-        DriverController.b().onTrue(setClimbersIn);
+        DriverController.y().onTrue(setClimberOut);
+        DriverController.b().onTrue(setClimberIn);
     }
 }

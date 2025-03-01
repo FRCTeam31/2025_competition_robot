@@ -1,5 +1,7 @@
 package frc.robot.subsystems.climbing;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -9,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.climbing.ClimberInputs.ClimberPosition;
 import frc.robot.subsystems.climbing.ClimberInputs.HooksPosition;
 
-@Logged
 public class ClimberSubsystem extends SubsystemBase {
 
     public static class ClimberMap {
@@ -35,9 +36,10 @@ public class ClimberSubsystem extends SubsystemBase {
     }
 
     private IClimberIO _climber;
-    private ClimberInputs _inputs;
+    private ClimberInputsAutoLogged _inputs = new ClimberInputsAutoLogged();
 
     public ClimberSubsystem(Boolean isReal) {
+        setName("Climber");
         if (isReal) {
             _climber = new ClimberIOReal();
 
@@ -45,13 +47,12 @@ public class ClimberSubsystem extends SubsystemBase {
             _climber = new ClimberIOSim();
 
         }
-
-        _inputs = _climber.updateInputs();
     }
 
     @Override
     public void periodic() {
-        _inputs = _climber.updateInputs();
+        _climber.updateInputs(_inputs);
+        Logger.processInputs(getName(), _inputs);
 
     }
 
@@ -124,7 +125,7 @@ public class ClimberSubsystem extends SubsystemBase {
                 .andThen(stopHooksMotorsCommand());
     }
 
-    public Command setClimbersStateCommand(ClimberPosition climberPosition) {
+    public Command setClimberStateCommand(ClimberPosition climberPosition) {
         return this.run(() -> {
             setClimberState(climberPosition);
         }).until(() -> climberPosition == ClimberPosition.IN ? _inputs.ClimbWenchInLimitSwitch
@@ -133,12 +134,12 @@ public class ClimberSubsystem extends SubsystemBase {
     }
 
     public Command setCLimberOutCommand() {
-        return setClimbersStateCommand(ClimberPosition.OUT);
+        return setClimberStateCommand(ClimberPosition.OUT);
     }
 
     public ParallelCommandGroup setClimberInCommand() {
         return new ParallelCommandGroup(setHooksStateCommand(HooksPosition.CLOSED),
-                setClimbersStateCommand(ClimberPosition.IN));
+                setClimberStateCommand(ClimberPosition.IN));
     }
 
     public Command climbUpCommand() {

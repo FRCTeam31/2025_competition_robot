@@ -14,10 +14,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.subsystems.drivetrain.gyro.IGyro;
 import frc.robot.subsystems.climbing.ClimberSubsystem.ClimberMap;
 
-@Logged
 public class ClimberIOReal implements IClimberIO {
-
-    private ClimberInputs _inputs = new ClimberInputs();
 
     private SparkFlex _climbWenchLeftMotor;
     private SparkFlex _climbWenchRightMotor;
@@ -56,18 +53,16 @@ public class ClimberIOReal implements IClimberIO {
 
     }
 
-    public ClimberInputs updateInputs() {
+    public void updateInputs(ClimberInputsAutoLogged inputs) {
         double climbWenchMotorSpeed = _climbWenchLeftMotor.get();
         double climbHookMotorSpeed = _climbHooksMotor.getMotorOutputPercent();
 
-        _inputs.ClimbWenchMotorSpeed = climbWenchMotorSpeed;
-        _inputs.HooksMotorSpeed = climbHookMotorSpeed;
-        _inputs.ClimbWenchOutLimitSwitch = _climbOutLimitSwitch.get();
-        _inputs.ClimbWenchInLimitSwitch = _climbInLimitSwitch.get();
-        _inputs.HooksClosedLimitSwitch = _hooksOutLimitSwitch.get();
-        _inputs.HooksOpenLimitSwitch = _hooksInLimitSwitch.get();
-
-        return _inputs;
+        inputs.ClimbWenchMotorSpeed = climbWenchMotorSpeed;
+        inputs.HooksMotorSpeed = climbHookMotorSpeed;
+        inputs.ClimbWenchOutLimitSwitch = _climbOutLimitSwitch.get();
+        inputs.ClimbWenchInLimitSwitch = _climbInLimitSwitch.get();
+        inputs.HooksClosedLimitSwitch = _hooksOutLimitSwitch.get();
+        inputs.HooksOpenLimitSwitch = _hooksInLimitSwitch.get();
     }
 
     public void setClimbingWenchSpeed(double speed) {

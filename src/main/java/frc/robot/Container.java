@@ -57,6 +57,8 @@ public class Container {
           Swerve::setAutoAlignSetpointCommand,
           Swerve::setDefaultCommand,
           Swerve::driveFieldRelativeCommand);
+      OperatorInterface.bindOperatorControls(
+          Climber.toggleHooksStateCommand(), Climber.setCLimberOutCommand(), Climber.setClimberInCommand());
     } catch (Exception e) {
       DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());
     }

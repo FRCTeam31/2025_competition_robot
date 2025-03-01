@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
 import frc.robot.subsystems.climbing.ClimberSubsystem.ClimberMap;
 
-@Logged
 public class ClimberIOSim implements IClimberIO {
     private DCMotorSim _climbWenchMotorsSim;
 
@@ -37,7 +36,7 @@ public class ClimberIOSim implements IClimberIO {
         _hooksInLimitSwitchSim = new DIOSim(ClimberMap.HooksInLimitSwitchChannel);
     }
 
-    public ClimberInputs updateInputs() {
+    public void updateInputs(ClimberInputsAutoLogged inputs) {
         double climbWenchMotorSpeed = _climbWenchMotorsSim.getAngularVelocity().magnitude();
         double climbHookMotorSpeed = _climbHooksMotorSim.getAngularVelocity().magnitude();
 
@@ -47,8 +46,6 @@ public class ClimberIOSim implements IClimberIO {
         _inputs.ClimbWenchInLimitSwitch = _climbInLimitSwitchSim.getValue();
         _inputs.HooksClosedLimitSwitch = _hooksOutLimitSwitchSim.getValue();
         _inputs.HooksOpenLimitSwitch = _hooksInLimitSwitchSim.getValue();
-        return _inputs;
-
     }
 
     public void setClimbingWenchSpeed(double speed) {

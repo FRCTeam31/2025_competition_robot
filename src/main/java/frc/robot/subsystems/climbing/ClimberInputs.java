@@ -1,8 +1,8 @@
 package frc.robot.subsystems.climbing;
 
-import edu.wpi.first.epilogue.Logged;
+import org.littletonrobotics.junction.AutoLog;
 
-@Logged
+@AutoLog
 public class ClimberInputs {
     public enum ClimberPosition {
         /** The starting position of the climber (Up) */
