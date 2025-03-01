@@ -3,6 +3,7 @@ package frc.robot.subsystems.elevator;
 
 import java.util.Map;
 
+import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.ExtendedPIDConstants;
 import org.prime.dashboard.SendableButton;
@@ -12,8 +13,10 @@ import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -43,6 +46,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     private SendableButton _lowPosButton;
     private SendableButton _midPosButton;
     private SendableButton _highPosButton;
+    private double elevatorSetpoint = 0;
 
     public enum ElevatorPosition {
         kSource,
@@ -76,6 +80,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         _positionPidController = ElevatorMap.PositionPID.createPIDController(0.02);
         _positionFeedforward = new ElevatorFeedforward(ElevatorMap.PositionPID.kS, ElevatorMap.FeedForwardKg,
                 ElevatorMap.PositionPID.kV);
+
+        SmartDashboard.putData(_positionPidController);
 
         // TODO: Remove when no longer needed
         _sysId = new SysIdRoutine(
@@ -113,9 +119,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     //#region Control
 
     private void setPositionSetpoint(ElevatorPosition pos) {
-        var setpoint = _positionMap.get(pos);
-        _positionPidController.setSetpoint(setpoint);
-        System.out.println(setpoint);
+
     }
 
     private void updateMotorSpeeds() {
@@ -143,6 +147,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void periodic() {
         _elevatorIO.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
+        Logger.recordOutput("Elevator/ElevatorSetpoint", elevatorSetpoint);
     }
 
     /**
@@ -167,7 +172,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public Command goToElevatorPositionCommand(ElevatorPosition pos) {
-        return this.runOnce(() -> setPositionSetpoint(pos));
+        return Commands.runOnce(() -> {
+            elevatorSetpoint = _positionMap.get(pos);
+            _positionPidController.setSetpoint(elevatorSetpoint);
+            System.out.println(elevatorSetpoint);
+        });
     }
 
     public Command stopMotorsCommand() {
