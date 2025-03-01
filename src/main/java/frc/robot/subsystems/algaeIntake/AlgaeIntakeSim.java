@@ -1,24 +1,20 @@
 package frc.robot.subsystems.algaeIntake;
 
-import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.DoubleSolenoidSim;
-import frc.robot.subsystems.algaeIntake.AlgaeIntakeMap;
+import frc.robot.subsystems.algaeIntake.AlgaeIntakeSubsystem.AlgaeIntakeMap;
 
-@Logged
-public class AlgaeIntakeIOSim implements IAlgaeIntakeIO {
-
-    public AlgaeIntakeInputs m_inputs = new AlgaeIntakeInputs();
-
+public class AlgaeIntakeSim implements IAlgaeIntake {
     public DoubleSolenoidSim leftAlgaeSolenoidSim;
     public DoubleSolenoidSim rightAlgaeSolenoidSim;
     public DCMotorSim algaeMotorSim;
 
-    public AlgaeIntakeIOSim() {
+    public AlgaeIntakeSim() {
         leftAlgaeSolenoidSim = new DoubleSolenoidSim(PneumaticsModuleType.CTREPCM,
                 AlgaeIntakeMap.leftAlgaeSolenoidForwardChannel, AlgaeIntakeMap.leftAlgaeSolenoidReverseChannel);
         rightAlgaeSolenoidSim = new DoubleSolenoidSim(PneumaticsModuleType.CTREPCM,
@@ -28,16 +24,11 @@ public class AlgaeIntakeIOSim implements IAlgaeIntakeIO {
                 DCMotor.getNeoVortex(1));
     }
 
-    public AlgaeIntakeInputs getInputs() {
-        Value leftSolenoidPosition = leftAlgaeSolenoidSim.get();
-        Value rightSolenoidPosition = rightAlgaeSolenoidSim.get();
-        double motorSpeed = algaeMotorSim.getAngularVelocityRadPerSec();
-
-        m_inputs.AlgaeMotorSpeed = motorSpeed;
-        m_inputs.AlgaeLeftSolenoidPosition = leftSolenoidPosition;
-        m_inputs.AlgaeRightSolenoidPosition = rightSolenoidPosition;
-
-        return m_inputs;
+    @Override
+    public void updateInputs(AlgaeIntakeInputsAutoLogged inputs) {
+        inputs.AlgaeLeftSolenoidPosition = leftAlgaeSolenoidSim.get();
+        inputs.AlgaeRightSolenoidPosition = rightAlgaeSolenoidSim.get();
+        inputs.AlgaeMotorSpeed = algaeMotorSim.getAngularVelocity().in(Units.RotationsPerSecond);
     }
 
     public void setAlgaeMotorSpeed(double speed) {

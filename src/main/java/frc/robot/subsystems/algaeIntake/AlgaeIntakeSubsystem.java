@@ -2,48 +2,51 @@ package frc.robot.subsystems.algaeIntake;
 
 import java.util.Map;
 
-import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.algaeIntake.AlgaeIntakeMap;
 
-@Logged
 public class AlgaeIntakeSubsystem extends SubsystemBase {
 
-    private IAlgaeIntakeIO AlgaeIntake;
+    public static class AlgaeIntakeMap {
+        public static final byte algaeIntakeMotorCANID = 32;
+        public static final byte leftAlgaeSolenoidForwardChannel = 0;
+        public static final byte leftAlgaeSolenoidReverseChannel = 1;
+        public static final byte rightAlgaeSolenoidForwardChannel = 2;
+        public static final byte rightAlgaeSolenoidReverseChannel = 3;
+        public static final byte algaeIntakeGearRatio = 1;
+        public static final double AlgaeIntakeSpeed = 0.5;
+        public static final double AlgaeEjectSpeed = -0.5;
+    }
 
-    private AlgaeIntakeInputs _inputs;
+    private IAlgaeIntake _algaeIntake;
+
+    private AlgaeIntakeInputsAutoLogged _inputs;
 
     public AlgaeIntakeSubsystem(boolean isReal) {
-        if (isReal) {
-            AlgaeIntake = new AlgaeIntakeIOReal();
-        } else {
-            AlgaeIntake = new AlgaeIntakeIOSim();
-        }
+        _algaeIntake = isReal ? new AlgaeIntakeReal() : new AlgaeIntakeSim();
 
-        _inputs = AlgaeIntake.getInputs();
     }
 
     public void periodic() {
-        _inputs = AlgaeIntake.getInputs();
+        _algaeIntake.updateInputs(_inputs);
     }
 
     public Command setAlgaeIntakePositionCommand(Value algaeIntakePosition) {
         return this.run(() -> {
-            AlgaeIntake.setAlgaeIntakePosition(algaeIntakePosition);
+            _algaeIntake.setAlgaeIntakePosition(algaeIntakePosition);
         });
     }
 
     public Command setAlgaeMotorSpeedCommand(double speed) {
         return this.run(() -> {
-            AlgaeIntake.setAlgaeMotorSpeed(speed);
+            _algaeIntake.setAlgaeMotorSpeed(speed);
         });
     }
 
     public Command stopAlgaeMotorCommand() {
         return this.run(() -> {
-            AlgaeIntake.stopMotors();
+            _algaeIntake.stopMotors();
         });
     }
 

@@ -1,12 +1,10 @@
 package frc.robot.subsystems.algaeIntake;
 
-import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
-@Logged
-public interface IAlgaeIntakeIO {
+public interface IAlgaeIntake {
 
-    public AlgaeIntakeInputs getInputs();
+    public void updateInputs(AlgaeIntakeInputsAutoLogged inputs);
 
     public void setAlgaeMotorSpeed(double speed);
 
