@@ -4,11 +4,9 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.climbing.ClimberInputs.ClimberPosition;
 import frc.robot.subsystems.climbing.ClimberInputs.HooksPosition;
-import frc.robot.subsystems.drivetrain.gyro.GyroReal;
 
 @Logged
 public class ClimberSubsystem extends SubsystemBase {
@@ -34,7 +32,7 @@ public class ClimberSubsystem extends SubsystemBase {
 
     }
 
-    public void setHooksState(HooksPosition hooksPosition) {
+    private void setHooksState(HooksPosition hooksPosition) {
         double hooksMotorSpeed = 0;
         boolean allowedToChangeHooksState = _inputs.ClimbWenchOutLimitSwitch
                 && _gyroPitch > ClimberMap.ClimbingPitchThresholdDegrees;
@@ -61,23 +59,7 @@ public class ClimberSubsystem extends SubsystemBase {
 
     }
 
-    public Command toggleHooksStateCommand() {
-        return Commands.runOnce(() -> {
-            if (_inputs.ClimbWenchOutLimitSwitch) {
-                // Toggle the commanded hooks state
-                HooksPosition commandedHooksState = (_inputs.CommandedHooksPosition == HooksPosition.CLOSED)
-                        ? HooksPosition.OPEN
-                        : HooksPosition.CLOSED;
-
-                setHooksState(commandedHooksState);
-                _inputs.CommandedHooksPosition = commandedHooksState;
-            }
-
-        }, this);
-
-    }
-
-    public void setClimberState(ClimberPosition climberPosition) {
+    private void setClimberState(ClimberPosition climberPosition) {
         double wenchSpeed = 0;
         _inputs.CommandedClimberPosition = climberPosition;
 
@@ -95,6 +77,22 @@ public class ClimberSubsystem extends SubsystemBase {
             }
         }
         _climber.setClimbingWenchSpeed(wenchSpeed);
+    }
+
+    public Command toggleHooksStateCommand() {
+        return Commands.runOnce(() -> {
+            if (_inputs.ClimbWenchOutLimitSwitch) {
+                // Toggle the commanded hooks state
+                HooksPosition commandedHooksState = (_inputs.CommandedHooksPosition == HooksPosition.CLOSED)
+                        ? HooksPosition.OPEN
+                        : HooksPosition.CLOSED;
+
+                setHooksState(commandedHooksState);
+                _inputs.CommandedHooksPosition = commandedHooksState;
+            }
+
+        }, this);
+
     }
 
     public Command setHooksStateCommand(HooksPosition hooksPosition) {
