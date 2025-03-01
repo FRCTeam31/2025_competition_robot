@@ -3,11 +3,9 @@ package frc.robot.subsystems.climbing;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.units.Units;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
-import frc.robot.subsystems.climbing.ClimberInputs.HooksPosition;
+import frc.robot.subsystems.climbing.ClimberSubsystem.ClimberMap;
 
 @Logged
 public class ClimberIOSim implements IClimberIO {

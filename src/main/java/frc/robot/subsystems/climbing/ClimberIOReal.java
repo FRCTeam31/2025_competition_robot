@@ -2,7 +2,6 @@ package frc.robot.subsystems.climbing;
 
 import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-import com.ctre.phoenix.motorcontrol.can.VictorSPXConfiguration;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -12,14 +11,8 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.Servo;
-import frc.robot.subsystems.drivetrain.SwerveMap;
 import frc.robot.subsystems.drivetrain.gyro.IGyro;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import frc.robot.subsystems.climbing.ClimberInputs.ClimberPosition;
-import frc.robot.subsystems.climbing.ClimberInputs.HooksPosition;
+import frc.robot.subsystems.climbing.ClimberSubsystem.ClimberMap;
 
 @Logged
 public class ClimberIOReal implements IClimberIO {
