@@ -3,6 +3,7 @@ package frc.robot.subsystems.climbing;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.climbing.ClimberInputs.ClimberPosition;
@@ -80,23 +81,21 @@ public class ClimberSubsystem extends SubsystemBase {
     }
 
     public Command toggleHooksStateCommand() {
-        return Commands.runOnce(() -> {
-            if (_inputs.ClimbWenchOutLimitSwitch) {
-                // Toggle the commanded hooks state
-                HooksPosition commandedHooksState = (_inputs.CommandedHooksPosition == HooksPosition.CLOSED)
-                        ? HooksPosition.OPEN
-                        : HooksPosition.CLOSED;
 
-                setHooksState(commandedHooksState);
-                _inputs.CommandedHooksPosition = commandedHooksState;
-            }
+        HooksPosition commandedHooksState = (_inputs.CommandedHooksPosition == HooksPosition.CLOSED)
+                ? HooksPosition.OPEN
+                : HooksPosition.CLOSED;
 
-        }, this);
+        if (_inputs.CommandedClimberPosition == ClimberPosition.OUT) {
+            return setHooksStateCommand(commandedHooksState);
+        } else {
+            return new InstantCommand();
 
+        }
     }
 
     public Command setHooksStateCommand(HooksPosition hooksPosition) {
-        return this.runOnce(() -> {
+        return this.run(() -> {
             setHooksState(hooksPosition);
         }).until(() -> hooksPosition == HooksPosition.CLOSED ? _inputs.HooksClosedLimitSwitch
                 : _inputs.HooksOpenLimitSwitch).withTimeout(ClimberMap.MaxChangeHookStateTime)
@@ -122,20 +121,20 @@ public class ClimberSubsystem extends SubsystemBase {
 
     public Command climbUpCommand() {
         // Only allowed to climb if the hooks are closed and the climber is in the out position
-        return Commands.runOnce(() -> {
+        return this.run(() -> {
             if (_inputs.ClimbWenchOutLimitSwitch && _inputs.CommandedHooksPosition == HooksPosition.CLOSED) {
                 _climber.setClimbingWenchSpeed(ClimberMap.ClimberMotorsReelingInSpeed);
             }
-        }, this);
+        });
     }
 
     public Command climbDownCommand() {
         // Only allowed to climb if the hooks are closed and the climber is in the out position
-        return Commands.runOnce(() -> {
+        return Commands.run(() -> {
             if (_inputs.ClimbWenchOutLimitSwitch && _inputs.CommandedHooksPosition == HooksPosition.CLOSED) {
                 _climber.setClimbingWenchSpeed(ClimberMap.ClimberMotorsReelingOutSpeed);
             }
-        }, this);
+        });
     }
 
     public Command stopClimbingMotorsCommand() {
