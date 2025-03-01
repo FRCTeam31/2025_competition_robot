@@ -53,7 +53,7 @@ public class Container {
       // Create Elevator Subsystem
       Elevator = new ElevatorSubsystem(isReal);
 
-      Elevator.setDefaultCommand(Elevator.runElevatorAutomaticSeekCommand());
+      // Elevator.setDefaultCommand(Elevator.runElevatorAutomaticSeekCommand());
 
       // Configure controller bindings
       OperatorInterface = new OperatorInterface();

@@ -173,10 +173,11 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public Command goToElevatorPositionCommand(ElevatorPosition pos) {
         return Commands.runOnce(() -> {
-            elevatorSetpoint = _positionMap.get(pos);
-            _positionPidController.setSetpoint(elevatorSetpoint);
-            System.out.println(elevatorSetpoint);
-        });
+            elevatorSetpoint = 4;
+            // elevatorSetpoint = _positionMap.get(pos);
+            // _positionPidController.setSetpoint(elevatorSetpoint);
+            // System.out.println(elevatorSetpoint);
+        }, this);
     }
 
     public Command stopMotorsCommand() {
@@ -191,6 +192,16 @@ public class ElevatorSubsystem extends SubsystemBase {
     // TODO: Remove when no longer needed
     public Command runSysIdDynamicRoutineCommand(Direction dir) {
         return _sysId.dynamic(dir);
+    }
+
+    public Map<String, Command> elevatorNamedCommands() {
+        return Map.of(
+                "Stop Elevator Motors Command", stopMotorsCommand(),
+                "Elevator High Position Command", goToElevatorPositionCommand(ElevatorPosition.kHigh),
+                "Elevator Middle Position Command", goToElevatorPositionCommand(ElevatorPosition.kMid),
+                "Elevator Low Position Command", goToElevatorPositionCommand(ElevatorPosition.kLow),
+                "Elevator Trough Position Command", goToElevatorPositionCommand(ElevatorPosition.kTrough),
+                "Elevator Source Position Command", goToElevatorPositionCommand(ElevatorPosition.kSource));
     }
 
     //#endregion
