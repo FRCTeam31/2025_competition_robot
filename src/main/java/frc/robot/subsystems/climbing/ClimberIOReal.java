@@ -26,7 +26,6 @@ public class ClimberIOReal implements IClimberIO {
     private DigitalInput _climbInLimitSwitch;
     private DigitalInput _hooksOutLimitSwitch;
     private DigitalInput _hooksInLimitSwitch;
-    private IGyro _gyro;
 
     public ClimberIOReal() {
 

@@ -18,9 +18,11 @@ public class OperatorInterface {
     }
 
     public SupplierXboxController DriverController;
+    public SupplierXboxController OperatorController;
 
     public OperatorInterface() {
         DriverController = new SupplierXboxController(Controls.DRIVER_PORT);
+        OperatorController = new SupplierXboxController(Controls.OPERATOR_PORT);
     }
 
     /**
@@ -62,7 +64,10 @@ public class OperatorInterface {
         DriverController.pov(Controls.upLeft).onTrue(setSnapToSetpointCommandFunc.apply(Controls.upLeft + 90));
     }
 
-    public void bindOperatorControls() {
+    public void bindOperatorControls(Command toggleHooksState, Command setClimbersOut, Command setClimbersIn) {
         // Not implemented yet
+        DriverController.x().onTrue(toggleHooksState);
+        DriverController.y().onTrue(setClimbersOut);
+        DriverController.b().onTrue(setClimbersIn);
     }
 }
