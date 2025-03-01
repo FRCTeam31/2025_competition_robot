@@ -15,7 +15,6 @@ public class ClimberSubsystem extends SubsystemBase {
     private IClimberIO _climber;
     private ClimberInputs _inputs;
     private double _gyroPitch = 0;
-    private boolean _isClimbing = false;
 
     public ClimberSubsystem(Boolean isReal) {
         if (isReal) {
