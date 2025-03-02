@@ -1,7 +1,6 @@
 package frc.robot.subsystems.drivetrain.gyro;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.simulation.AnalogGyroSim;
 
 public class GyroSim implements IGyro {

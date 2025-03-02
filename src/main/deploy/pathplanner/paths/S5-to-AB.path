@@ -4,28 +4,28 @@
     {
       "anchor": {
         "x": 7.575,
-        "y": 6.15
+        "y": 1.9
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.823614441046734,
-        "y": 6.123715789853605
+        "x": 2.5512061403508772,
+        "y": 1.902390350877194
       },
       "isLocked": false,
-      "linkedName": "S2R"
+      "linkedName": "S5"
     },
     {
       "anchor": {
-        "x": 7.575,
-        "y": 6.15
+        "x": 3.15,
+        "y": 4.05
       },
       "prevControl": {
-        "x": 7.296364015135495,
-        "y": 6.178835752408761
+        "x": 3.0807017543859647,
+        "y": 2.845855263157895
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "S2"
+      "linkedName": "AB"
     }
   ],
   "rotationTargets": [],
@@ -45,10 +45,10 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "Good For Nothing Test Paths",
+  "folder": "S5 Paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }
