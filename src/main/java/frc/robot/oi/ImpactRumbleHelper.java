@@ -5,7 +5,7 @@ import java.util.Queue;
 
 public class ImpactRumbleHelper {
     private static final int SAMPLE_WINDOW = 50; // 1 second (50 samples at 20ms intervals)
-    private static final double IMPACT_THRESHOLD_G = 1.5; // Threshold for detecting an impact
+    private static final double IMPACT_THRESHOLD_G = 0.5; // Threshold for detecting an impact
     private static final double SCALING_FACTOR = 0.5; // Scales impact strength to rumble intensity
     private static final double MIN_VELOCITY_THRESHOLD = 0.1; // Ignore impacts when nearly stationary
     private static final int TAPER_OFF_DURATION = 25; // 0.5 seconds (25 samples)
@@ -44,7 +44,7 @@ public class ImpactRumbleHelper {
 
             // Update rumble intensity
             currentRumbleIntensity = rumbleIntensity;
-            taperOffCounter = TAPER_OFF_DURATION; // Reset taper-off timer
+            taperOffCounter = TAPER_OFF_DURATION * (int) rumbleIntensity; // Reset taper-off timer and scale it to intensity
         }
     }
 
