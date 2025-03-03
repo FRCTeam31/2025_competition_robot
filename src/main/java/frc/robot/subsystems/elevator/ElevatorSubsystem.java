@@ -25,10 +25,10 @@ import frc.robot.Container;
 public class ElevatorSubsystem extends SubsystemBase {
 
     public static class ElevatorMap {
-        public static final int leftElevatorMotorCANID = 20;
-        public static final int rightElevatorMotorCANID = 21;
+        public static final int leftElevatorMotorCANID = 15;
+        public static final int rightElevatorMotorCANID = 16;
         public static final int topLimitSwitchChannel = 0;
-        public static final int bottomLimitSwitchChannel = 1;
+        public static final int bottomLimitSwitchChannel = 2;
         public static final int maxPercentOutput = 1;
 
         public static final ExtendedPIDConstants PositionPID = new ExtendedPIDConstants(0.01, 0, 0, 0, 0.01, 0.01,
