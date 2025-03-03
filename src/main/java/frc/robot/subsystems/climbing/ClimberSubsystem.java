@@ -14,20 +14,20 @@ import frc.robot.subsystems.climbing.ClimberInputs.HooksPosition;
 public class ClimberSubsystem extends SubsystemBase {
 
     public static class ClimberMap {
-        public static final byte ClimberLeftMotorCANID = 100;
-        public static final byte ClimberRightMotorCANID = 69;
-        public static final byte ClimberGearRatio = 60;
-        public static final double ClimberInSpeed = 0.7;
+        public static final byte ClimberLeftMotorCANID = 17;
+        public static final byte ClimberRightMotorCANID = 18;
+        public static final byte ClimberGearRatio = 100;
+        public static final double ClimberInSpeed = 0.5;
         public static final double ClimberOutSpeed = -0.5;
-        public static final int ClimberOutLimitSwitchChannel = 0;
-        public static final int ClimberInLimitSwitchChannel = 0;
+        public static final int ClimberOutLimitSwitchChannel = 0; //unknown
+        public static final int ClimberInLimitSwitchChannel = 0; //unknown
         public static final double MaxMotorPercentOutput = 1;
         public static final double ClimberMotorsReelingInSpeed = 0.5;
         public static final double ClimberMotorsReelingOutSpeed = -0.5;
         public static final double MaxChangeClimberStateTime = 5;
-        public static final int ClimberHookMotorCANID = 0;
-        public static final int HooksOutLimitSwitchChannel = 0;
-        public static final int HooksInLimitSwitchChannel = 0;
+        public static final int ClimberHookMotorCANID = 21;
+        public static final int HooksOutLimitSwitchChannel = 0; //unkmown
+        public static final int HooksInLimitSwitchChannel = 0; //unknown
         public static final double HooksOpenSpeed = 0.5;
         public static final double HooksCloseSpeed = -0.5;
         public static final double MaxChangeHookStateTime = 5;
