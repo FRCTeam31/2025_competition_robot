@@ -46,6 +46,11 @@ public class EndEffectorReal implements IEndEffector {
         _endEffectorWristMotor.stopMotor();
     }
 
+    public void stopMotors() {
+        _endEffectorIntakeMotor.stopMotor();
+        _endEffectorWristMotor.stopMotor();
+    }
+
     @Override
     public void updateInputs(EndEffectorInputsAutoLogged inputs) {
         var motorIntakeSpeed = _endEffectorIntakeMotor.getAbsoluteEncoder().getVelocity();

@@ -134,7 +134,7 @@ task(eventDeploy) {
                     println '                        (##(#(((/#/*              %###(((#   #/.#               '
                     println '                 ,.*(((*,.//((((***(//,.///   ((((((((((##/*/// /#              '
                     println '                 ((/((/*,.*//(* ,/#*,,(***//*****/////*/***/.                   '
-                    println '                                                                                 '
+                    println '                                                                                '
                     println ''
                     println ''
                     println ''
@@ -180,7 +180,6 @@ task(eventDeploy) {
                     println '              *./#//,..((///////#/.,/(/////*/((((///****/(//%/               '
                     println '               ##(//*///(#     (*( ((#/*/****/((((////*(                     '
                     println ''
-
                     println ''
                     println ''
                     println ''

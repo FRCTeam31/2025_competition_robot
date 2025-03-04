@@ -41,6 +41,7 @@ public class EndEffectorSim implements IEndEffector {
 
     public void stopMotors() {
         _endEffectorIntakeMotor.setAngularVelocity(0);
+        _endEffectorWristMotor.setAngularVelocity(0);
     }
 
     @Override
