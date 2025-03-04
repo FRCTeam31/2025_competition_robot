@@ -2,7 +2,11 @@ package frc.robot.subsystems.elevator;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -10,23 +14,40 @@ import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorMap;
 
 public class ElevatorReal implements IElevator {
 
-    private SparkFlex _elevatorMotor;
+    private SparkFlex _leftElevatorMotor;
+    private SparkFlex _rightElevatorMotor;
+
     private DigitalInput _topElevatorLimitSwitch;
     private DigitalInput _bottomElevatorLimitSwitch;
     private RelativeEncoder _outputEncoder;
 
     public ElevatorReal() {
-        _elevatorMotor = new SparkFlex(ElevatorMap.leftElevatorMotorCANID, MotorType.kBrushless);
+        _leftElevatorMotor = new SparkFlex(ElevatorMap.leftElevatorMotorCANID, MotorType.kBrushless);
         _topElevatorLimitSwitch = new DigitalInput(ElevatorMap.topLimitSwitchChannel);
         _bottomElevatorLimitSwitch = new DigitalInput(ElevatorMap.bottomLimitSwitchChannel);
-        _outputEncoder = _elevatorMotor.getEncoder();
+        _outputEncoder = _leftElevatorMotor.getEncoder();
+    }
+
+    public void motorConfig() {
+        SparkMaxConfig leftMotorConfig = new SparkMaxConfig();
+        SparkMaxConfig rightMotorConfig = new SparkMaxConfig();
+
+        leftMotorConfig.follow(ElevatorMap.rightElevatorMotorCANID, true);
+        leftMotorConfig.idleMode(IdleMode.kBrake);
+        rightMotorConfig.idleMode(IdleMode.kBrake);
+
+        _leftElevatorMotor = new SparkFlex(ElevatorMap.leftElevatorMotorCANID, MotorType.kBrushless);
+        _rightElevatorMotor = new SparkFlex(ElevatorMap.rightElevatorMotorCANID, MotorType.kBrushless);
+        _leftElevatorMotor.configure(leftMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        _rightElevatorMotor.configure(rightMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
     }
 
     @Override
     public void updateInputs(ElevatorInputsAutoLogged inputs) {
-        inputs.MotorSpeed = _elevatorMotor.get();
+        inputs.MotorSpeed = _leftElevatorMotor.get();
 
-        inputs.MotorVoltage = _elevatorMotor.getBusVoltage() * _elevatorMotor.getAppliedOutput();
+        inputs.MotorVoltage = _leftElevatorMotor.getBusVoltage() * _leftElevatorMotor.getAppliedOutput();
         inputs.ElevatorDistanceMeters = getElevatorDistance();
         inputs.ElevatorSpeedMetersPerSecond = getElevatorSpeedMetersPerSecond();
 
@@ -35,27 +56,19 @@ public class ElevatorReal implements IElevator {
     }
 
     public void setMotorVoltages(double volts) {
-        _elevatorMotor.setVoltage(volts);
+        _leftElevatorMotor.setVoltage(volts);
     }
 
     @Override
     public void setMotorSpeeds(double output) {
-        var reachedTopLimit = _topElevatorLimitSwitch.get();
-        var reachedBottomLimit = _bottomElevatorLimitSwitch.get();
-        var speedIsUp = output > 0;
-        var speedIsDown = output < 0;
 
-        if ((speedIsUp && reachedTopLimit) || (speedIsDown && reachedBottomLimit)) {
-            DriverStation.reportWarning("[ELEVATOR] Reached Elevator Limit!", false);
-            return;
-        }
-
-        _elevatorMotor.set(output);
+        _leftElevatorMotor.set(output);
+        _rightElevatorMotor.set(output);
     }
 
     @Override
     public void stopMotors() {
-        _elevatorMotor.stopMotor();
+        _leftElevatorMotor.stopMotor();
     }
 
     public double getElevatorDistance() {

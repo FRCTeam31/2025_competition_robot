@@ -36,7 +36,7 @@ public class Container {
       // Create subsystems
       LEDs = new PwmLEDs();
       Vision = new VisionSubsystem();
-      Swerve = new SwerveSubsystem(isReal);
+      // Swerve = new SwerveSubsystem(isReal);
 
       // Register the named commands from each subsystem that may be used in PathPlanner
       var namedCommandsMap = Swerve.getNamedCommands();
@@ -44,11 +44,11 @@ public class Container {
       NamedCommands.registerCommands(namedCommandsMap);
 
       // Create our custom auto builder
-      AutoDashboardSection = new DashboardSection("Auto");
-      AutoBuilder = new BuildableAutoRoutine(namedCommandsMap);
-      TeleopDashboardSection = new TeleopDashboardTab();
-      CommandsDashboardSection = new DashboardSection("Commands");
-      TestDashboardSection = new DashboardSection("Test");
+      // AutoDashboardSection = new DashboardSection("Auto");
+      // AutoBuilder = new BuildableAutoRoutine(namedCommandsMap);
+      // TeleopDashboardSection = new TeleopDashboardTab();
+      // CommandsDashboardSection = new DashboardSection("Commands");
+      // TestDashboardSection = new DashboardSection("Test");
 
       // Create Elevator Subsystem
       Elevator = new ElevatorSubsystem(isReal);
@@ -57,13 +57,15 @@ public class Container {
 
       // Configure controller bindings
       OperatorInterface = new OperatorInterface();
-      OperatorInterface.bindDriverControls(
-          Swerve.resetGyroCommand(),
-          Swerve.enableLockOnCommand(),
-          Swerve.disableAutoAlignCommand(),
-          Swerve::setAutoAlignSetpointCommand,
-          Swerve::setDefaultCommand,
-          Swerve::driveFieldRelativeCommand);
+      // OperatorInterface.bindDriverControls(
+      //     Swerve.resetGyroCommand(),
+      //     Swerve.enableLockOnCommand(),
+      //     Swerve.disableAutoAlignCommand(),
+      //     Swerve::setAutoAlignSetpointCommand,
+      //     Swerve::setDefaultCommand,
+      //     Swerve::driveFieldRelativeCommand);
+      OperatorInterface.bindOperatorControls(
+          Elevator.testElevatorUpCommand(), Elevator.testElevatorDownCommand(), Elevator.stopMotorsCommand());
     } catch (Exception e) {
       DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());
     }

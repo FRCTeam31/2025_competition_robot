@@ -3,7 +3,6 @@ package frc.robot.subsystems.elevator;
 
 import java.util.Map;
 
-import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.ExtendedPIDConstants;
 import org.prime.dashboard.SendableButton;
@@ -77,71 +76,71 @@ public class ElevatorSubsystem extends SubsystemBase {
                 ? new ElevatorReal()
                 : new ElevatorSim();
 
-        _positionPidController = ElevatorMap.PositionPID.createPIDController(0.02);
-        _positionFeedforward = new ElevatorFeedforward(ElevatorMap.PositionPID.kS, ElevatorMap.FeedForwardKg,
-                ElevatorMap.PositionPID.kV);
+        // _positionPidController = ElevatorMap.PositionPID.createPIDController(0.02);
+        // _positionFeedforward = new ElevatorFeedforward(ElevatorMap.PositionPID.kS, ElevatorMap.FeedForwardKg,
+        //         ElevatorMap.PositionPID.kV);
 
-        SmartDashboard.putData(_positionPidController);
+        // SmartDashboard.putData(_positionPidController);
 
-        // TODO: Remove when no longer needed
-        _sysId = new SysIdRoutine(
-                // Ramp up at 1 volt per second for quasistatic tests, step at 2 volts in
-                // dynamic tests, run for 13 seconds.
-                new SysIdRoutine.Config(Units.Volts.of(2).per(Units.Second), Units.Volts.of(4),
-                        Units.Seconds.of(7)),
-                new SysIdRoutine.Mechanism(
-                        // Tell SysId how to plumb the driving voltage to the motors.
-                        this::setMotorVoltages,
-                        // Tell SysId how to record a frame of data for each motor on the mechanism
-                        // being characterized.
-                        this::logSysIdFrame,
-                        // Tell SysId to make generated commands require this subsystem, suffix test
-                        // state in WPILog with this subsystem's name
-                        this));
+        // // TODO: Remove when no longer needed
+        // _sysId = new SysIdRoutine(
+        //         // Ramp up at 1 volt per second for quasistatic tests, step at 2 volts in
+        //         // dynamic tests, run for 13 seconds.
+        //         new SysIdRoutine.Config(Units.Volts.of(2).per(Units.Second), Units.Volts.of(4),
+        //                 Units.Seconds.of(7)),
+        //         new SysIdRoutine.Mechanism(
+        //                 // Tell SysId how to plumb the driving voltage to the motors.
+        //                 this::setMotorVoltages,
+        //                 // Tell SysId how to record a frame of data for each motor on the mechanism
+        //                 // being characterized.
+        //                 this::logSysIdFrame,
+        //                 // Tell SysId to make generated commands require this subsystem, suffix test
+        //                 // state in WPILog with this subsystem's name
+        //                 this));
 
-        _stopMotorsButton = new SendableButton("Stop Elevator Motors", () -> stopMotorsCommand());
-        Container.TestDashboardSection.putData("Elevator/Stop Motors", _stopMotorsButton);
-        _sourcePosButton = new SendableButton("Source Position",
-                () -> goToElevatorPositionCommand(ElevatorPosition.kSource));
-        Container.TestDashboardSection.putData("Elevator/Source Position", _sourcePosButton);
-        _troughPosButton = new SendableButton("Trough Position",
-                () -> goToElevatorPositionCommand(ElevatorPosition.kTrough));
-        Container.TestDashboardSection.putData("Elevator/Trough Position", _troughPosButton);
-        _lowPosButton = new SendableButton("Low Position", () -> goToElevatorPositionCommand(ElevatorPosition.kLow));
-        Container.TestDashboardSection.putData("Elevator/Low Position", _lowPosButton);
-        _midPosButton = new SendableButton("Middle Position", () -> goToElevatorPositionCommand(ElevatorPosition.kMid));
-        Container.TestDashboardSection.putData("Elevator/Middle Position", _midPosButton);
-        _highPosButton = new SendableButton("High Position", () -> goToElevatorPositionCommand(ElevatorPosition.kHigh));
-        Container.TestDashboardSection.putData("Elevator/High Position", _highPosButton);
+        // _stopMotorsButton = new SendableButton("Stop Elevator Motors", () -> stopMotorsCommand());
+        // Container.TestDashboardSection.putData("Elevator/Stop Motors", _stopMotorsButton);
+        // _sourcePosButton = new SendableButton("Source Position",
+        //         () -> goToElevatorPositionCommand(ElevatorPosition.kSource));
+        // Container.TestDashboardSection.putData("Elevator/Source Position", _sourcePosButton);
+        // _troughPosButton = new SendableButton("Trough Position",
+        //         () -> goToElevatorPositionCommand(ElevatorPosition.kTrough));
+        // Container.TestDashboardSection.putData("Elevator/Trough Position", _troughPosButton);
+        // _lowPosButton = new SendableButton("Low Position", () -> goToElevatorPositionCommand(ElevatorPosition.kLow));
+        // Container.TestDashboardSection.putData("Elevator/Low Position", _lowPosButton);
+        // _midPosButton = new SendableButton("Middle Position", () -> goToElevatorPositionCommand(ElevatorPosition.kMid));
+        // Container.TestDashboardSection.putData("Elevator/Middle Position", _midPosButton);
+        // _highPosButton = new SendableButton("High Position", () -> goToElevatorPositionCommand(ElevatorPosition.kHigh));
+        // Container.TestDashboardSection.putData("Elevator/High Position", _highPosButton);
 
     }
 
     //#region Control
 
-    private void setPositionSetpoint(ElevatorPosition pos) {
+    // private void setPositionSetpoint(ElevatorPosition pos) {
 
-    }
+    // }
 
-    private void updateMotorSpeeds() {
-        // TODO: check this logic
-        var pid = _positionPidController.calculate(_inputs.ElevatorDistanceMeters);
-        var ff = _positionFeedforward.calculate(pid);
-        var finalOutput = MathUtil.clamp(pid + ff, -ElevatorMap.maxPercentOutput, ElevatorMap.maxPercentOutput);
+    // private void updateMotorSpeeds() {
+    //     // TODO: check this logic
+    //     var pid = _positionPidController.calculate(_inputs.ElevatorDistanceMeters);
+    //     var ff = _positionFeedforward.calculate(pid);
+    //     var finalOutput = MathUtil.clamp(pid + ff, -ElevatorMap.maxPercentOutput, ElevatorMap.maxPercentOutput);
 
-        if (_inputs.TopLimitSwitch && finalOutput > 0) {
-            finalOutput = MathUtil.clamp(finalOutput, -ElevatorMap.maxPercentOutput, 0);
+    //     if (_inputs.TopLimitSwitch && finalOutput > 0) {
+    //         finalOutput = MathUtil.clamp(finalOutput, -ElevatorMap.maxPercentOutput, 0);
 
-        } else if (_inputs.BottomLimitSwitch && finalOutput < 0) {
-            finalOutput = MathUtil.clamp(finalOutput, 0, ElevatorMap.maxPercentOutput);
+    //     } else if (_inputs.BottomLimitSwitch && finalOutput < 0) {
+    //         finalOutput = MathUtil.clamp(finalOutput, 0, ElevatorMap.maxPercentOutput);
 
-        }
-        _elevatorIO.setMotorSpeeds(finalOutput);
-    }
+    //     }
+    //     _elevatorIO.setMotorSpeeds(finalOutput);
+    // }
 
-    private void setMotorVoltages(Voltage volts) {
-        _elevatorIO.setMotorVoltages(volts.magnitude());
+    // private void setMotorVoltages(Voltage volts) {
+    //     _elevatorIO.setMotorVoltages(volts.magnitude());
 
-    }
+    // }
 
     @Override
     public void periodic() {
@@ -150,59 +149,70 @@ public class ElevatorSubsystem extends SubsystemBase {
         Logger.recordOutput("Elevator/ElevatorSetpoint", elevatorSetpoint);
     }
 
-    /**
-    * Logs a sysid frame for the FL module
-    * @param log
-    */
-    public void logSysIdFrame(SysIdRoutineLog log) {
-        // Record a frame. Since these share an encoder, we consider
-        // the entire group to be one motor.
-        log.motor("Elevator-Output")
-                .voltage(Units.Volts.of(_inputs.MotorVoltage)) // measured motor voltage
-                .linearPosition(Units.Meters.of(_inputs.ElevatorDistanceMeters)) // distance in meters
-                .linearVelocity(Units.MetersPerSecond.of(_inputs.ElevatorSpeedMetersPerSecond)); // speed in meters per second
-    }
+    // /**
+    // * Logs a sysid frame for the FL module
+    // * @param log
+    // */
+    // public void logSysIdFrame(SysIdRoutineLog log) {
+    //     // Record a frame. Since these share an encoder, we consider
+    //     // the entire group to be one motor.
+    //     log.motor("Elevator-Output")
+    //             .voltage(Units.Volts.of(_inputs.MotorVoltage)) // measured motor voltage
+    //             .linearPosition(Units.Meters.of(_inputs.ElevatorDistanceMeters)) // distance in meters
+    //             .linearVelocity(Units.MetersPerSecond.of(_inputs.ElevatorSpeedMetersPerSecond)); // speed in meters per second
+    // }
 
     //#endregion
 
     //#region Commands
 
-    public Command runElevatorAutomaticSeekCommand() {
-        return this.run(this::updateMotorSpeeds);
+    // public Command runElevatorAutomaticSeekCommand() {
+    //     return this.run(this::updateMotorSpeeds);
+    // }
+
+    // public Command goToElevatorPositionCommand(ElevatorPosition pos) {
+    //     return Commands.runOnce(() -> {
+    //         elevatorSetpoint = _positionMap.get(pos);
+    //         _positionPidController.setSetpoint(elevatorSetpoint);
+    //     }, this);
+    // }
+
+    public Command testElevatorUpCommand() {
+        return Commands.runOnce(() -> {
+            _elevatorIO.setMotorSpeeds(0.01);
+        });
     }
 
-    public Command goToElevatorPositionCommand(ElevatorPosition pos) {
+    public Command testElevatorDownCommand() {
         return Commands.runOnce(() -> {
-            elevatorSetpoint = 4;
-            // elevatorSetpoint = _positionMap.get(pos);
-            // _positionPidController.setSetpoint(elevatorSetpoint);
-            // System.out.println(elevatorSetpoint);
-        }, this);
+            _elevatorIO.setMotorSpeeds(-0.01);
+        });
     }
 
     public Command stopMotorsCommand() {
         return this.runOnce(_elevatorIO::stopMotors);
     }
 
-    // TODO: Remove when no longer needed
-    public Command runSysIdQuasistaticRoutineCommand(Direction dir) {
-        return _sysId.quasistatic(dir);
-    }
+    // // TODO: Remove when no longer needed
+    // public Command runSysIdQuasistaticRoutineCommand(Direction dir) {
+    //     return _sysId.quasistatic(dir);
+    // }
 
-    // TODO: Remove when no longer needed
-    public Command runSysIdDynamicRoutineCommand(Direction dir) {
-        return _sysId.dynamic(dir);
-    }
+    // // TODO: Remove when no longer needed
+    // public Command runSysIdDynamicRoutineCommand(Direction dir) {
+    //     return _sysId.dynamic(dir);
+    // }
 
-    public Map<String, Command> elevatorNamedCommands() {
-        return Map.of(
-                "Stop Elevator Motors Command", stopMotorsCommand(),
-                "Elevator High Position Command", goToElevatorPositionCommand(ElevatorPosition.kHigh),
-                "Elevator Middle Position Command", goToElevatorPositionCommand(ElevatorPosition.kMid),
-                "Elevator Low Position Command", goToElevatorPositionCommand(ElevatorPosition.kLow),
-                "Elevator Trough Position Command", goToElevatorPositionCommand(ElevatorPosition.kTrough),
-                "Elevator Source Position Command", goToElevatorPositionCommand(ElevatorPosition.kSource));
-    }
+    // public Map<String, Command> elevatorNamedCommands() {
+    //     return Map.of(
+    //     // "Stop Elevator Motors Command", stopMotorsCommand(),
+    //     // "Elevator High Position Command", goToElevatorPositionCommand(ElevatorPosition.kHigh),
+    //     // "Elevator Middle Position Command", goToElevatorPositionCommand(ElevatorPosition.kMid),
+    //     // "Elevator Low Position Command", goToElevatorPositionCommand(ElevatorPosition.kLow),
+    //     // "Elevator Trough Position Command", goToElevatorPositionCommand(ElevatorPosition.kTrough),
+    //     // "Elevator Source Position Command", goToElevatorPositionCommand(ElevatorPosition.kSource)
+    //     );
+    // }
 
     //#endregion
 }
