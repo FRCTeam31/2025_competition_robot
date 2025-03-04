@@ -9,6 +9,8 @@ public class EndEffectorMap {
     public static final double EjectSpeed = 0.5;
     public static final double IntakeSpeed = -0.5;
 
+    public static final ExtendedPIDConstants WristPID = new ExtendedPIDConstants(0, 0, 0);
+
     public static final double GearRatio = 1;
 
 }
