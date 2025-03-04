@@ -8,33 +8,52 @@ import frc.robot.subsystems.drivetrain.SwerveMap;
 
 public class EndEffectorSim implements IEndEffector {
 
-    private DCMotorSim _endEffectorMotor;
+    private DCMotorSim _endEffectorIntakeMotor;
+    private DCMotorSim _endEffectorWristMotor;
     private DIOSim _coralLimitSwitch;
     private EndEffectorInputsAutoLogged _inputs = new EndEffectorInputsAutoLogged();
 
     public EndEffectorSim() {
-        _endEffectorMotor = new DCMotorSim(
+        _endEffectorIntakeMotor = new DCMotorSim(
+                LinearSystemId.createDCMotorSystem(DCMotor.getNeoVortex(1), 0.001, EndEffectorMap.GearRatio),
+                DCMotor.getNeoVortex(1));
+        _endEffectorWristMotor = new DCMotorSim(
                 LinearSystemId.createDCMotorSystem(DCMotor.getNeoVortex(1), 0.001, EndEffectorMap.GearRatio),
                 DCMotor.getNeoVortex(1));
 
     }
 
-    public void setMotorSpeed(double speedRadians) {
-        _endEffectorMotor.setAngularVelocity(speedRadians);
+    public void setIntakeMotorSpeed(double speedRadians) {
+        _endEffectorIntakeMotor.setAngularVelocity(speedRadians);
+    }
+
+    public void setWristMotorSpeed(double speedRadians) {
+        _endEffectorWristMotor.setAngularVelocity(speedRadians);
+    }
+
+    public void stopIntakeMotor() {
+        _endEffectorIntakeMotor.setAngularVelocity(0);
+    }
+
+    public void stopWristMotor() {
+        _endEffectorWristMotor.setAngularVelocity(0);
     }
 
     public void stopMotors() {
-        _endEffectorMotor.setAngularVelocity(0);
+        _endEffectorIntakeMotor.setAngularVelocity(0);
     }
 
     @Override
     public void updateInputs(EndEffectorInputsAutoLogged inputs) {
-        _endEffectorMotor.update(0.02);
+        _endEffectorIntakeMotor.update(0.02);
+        _endEffectorWristMotor.update(0.02);
 
-        var motorSpeed = _endEffectorMotor.getAngularVelocity();
+        var motorIntakeSpeed = _endEffectorIntakeMotor.getAngularVelocity().magnitude();
+        var motorWristSpeed = _endEffectorWristMotor.getAngularVelocity().magnitude();
         var limitSwitchState = getLimitSwitchState();
 
-        inputs.MotorSpeed = motorSpeed;
+        inputs.IntakeMotorSpeed = motorIntakeSpeed;
+        inputs.WristMotorSpeed = motorWristSpeed;
         inputs.LimitSwitchState = limitSwitchState;
     }
 

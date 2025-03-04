@@ -4,7 +4,11 @@ public interface IEndEffector {
 
     public void updateInputs(EndEffectorInputsAutoLogged inputs);
 
-    public void setMotorSpeed(double speed);
+    public void setIntakeMotorSpeed(double speed);
 
-    public void stopMotors();
+    public void setWristMotorSpeed(double speed);
+
+    public void stopIntakeMotor();
+
+    public void stopWristMotor();
 }

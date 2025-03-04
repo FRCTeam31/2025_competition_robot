@@ -16,36 +16,45 @@ import frc.robot.subsystems.drivetrain.SwerveMap;
 
 public class EndEffectorReal implements IEndEffector {
 
-    private SparkFlex _endEffectorMotor;
+    private SparkFlex _endEffectorIntakeMotor;
+    private SparkFlex _endEffectorWristMotor;
     private DigitalInput _coralLimitSwitch;
 
     public EndEffectorReal() {
-        _endEffectorMotor = new SparkFlex(EndEffectorMap.MotorCanID, MotorType.kBrushless);
+        _endEffectorIntakeMotor = new SparkFlex(EndEffectorMap.IntakeMotorCanID, MotorType.kBrushless);
+        _endEffectorWristMotor = new SparkFlex(EndEffectorMap.WristMotorCanID, MotorType.kBrushless);
         _coralLimitSwitch = new DigitalInput(EndEffectorMap.LimitSwitchCanID);
 
     }
 
     @Override
-    public void setMotorSpeed(double speed) {
-        _endEffectorMotor.set(speed);
+    public void setIntakeMotorSpeed(double speed) {
+        _endEffectorIntakeMotor.set(speed);
+    }
+
+    public void setWristMotorSpeed(double speed) {
+        _endEffectorWristMotor.set(speed);
     }
 
     @Override
-    public void stopMotors() {
-        _endEffectorMotor.stopMotor();
+    public void stopIntakeMotor() {
+        _endEffectorIntakeMotor.stopMotor();
+    }
+
+    @Override
+    public void stopWristMotor() {
+        _endEffectorWristMotor.stopMotor();
     }
 
     @Override
     public void updateInputs(EndEffectorInputsAutoLogged inputs) {
-        var motorSpeed = getMotorSpeed();
+        var motorIntakeSpeed = _endEffectorIntakeMotor.getAbsoluteEncoder().getVelocity();
+        var motorWristSpeed = _endEffectorWristMotor.getAbsoluteEncoder().getVelocity();
         var limitSwitchState = getLimitSwitchState();
 
-        inputs.MotorSpeed = motorSpeed;
+        inputs.IntakeMotorSpeed = motorIntakeSpeed;
+        inputs.IntakeMotorSpeed = motorWristSpeed;
         inputs.LimitSwitchState = limitSwitchState;
-    }
-
-    private Double getMotorSpeed() {
-        return _endEffectorMotor.getAbsoluteEncoder().getVelocity();
     }
 
     private boolean getLimitSwitchState() {
