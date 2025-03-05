@@ -65,7 +65,5 @@ public class OperatorInterface {
     }
 
     public void bindOperatorControls(Command elevatorUpCommand, Command elevatorDownCommand, Command stopMotors) {
-        OperatorController.a().onTrue(elevatorUpCommand).onFalse(stopMotors);
-        OperatorController.b().onTrue(elevatorDownCommand).onFalse(stopMotors);
     }
 }

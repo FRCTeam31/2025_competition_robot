@@ -126,7 +126,7 @@ public class Robot extends LoggedRobot {
     var disabledPattern = LEDPattern.solid(getAllianceColor()).breathe(Units.Seconds.of(2.0));
     Container.LEDs.setBackgroundPattern(disabledPattern);
     Container.LEDs.clearForegroundPattern();
-    Container.Swerve.disableAutoAlignCommand().schedule();
+    // Container.Swerve.disableAutoAlignCommand().schedule();
   }
 
   /**
@@ -157,14 +157,14 @@ public class Robot extends LoggedRobot {
         .blend(autoPattern);
     Container.LEDs.setBackgroundPattern(combinedPattern);
     Container.LEDs.clearForegroundPattern();
-    Container.Swerve.disableAutoAlignCommand().schedule();
+    // Container.Swerve.disableAutoAlignCommand().schedule();
 
     // Cancel any auto command that's still running and reset the subsystem states
     if (_autonomousCommand != null) {
       _autonomousCommand.cancel();
 
       // Stop any subsystems still running
-      Container.Swerve.stopAllMotors();
+      // Container.Swerve.stopAllMotors();
     }
 
     _autonomousCommand = Container.AutoBuilder.exportCombinedAutoRoutine();
@@ -172,11 +172,11 @@ public class Robot extends LoggedRobot {
     if (_autonomousCommand == null || _autonomousCommand == Commands.none()) {
       // Exit without scheduling an auto command if none is selected
       DriverStation.reportError("[ERROR] >> No auto command selected", false);
-      Container.Swerve.resetGyro();
+      // Container.Swerve.resetGyro();
     } else {
       // Reset the gyro if we're on the red alliance
       if (onRedAlliance()) {
-        Container.Swerve.resetGyro();
+        // Container.Swerve.resetGyro();
       }
 
       // Schedule the auto command
@@ -200,16 +200,16 @@ public class Robot extends LoggedRobot {
       _autonomousCommand.cancel();
 
       // Stop any subsystems still running
-      Container.Swerve.stopAllMotors();
+      // Container.Swerve.stopAllMotors();
     } else {
-      Container.Swerve.resetGyro();
+      // Container.Swerve.resetGyro();
     }
 
     // Set teleop LED pattern
     var telePattern = LEDPattern.solid(getAllianceColor()).scrollAtRelativeSpeed(Units.Hertz.of(2));
     Container.LEDs.setBackgroundPattern(telePattern);
     Container.LEDs.clearForegroundPattern();
-    Container.Swerve.disableAutoAlignCommand().schedule();
+    // Container.Swerve.disableAutoAlignCommand().schedule();
   }
 
   /**
@@ -220,7 +220,7 @@ public class Robot extends LoggedRobot {
     Elastic.selectTab("Test");
 
     CommandScheduler.getInstance().cancelAll();
-    Container.Swerve.disableAutoAlignCommand().schedule();
+    // Container.Swerve.disableAutoAlignCommand().schedule();
   }
 
   public static boolean onRedAlliance() {

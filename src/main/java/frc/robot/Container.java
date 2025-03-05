@@ -13,6 +13,7 @@ import frc.robot.dashboard.DashboardSection;
 import frc.robot.oi.OperatorInterface;
 import frc.robot.oi.BuildableAutoRoutine;
 import frc.robot.subsystems.*;
+import frc.robot.subsystems.drivetrain.SwerveMap;
 import frc.robot.subsystems.drivetrain.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
@@ -24,7 +25,7 @@ public class Container {
   public static DashboardSection TestDashboardSection;
   public static BuildableAutoRoutine AutoBuilder;
 
-  public static SwerveSubsystem Swerve;
+  // public static SwerveSubsystem Swerve;
   public static ElevatorSubsystem Elevator;
   public static VisionSubsystem Vision;
   public static PwmLEDs LEDs;
@@ -39,24 +40,27 @@ public class Container {
       // Swerve = new SwerveSubsystem(isReal);
 
       // Register the named commands from each subsystem that may be used in PathPlanner
-      var namedCommandsMap = Swerve.getNamedCommands();
+      // var namedCommandsMap = Swerve.getNamedCommands();
       // ...add other named commands to the map using "otherNamedCommands.putAll(namedCommandsMap);"
-      NamedCommands.registerCommands(namedCommandsMap);
+      // NamedCommands.registerCommands(namedCommandsMap);
 
       // Create our custom auto builder
-      // AutoDashboardSection = new DashboardSection("Auto");
+      AutoDashboardSection = new DashboardSection("Auto");
       // AutoBuilder = new BuildableAutoRoutine(namedCommandsMap);
-      // TeleopDashboardSection = new TeleopDashboardTab();
-      // CommandsDashboardSection = new DashboardSection("Commands");
-      // TestDashboardSection = new DashboardSection("Test");
+      TeleopDashboardSection = new TeleopDashboardTab();
+      CommandsDashboardSection = new DashboardSection("Commands");
+      TestDashboardSection = new DashboardSection("Test");
 
       // Create Elevator Subsystem
+      OperatorInterface = new OperatorInterface();
       Elevator = new ElevatorSubsystem(isReal);
 
-      // Elevator.setDefaultCommand(Elevator.runElevatorAutomaticSeekCommand());
+      Elevator.setDefaultCommand(
+          Elevator.elevatorDefaultCommand(
+              OperatorInterface.OperatorController.getTriggerSupplier(SwerveMap.Control.DriveDeadband,
+                  SwerveMap.Control.DeadbandCurveWeight)));
 
       // Configure controller bindings
-      OperatorInterface = new OperatorInterface();
       // OperatorInterface.bindDriverControls(
       //     Swerve.resetGyroCommand(),
       //     Swerve.enableLockOnCommand(),
@@ -64,8 +68,8 @@ public class Container {
       //     Swerve::setAutoAlignSetpointCommand,
       //     Swerve::setDefaultCommand,
       //     Swerve::driveFieldRelativeCommand);
-      OperatorInterface.bindOperatorControls(
-          Elevator.testElevatorUpCommand(), Elevator.testElevatorDownCommand(), Elevator.stopMotorsCommand());
+      // OperatorInterface.bindOperatorControls(
+      //     Elevator.testElevatorUpCommand(), Elevator.testElevatorDownCommand(), Elevator.stopMotorsCommand());
     } catch (Exception e) {
       DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());
     }

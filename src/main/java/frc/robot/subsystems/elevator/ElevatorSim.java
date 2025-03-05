@@ -47,4 +47,9 @@ public class ElevatorSim implements IElevator {
     public void stopMotors() {
         _gearboxSim.setAngularVelocity(0);
     }
+
+    @Override
+    public void resetElevatorPosition() {
+
+    }
 }

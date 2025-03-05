@@ -1,7 +1,10 @@
 
 package frc.robot.subsystems.elevator;
 
+import static edu.wpi.first.units.Units.Meters;
+
 import java.util.Map;
+import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.ExtendedPIDConstants;
@@ -27,16 +30,15 @@ public class ElevatorSubsystem extends SubsystemBase {
         public static final int leftElevatorMotorCANID = 15;
         public static final int rightElevatorMotorCANID = 16;
         public static final int topLimitSwitchChannel = 0;
-        public static final int bottomLimitSwitchChannel = 2;
+        public static final int bottomLimitSwitchChannel = 1;
         public static final int maxPercentOutput = 1;
 
         public static final ExtendedPIDConstants PositionPID = new ExtendedPIDConstants(0.01, 0, 0, 0, 0.01, 0.01,
                 0.01);
         public static final double FeedForwardKg = 0.0;
 
-        // TODO: Measure
-        public static final double OutputSprocketDiameterMeters = 0;
-        public static final double GearRatio = 0;
+        public static final double OutputSprocketDiameterMeters = Units.Millimeters.of(32.2).in(Meters);
+        public static final double GearRatio = 16;
     }
 
     private SendableButton _stopMotorsButton;
@@ -45,7 +47,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     private SendableButton _lowPosButton;
     private SendableButton _midPosButton;
     private SendableButton _highPosButton;
-    private double elevatorSetpoint = 0;
+    private double _elevatorSetpoint = 0;
 
     public enum ElevatorPosition {
         kSource,
@@ -115,6 +117,19 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     }
 
+    public void runELevatorWLimitSwitches(double finalOutput) {
+
+        if (_inputs.TopLimitSwitch && finalOutput > 0) {
+            finalOutput = MathUtil.clamp(finalOutput, -ElevatorMap.maxPercentOutput, 0);
+
+        } else if (_inputs.BottomLimitSwitch && finalOutput < 0) {
+            finalOutput = MathUtil.clamp(finalOutput, 0, ElevatorMap.maxPercentOutput);
+
+        }
+        _elevatorIO.setMotorSpeeds(finalOutput);
+
+    }
+
     //#region Control
 
     // private void setPositionSetpoint(ElevatorPosition pos) {
@@ -146,7 +161,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void periodic() {
         _elevatorIO.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
-        Logger.recordOutput("Elevator/ElevatorSetpoint", elevatorSetpoint);
+        if (_inputs.BottomLimitSwitch) {
+            _elevatorIO.resetElevatorPosition();
+        }
+        // Logger.recordOutput("Elevator/ElevatorSetpoint", elevatorSetpoint);
     }
 
     // /**
@@ -177,21 +195,16 @@ public class ElevatorSubsystem extends SubsystemBase {
     //     }, this);
     // }
 
-    public Command testElevatorUpCommand() {
-        return Commands.runOnce(() -> {
-            _elevatorIO.setMotorSpeeds(0.01);
+    public Command elevatorDefaultCommand(DoubleSupplier speed) {
+        return this.run(() -> {
+            var inputSpeed = speed.getAsDouble() * 0.50;
+            runELevatorWLimitSwitches(inputSpeed);
         });
     }
 
-    public Command testElevatorDownCommand() {
-        return Commands.runOnce(() -> {
-            _elevatorIO.setMotorSpeeds(-0.01);
-        });
-    }
-
-    public Command stopMotorsCommand() {
-        return this.runOnce(_elevatorIO::stopMotors);
-    }
+    // public Command stopMotorsCommand() {
+    //     return this.runOnce(_elevatorIO::stopMotors);
+    // }
 
     // // TODO: Remove when no longer needed
     // public Command runSysIdQuasistaticRoutineCommand(Direction dir) {
