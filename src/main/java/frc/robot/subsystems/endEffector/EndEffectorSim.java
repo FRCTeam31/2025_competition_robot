@@ -4,7 +4,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
-import frc.robot.subsystems.drivetrain.SwerveMap;
+import frc.robot.subsystems.endEffector.EndEffectorSubsystem.EndEffectorMap;
 
 public class EndEffectorSim implements IEndEffector {
 
@@ -23,22 +23,27 @@ public class EndEffectorSim implements IEndEffector {
 
     }
 
+    @Override
     public void setIntakeMotorSpeed(double speedRadians) {
         _endEffectorIntakeMotor.setAngularVelocity(speedRadians);
     }
 
+    @Override
     public void setWristMotorSpeed(double speedRadians) {
         _endEffectorWristMotor.setAngularVelocity(speedRadians);
     }
 
+    @Override
     public void stopIntakeMotor() {
         _endEffectorIntakeMotor.setAngularVelocity(0);
     }
 
+    @Override
     public void stopWristMotor() {
         _endEffectorWristMotor.setAngularVelocity(0);
     }
 
+    @Override
     public void stopMotors() {
         _endEffectorIntakeMotor.setAngularVelocity(0);
         _endEffectorWristMotor.setAngularVelocity(0);

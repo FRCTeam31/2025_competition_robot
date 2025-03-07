@@ -11,4 +11,6 @@ public interface IEndEffector {
     public void stopIntakeMotor();
 
     public void stopWristMotor();
+
+    public void stopMotors();
 }
