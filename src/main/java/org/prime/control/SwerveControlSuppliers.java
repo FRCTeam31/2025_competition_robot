@@ -8,6 +8,15 @@ import frc.robot.subsystems.drivetrain.SwerveMap;
 
 public class SwerveControlSuppliers {
 
+  // The number of samples for which the input filters operate over
+  private static final int _filterSamples = 5;
+
+  private MedianFilter _medianFilterX = new MedianFilter(_filterSamples);
+  private MedianFilter _medianFilterY = new MedianFilter(_filterSamples);
+  
+  private LinearFilter _linearFilterX = LinearFilter.movingAverage(_filterSamples);
+  private LinearFilter _linearFilterY = LinearFilter.movingAverage(_filterSamples);
+
   public DoubleSupplier X;
   public DoubleSupplier Y;
   public DoubleSupplier Z;
@@ -33,9 +42,17 @@ public class SwerveControlSuppliers {
       disableAutoAlign.run();
     }
 
+    // Apply a median filter to X and Y
+    var medianFilteredX = _medianFilterX.calculate(X.getAsDouble());
+    var medianFilteredY = _medianFilterY.calculate(-Y.getAsDouble());
+
+    // Apply a linear filter to the median filtered X and Y
+    var linearFilteredX = _linearFilterX.calculate(medianFilteredX);
+    var linearFilteredY = _linearFilterY.calculate(medianFilteredY);
+
     // Convert inputs to MPS
-    var inputXMPS = X.getAsDouble() * SwerveMap.Chassis.MaxSpeedMetersPerSecond;
-    var inputYMPS = -Y.getAsDouble() * SwerveMap.Chassis.MaxSpeedMetersPerSecond;
+    var inputXMPS = linearFilteredX * SwerveMap.Chassis.MaxSpeedMetersPerSecond;
+    var inputYMPS = linearFilteredY * SwerveMap.Chassis.MaxSpeedMetersPerSecond;
     var inputRotationRadiansPS = -Z.getAsDouble() * SwerveMap.Chassis.MaxAngularSpeedRadians; // CCW positive
 
     // Return the proper chassis speeds based on the control mode
