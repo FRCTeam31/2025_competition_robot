@@ -20,8 +20,8 @@ public class ElevatorSim implements IElevator {
                         ElevatorMap.PositionPID.kA),
                 DCMotor.getNeoVortex(1)
                         .withReduction(ElevatorMap.GearRatio));
-        _topLimitSwitchSim = new DIOSim(ElevatorMap.topLimitSwitchChannel);
-        _bottomLimitSwitchSim = new DIOSim(ElevatorMap.bottomLimitSwitchChannel);
+        _topLimitSwitchSim = new DIOSim(ElevatorMap.TopLimitSwitchChannel);
+        _bottomLimitSwitchSim = new DIOSim(ElevatorMap.BottomLimitSwitchChannel);
     }
 
     @Override

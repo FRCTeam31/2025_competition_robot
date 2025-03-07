@@ -64,6 +64,13 @@ public class OperatorInterface {
         DriverController.pov(Controls.upLeft).onTrue(setSnapToSetpointCommandFunc.apply(Controls.upLeft + 90));
     }
 
-    public void bindOperatorControls(Command elevatorUpCommand, Command elevatorDownCommand, Command stopMotors) {
+    public void bindOperatorControls(Command setElevatorSourcePoseCommand, Command setElevatorTroughPoseCommand,
+            Command setElevatorLowPoseCommand, Command setElevatorMidPoseCommand, Command setElevatorHighPoseCommand) {
+        OperatorController.rightBumper().onTrue(setElevatorSourcePoseCommand);
+        OperatorController.b().onTrue(setElevatorTroughPoseCommand);
+        OperatorController.a().onTrue(setElevatorLowPoseCommand);
+        OperatorController.x().onTrue(setElevatorMidPoseCommand);
+        OperatorController.y().onTrue(setElevatorHighPoseCommand);
+
     }
 }

@@ -21,24 +21,26 @@ public class ElevatorReal implements IElevator {
 
     public ElevatorReal() {
         setupElevatorMotors();
-        _topElevatorLimitSwitch = new DigitalInput(ElevatorMap.topLimitSwitchChannel);
-        _bottomElevatorLimitSwitch = new DigitalInput(ElevatorMap.bottomLimitSwitchChannel);
+        _topElevatorLimitSwitch = new DigitalInput(ElevatorMap.TopLimitSwitchChannel);
+        _bottomElevatorLimitSwitch = new DigitalInput(ElevatorMap.BottomLimitSwitchChannel);
         _outputEncoder = _leftElevatorMotor.getEncoder();
     }
 
     public void setupElevatorMotors() {
-        _leftElevatorMotor = new SparkFlex(ElevatorMap.leftElevatorMotorCANID, MotorType.kBrushless);
-        _rightElevatorMotor = new SparkFlex(ElevatorMap.rightElevatorMotorCANID, MotorType.kBrushless);
+        _leftElevatorMotor = new SparkFlex(ElevatorMap.LeftElevatorMotorCANID, MotorType.kBrushless);
+        _rightElevatorMotor = new SparkFlex(ElevatorMap.RightElevatorMotorCANID, MotorType.kBrushless);
 
         SparkMaxConfig leftMotorConfig = new SparkMaxConfig();
         SparkMaxConfig rightMotorConfig = new SparkMaxConfig();
         leftMotorConfig.smartCurrentLimit(40);
         rightMotorConfig.smartCurrentLimit(40);
+        leftMotorConfig.openLoopRampRate(0.5);
+        rightMotorConfig.openLoopRampRate(0.5);
 
         leftMotorConfig.idleMode(IdleMode.kBrake);
         rightMotorConfig.idleMode(IdleMode.kBrake);
 
-        rightMotorConfig.follow(ElevatorMap.leftElevatorMotorCANID, true);
+        rightMotorConfig.follow(ElevatorMap.LeftElevatorMotorCANID, true);
         _leftElevatorMotor.configure(leftMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         _rightElevatorMotor.configure(rightMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }

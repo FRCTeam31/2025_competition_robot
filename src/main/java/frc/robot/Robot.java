@@ -200,6 +200,7 @@ public class Robot extends LoggedRobot {
       _autonomousCommand.cancel();
 
       // Stop any subsystems still running
+      Container.Elevator.stopMotorsCommand().schedule();
       // Container.Swerve.stopAllMotors();
     } else {
       // Container.Swerve.resetGyro();
