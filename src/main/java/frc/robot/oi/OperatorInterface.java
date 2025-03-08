@@ -8,6 +8,7 @@ import org.prime.control.HolonomicControlStyle;
 import org.prime.control.SupplierXboxController;
 import org.prime.control.SwerveControlSuppliers;
 
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import frc.robot.subsystems.drivetrain.SwerveMap;
@@ -72,5 +73,9 @@ public class OperatorInterface {
         OperatorController.x().onTrue(setElevatorMidPoseCommand);
         OperatorController.y().onTrue(setElevatorHighPoseCommand);
 
+    }
+
+    public void setDriverRumbleIntensity(double intensity) {
+        DriverController.setRumble(RumbleType.kBothRumble, intensity);
     }
 }

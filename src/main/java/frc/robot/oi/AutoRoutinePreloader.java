@@ -2,15 +2,10 @@ package frc.robot.oi;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.wpi.first.wpilibj.Preferences;
 
 public class AutoRoutinePreloader {
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-
     private final String PRELOADER_PREF_KEY = "autoroutine-preloader";
     private List<String> _preloaded = new ArrayList<>();
     private String _fullRoutine = "";

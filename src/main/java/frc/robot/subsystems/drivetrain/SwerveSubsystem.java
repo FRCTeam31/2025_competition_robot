@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.dashboard.DrivetrainDashboardSection;
+import frc.robot.oi.ImpactRumbleHelper;
 import frc.robot.Container;
 import frc.robot.Robot;
 import frc.robot.subsystems.drivetrain.util.AutoAlign;
@@ -37,6 +38,7 @@ import org.prime.vision.LimelightInputs;
 
 public class SwerveSubsystem extends SubsystemBase {
   private DrivetrainDashboardSection _drivetrainDashboardSection;
+  private ImpactRumbleHelper _rumbleHelper;
 
   // IO
   private SwerveIOPackager _swervePackager;
@@ -63,6 +65,8 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public SwerveSubsystem(boolean isReal) {
     setName("Drivetrain");
+
+    _rumbleHelper = new ImpactRumbleHelper();
 
     // Create swerve controller
     _swervePackager = new SwerveIOPackager(isReal);
@@ -272,6 +276,15 @@ public class SwerveSubsystem extends SubsystemBase {
     Logger.recordOutput("Drive/estimatedRobotPose", _inputs.EstimatedRobotPose);
     _drivetrainDashboardSection.setAutoAlignEnabled(_useAutoAlign);
     _drivetrainDashboardSection.setAutoAlignTarget(_autoAlign.getSetpoint());
+
+    // Update rumble
+    _rumbleHelper.addSample(
+        _inputs.GyroAccelX,
+        _inputs.GyroAccelY,
+        _inputs.GyroAccelZ,
+        _inputs.RobotRelativeChassisSpeeds.vxMetersPerSecond,
+        SwerveMap.Chassis.MaxSpeedMetersPerSecond);
+    Container.OperatorInterface.setDriverRumbleIntensity(_rumbleHelper.getRumbleIntensity());
   }
 
   // #region Commands
