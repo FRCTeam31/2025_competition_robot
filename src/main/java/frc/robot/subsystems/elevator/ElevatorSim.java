@@ -9,9 +9,9 @@ import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorMap;
 
 public class ElevatorSim implements IElevator {
 
-    public DCMotorSim _gearboxSim;
-    public DIOSim _topLimitSwitchSim;
-    public DIOSim _bottomLimitSwitchSim;
+    private DCMotorSim _gearboxSim;
+    private DIOSim _topLimitSwitchSim;
+    private DIOSim _bottomLimitSwitchSim;
 
     public ElevatorSim() {
         _gearboxSim = new DCMotorSim(
@@ -48,8 +48,4 @@ public class ElevatorSim implements IElevator {
         _gearboxSim.setAngularVelocity(0);
     }
 
-    @Override
-    public void resetElevatorPosition() {
-
-    }
 }

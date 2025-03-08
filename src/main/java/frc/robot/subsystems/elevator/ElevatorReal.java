@@ -1,5 +1,6 @@
 package frc.robot.subsystems.elevator;
 
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -18,13 +19,13 @@ public class ElevatorReal implements IElevator {
     private SparkFlex _rightElevatorMotor;
     private DigitalInput _topElevatorLimitSwitch;
     private DigitalInput _bottomElevatorLimitSwitch;
-    private RelativeEncoder _outputEncoder;
+    private CANcoder _elevatorEncoder;
 
     public ElevatorReal() {
         setupElevatorMotors();
         _topElevatorLimitSwitch = new DigitalInput(ElevatorMap.TopLimitSwitchChannel);
         _bottomElevatorLimitSwitch = new DigitalInput(ElevatorMap.BottomLimitSwitchChannel);
-        _outputEncoder = _leftElevatorMotor.getEncoder();
+        _elevatorEncoder = new CANcoder(ElevatorMap.ElevatorEncoderCANID);
     }
 
     public void setupElevatorMotors() {
@@ -69,23 +70,18 @@ public class ElevatorReal implements IElevator {
     }
 
     @Override
-    public void resetElevatorPosition() {
-        _leftElevatorMotor.getEncoder().setPosition(0);
-    }
-
-    @Override
     public void stopMotors() {
         _leftElevatorMotor.stopMotor();
         _rightElevatorMotor.stopMotor();
     }
 
     public double getElevatorDistance() {
-        var rotations = _outputEncoder.getPosition() / ElevatorMap.GearRatio;
+        var rotations = _elevatorEncoder.getPosition().getValueAsDouble();
         return rotations * Math.PI * ElevatorMap.OutputSprocketDiameterMeters;
     }
 
     public double getElevatorSpeedMetersPerSecond() {
-        var speedRPS = _outputEncoder.getVelocity() / ElevatorMap.GearRatio;
+        var speedRPS = _elevatorEncoder.getVelocity().getValueAsDouble() / ElevatorMap.GearRatio;
         return speedRPS * Math.PI * ElevatorMap.OutputSprocketDiameterMeters;
     }
 }

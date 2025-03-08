@@ -46,6 +46,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         public static final double OutputSprocketDiameterMeters = Units.Millimeters.of(32.2).in(Meters);
         public static final double GearRatio = 16;
         public static final double maxVoltage = 12;
+        public static final int ElevatorEncoderCANID = 22;
     }
 
     public enum ElevatorPosition {
@@ -192,9 +193,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         _elevatorIO.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
         // Logger.recordOutput("Elevator/ElevatorSetpoint", elevatorSetpoint);
-        if (_inputs.BottomLimitSwitch) {
-            _elevatorIO.resetElevatorPosition();
-        }
+
     }
 
     /**
