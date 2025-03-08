@@ -143,7 +143,6 @@ task(eventDeploy) {
                     println ''
                     println ''
                     println ''
-                    println ''
                 } else {
                     // Print out the Mango Bird
                     println ''
@@ -184,7 +183,6 @@ task(eventDeploy) {
                     println ''
                     println ''
                     println '                          -~ Mango Bird My Beloved ~-                        '
-                    println ''
                     println ''
                     println ''
                     println ''
