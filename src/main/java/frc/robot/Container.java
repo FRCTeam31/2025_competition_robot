@@ -4,20 +4,15 @@
 
 package frc.robot;
 
-import org.prime.control.Controls;
-
-import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.dashboard.TeleopDashboardTab;
 import frc.robot.dashboard.DashboardSection;
 import frc.robot.oi.OperatorInterface;
 import frc.robot.oi.BuildableAutoRoutine;
 import frc.robot.subsystems.*;
-import frc.robot.subsystems.drivetrain.SwerveMap;
-import frc.robot.subsystems.drivetrain.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorPosition;
+import frc.robot.subsystems.endEffector.EndEffectorSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
 public class Container {
@@ -29,6 +24,7 @@ public class Container {
 
   // public static SwerveSubsystem Swerve;
   public static ElevatorSubsystem Elevator;
+  public static EndEffectorSubsystem EndEffector;
   public static VisionSubsystem Vision;
   public static PwmLEDs LEDs;
   public static OperatorInterface OperatorInterface;
@@ -39,6 +35,7 @@ public class Container {
       LEDs = new PwmLEDs();
       Vision = new VisionSubsystem();
       // Swerve = new SwerveSubsystem(isReal);
+      EndEffector = new EndEffectorSubsystem(isReal);
 
       // Register the named commands from each subsystem that may be used in PathPlanner
       // var namedCommandsMap = Swerve.getNamedCommands();
