@@ -5,10 +5,6 @@ import java.util.Map;
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.ExtendedPIDConstants;
 
-import com.revrobotics.spark.SparkLowLevel.PeriodicFrame;
-
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -51,7 +47,8 @@ public class EndEffectorSubsystem extends SubsystemBase {
         Logger.processInputs(getName(), _inputs);
     }
 
-    public Command setEndEffectorWristAngle(Rotation2d angle) {
+    // TODO: How this command is set up now, it will cancel all other running commands in this subsystem when it is ran. This may not be ideal and needs testing. It may be better to always run setWristAngle (in this subsystem's periodic), but update a variable in real/sim (using a command; this.runOnce) that will then make the wrist try to rotate to that new angle. You will not be able to update the variable directly, and will instead need to add a new method to the interface for changing the variable and add it to both real and sim.
+    public Command setEndEffectorWristAngleCommand(Rotation2d angle) {
         return this.run(() -> {
             _endEffector.setWristAngle(angle);
         });
