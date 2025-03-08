@@ -34,10 +34,15 @@ public class ElevatorSubsystem extends SubsystemBase {
         public static final int MaxPercentOutput = 1;
         public static final double MaxElevatorHeight = 0.63;
         public static final double MaxSpeedCoefficient = 0.3;
-        public static final ExtendedPIDConstants PositionPID = new ExtendedPIDConstants(0.0001, 0, 0, 0,
-                0.1,
-                0.01,
-                0.15);
+        // public static final ExtendedPIDConstants PositionPID = new ExtendedPIDConstants(0.1, 0, 0, 0,
+        //         1,
+        //         0.01,
+        //         0.05);
+
+        public static final ExtendedPIDConstants PositionPID = new ExtendedPIDConstants(0.043861, 0, 0, 0,
+                0.30004,
+                0.031234,
+                0.10131);
         public static final double FeedForwardKg = 0.01733;
         public static final double OutputSprocketDiameterMeters = Units.Millimeters.of(32.2).in(Meters);
         public static final double GearRatio = 16;
@@ -81,6 +86,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                 : new ElevatorSim();
 
         _positionPidController = ElevatorMap.PositionPID.createPIDController(0.02);
+        _positionPidController.setTolerance(0.01);
         _positionFeedforward = new ElevatorFeedforward(ElevatorMap.PositionPID.kS, ElevatorMap.FeedForwardKg,
                 ElevatorMap.PositionPID.kV, ElevatorMap.PositionPID.kA);
 
@@ -136,8 +142,10 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private void updateMotorSpeedsWithPID() {
         // TODO: check this logic
+        var posError = _elevatorSetpoint - _inputs.ElevatorDistanceMeters;
+        var desiredVelocity = posError * ElevatorMap.MaxSpeedCoefficient;
         var pid = _positionPidController.calculate(_inputs.ElevatorDistanceMeters);
-        var ff = _positionFeedforward.calculate(pid);
+        var ff = _positionFeedforward.calculate(desiredVelocity);
         var finalOutput = MathUtil.clamp(pid + ff, -ElevatorMap.MaxPercentOutput, ElevatorMap.MaxPercentOutput);
         Logger.recordOutput(getName() + "/finalOutput", finalOutput);
 
