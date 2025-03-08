@@ -53,7 +53,8 @@ public class EndEffectorSubsystem extends SubsystemBase {
     public void seekWristAngle() {
         double PIDOutput = _wristPidController.calculate(_inputs.EndEffectorAngleDegrees);
         PIDOutput = MathUtil.clamp(PIDOutput, -1, 1);
-        _endEffector.setWristMotorSpeed(PIDOutput);
+
+        // _endEffector.setWristMotorSpeed(PIDOutput);
     }
 
     @Override
