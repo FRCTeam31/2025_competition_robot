@@ -8,6 +8,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorMap;
 
@@ -34,8 +35,8 @@ public class ElevatorReal implements IElevator {
         SparkMaxConfig rightMotorConfig = new SparkMaxConfig();
         leftMotorConfig.smartCurrentLimit(40);
         rightMotorConfig.smartCurrentLimit(40);
-        leftMotorConfig.openLoopRampRate(0.5);
-        rightMotorConfig.openLoopRampRate(0.5);
+        leftMotorConfig.openLoopRampRate(2);
+        rightMotorConfig.openLoopRampRate(2);
 
         leftMotorConfig.idleMode(IdleMode.kBrake);
         rightMotorConfig.idleMode(IdleMode.kBrake);
@@ -56,13 +57,15 @@ public class ElevatorReal implements IElevator {
     }
 
     public void setMotorVoltages(double volts) {
-        _leftElevatorMotor.setVoltage(volts);
+        var deadbandedVolts = MathUtil.applyDeadband(volts, 0.05);
+        _leftElevatorMotor.setVoltage(deadbandedVolts);
     }
 
     @Override
     public void setMotorSpeeds(double output) {
         // right elevator motor follows the left motor
-        _leftElevatorMotor.set(output);
+        var deadbandedSpeed = MathUtil.applyDeadband(output, 0.06);
+        _leftElevatorMotor.set(deadbandedSpeed);
     }
 
     @Override

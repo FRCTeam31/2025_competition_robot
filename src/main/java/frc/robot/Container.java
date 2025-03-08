@@ -75,24 +75,25 @@ public class Container {
       //     Elevator.goToElevatorPositionCommand(ElevatorPosition.kLow),
       //     Elevator.goToElevatorPositionCommand(ElevatorPosition.kMid),
       //     Elevator.goToElevatorPositionCommand(ElevatorPosition.kHigh));
-      OperatorInterface.OperatorController.povUp()
-          .onTrue(Elevator.runSysIdDynamicRoutineCommand(Direction.kForward))
-          .onFalse(Elevator.stopMotorsCommand());
-      OperatorInterface.OperatorController.povDown()
-          .onTrue(Elevator.runSysIdDynamicRoutineCommand(Direction.kReverse))
-          .onFalse(Elevator.stopMotorsCommand());
-      OperatorInterface.OperatorController.povRight()
-          .onTrue(Elevator.runSysIdQuasistaticRoutineCommand(Direction.kForward))
-          .onFalse(Elevator.stopMotorsCommand());
-      OperatorInterface.OperatorController.povLeft()
-          .onTrue(Elevator.runSysIdQuasistaticRoutineCommand(Direction.kReverse))
-          .onFalse(Elevator.stopMotorsCommand());
+      // OperatorInterface.OperatorController.povUp()
+      //     .onTrue(Elevator.runSysIdDynamicRoutineCommand(Direction.kForward))
+      //     .onFalse(Elevator.stopMotorsCommand());
+      // OperatorInterface.OperatorController.povDown()
+      //     .onTrue(Elevator.runSysIdDynamicRoutineCommand(Direction.kReverse))
+      //     .onFalse(Elevator.stopMotorsCommand());
+      // OperatorInterface.OperatorController.povRight()
+      //     .onTrue(Elevator.runSysIdQuasistaticRoutineCommand(Direction.kForward))
+      //     .onFalse(Elevator.stopMotorsCommand());
+      // OperatorInterface.OperatorController.povLeft()
+      //     .onTrue(Elevator.runSysIdQuasistaticRoutineCommand(Direction.kReverse))
+      //     .onFalse(Elevator.stopMotorsCommand());
+      OperatorInterface.OperatorController.start().onTrue(Elevator.goToElevatorBottomCommand());
       OperatorInterface.OperatorController.a()
           .onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kHigh));
-      // OperatorInterface.OperatorController.y().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kMid));
-      // OperatorInterface.OperatorController.x().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kSource));
-      // OperatorInterface.OperatorController.b().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kTrough));
-      // Elevator.setDefaultCommand(Elevator.runElevatorAutomaticSeekCommand());
+      OperatorInterface.OperatorController.y().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kMid));
+      OperatorInterface.OperatorController.x().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kSource));
+      OperatorInterface.OperatorController.b().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kLow));
+      Elevator.setDefaultCommand(Elevator.runElevatorAutomaticSeekCommand());
       // Elevator.setDefaultCommand(
       //     Elevator.elevatorDefaultCommand(
       //         OperatorInterface.OperatorController.getTriggerSupplier(
