@@ -54,6 +54,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
         });
     }
 
+    // This may need to be changed to this.run instead of this.runOnce. The JavaDoc for _motor.set() does not specify if the motor will hold that speed or not. If the intake starts spinning then immediately stops, try changing this. If it does not hold the speed, we will need to find a new way to implement the above method so changing the angle of the intake does not stop the intake motor.
     public Command runEndEffectorIntakeCommand(double speed) {
         return this.runOnce(() -> {
             _endEffector.setIntakeMotorSpeed(speed);
