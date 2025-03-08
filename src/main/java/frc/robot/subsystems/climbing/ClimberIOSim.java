@@ -32,8 +32,8 @@ public class ClimberIOSim implements IClimberIO {
 
         _climbOutLimitSwitchSim = new DIOSim(ClimberMap.ClimberOutLimitSwitchChannel);
         _climbInLimitSwitchSim = new DIOSim(ClimberMap.ClimberInLimitSwitchChannel);
-        _hooksOutLimitSwitchSim = new DIOSim(ClimberMap.HooksOutLimitSwitchChannel);
-        _hooksInLimitSwitchSim = new DIOSim(ClimberMap.HooksInLimitSwitchChannel);
+        _hooksOutLimitSwitchSim = new DIOSim(ClimberMap.HooksOpenLimitSwitchChannel);
+        _hooksInLimitSwitchSim = new DIOSim(ClimberMap.HooksClosedLimitSwitchChannel);
     }
 
     public void updateInputs(ClimberInputsAutoLogged inputs) {

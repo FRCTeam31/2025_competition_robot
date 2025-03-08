@@ -23,7 +23,7 @@ public class Container {
   public static DashboardSection AutoDashboardSection;
   public static BuildableAutoRoutine AutoBuilder;
 
-  public static SwerveSubsystem Swerve;
+  // public static SwerveSubsystem Swerve;
   public static VisionSubsystem Vision;
   public static ClimberSubsystem Climber;
   public static PwmLEDs LEDs;
@@ -34,31 +34,35 @@ public class Container {
       // Create subsystems
       LEDs = new PwmLEDs();
       Vision = new VisionSubsystem();
-      Swerve = new SwerveSubsystem(isReal);
+      // Swerve = new SwerveSubsystem(isReal);
       Climber = new ClimberSubsystem(isReal);
 
       // Register the named commands from each subsystem that may be used in PathPlanner
-      var namedCommandsMap = Swerve.getNamedCommands();
+      // var namedCommandsMap = Swerve.getNamedCommands();
       // ...add other named commands to the map using "otherNamedCommands.putAll(namedCommandsMap);"
-      NamedCommands.registerCommands(namedCommandsMap);
+      // NamedCommands.registerCommands(namedCommandsMap);
 
       // Create our custom auto builder
       AutoDashboardSection = new DashboardSection("Auto");
-      AutoBuilder = new BuildableAutoRoutine(namedCommandsMap);
+      // AutoBuilder = new BuildableAutoRoutine(namedCommandsMap);
       TeleopDashboardSection = new TeleopDashboardTab();
       CommandsDashboardSection = new DashboardSection("Commands");
 
       // Configure controller bindings
       OperatorInterface = new OperatorInterface();
-      OperatorInterface.bindDriverControls(
-          Swerve.resetGyroCommand(),
-          Swerve.enableLockOnCommand(),
-          Swerve.disableAutoAlignCommand(),
-          Swerve::setAutoAlignSetpointCommand,
-          Swerve::setDefaultCommand,
-          Swerve::driveFieldRelativeCommand);
-      OperatorInterface.bindOperatorControls(
-          Climber.toggleHooksStateCommand(), Climber.setCLimberOutCommand(), Climber.setClimberInCommand());
+      // OperatorInterface.bindDriverControls(
+      //     Swerve.resetGyroCommand(),
+      //     Swerve.enableLockOnCommand(),
+      //     Swerve.disableAutoAlignCommand(),
+      //     Swerve::setAutoAlignSetpointCommand,
+      //     Swerve::setDefaultCommand,
+      //     Swerve::driveFieldRelativeCommand);
+      // OperatorInterface.bindOperatorControls(
+      //     Climber.toggleHooksStateCommand(), Climber.setCLimberOutCommand(), Climber.setClimberInCommand());
+
+      OperatorInterface.OperatorController.a().whileTrue(Climber.climbManuallyCommand(.20));
+      OperatorInterface.OperatorController.b().whileTrue(Climber.climbManuallyCommand(-0.2));
+
     } catch (Exception e) {
       DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());
     }

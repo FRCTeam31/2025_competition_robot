@@ -21,15 +21,15 @@ public class ClimberIOReal implements IClimberIO {
     private VictorSPX _climbHooksMotor;
     private DigitalInput _climbOutLimitSwitch;
     private DigitalInput _climbInLimitSwitch;
-    private DigitalInput _hooksOutLimitSwitch;
-    private DigitalInput _hooksInLimitSwitch;
+    private DigitalInput _hooksOpenLimitSwitch;
+    private DigitalInput _hooksClosedLimitSwitch;
 
     public ClimberIOReal() {
 
         _climbOutLimitSwitch = new DigitalInput(ClimberMap.ClimberOutLimitSwitchChannel);
         _climbInLimitSwitch = new DigitalInput(ClimberMap.ClimberInLimitSwitchChannel);
-        _hooksOutLimitSwitch = new DigitalInput(ClimberMap.HooksOutLimitSwitchChannel);
-        _hooksInLimitSwitch = new DigitalInput(ClimberMap.HooksInLimitSwitchChannel);
+        _hooksOpenLimitSwitch = new DigitalInput(ClimberMap.HooksOpenLimitSwitchChannel);
+        _hooksClosedLimitSwitch = new DigitalInput(ClimberMap.HooksClosedLimitSwitchChannel);
 
         climbMotorsConfig();
     }
@@ -61,8 +61,8 @@ public class ClimberIOReal implements IClimberIO {
         inputs.HooksMotorSpeed = climbHookMotorSpeed;
         inputs.ClimbWenchOutLimitSwitch = _climbOutLimitSwitch.get();
         inputs.ClimbWenchInLimitSwitch = _climbInLimitSwitch.get();
-        inputs.HooksClosedLimitSwitch = _hooksOutLimitSwitch.get();
-        inputs.HooksOpenLimitSwitch = _hooksInLimitSwitch.get();
+        inputs.HooksClosedLimitSwitch = !_hooksOpenLimitSwitch.get();
+        inputs.HooksOpenLimitSwitch = _hooksClosedLimitSwitch.get();
     }
 
     public void setClimbingWenchSpeed(double speed) {

@@ -19,15 +19,15 @@ public class ClimberSubsystem extends SubsystemBase {
         public static final byte ClimberGearRatio = 100;
         public static final double ClimberInSpeed = 0.5;
         public static final double ClimberOutSpeed = -0.5;
-        public static final int ClimberOutLimitSwitchChannel = 0; //unknown
-        public static final int ClimberInLimitSwitchChannel = 0; //unknown
+        public static final int ClimberOutLimitSwitchChannel = 5;
+        public static final int ClimberInLimitSwitchChannel = 6;
         public static final double MaxMotorPercentOutput = 1;
         public static final double ClimberMotorsReelingInSpeed = 0.5;
         public static final double ClimberMotorsReelingOutSpeed = -0.5;
         public static final double MaxChangeClimberStateTime = 5;
         public static final int ClimberHookMotorCANID = 21;
-        public static final int HooksOutLimitSwitchChannel = 0; //unkmown
-        public static final int HooksInLimitSwitchChannel = 0; //unknown
+        public static final int HooksOpenLimitSwitchChannel = 4;
+        public static final int HooksClosedLimitSwitchChannel = 2;
         public static final double HooksOpenSpeed = 0.5;
         public static final double HooksCloseSpeed = -0.5;
         public static final double MaxChangeHookStateTime = 5;
@@ -157,6 +157,19 @@ public class ClimberSubsystem extends SubsystemBase {
             if (_inputs.ClimbWenchOutLimitSwitch && _inputs.CommandedHooksPosition == HooksPosition.CLOSED) {
                 _climber.setClimbingWenchSpeed(ClimberMap.ClimberMotorsReelingOutSpeed);
             }
+        });
+    }
+
+    public Command climbManuallyCommand(double speed) {
+        return this.run(() -> {
+            _climber.setClimbingWenchSpeed(speed);
+        }).until(() -> _inputs.ClimbWenchInLimitSwitch || _inputs.ClimbWenchOutLimitSwitch)
+                .andThen(stopClimbingMotorsCommand());
+    }
+
+    public Command setHooksManual(double speed) {
+        return this.run(() -> {
+            _climber.setHookMotorSpeed(speed);
         });
     }
 
