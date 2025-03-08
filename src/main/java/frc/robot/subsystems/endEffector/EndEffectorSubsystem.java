@@ -1,12 +1,16 @@
 package frc.robot.subsystems.endEffector;
 
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.ExtendedPIDConstants;
 
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class EndEffectorSubsystem extends SubsystemBase {
@@ -22,15 +26,20 @@ public class EndEffectorSubsystem extends SubsystemBase {
 
         public static final ExtendedPIDConstants WristPID = new ExtendedPIDConstants(0, 0, 0);
 
-        // TODO: Verify wether this is the gear ratio for the wrist or the intake, it is used for both in sim
         public static final double GearRatio = 5;
 
         public static final double MaxWristAngle = 135;
         public static final double MinWristAngle = 0;
 
+        // Wrist Constants
+        public static final double WristUp = 0;
+        public static final double WristSource = 45;
+        public static final double WristReef = 135;
+        public static final double WristMaxOutput = 0.25;
     }
 
     private IEndEffector _endEffector;
+    private PIDController _wristPID;
 
     private EndEffectorInputsAutoLogged _inputs = new EndEffectorInputsAutoLogged();
 
@@ -39,6 +48,17 @@ public class EndEffectorSubsystem extends SubsystemBase {
     public EndEffectorSubsystem(boolean isReal) {
         setName("End Effector");
         _endEffector = isReal ? new EndEffectorReal() : new EndEffectorSim();
+        _wristPID = EndEffectorMap.WristPID.createPIDController(0.02);
+    }
+
+    public void seekWristAngle() {
+        double pid = _wristPID.calculate(_inputs.EndEffectorAngleDegrees);
+        SmartDashboard.putNumber(getName() + "/WristPID", pid);
+
+        pid = MathUtil.clamp(pid, -EndEffectorMap.WristMaxOutput, EndEffectorMap.WristMaxOutput);
+
+        Logger.recordOutput(getName() + "/WristPID-FinalOutput", pid);
+        // _endEffector.setWristSpeed(pid);
     }
 
     @Override
@@ -47,31 +67,55 @@ public class EndEffectorSubsystem extends SubsystemBase {
         Logger.processInputs(getName(), _inputs);
     }
 
-    // TODO: How this command is set up now, it will cancel all other running commands in this subsystem when it is ran. This may not be ideal and needs testing. It may be better to always run setWristAngle (in this subsystem's periodic), but update a variable in real/sim (using a command; this.runOnce) that will then make the wrist try to rotate to that new angle. You will not be able to update the variable directly, and will instead need to add a new method to the interface for changing the variable and add it to both real and sim.
-    public Command setEndEffectorWristAngleCommand(Rotation2d angle) {
+    /**
+     * Default command which runs the wrist PID and runs the intake based on two buttons
+     * @param runIntakeIn
+     * @param runIntakeOut
+     */
+    public Command defaultCommand(BooleanSupplier runIntakeIn, BooleanSupplier runIntakeOut) {
         return this.run(() -> {
-            _endEffector.setWristAngle(angle);
+            if (runIntakeIn.getAsBoolean()) {
+                _endEffector.setIntakeSpeed(EndEffectorMap.IntakeSpeed);
+            } else if (runIntakeOut.getAsBoolean()) {
+                _endEffector.setIntakeSpeed(EndEffectorMap.EjectSpeed);
+            } else {
+                _endEffector.stopIntakeMotor();
+            }
+
+            seekWristAngle();
         });
     }
 
-    // This may need to be changed to this.run instead of this.runOnce. The JavaDoc for _motor.set() does not specify if the motor will hold that speed or not. If the intake starts spinning then immediately stops, try changing this. If it does not hold the speed, we will need to find a new way to implement the above method so changing the angle of the intake does not stop the intake motor.
-    public Command runEndEffectorIntakeCommand(double speed) {
-        return this.runOnce(() -> {
-            _endEffector.setIntakeMotorSpeed(speed);
-        });
+    /**
+     * Sets the wrist setpoint
+     * @param angle Desired angle
+     */
+    public Command setWristSetpointCommand(double angle) {
+        return Commands.runOnce(() -> _wristPID.setSetpoint(angle));
     }
 
-    public Command stopEndEffectorIntakeCommand() {
-        return this.runOnce(() -> {
-            _endEffector.stopIntakeMotor();
-        });
+    public Command stopIntakeMotorCommand() {
+        return Commands.runOnce(() -> _endEffector.stopIntakeMotor());
+    }
+
+    public Command stopWristMotorCommand() {
+        return Commands.runOnce(() -> _endEffector.stopWristMotor());
+    }
+
+    public Command stopBothMotorsCommand() {
+        return Commands.runOnce(() -> _endEffector.stopMotors());
+    }
+
+    public Command setIntakeSpeedCommand(double speed) {
+        return Commands.runOnce(() -> _endEffector.setIntakeSpeed(speed));
     }
 
     // TODO: Add more named commands for running the intake and rotating the wrist to predefined setpoints (See above todo)
     public Map<String, Command> getNamedCommands() {
-        return Map.of("Stop Intake", stopEndEffectorIntakeCommand(), "Intake Coral",
-                runEndEffectorIntakeCommand(EndEffectorMap.IntakeSpeed), "Eject Coral",
-                runEndEffectorIntakeCommand(EndEffectorMap.EjectSpeed));
+        return Map.of("Stop Intake", stopIntakeMotorCommand(), "Stop Both Motors", stopBothMotorsCommand(),
+                "Intake Coral",
+                setIntakeSpeedCommand(EndEffectorMap.IntakeSpeed), "Eject Coral",
+                setIntakeSpeedCommand(EndEffectorMap.EjectSpeed));
     }
 
 }

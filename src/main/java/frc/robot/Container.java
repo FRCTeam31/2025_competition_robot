@@ -57,9 +57,10 @@ public class Container {
       //     Swerve::setAutoAlignSetpointCommand,
       //     Swerve::setDefaultCommand,
       //     Swerve::driveFieldRelativeCommand);
-
-      OperatorInterface.bindOperatorControls(EndEffector.runEndEffectorIntakeCommand(0.25),
-          EndEffector.runEndEffectorIntakeCommand(-0.25), EndEffector.stopEndEffectorIntakeCommand());
+      EndEffector.setDefaultCommand(EndEffector.defaultCommand(OperatorInterface.OperatorController.rightTrigger(0.2),
+          OperatorInterface.OperatorController.leftTrigger(0.2)));
+      OperatorInterface.OperatorController.y().onTrue(EndEffector.setWristSetpointCommand(45));
+      OperatorInterface.OperatorController.x().onTrue(EndEffector.setWristSetpointCommand(0));
     } catch (Exception e) {
       DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());
     }

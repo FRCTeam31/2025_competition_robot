@@ -15,33 +15,10 @@ public class EndEffectorSim implements IEndEffector {
     private DCMotorSim _intakeMotor;
 
     private DCMotorSim _wristMotor;
-    private PIDController _wristPIDController;
 
     private DIOSim _coralLimitSwitch;
 
     private EndEffectorInputsAutoLogged _inputs = new EndEffectorInputsAutoLogged();
-
-    private WristAngle _wristAngle = new WristAngle(0);
-
-    private class WristAngle {
-        private double _rotations;
-
-        public WristAngle(double rotations) {
-            _rotations = rotations;
-        }
-
-        public double asDegrees() {
-            return Rotation2d.fromRotations(_rotations).getDegrees();
-        }
-
-        public Rotation2d asRotation2d() {
-            return Rotation2d.fromRotations(_rotations);
-        }
-
-        public void update(double rotations) {
-            _rotations = rotations;
-        }
-    }
 
     public EndEffectorSim() {
         _coralLimitSwitch = new DIOSim(EndEffectorMap.LimitSwitchCanID);
@@ -63,28 +40,16 @@ public class EndEffectorSim implements IEndEffector {
                 LinearSystemId.createDCMotorSystem(DCMotor.getNeoVortex(1), 0.001, EndEffectorMap.GearRatio),
                 DCMotor.getNeoVortex(1));
 
-        _wristPIDController = pid.createPIDController(0.02);
-
-        // TODO: Add the ability to change wrist PID values without having to restart sim
-        setWristPID(pid);
     }
 
     @Override
-    public void setWristPID(ExtendedPIDConstants pid) {
-        _wristPIDController.setP(pid.kP);
-        _wristPIDController.setI(pid.kI);
-        _wristPIDController.setD(pid.kD);
-    }
-
-    @Override
-    public void setWristAngle(Rotation2d angle) {
-        var wristOutput = _wristPIDController.calculate(getWristAngle().asDegrees(), angle.getDegrees());
-        setWristMotorSpeed(wristOutput);
-    }
-
-    @Override
-    public void setIntakeMotorSpeed(double speedRadians) {
+    public void setIntakeSpeed(double speedRadians) {
         _intakeMotor.setAngularVelocity(speedRadians);
+    }
+
+    @Override
+    public void setWristSpeed(double speedRadians) {
+        _wristMotor.setAngularVelocity(speedRadians);
     }
 
     @Override
@@ -117,15 +82,10 @@ public class EndEffectorSim implements IEndEffector {
         inputs.LimitSwitchState = limitSwitchState;
     }
 
-    private void setWristMotorSpeed(double speedRadians) {
-        _wristMotor.setAngularVelocity(speedRadians);
-    }
-
-    private WristAngle getWristAngle() {
+    private double getWristAngle() {
         double wristRotations = _wristMotor.getAngularPositionRotations() / EndEffectorMap.GearRatio;
 
-        _wristAngle.update(wristRotations);
-        return _wristAngle;
+        return Rotation2d.fromRotations(wristRotations).getDegrees();
     }
 
     private boolean getLimitSwitchState() {
