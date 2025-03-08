@@ -4,19 +4,13 @@ package frc.robot.subsystems.elevator;
 import static edu.wpi.first.units.Units.Meters;
 
 import java.util.Map;
-import java.util.function.DoubleSupplier;
-
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.ExtendedPIDConstants;
-import org.prime.dashboard.SendableButton;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,7 +18,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.Container;
 
 public class ElevatorSubsystem extends SubsystemBase {
 
