@@ -4,6 +4,8 @@ package frc.robot.subsystems.elevator;
 import static edu.wpi.first.units.Units.Meters;
 
 import java.util.Map;
+import java.util.function.DoubleSupplier;
+
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.ExtendedPIDConstants;
 import edu.wpi.first.math.MathUtil;
@@ -47,7 +49,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public enum ElevatorPosition {
-        kSource,
+        kBottom,
         kTrough,
         kLow,
         kMid,
@@ -55,9 +57,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     private Map<ElevatorPosition, Double> _positionMap = Map.of(
-            ElevatorPosition.kSource, 0.0,
+            ElevatorPosition.kBottom, 0.0,
             ElevatorPosition.kTrough, -0.63,
-            ElevatorPosition.kLow, 0.3,
+            ElevatorPosition.kLow, 0.16,
             ElevatorPosition.kMid, 0.45,
             ElevatorPosition.kHigh, 0.63);
 
@@ -82,20 +84,20 @@ public class ElevatorSubsystem extends SubsystemBase {
         SmartDashboard.putData(_positionPidController);
 
         // TODO: Remove when no longer needed
-        _sysId = new SysIdRoutine(
-                // Ramp up at 1 volt per second for quasistatic tests, step at 2 volts in
-                // dynamic tests, run for 13 seconds.
-                new SysIdRoutine.Config(Units.Volts.of(2).per(Units.Second), Units.Volts.of(3),
-                        Units.Seconds.of(4)),
-                new SysIdRoutine.Mechanism(
-                        // Tell SysId how to plumb the driving voltage to the motors.
-                        this::setMotorVoltages,
-                        // Tell SysId how to record a frame of data for each motor on the mechanism
-                        // being characterized.
-                        this::logSysIdFrame,
-                        // Tell SysId to make generated commands require this subsystem, suffix test
-                        // state in WPILog with this subsystem's name
-                        this));
+        // _sysId = new SysIdRoutine(
+        //         // Ramp up at 1 volt per second for quasistatic tests, step at 2 volts in
+        //         // dynamic tests, run for 13 seconds.
+        //         new SysIdRoutine.Config(Units.Volts.of(2).per(Units.Second), Units.Volts.of(3),
+        //                 Units.Seconds.of(4)),
+        //         new SysIdRoutine.Mechanism(
+        //                 // Tell SysId how to plumb the driving voltage to the motors.
+        //                 this::setMotorVoltages,
+        //                 // Tell SysId how to record a frame of data for each motor on the mechanism
+        //                 // being characterized.
+        //                 this::logSysIdFrame,
+        //                 // Tell SysId to make generated commands require this subsystem, suffix test
+        //                 // state in WPILog with this subsystem's name
+        //                 this));
 
         // _stopMotorsButton = new SendableButton("Stop Elevator Motors", () -> stopMotorsCommand());
         // Container.TestDashboardSection.putData("Elevator/Stop Motors", _stopMotorsButton);
@@ -112,6 +114,14 @@ public class ElevatorSubsystem extends SubsystemBase {
         // _highPosButton = new SendableButton("High Position", () -> goToElevatorPositionCommand(ElevatorPosition.kHigh));
         // Container.TestDashboardSection.putData("Elevator/High Position", _highPosButton);
 
+    }
+
+    public double getElevatorPositionMeters() {
+        return _inputs.ElevatorDistanceMeters;
+    }
+
+    public double getElevatorPositionPercent() {
+        return getElevatorPositionMeters() / ElevatorMap.MaxElevatorHeight;
     }
 
     //#region Control
@@ -139,11 +149,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         }
 
         // Within 5% of max height, reduce speed
-        if (finalOutput > 0 && _inputs.ElevatorDistanceMeters > (ElevatorMap.MaxElevatorHeight
-                - (ElevatorMap.MaxElevatorHeight * 0.15))) {
-            finalOutput = MathUtil.clamp(finalOutput, ElevatorMap.MaxSpeedCoefficient,
-                    ElevatorMap.MaxUpSpeedCoefficient);
-        }
+        finalOutput = getScaledSpeed(finalOutput, _inputs.ElevatorDistanceMeters);
 
         SmartDashboard.putNumber(getName() + "/finalOutput", finalOutput);
         SmartDashboard.putNumber(getName() + "/PID", pid);
@@ -153,17 +159,33 @@ public class ElevatorSubsystem extends SubsystemBase {
         setMotorSpeedsWithLimitSwitches(finalOutput);
     }
 
-    private void setMotorVoltages(Voltage volts) {
-        var vMag = volts.magnitude();
-        if (_inputs.TopLimitSwitch && vMag > 0) {
-            vMag = MathUtil.clamp(vMag, -ElevatorMap.maxVoltage * ElevatorMap.MaxSpeedCoefficient, 0);
-        } else if (_inputs.BottomLimitSwitch && vMag < 0) {
-            vMag = MathUtil.clamp(vMag, 0, ElevatorMap.maxVoltage * ElevatorMap.MaxSpeedCoefficient);
+    private double getScaledSpeed(double outputSpeed, double currentPosition) {
+        var lowPositionScaleDownThreshold = ElevatorMap.MaxElevatorHeight * 0.15;
+        var highPositionScaleDownThreshold = ElevatorMap.MaxElevatorHeight - lowPositionScaleDownThreshold;
+
+        var speedScalingFactor = 1.0;
+        if (currentPosition <= lowPositionScaleDownThreshold && outputSpeed < 0) {
+            var scale = currentPosition / lowPositionScaleDownThreshold;
+            speedScalingFactor = Math.max(0.1, scale);
+        } else if (currentPosition >= highPositionScaleDownThreshold && outputSpeed > 0) {
+            var scale = (ElevatorMap.MaxElevatorHeight - currentPosition) / lowPositionScaleDownThreshold;
+            speedScalingFactor = Math.max(0.1, scale);
         }
 
-        SmartDashboard.putNumber(getName() + "/Output-V", vMag);
-        _elevatorIO.setMotorVoltages(vMag);
+        return outputSpeed * speedScalingFactor;
     }
+
+    // private void setMotorVoltages(Voltage volts) {
+    //     var vMag = volts.magnitude();
+    //     if (_inputs.TopLimitSwitch && vMag > 0) {
+    //         vMag = MathUtil.clamp(vMag, -ElevatorMap.maxVoltage * ElevatorMap.MaxSpeedCoefficient, 0);
+    //     } else if (_inputs.BottomLimitSwitch && vMag < 0) {
+    //         vMag = MathUtil.clamp(vMag, 0, ElevatorMap.maxVoltage * ElevatorMap.MaxSpeedCoefficient);
+    //     }
+
+    //     SmartDashboard.putNumber(getName() + "/Output-V", vMag);
+    //     _elevatorIO.setMotorVoltages(vMag);
+    // }
 
     @Override
     public void periodic() {
@@ -192,6 +214,11 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     //#region Commands
 
+    public Command runElevatorWithController(DoubleSupplier dSup) {
+        return this.run(() -> setMotorSpeedsWithLimitSwitches(
+                MathUtil.clamp(dSup.getAsDouble(), -ElevatorMap.MaxSpeedCoefficient, ElevatorMap.MaxSpeedCoefficient)));
+    }
+
     public Command runElevatorAutomaticSeekCommand() {
         return this.run(this::updateMotorSpeedsWithPID);
     }
@@ -203,11 +230,14 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public Command goToElevatorBottomCommand() {
-        return Commands.runOnce(() -> {
-            _positionPidController.setSetpoint(-ElevatorMap.MaxElevatorHeight);
-        }).andThen(Commands.waitUntil(() -> _inputs.BottomLimitSwitch)).andThen(Commands.runOnce(() -> {
-            _positionPidController.setSetpoint(0);
-        }));
+        return Commands
+                .run(() -> _elevatorIO.setMotorSpeeds(ElevatorMap.MaxDownSpeedCoefficient))
+                .until(() -> _inputs.BottomLimitSwitch)
+                .withTimeout(7)
+                .andThen(Commands.runOnce(() -> {
+                    _elevatorIO.stopMotors();
+                    _positionPidController.setSetpoint(0);
+                }));
     }
 
     public Command stopMotorsCommand() {
@@ -231,7 +261,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                 "Elevator Middle Position Command", goToElevatorPositionCommand(ElevatorPosition.kMid),
                 "Elevator Low Position Command", goToElevatorPositionCommand(ElevatorPosition.kLow),
                 "Elevator Trough Position Command", goToElevatorPositionCommand(ElevatorPosition.kTrough),
-                "Elevator Source Position Command", goToElevatorPositionCommand(ElevatorPosition.kSource));
+                "Elevator Source Position Command", goToElevatorPositionCommand(ElevatorPosition.kBottom));
     }
 
     //#endregion

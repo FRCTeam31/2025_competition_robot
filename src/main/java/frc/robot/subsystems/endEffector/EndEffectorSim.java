@@ -21,7 +21,7 @@ public class EndEffectorSim implements IEndEffector {
     private EndEffectorInputsAutoLogged _inputs = new EndEffectorInputsAutoLogged();
 
     public EndEffectorSim() {
-        _coralLimitSwitch = new DIOSim(EndEffectorMap.LimitSwitchCanID);
+        _coralLimitSwitch = new DIOSim(EndEffectorMap.LimitSwitchDIOChannel);
 
         setupIntakeMotor();
         setupWristMotor(EndEffectorMap.WristPID);

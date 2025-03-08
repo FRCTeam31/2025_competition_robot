@@ -23,7 +23,7 @@ public class EndEffectorReal implements IEndEffector {
     private DigitalInput _coralLimitSwitch;
 
     public EndEffectorReal() {
-        _coralLimitSwitch = new DigitalInput(EndEffectorMap.LimitSwitchCanID);
+        _coralLimitSwitch = new DigitalInput(EndEffectorMap.LimitSwitchDIOChannel);
 
         setupIntakeMotor();
         setupWristMotor(EndEffectorMap.WristPID);

@@ -84,13 +84,23 @@ public class Container {
       // OperatorInterface.OperatorController.povLeft()
       //     .onTrue(Elevator.runSysIdQuasistaticRoutineCommand(Direction.kReverse))
       //     .onFalse(Elevator.stopMotorsCommand());
-      OperatorInterface.OperatorController.start().onTrue(Elevator.goToElevatorBottomCommand());
-      OperatorInterface.OperatorController.a()
-          .onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kHigh));
-      OperatorInterface.OperatorController.y().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kMid));
-      OperatorInterface.OperatorController.x().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kSource));
-      OperatorInterface.OperatorController.b().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kLow));
-      Elevator.setDefaultCommand(Elevator.runElevatorAutomaticSeekCommand());
+      // OperatorInterface.OperatorController.start().onTrue(Elevator.goToElevatorBottomCommand());
+      // OperatorInterface.OperatorController.a()
+      //     .onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kBottom));
+      // OperatorInterface.OperatorController.y().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kMid));
+      // OperatorInterface.OperatorController.x().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kBottom));
+      // OperatorInterface.OperatorController.b().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kLow));
+      // Elevator.setDefaultCommand(Elevator.runElevatorAutomaticSeekCommand());
+      Elevator
+          .setDefaultCommand(Elevator.runElevatorWithController(OperatorInterface.OperatorController.getTriggerSupplier(
+              0.06, 0)));
+      EndEffector.setDefaultCommand(EndEffector.defaultCommand(() -> false, () -> false));
+
+      OperatorInterface.OperatorController.y().onTrue(EndEffector.setWristSetpointCommand(-4));
+
+      OperatorInterface.OperatorController.x().onTrue(EndEffector.setWristSetpointCommand(-65));
+      OperatorInterface.OperatorController.a().onTrue(EndEffector.setWristSetpointCommand(-130));
+
       // Elevator.setDefaultCommand(
       //     Elevator.elevatorDefaultCommand(
       //         OperatorInterface.OperatorController.getTriggerSupplier(

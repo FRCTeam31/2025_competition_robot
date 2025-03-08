@@ -12,21 +12,22 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Container;
 
 public class EndEffectorSubsystem extends SubsystemBase {
 
     public class EndEffectorMap {
-        public static final byte IntakeMotorCanID = 127;
-        public static final byte WristMotorCanID = 127;
-        public static final byte LimitSwitchCanID = 0;
+        public static final byte IntakeMotorCanID = 19;
+        public static final byte WristMotorCanID = 20;
+        public static final byte LimitSwitchDIOChannel = 9;
         public static final double EjectSpeed = 0.5;
         public static final double IntakeSpeed = -0.5;
         public static final byte IntakeCurrentLimit = 20;
         public static final byte WristCurrentLimit = 30;
 
-        public static final ExtendedPIDConstants WristPID = new ExtendedPIDConstants(0, 0, 0);
+        public static final ExtendedPIDConstants WristPID = new ExtendedPIDConstants(0.007, 0, 0);
 
-        public static final double GearRatio = 5;
+        public static final double GearRatio = 20;
 
         public static final double MaxWristAngle = 135;
         public static final double MinWristAngle = 0;
@@ -35,7 +36,11 @@ public class EndEffectorSubsystem extends SubsystemBase {
         public static final double WristUp = 0;
         public static final double WristSource = 45;
         public static final double WristReef = 135;
-        public static final double WristMaxOutput = 0.25;
+        public static final double WristMaxOutput = 0.175;
+
+        public static final double LowerElevatorHeightLimit = 0.11;
+        public static final double UpperElevatorHeightLimit = 0.38;
+        public static final double SafeWristAngleAtUpperElevatorHeightLimit = -30;
     }
 
     private IEndEffector _endEffector;
@@ -49,16 +54,29 @@ public class EndEffectorSubsystem extends SubsystemBase {
         setName("End Effector");
         _endEffector = isReal ? new EndEffectorReal() : new EndEffectorSim();
         _wristPID = EndEffectorMap.WristPID.createPIDController(0.02);
+        SmartDashboard.putData(_wristPID);
     }
 
     public void seekWristAngle() {
-        double pid = _wristPID.calculate(_inputs.EndEffectorAngleDegrees);
+        var belowMinHeightThreshold = Container.Elevator
+                .getElevatorPositionMeters() <= EndEffectorMap.LowerElevatorHeightLimit;
+        var aboveMaxHeightThreshold = Container.Elevator
+                .getElevatorPositionMeters() >= EndEffectorMap.UpperElevatorHeightLimit;
+        double pid = belowMinHeightThreshold
+                ? _wristPID.calculate(_inputs.EndEffectorAngleDegrees, 0)
+                : _wristPID.calculate(_inputs.EndEffectorAngleDegrees);
+
+        if (aboveMaxHeightThreshold && !belowMinHeightThreshold) {
+            double previousSetpoint = _wristPID.getSetpoint();
+            _wristPID.setSetpoint(Math.min(previousSetpoint, EndEffectorMap.SafeWristAngleAtUpperElevatorHeightLimit));
+        }
         SmartDashboard.putNumber(getName() + "/WristPID", pid);
+        SmartDashboard.putNumber(getName() + "/WristSetpoint", _wristPID.getSetpoint());
 
         pid = MathUtil.clamp(pid, -EndEffectorMap.WristMaxOutput, EndEffectorMap.WristMaxOutput);
 
         Logger.recordOutput(getName() + "/WristPID-FinalOutput", pid);
-        // _endEffector.setWristSpeed(pid);
+        _endEffector.setWristSpeed(pid);
     }
 
     @Override
