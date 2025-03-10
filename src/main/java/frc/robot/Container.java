@@ -60,8 +60,8 @@ public class Container {
       // OperatorInterface.bindOperatorControls(
       //     Climber.toggleHooksStateCommand(), Climber.setCLimberOutCommand(), Climber.setClimberInCommand());
 
-      OperatorInterface.OperatorController.a().whileTrue(Climber.climbManuallyCommand(.20));
-      OperatorInterface.OperatorController.b().whileTrue(Climber.climbManuallyCommand(-0.2));
+      OperatorInterface.OperatorController.a().onTrue(Climber.runHooksManually(0.2));
+      OperatorInterface.OperatorController.b().onTrue(Climber.runHooksManually(-0.2));
 
     } catch (Exception e) {
       DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());

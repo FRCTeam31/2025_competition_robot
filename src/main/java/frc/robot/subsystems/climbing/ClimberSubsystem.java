@@ -28,8 +28,8 @@ public class ClimberSubsystem extends SubsystemBase {
         public static final int ClimberHookMotorCANID = 21;
         public static final int HooksOpenLimitSwitchChannel = 4;
         public static final int HooksClosedLimitSwitchChannel = 2;
-        public static final double HooksOpenSpeed = 0.5;
-        public static final double HooksCloseSpeed = -0.5;
+        public static final double HooksOpenSpeed = -0.5;
+        public static final double HooksCloseSpeed = 0.5;
         public static final double MaxChangeHookStateTime = 5;
         public static final double ClimbingPitchThresholdDegrees = 5;
 
@@ -164,7 +164,14 @@ public class ClimberSubsystem extends SubsystemBase {
         return this.run(() -> {
             _climber.setClimbingWenchSpeed(speed);
         }).until(() -> _inputs.ClimbWenchInLimitSwitch || _inputs.ClimbWenchOutLimitSwitch)
-                .andThen(stopClimbingMotorsCommand());
+                .finallyDo(() -> stopClimbingMotorsCommand().schedule());
+    }
+
+    public Command runHooksManually(double speed) {
+        return this.run(() -> {
+            _climber.setHookMotorSpeed(speed);
+        }).until(() -> _inputs.HooksOpenLimitSwitch || _inputs.HooksClosedLimitSwitch)
+                .finallyDo(() -> stopHooksMotorsCommand().schedule());
     }
 
     public Command setHooksManual(double speed) {
