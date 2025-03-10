@@ -14,6 +14,7 @@ import frc.robot.oi.OperatorInterface;
 import frc.robot.oi.BuildableAutoRoutine;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.climbing.ClimberSubsystem;
+import frc.robot.subsystems.climbing.ClimberInputs.ClimberPosition;
 import frc.robot.subsystems.drivetrain.SwerveSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
@@ -59,9 +60,6 @@ public class Container {
       //     Swerve::driveFieldRelativeCommand);
       // OperatorInterface.bindOperatorControls(
       //     Climber.toggleHooksStateCommand(), Climber.setCLimberOutCommand(), Climber.setClimberInCommand());
-
-      OperatorInterface.OperatorController.a().onTrue(Climber.runHooksManually(0.2));
-      OperatorInterface.OperatorController.b().onTrue(Climber.runHooksManually(-0.2));
 
     } catch (Exception e) {
       DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());

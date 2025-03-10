@@ -22,8 +22,8 @@ public class ClimberSubsystem extends SubsystemBase {
         public static final int ClimberOutLimitSwitchChannel = 5;
         public static final int ClimberInLimitSwitchChannel = 6;
         public static final double MaxMotorPercentOutput = 1;
-        public static final double ClimberMotorsReelingInSpeed = 0.5;
-        public static final double ClimberMotorsReelingOutSpeed = -0.5;
+        public static final double ClimberMotorsReelingInSpeed = 1;
+        public static final double ClimberMotorsReelingOutSpeed = -1;
         public static final double MaxChangeClimberStateTime = 5;
         public static final int ClimberHookMotorCANID = 21;
         public static final int HooksOpenLimitSwitchChannel = 4;
@@ -58,27 +58,27 @@ public class ClimberSubsystem extends SubsystemBase {
 
     private void setHooksState(HooksPosition hooksPosition) {
         double hooksMotorSpeed = 0;
-        boolean allowedToChangeHooksState = _inputs.ClimbWenchOutLimitSwitch
-                && _inputs.RobotPitch > ClimberMap.ClimbingPitchThresholdDegrees;
+        // boolean allowedToChangeHooksState = _inputs.ClimbWenchOutLimitSwitch
+        //         && _inputs.RobotPitch > ClimberMap.ClimbingPitchThresholdDegrees;
 
         _inputs.CommandedHooksPosition = hooksPosition;
         // Only Allow the hooks to change state if the climber is  out
-        if (allowedToChangeHooksState) {
-            if (hooksPosition == HooksPosition.CLOSED) {
-                if (!_inputs.HooksClosedLimitSwitch) {
-                    hooksMotorSpeed = ClimberMap.HooksCloseSpeed;
-                } else {
-                    hooksMotorSpeed = 0; // Stop motor if InLimitSwitch is pressed
-                }
-            } else if (hooksPosition == HooksPosition.OPEN) {
-                if (!_inputs.HooksOpenLimitSwitch) {
-                    hooksMotorSpeed = ClimberMap.HooksOpenSpeed;
-                } else {
-                    hooksMotorSpeed = 0; // Stop motor if OutLimitSwitch is pressed
-                }
+        // if (allowedToChangeHooksState) {
+        if (hooksPosition == HooksPosition.CLOSED) {
+            if (!_inputs.HooksClosedLimitSwitch) {
+                hooksMotorSpeed = ClimberMap.HooksCloseSpeed;
+            } else {
+                hooksMotorSpeed = 0; // Stop motor if InLimitSwitch is pressed
             }
-
+        } else if (hooksPosition == HooksPosition.OPEN) {
+            if (!_inputs.HooksOpenLimitSwitch) {
+                hooksMotorSpeed = ClimberMap.HooksOpenSpeed;
+            } else {
+                hooksMotorSpeed = 0; // Stop motor if OutLimitSwitch is pressed
+            }
         }
+
+        // }
         _climber.setHookMotorSpeed(hooksMotorSpeed);
 
     }
@@ -164,7 +164,7 @@ public class ClimberSubsystem extends SubsystemBase {
         return this.run(() -> {
             _climber.setClimbingWenchSpeed(speed);
         }).until(() -> _inputs.ClimbWenchInLimitSwitch || _inputs.ClimbWenchOutLimitSwitch)
-                .finallyDo(() -> stopClimbingMotorsCommand().schedule());
+                .andThen(stopClimbingMotorsCommand());
     }
 
     public Command runHooksManually(double speed) {
