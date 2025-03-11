@@ -7,7 +7,7 @@ public class ClimberInputs {
     public enum ClimberPosition {
         /** The starting position of the climber (Up) */
         IN,
-        /** 𝓣𝓱𝓮 𝓮𝓷𝓭𝓲𝓷𝓰 𝓹𝓸𝓼𝓲𝓸𝓷 𝓸𝓯 𝓽𝓱𝓮 𝓬𝓵𝓲𝓶𝓫𝓮𝓻 (Down) */
+        /** The ending position of the climber (Down) */
         OUT
     }
 

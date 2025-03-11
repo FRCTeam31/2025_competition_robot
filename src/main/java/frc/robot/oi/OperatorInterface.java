@@ -20,7 +20,6 @@ public class OperatorInterface {
 
     public SupplierXboxController DriverController;
     public SupplierXboxController OperatorController;
-    public SupplierXboxController OperatorController;
 
     public OperatorInterface() {
         DriverController = new SupplierXboxController(Controls.DRIVER_PORT);
@@ -67,7 +66,7 @@ public class OperatorInterface {
         DriverController.pov(Controls.upLeft).onTrue(setSnapToSetpointCommandFunc.apply(Controls.upLeft + 90));
     }
 
-    public void bindOperatorControls(Command intakeCoralCommand, Command ejectCoralCommand, Command stopIntakeCommand) {
+    public void bindOperatorControls() {
         // Not implemented yet
     }
 
