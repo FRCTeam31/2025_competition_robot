@@ -94,12 +94,20 @@ public class Container {
       Elevator
           .setDefaultCommand(Elevator.runElevatorWithController(OperatorInterface.OperatorController.getTriggerSupplier(
               0.06, 0)));
-      EndEffector.setDefaultCommand(EndEffector.defaultCommand(() -> false, () -> false));
+      EndEffector.setDefaultCommand(
+          EndEffector.defaultCommand(OperatorInterface.OperatorController.rightBumper(),
+              OperatorInterface.OperatorController.leftBumper()));
 
       OperatorInterface.OperatorController.y().onTrue(EndEffector.setWristSetpointCommand(-4));
 
       OperatorInterface.OperatorController.x().onTrue(EndEffector.setWristSetpointCommand(-65));
       OperatorInterface.OperatorController.a().onTrue(EndEffector.setWristSetpointCommand(-130));
+
+      // OperatorInterface.OperatorController.rightBumper().whileTrue(EndEffector.setIntakeSpeedCommand(0.5))
+      //     .onFalse(EndEffector.stopIntakeMotorCommand());
+
+      // OperatorInterface.OperatorController.leftBumper().whileTrue(EndEffector.setIntakeSpeedCommand(-0.5))
+      //     .onFalse(EndEffector.stopIntakeMotorCommand());
 
       // Elevator.setDefaultCommand(
       //     Elevator.elevatorDefaultCommand(

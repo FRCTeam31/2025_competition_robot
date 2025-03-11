@@ -21,7 +21,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
         public static final byte WristMotorCanID = 20;
         public static final byte LimitSwitchDIOChannel = 9;
         public static final double EjectSpeed = 0.5;
-        public static final double IntakeSpeed = -0.5;
+        public static final double IntakeSpeed = -1;
         public static final byte IntakeCurrentLimit = 20;
         public static final byte WristCurrentLimit = 30;
 
@@ -94,10 +94,15 @@ public class EndEffectorSubsystem extends SubsystemBase {
         return this.run(() -> {
             if (runIntakeIn.getAsBoolean()) {
                 _endEffector.setIntakeSpeed(EndEffectorMap.IntakeSpeed);
+                System.out.println(" Not Stopping Intake Motors");
+
             } else if (runIntakeOut.getAsBoolean()) {
                 _endEffector.setIntakeSpeed(EndEffectorMap.EjectSpeed);
+                System.out.println(" Not Stopping Intake Motors");
+
             } else {
                 _endEffector.stopIntakeMotor();
+                System.out.println("Stopping Intake Motors");
             }
 
             seekWristAngle();
@@ -105,6 +110,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
     }
 
     /**
+    
      * Sets the wrist setpoint
      * @param angle Desired angle
      */
@@ -121,11 +127,11 @@ public class EndEffectorSubsystem extends SubsystemBase {
     }
 
     public Command stopBothMotorsCommand() {
-        return Commands.runOnce(() -> _endEffector.stopMotors());
+        return this.runOnce(() -> _endEffector.stopMotors());
     }
 
     public Command setIntakeSpeedCommand(double speed) {
-        return Commands.runOnce(() -> _endEffector.setIntakeSpeed(speed));
+        return this.run(() -> _endEffector.setIntakeSpeed(speed));
     }
 
     // TODO: Add more named commands for running the intake and rotating the wrist to predefined setpoints (See above todo)
