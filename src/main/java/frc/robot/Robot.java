@@ -127,6 +127,7 @@ public class Robot extends LoggedRobot {
     Container.LEDs.setBackgroundPattern(disabledPattern);
     Container.LEDs.clearForegroundPattern();
     // Container.Swerve.disableAutoAlignCommand().schedule();
+    // Container.Swerve.disableAutoAlignCommand().schedule();
   }
 
   /**
@@ -158,12 +159,14 @@ public class Robot extends LoggedRobot {
     Container.LEDs.setBackgroundPattern(combinedPattern);
     Container.LEDs.clearForegroundPattern();
     // Container.Swerve.disableAutoAlignCommand().schedule();
+    // Container.Swerve.disableAutoAlignCommand().schedule();
 
     // Cancel any auto command that's still running and reset the subsystem states
     if (_autonomousCommand != null) {
       _autonomousCommand.cancel();
 
       // Stop any subsystems still running
+      // Container.Swerve.stopAllMotors();
       // Container.Swerve.stopAllMotors();
     }
 
@@ -176,6 +179,7 @@ public class Robot extends LoggedRobot {
     } else {
       // Reset the gyro if we're on the red alliance
       if (onRedAlliance()) {
+        // Container.Swerve.resetGyro();
         // Container.Swerve.resetGyro();
       }
 
@@ -221,6 +225,7 @@ public class Robot extends LoggedRobot {
     Elastic.selectTab("Test");
 
     CommandScheduler.getInstance().cancelAll();
+    // Container.Swerve.disableAutoAlignCommand().schedule();
     // Container.Swerve.disableAutoAlignCommand().schedule();
   }
 

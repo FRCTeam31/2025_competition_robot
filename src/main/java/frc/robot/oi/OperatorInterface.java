@@ -20,9 +20,11 @@ public class OperatorInterface {
 
     public SupplierXboxController DriverController;
     public SupplierXboxController OperatorController;
+    public SupplierXboxController OperatorController;
 
     public OperatorInterface() {
         DriverController = new SupplierXboxController(Controls.DRIVER_PORT);
+        OperatorController = new SupplierXboxController(Controls.OPERATOR_PORT);
         OperatorController = new SupplierXboxController(Controls.OPERATOR_PORT);
     }
 
@@ -72,4 +74,5 @@ public class OperatorInterface {
     public void setDriverRumbleIntensity(double intensity) {
         DriverController.setRumble(RumbleType.kBothRumble, intensity);
     }
+
 }
