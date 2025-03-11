@@ -61,6 +61,9 @@ public class Container {
       // OperatorInterface.bindOperatorControls(
       //     Climber.toggleHooksStateCommand(), Climber.setCLimberOutCommand(), Climber.setClimberInCommand());
 
+      OperatorInterface.OperatorController.a().onTrue(Climber.setClimberStateCommand(ClimberPosition.OUT));
+      OperatorInterface.OperatorController.b().onTrue(Climber.setClimberStateCommand(ClimberPosition.IN));
+
     } catch (Exception e) {
       DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());
     }
