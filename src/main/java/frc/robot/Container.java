@@ -96,7 +96,8 @@ public class Container {
               0.06, 0)));
       EndEffector.setDefaultCommand(
           EndEffector.defaultCommand(OperatorInterface.OperatorController.rightBumper(),
-              OperatorInterface.OperatorController.leftBumper()));
+              OperatorInterface.OperatorController.leftBumper(),
+              OperatorInterface.OperatorController.getLeftStickYSupplier(0.06, 0)));
 
       OperatorInterface.OperatorController.y().onTrue(EndEffector.setWristSetpointCommand(-4));
 

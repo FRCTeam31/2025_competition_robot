@@ -2,6 +2,7 @@ package frc.robot.subsystems.endEffector;
 
 import java.util.Map;
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.ExtendedPIDConstants;
@@ -46,6 +47,8 @@ public class EndEffectorSubsystem extends SubsystemBase {
     private IEndEffector _endEffector;
     private PIDController _wristPID;
 
+    private boolean _endEffectorManuallyControlled = false;
+
     private EndEffectorInputsAutoLogged _inputs = new EndEffectorInputsAutoLogged();
 
     // TODO: Add a system to set the wrist angle to a predefined setpoint. Look at the system used in the elevator subsystem for reference. We will most likely use the same enums used in the elevator subsystem so it is easier to implement the auto rotating system later. For now, create a temporary enum.
@@ -57,26 +60,42 @@ public class EndEffectorSubsystem extends SubsystemBase {
         SmartDashboard.putData(_wristPID);
     }
 
-    public void seekWristAngle() {
+    public void seekWristAngle(double endEffectorManualControl) {
         var belowMinHeightThreshold = Container.Elevator
                 .getElevatorPositionMeters() <= EndEffectorMap.LowerElevatorHeightLimit;
         var aboveMaxHeightThreshold = Container.Elevator
                 .getElevatorPositionMeters() >= EndEffectorMap.UpperElevatorHeightLimit;
+
+        var inDangerZone = belowMinHeightThreshold || aboveMaxHeightThreshold ? true : false;
+
         double pid = belowMinHeightThreshold
                 ? _wristPID.calculate(_inputs.EndEffectorAngleDegrees, 0)
                 : _wristPID.calculate(_inputs.EndEffectorAngleDegrees);
 
         if (aboveMaxHeightThreshold && !belowMinHeightThreshold) {
             double previousSetpoint = _wristPID.getSetpoint();
-            _wristPID.setSetpoint(Math.min(previousSetpoint, EndEffectorMap.SafeWristAngleAtUpperElevatorHeightLimit));
+            _wristPID.setSetpoint(
+                    Math.min(previousSetpoint, EndEffectorMap.SafeWristAngleAtUpperElevatorHeightLimit));
         }
+
         SmartDashboard.putNumber(getName() + "/WristPID", pid);
         SmartDashboard.putNumber(getName() + "/WristSetpoint", _wristPID.getSetpoint());
 
         pid = MathUtil.clamp(pid, -EndEffectorMap.WristMaxOutput, EndEffectorMap.WristMaxOutput);
 
         Logger.recordOutput(getName() + "/WristPID-FinalOutput", pid);
-        _endEffector.setWristSpeed(pid);
+
+        if ((endEffectorManualControl != 0
+                || _endEffectorManuallyControlled) && !inDangerZone) {
+            _endEffector.setWristSpeed(-endEffectorManualControl * EndEffectorMap.WristMaxOutput);
+            _endEffectorManuallyControlled = true;
+        } else {
+            _endEffector.setWristSpeed(pid);
+        }
+    }
+
+    public void resetWristManualControl() {
+        _endEffectorManuallyControlled = false;
     }
 
     @Override
@@ -90,7 +109,8 @@ public class EndEffectorSubsystem extends SubsystemBase {
      * @param runIntakeIn
      * @param runIntakeOut
      */
-    public Command defaultCommand(BooleanSupplier runIntakeIn, BooleanSupplier runIntakeOut) {
+    public Command defaultCommand(BooleanSupplier runIntakeIn, BooleanSupplier runIntakeOut,
+            DoubleSupplier wristManualControl) {
         return this.run(() -> {
             if (runIntakeIn.getAsBoolean()) {
                 _endEffector.setIntakeSpeed(EndEffectorMap.IntakeSpeed);
@@ -105,7 +125,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
                 System.out.println("Stopping Intake Motors");
             }
 
-            seekWristAngle();
+            seekWristAngle(wristManualControl.getAsDouble());
         });
     }
 
@@ -115,7 +135,12 @@ public class EndEffectorSubsystem extends SubsystemBase {
      * @param angle Desired angle
      */
     public Command setWristSetpointCommand(double angle) {
+        _endEffectorManuallyControlled = false;
         return Commands.runOnce(() -> _wristPID.setSetpoint(angle));
+    }
+
+    public Command wristManualControlCommand(double speed) {
+        return Commands.runOnce(() -> _endEffector.setWristSpeed(speed));
     }
 
     public Command stopIntakeMotorCommand() {
