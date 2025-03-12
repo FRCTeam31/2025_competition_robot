@@ -24,6 +24,7 @@ public class OperatorInterface {
     public OperatorInterface() {
         DriverController = new SupplierXboxController(Controls.DRIVER_PORT);
         OperatorController = new SupplierXboxController(Controls.OPERATOR_PORT);
+        OperatorController = new SupplierXboxController(Controls.OPERATOR_PORT);
     }
 
     /**
@@ -65,11 +66,12 @@ public class OperatorInterface {
         DriverController.pov(Controls.upLeft).onTrue(setSnapToSetpointCommandFunc.apply(Controls.upLeft + 90));
     }
 
-    public void bindOperatorControls(Command intakeCoralCommand, Command ejectCoralCommand, Command stopIntakeCommand) {
+    public void bindOperatorControls() {
         // Not implemented yet
     }
 
     public void setDriverRumbleIntensity(double intensity) {
         DriverController.setRumble(RumbleType.kBothRumble, intensity);
     }
+
 }

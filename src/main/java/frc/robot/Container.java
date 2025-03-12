@@ -10,6 +10,10 @@ import frc.robot.dashboard.DashboardSection;
 import frc.robot.oi.OperatorInterface;
 import frc.robot.oi.BuildableAutoRoutine;
 import frc.robot.subsystems.*;
+import frc.robot.subsystems.climbing.ClimberSubsystem;
+import frc.robot.subsystems.drivetrain.SwerveMap;
+import frc.robot.subsystems.drivetrain.SwerveSubsystem;
+import frc.robot.subsystems.climbing.ClimberInputs.ClimberPosition;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorPosition;
 import frc.robot.subsystems.endEffector.EndEffectorSubsystem;
@@ -22,11 +26,12 @@ public class Container {
   public static DashboardSection TestDashboardSection;
   public static BuildableAutoRoutine AutoBuilder;
 
-  // public static SwerveSubsystem Swerve;
-  public static ElevatorSubsystem Elevator;
-  public static EndEffectorSubsystem EndEffector;
+  public static SwerveSubsystem Swerve;
   public static VisionSubsystem Vision;
+  public static ClimberSubsystem Climber;
   public static PwmLEDs LEDs;
+  public static EndEffectorSubsystem EndEffector;
+  public static ElevatorSubsystem Elevator;
   public static OperatorInterface OperatorInterface;
 
   public static void initialize(boolean isReal) {
@@ -34,7 +39,8 @@ public class Container {
       // Create subsystems
       LEDs = new PwmLEDs();
       Vision = new VisionSubsystem();
-      // Swerve = new SwerveSubsystem(isReal);
+      Swerve = new SwerveSubsystem(isReal);
+      Climber = new ClimberSubsystem(isReal);
       EndEffector = new EndEffectorSubsystem(isReal);
 
       // Register the named commands from each subsystem that may be used in PathPlanner
@@ -53,10 +59,8 @@ public class Container {
       OperatorInterface = new OperatorInterface();
       Elevator = new ElevatorSubsystem(isReal);
 
-      // Elevator.setDefaultCommand(
-      //     Elevator.elevatorDefaultCommand(
-      //         OperatorInterface.OperatorController.getTriggerSupplier(SwerveMap.Control.DriveDeadband,
-      //             SwerveMap.Control.DeadbandCurveWeight)));
+      Elevator.setDefaultCommand(
+          Elevator.runElevatorAutomaticSeekCommand());
 
       // Configure controller bindings
       // OperatorInterface.bindDriverControls(
