@@ -31,7 +31,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
 
         public static final double GearRatio = 20;
 
-        public static final double MaxWristAngle = 135;
+        public static final double MaxWristAngle = -135;
         public static final double MinWristAngle = 0;
 
         // Wrist Constants
@@ -95,16 +95,24 @@ public class EndEffectorSubsystem extends SubsystemBase {
         Logger.recordOutput(getName() + "/WristPID-FinalOutput", pid);
 
         var tryingToUseManualControl = endEffectorManualControl != 0 || _endEffectorManuallyControlled;
-        var finalManualSpeed = -endEffectorManualControl * EndEffectorMap.WristMaxOutput;
+
+        double manualMotorControl = -endEffectorManualControl * EndEffectorMap.WristMaxOutput;
+
+        if (_inputs.EndEffectorAngleDegrees <= EndEffectorMap.MaxWristAngle) {
+            manualMotorControl = Math.max(manualMotorControl, 0);
+        } else if (_inputs.EndEffectorAngleDegrees >= EndEffectorMap.MinWristAngle) {
+            manualMotorControl = Math.min(manualMotorControl, 0);
+        }
 
         if (tryingToUseManualControl && !inDangerZone) {
-            _endEffector.setWristSpeed(finalManualSpeed);
+            _endEffector.setWristSpeed(manualMotorControl);
             _endEffectorManuallyControlled = true;
         } else if (tryingToUseManualControl && aboveMaxHeightThreshold) {
             _endEffector.setWristSpeed(
                     _inputs.EndEffectorAngleDegrees >= EndEffectorMap.SafeWristAngleAtUpperElevatorHeightLimit
-                            ? Math.min(finalManualSpeed, 0)
-                            : finalManualSpeed);
+                            ? Math.min(manualMotorControl, 0)
+                            : manualMotorControl);
+            _endEffectorManuallyControlled = true;
         } else {
             _endEffector.setWristSpeed(pid);
         }

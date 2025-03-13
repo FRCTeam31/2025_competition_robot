@@ -27,7 +27,7 @@ public class SwerveMap {
         }
 
         // PID Constants
-        public static final ExtendedPIDConstants DrivePID = new ExtendedPIDConstants(0.01, 0, 0.000, 0.0, 0.096, 0,
+        public static final ExtendedPIDConstants DrivePID = new ExtendedPIDConstants(0.0075, 0, 0.000, 0.0, 0.099, 0.12,
                         0.14);
         public static final ExtendedPIDConstants SteeringPID = new ExtendedPIDConstants(4.1, 0, 0.04);
         public static final ExtendedPIDConstants AutoAlignPID = new ExtendedPIDConstants(4, 0, 0.08);

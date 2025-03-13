@@ -5,16 +5,12 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import frc.robot.Robot;
 import frc.robot.subsystems.drivetrain.gyro.GyroReal;
 import frc.robot.subsystems.drivetrain.gyro.GyroInputsAutoLogged;
@@ -215,30 +211,6 @@ public class SwerveIOPackager {
   public void addPoseEstimatorVisionMeasurement(Pose2d pose, double timestamp,
       Matrix<N3, N1> stdDeviations) {
     m_poseEstimator.addVisionMeasurement(pose, timestamp, stdDeviations);
-  }
-
-  /**
-   * Sets the modules to a specific voltage, and a heading of 0
-   * @param volts
-   */
-  public void setDriveVoltages(Voltage volts) {
-    var angle = Rotation2d.fromDegrees(0);
-    _frontLeftModule.setDriveVoltage(volts.magnitude(), angle);
-    _frontRightModule.setDriveVoltage(volts.magnitude(), angle);
-    _rearLeftModule.setDriveVoltage(volts.magnitude(), angle);
-    _rearRightModule.setDriveVoltage(volts.magnitude(), angle);
-  }
-
-  /**
-   * Logs a sysid frame for the FL module
-   * @param log
-   */
-  public void logSysIdDrive(SysIdRoutineLog log) {
-    // Record a frame for the left motors. Since these share an encoder, we consider
-    // the entire group to be one motor.
-    log.motor("Front-Left-Module").voltage(Units.Volts.of(m_moduleInputs[0].DriveMotorVoltage)) // measured motor voltage
-        .linearPosition(Units.Meters.of(m_moduleInputs[0].ModulePosition.distanceMeters)) // distance in meters
-        .linearVelocity(Units.MetersPerSecond.of(m_moduleInputs[0].ModuleState.speedMetersPerSecond)); // speed in meters per second
   }
 
   /**

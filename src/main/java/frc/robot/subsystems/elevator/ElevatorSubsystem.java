@@ -12,14 +12,10 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 public class ElevatorSubsystem extends SubsystemBase {
 
@@ -66,17 +62,16 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private Map<ElevatorPosition, Double> _positionMap = Map.of(
             ElevatorPosition.kAbsoluteMinimum, 0.0,
-            ElevatorPosition.kTrough, -0.63,
-            ElevatorPosition.kLow, 0.16,
-            ElevatorPosition.kMid, 0.45,
-            ElevatorPosition.kHigh, 0.63);
+            ElevatorPosition.kSource, 0.229,
+            ElevatorPosition.kTrough, 0.172,
+            ElevatorPosition.kLow, 0.311,
+            ElevatorPosition.kMid, 0.432,
+            ElevatorPosition.kHigh, 0.654);
 
     private ElevatorInputsAutoLogged _inputs = new ElevatorInputsAutoLogged();
     private IElevator _elevatorIO;
     private PIDController _positionPidController;
     private ElevatorFeedforward _positionFeedforward;
-
-    private SysIdRoutine _sysId;
 
     public ElevatorSubsystem(boolean isReal) {
         setName("Elevator");
@@ -90,22 +85,6 @@ public class ElevatorSubsystem extends SubsystemBase {
                 ElevatorMap.PositionPID.kV, ElevatorMap.PositionPID.kA);
 
         SmartDashboard.putData(_positionPidController);
-
-        // TODO: Remove when no longer needed
-        // _sysId = new SysIdRoutine(
-        //         // Ramp up at 1 volt per second for quasistatic tests, step at 2 volts in
-        //         // dynamic tests, run for 13 seconds.
-        //         new SysIdRoutine.Config(Units.Volts.of(2).per(Units.Second), Units.Volts.of(3),
-        //                 Units.Seconds.of(4)),
-        //         new SysIdRoutine.Mechanism(
-        //                 // Tell SysId how to plumb the driving voltage to the motors.
-        //                 this::setMotorVoltages,
-        //                 // Tell SysId how to record a frame of data for each motor on the mechanism
-        //                 // being characterized.
-        //                 this::logSysIdFrame,
-        //                 // Tell SysId to make generated commands require this subsystem, suffix test
-        //                 // state in WPILog with this subsystem's name
-        //                 this));
 
         // _stopMotorsButton = new SendableButton("Stop Elevator Motors", () -> stopMotorsCommand());
         // Container.TestDashboardSection.putData("Elevator/Stop Motors", _stopMotorsButton);
@@ -203,19 +182,6 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     }
 
-    /**
-    * Logs a sysid frame for the FL module
-    * @param log
-    */
-    public void logSysIdFrame(SysIdRoutineLog log) {
-        // Record a frame. Since these share an encoder, we consider
-        // the entire group to be one motor.
-        log.motor("Elevator-Output")
-                .voltage(Units.Volts.of(_inputs.MotorVoltage)) // measured motor voltage
-                .linearPosition(Units.Meters.of(_inputs.ElevatorDistanceMeters)) // distance in meters
-                .linearVelocity(Units.MetersPerSecond.of(_inputs.ElevatorSpeedMetersPerSecond)); // speed in meters per second
-    }
-
     //#endregion
 
     //#region Commands
@@ -248,16 +214,6 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public Command stopMotorsCommand() {
         return this.runOnce(_elevatorIO::stopMotors);
-    }
-
-    // TODO: Remove when no longer needed
-    public Command runSysIdQuasistaticRoutineCommand(Direction dir) {
-        return _sysId.quasistatic(dir);
-    }
-
-    // TODO: Remove when no longer needed
-    public Command runSysIdDynamicRoutineCommand(Direction dir) {
-        return _sysId.dynamic(dir);
     }
 
     public Map<String, Command> elevatorNamedCommands() {

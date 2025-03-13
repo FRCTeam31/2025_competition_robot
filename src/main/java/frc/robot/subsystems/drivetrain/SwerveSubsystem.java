@@ -17,8 +17,6 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.dashboard.DrivetrainDashboardSection;
 import frc.robot.oi.ImpactRumbleHelper;
 import frc.robot.Container;
@@ -58,8 +56,6 @@ public class SwerveSubsystem extends SubsystemBase {
       .steps(Map.of(0.0, Color.kRed, 0.25, Color.kBlack))
       .scrollAtRelativeSpeed(Units.Hertz.of(2));
 
-  SysIdRoutine _driveSysIdRoutine;
-
   /**
    * Creates a new Drivetrain.
    */
@@ -78,29 +74,6 @@ public class SwerveSubsystem extends SubsystemBase {
     _drivetrainDashboardSection = new DrivetrainDashboardSection();
 
     configurePathPlanner();
-
-    // Create a new SysId routine for characterizing the drive.
-    // TODO: Remove when no longer needed
-    _driveSysIdRoutine = new SysIdRoutine(
-        // Ramp up at 1 volt per second for quasistatic tests, step at 2 volts in
-        // dynamic tests, run for 13 seconds.
-        new SysIdRoutine.Config(Units.Volts.of(2).per(Units.Second), Units.Volts.of(8),
-            Units.Seconds.of(15)),
-        new SysIdRoutine.Mechanism(
-            // Tell SysId how to plumb the driving voltage to the motors.
-            _swervePackager::setDriveVoltages,
-            // Tell SysId how to record a frame of data for each motor on the mechanism
-            // being characterized.
-            _swervePackager::logSysIdDrive,
-            // Tell SysId to make generated commands require this subsystem, suffix test
-            // state in WPILog with this subsystem's name
-            this));
-  }
-
-  public Command driveSwerveVoltage(double voltage) {
-    return Commands.runOnce(() -> {
-      _swervePackager.setDriveVoltages(Units.Volts.of(voltage));
-    }, this);
   }
 
   private void configurePathPlanner() {
@@ -406,16 +379,6 @@ public class SwerveSubsystem extends SubsystemBase {
         SwerveMap.Chassis.MaxAngularSpeedRadians / 2);
 
     return AutoBuilder.pathfindToPoseFlipped(pose, pathConstraints);
-  }
-
-  // TODO: Remove when no longer needed
-  public Command runSysIdQuasistaticRoutineCommand(Direction dir) {
-    return _driveSysIdRoutine.quasistatic(dir);
-  }
-
-  // TODO: Remove when no longer needed
-  public Command runSysIdDynamicRoutineCommand(Direction dir) {
-    return _driveSysIdRoutine.dynamic(dir);
   }
 
   /*

@@ -16,6 +16,7 @@ import frc.robot.subsystems.climbing.ClimberSubsystem;
 import frc.robot.subsystems.drivetrain.SwerveMap;
 import frc.robot.subsystems.drivetrain.SwerveSubsystem;
 import frc.robot.subsystems.climbing.ClimberInputs.ClimberPosition;
+import frc.robot.subsystems.climbing.ClimberInputs.HooksPosition;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorPosition;
 import frc.robot.subsystems.endEffector.EndEffectorSubsystem;
@@ -65,13 +66,14 @@ public class Container {
           Elevator.runElevatorAutomaticSeekCommand());
 
       // Configure controller bindings
-      // OperatorInterface.bindDriverControls(
-      //     Swerve.resetGyroCommand(),
-      //     Swerve.enableLockOnCommand(),
-      //     Swerve.disableAutoAlignCommand(),
-      //     Swerve::setAutoAlignSetpointCommand,
-      //     Swerve::setDefaultCommand,
-      //     Swerve::driveFieldRelativeCommand);
+      OperatorInterface.bindDriverControls(
+          Swerve.resetGyroCommand(),
+          Swerve.enableLockOnCommand(),
+          Swerve.disableAutoAlignCommand(),
+          Swerve::setAutoAlignSetpointCommand,
+          Swerve::setDefaultCommand,
+          Swerve::driveFieldRelativeCommand);
+
       OperatorInterface.bindOperatorControls(Elevator, EndEffector);
       // OperatorController.povUp()
       //     .onTrue(Elevator.runSysIdDynamicRoutineCommand(Direction.kForward))
