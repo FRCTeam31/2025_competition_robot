@@ -63,13 +63,13 @@ public class Container {
           Elevator.runElevatorAutomaticSeekCommand());
 
       // Configure controller bindings
-      // OperatorInterface.bindDriverControls(
-      //     Swerve.resetGyroCommand(),
-      //     Swerve.enableLockOnCommand(),
-      //     Swerve.disableAutoAlignCommand(),
-      //     Swerve::setAutoAlignSetpointCommand,
-      //     Swerve::setDefaultCommand,
-      //     Swerve::driveFieldRelativeCommand);
+      OperatorInterface.bindDriverControls(
+          Swerve.resetGyroCommand(),
+          Swerve.enableLockOnCommand(),
+          Swerve.disableAutoAlignCommand(),
+          Swerve::setAutoAlignSetpointCommand,
+          Swerve::setDefaultCommand,
+          Swerve::driveFieldRelativeCommand);
       // OperatorInterface.bindOperatorControls(
       //     Elevator.goToElevatorPositionCommand(ElevatorPosition.kSource),
       //     Elevator.goToElevatorPositionCommand(ElevatorPosition.kTrough),
@@ -108,15 +108,21 @@ public class Container {
       OperatorInterface.OperatorController.x().onTrue(EndEffector.setWristSetpointCommand(-65));
       OperatorInterface.OperatorController.a().onTrue(EndEffector.setWristSetpointCommand(-130));
 
+      var DriverController = OperatorInterface.DriverController;
       Climber.setDefaultCommand(
-          Climber.defaultClimbingCommand(() -> (OperatorInterface.DriverController.leftBumper().getAsBoolean()
-              && OperatorInterface.DriverController.x().getAsBoolean()),
-              () -> (OperatorInterface.DriverController.rightBumper().getAsBoolean()
-                  && OperatorInterface.DriverController.x().getAsBoolean()),
-              () -> (OperatorInterface.DriverController.leftBumper().getAsBoolean()
-                  && OperatorInterface.DriverController.b().getAsBoolean()),
-              () -> (OperatorInterface.DriverController.rightBumper().getAsBoolean()
-                  && OperatorInterface.DriverController.b().getAsBoolean())));
+          // Climber.defaultClimbingCommand(() -> (OperatorInterface.DriverController.leftBumper().getAsBoolean()
+          //     && OperatorInterface.DriverController.x().getAsBoolean()),
+          //     () -> (OperatorInterface.DriverController.rightBumper().getAsBoolean()
+          //         && OperatorInterface.DriverController.x().getAsBoolean()),
+          //     () -> (OperatorInterface.DriverController.leftBumper().getAsBoolean()
+          //         && OperatorInterface.DriverController.b().getAsBoolean()),
+          //     () -> (OperatorInterface.DriverController.rightBumper().getAsBoolean()
+          //         && OperatorInterface.DriverController.b().getAsBoolean())));
+
+          Climber.defaultClimbingCommand(DriverController.leftBumper().and(DriverController.x()),
+              DriverController.rightBumper().and(DriverController.x()),
+              DriverController.leftBumper().and(DriverController.b()),
+              DriverController.rightBumper().and(DriverController.b())));
 
       // OperatorInterface.OperatorController.rightBumper().whileTrue(EndEffector.setIntakeSpeedCommand(0.5))
       //     .onFalse(EndEffector.stopIntakeMotorCommand());

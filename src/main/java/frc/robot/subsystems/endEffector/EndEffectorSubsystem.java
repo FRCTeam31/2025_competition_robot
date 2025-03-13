@@ -114,15 +114,12 @@ public class EndEffectorSubsystem extends SubsystemBase {
         return this.run(() -> {
             if (runIntakeIn.getAsBoolean()) {
                 _endEffector.setIntakeSpeed(EndEffectorMap.IntakeSpeed);
-                System.out.println(" Not Stopping Intake Motors");
 
             } else if (runIntakeOut.getAsBoolean()) {
                 _endEffector.setIntakeSpeed(EndEffectorMap.EjectSpeed);
-                System.out.println(" Not Stopping Intake Motors");
 
             } else {
                 _endEffector.stopIntakeMotor();
-                System.out.println("Stopping Intake Motors");
             }
 
             seekWristAngle(wristManualControl.getAsDouble());

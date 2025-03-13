@@ -26,8 +26,8 @@ public class ClimberSubsystem extends SubsystemBase {
         public static final double ActuallyClimbingSpeed = 0.8;
         public static final double MaxChangeClimberStateTime = 7;
         public static final int ClimberHookMotorCANID = 21;
-        public static final int HooksOpenLimitSwitchChannel = 4;
-        public static final int HooksClosedLimitSwitchChannel = 2;
+        public static final int HooksOpenLimitSwitchChannel = 2;
+        public static final int HooksClosedLimitSwitchChannel = 4;
         public static final double HooksOpenSpeed = -0.5;
         public static final double HooksCloseSpeed = 0.5;
         public static final double MaxChangeHookStateTime = 5;
@@ -120,6 +120,7 @@ public class ClimberSubsystem extends SubsystemBase {
     public Command defaultClimbingCommand(BooleanSupplier climbIn, BooleanSupplier climbOut,
             BooleanSupplier hooksClosed, BooleanSupplier hooksOpen) {
         if (climbIn.getAsBoolean()) {
+
             return setClimberInCommand();
         } else if (climbOut.getAsBoolean()) {
             return setCLimberOutCommand();
