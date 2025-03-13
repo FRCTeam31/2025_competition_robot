@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.dashboard.TeleopDashboardTab;
 import frc.robot.dashboard.DashboardSection;
 import frc.robot.oi.OperatorInterface;
@@ -64,13 +65,14 @@ public class Container {
           Elevator.runElevatorAutomaticSeekCommand());
 
       // Configure controller bindings
-      // OperatorInterface.bindDriverControls(
-      //     Swerve.resetGyroCommand(),
-      //     Swerve.enableLockOnCommand(),
-      //     Swerve.disableAutoAlignCommand(),
-      //     Swerve::setAutoAlignSetpointCommand,
-      //     Swerve::setDefaultCommand,
-      //     Swerve::driveFieldRelativeCommand);
+      OperatorInterface.bindDriverControls(
+          Swerve.resetGyroCommand(),
+          Swerve.enableLockOnCommand(),
+          Swerve.disableAutoAlignCommand(),
+          Swerve::setAutoAlignSetpointCommand,
+          Swerve::setDefaultCommand,
+          Swerve::driveFieldRelativeCommand);
+
       // OperatorInterface.bindOperatorControls(
       //     Elevator.goToElevatorPositionCommand(ElevatorPosition.kSource),
       //     Elevator.goToElevatorPositionCommand(ElevatorPosition.kTrough),
@@ -125,11 +127,11 @@ public class Container {
       //     DriverController.leftBumper().and(DriverController.b()),
       //     DriverController.rightBumper().and(DriverController.b())));
 
-      OperatorInterface.DriverController.a().onTrue(Climber.setClimberOutCommand());
-      OperatorInterface.DriverController.b().onTrue(Climber.setClimberInCommand());
+      // OperatorInterface.DriverController.a().onTrue(Climber.setClimberOutCommand());
+      // OperatorInterface.DriverController.b().onTrue(Climber.setClimberInCommand());
 
-      OperatorInterface.DriverController.y().onTrue(Climber.setHooksStateCommand(HooksPosition.OPEN));
-      OperatorInterface.DriverController.x().onTrue(Climber.setHooksStateCommand(HooksPosition.CLOSED));
+      // OperatorInterface.DriverController.y().onTrue(Climber.setHooksStateCommand(HooksPosition.OPEN));
+      // OperatorInterface.DriverController.x().onTrue(Climber.setHooksStateCommand(HooksPosition.CLOSED));
 
       // OperatorInterface.OperatorController.rightBumper().whileTrue(EndEffector.setIntakeSpeedCommand(0.5))
       //     .onFalse(EndEffector.stopIntakeMotorCommand());

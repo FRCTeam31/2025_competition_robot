@@ -145,8 +145,8 @@ public class SwerveModuleReal implements ISwerveModule {
 
   @Override
   public void setDriveVoltage(double voltage, Rotation2d moduleAngle) {
-    var speed = voltage / _driveMotor.getBusVoltage();
-    _driveMotor.set(speed);
+
+    _driveMotor.setVoltage(voltage);
 
     setModuleAngle(moduleAngle);
   }
