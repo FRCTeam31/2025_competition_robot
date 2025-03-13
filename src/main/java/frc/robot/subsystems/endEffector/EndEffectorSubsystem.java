@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Container;
+import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorPosition;
 
 public class EndEffectorSubsystem extends SubsystemBase {
 
@@ -49,6 +50,14 @@ public class EndEffectorSubsystem extends SubsystemBase {
 
     private boolean _endEffectorManuallyControlled = false;
 
+    private Map<ElevatorPosition, Double> _angleAtElevatorHeight = Map.of(
+            ElevatorPosition.kAbsoluteMinimum, 0.0,
+            ElevatorPosition.kSource, 0.0,
+            ElevatorPosition.kTrough, 0.0,
+            ElevatorPosition.kLow, 0.0,
+            ElevatorPosition.kMid, 0.0,
+            ElevatorPosition.kHigh, 0.0);
+
     private EndEffectorInputsAutoLogged _inputs = new EndEffectorInputsAutoLogged();
 
     // TODO: Add a system to set the wrist angle to a predefined setpoint. Look at the system used in the elevator subsystem for reference. We will most likely use the same enums used in the elevator subsystem so it is easier to implement the auto rotating system later. For now, create a temporary enum.
@@ -66,7 +75,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
         var aboveMaxHeightThreshold = Container.Elevator
                 .getElevatorPositionMeters() >= EndEffectorMap.UpperElevatorHeightLimit;
 
-        var inDangerZone = belowMinHeightThreshold || aboveMaxHeightThreshold ? true : false;
+        boolean inDangerZone = belowMinHeightThreshold || aboveMaxHeightThreshold;
 
         double pid = belowMinHeightThreshold
                 ? _wristPID.calculate(_inputs.EndEffectorAngleDegrees, 0)
@@ -94,7 +103,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
         }
     }
 
-    public void resetWristManualControl() {
+    private void resetWristManualControl() {
         _endEffectorManuallyControlled = false;
     }
 
@@ -114,15 +123,12 @@ public class EndEffectorSubsystem extends SubsystemBase {
         return this.run(() -> {
             if (runIntakeIn.getAsBoolean()) {
                 _endEffector.setIntakeSpeed(EndEffectorMap.IntakeSpeed);
-                System.out.println(" Not Stopping Intake Motors");
 
             } else if (runIntakeOut.getAsBoolean()) {
                 _endEffector.setIntakeSpeed(EndEffectorMap.EjectSpeed);
-                System.out.println(" Not Stopping Intake Motors");
 
             } else {
                 _endEffector.stopIntakeMotor();
-                System.out.println("Stopping Intake Motors");
             }
 
             seekWristAngle(wristManualControl.getAsDouble());
@@ -135,12 +141,28 @@ public class EndEffectorSubsystem extends SubsystemBase {
      * @param angle Desired angle
      */
     public Command setWristSetpointCommand(double angle) {
-        _endEffectorManuallyControlled = false;
-        return Commands.runOnce(() -> _wristPID.setSetpoint(angle));
+        return Commands.runOnce(this::resetWristManualControl).andThen(() -> {
+            _wristPID.setSetpoint(angle);
+        });
+    }
+
+    /**
+    
+     * Sets the wrist setpoint
+     * @param position Elevator position
+     */
+    public Command setWristSetpointCommand(ElevatorPosition position) {
+        return Commands.runOnce(this::resetWristManualControl).andThen(() -> {
+            _wristPID.setSetpoint(_angleAtElevatorHeight.get(position));
+        });
     }
 
     public Command wristManualControlCommand(double speed) {
         return Commands.runOnce(() -> _endEffector.setWristSpeed(speed));
+    }
+
+    public Command resetWristManualControlCommand() {
+        return Commands.runOnce(this::resetWristManualControl);
     }
 
     public Command stopIntakeMotorCommand() {

@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import frc.robot.subsystems.drivetrain.SwerveMap;
+import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorPosition;
 
 public class OperatorInterface {
     public static class OIMap {
@@ -66,8 +67,23 @@ public class OperatorInterface {
         DriverController.pov(Controls.upLeft).onTrue(setSnapToSetpointCommandFunc.apply(Controls.upLeft + 90));
     }
 
-    public void bindOperatorControls() {
-        // Not implemented yet
+    public void bindOperatorControls(Function<ElevatorPosition, Command> setElevatorEndEffectorCombinedSetpointFunc,
+            Function<Double, Command> runIntakeFunc,
+            Command stopIntakeCommand,
+            Command resetEndEffectorManualControlCommand, Command resetElevatorManualControlCommand) {
+
+        OperatorController.povDown().onTrue(setElevatorEndEffectorCombinedSetpointFunc.apply(ElevatorPosition.kTrough));
+        OperatorController.a().onTrue(setElevatorEndEffectorCombinedSetpointFunc.apply(ElevatorPosition.kLow));
+        OperatorController.x().onTrue(setElevatorEndEffectorCombinedSetpointFunc.apply(ElevatorPosition.kMid));
+        OperatorController.povUp().onTrue(setElevatorEndEffectorCombinedSetpointFunc.apply(ElevatorPosition.kHigh));
+        OperatorController.start().onTrue(setElevatorEndEffectorCombinedSetpointFunc.apply(ElevatorPosition.kSource));
+        OperatorController.b()
+                .onTrue(setElevatorEndEffectorCombinedSetpointFunc.apply(ElevatorPosition.kAbsoluteMinimum));
+
+        // OperatorController.rightBumper().whileTrue(runIntakeFunc.apply(0.5)).onFalse(stopIntakeCommand);
+        // OperatorController.leftBumper().whileTrue(runIntakeFunc.apply(-0.5)).onFalse(stopIntakeCommand);
+
+        OperatorController.leftStick().onTrue(resetEndEffectorManualControlCommand);
     }
 
     public void setDriverRumbleIntensity(double intensity) {

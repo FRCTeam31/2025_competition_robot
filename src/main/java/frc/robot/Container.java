@@ -103,10 +103,11 @@ public class Container {
               OperatorInterface.OperatorController.leftBumper(),
               OperatorInterface.OperatorController.getLeftStickYSupplier(0.06, 0)));
 
-      OperatorInterface.OperatorController.y().onTrue(EndEffector.setWristSetpointCommand(-4));
+      // OperatorInterface.OperatorController.y().onTrue(EndEffector.setWristSetpointCommand(-4));
+      // OperatorInterface.OperatorController.x().onTrue(EndEffector.setWristSetpointCommand(-65));
+      // OperatorInterface.OperatorController.a().onTrue(EndEffector.setWristSetpointCommand(-130));
 
-      OperatorInterface.OperatorController.x().onTrue(EndEffector.setWristSetpointCommand(-65));
-      OperatorInterface.OperatorController.a().onTrue(EndEffector.setWristSetpointCommand(-130));
+      OperatorInterface.OperatorController.leftStick().onTrue(EndEffector.resetWristManualControlCommand());
 
       // OperatorInterface.OperatorController.rightBumper().whileTrue(EndEffector.setIntakeSpeedCommand(0.5))
       //     .onFalse(EndEffector.stopIntakeMotorCommand());

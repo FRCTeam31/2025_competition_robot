@@ -50,15 +50,22 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public enum ElevatorPosition {
-        kBottom,
+        /** The lowest the elevator can physically go */
+        kAbsoluteMinimum,
+        /** The position to intake from source */
+        kSource,
+        /** The position to score in the trough, L1 */
         kTrough,
+        /** The position to score on the level just above the trough, L2 */
         kLow,
+        /** The position to score on the level two above the trought, L3 */
         kMid,
+        /** The position to score on the highest level of the reef, L4 */
         kHigh
     }
 
     private Map<ElevatorPosition, Double> _positionMap = Map.of(
-            ElevatorPosition.kBottom, 0.0,
+            ElevatorPosition.kAbsoluteMinimum, 0.0,
             ElevatorPosition.kTrough, -0.63,
             ElevatorPosition.kLow, 0.16,
             ElevatorPosition.kMid, 0.45,
@@ -260,7 +267,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                 "Elevator Middle Position Command", goToElevatorPositionCommand(ElevatorPosition.kMid),
                 "Elevator Low Position Command", goToElevatorPositionCommand(ElevatorPosition.kLow),
                 "Elevator Trough Position Command", goToElevatorPositionCommand(ElevatorPosition.kTrough),
-                "Elevator Source Position Command", goToElevatorPositionCommand(ElevatorPosition.kBottom));
+                "Elevator Source Position Command", goToElevatorPositionCommand(ElevatorPosition.kAbsoluteMinimum));
     }
 
     //#endregion
