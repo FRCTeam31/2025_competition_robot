@@ -61,8 +61,8 @@ public class ClimberIOReal implements IClimberIO {
         inputs.HooksMotorSpeed = climbHookMotorSpeed;
         inputs.ClimbWenchOutLimitSwitch = _climbOutLimitSwitch.get();
         inputs.ClimbWenchInLimitSwitch = _climbInLimitSwitch.get();
-        inputs.HooksClosedLimitSwitch = !_hooksOpenLimitSwitch.get();
-        inputs.HooksOpenLimitSwitch = _hooksClosedLimitSwitch.get();
+        inputs.HooksClosedLimitSwitch = _hooksClosedLimitSwitch.get();
+        inputs.HooksOpenLimitSwitch = !_hooksOpenLimitSwitch.get();
     }
 
     public void setClimbingWenchSpeed(double speed) {
@@ -70,6 +70,7 @@ public class ClimberIOReal implements IClimberIO {
     }
 
     public void setHookMotorSpeed(double speed) {
+        System.out.println("Set Hook Motor Speed: " + speed);
         _climbHooksMotor.set(VictorSPXControlMode.PercentOutput, speed);
     }
 
