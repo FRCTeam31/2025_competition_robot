@@ -51,6 +51,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public enum ElevatorPosition {
         kBottom,
+        kSource,
         kTrough,
         kLow,
         kMid,
@@ -59,10 +60,11 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private Map<ElevatorPosition, Double> _positionMap = Map.of(
             ElevatorPosition.kBottom, 0.0,
-            ElevatorPosition.kTrough, -0.63,
-            ElevatorPosition.kLow, 0.16,
-            ElevatorPosition.kMid, 0.45,
-            ElevatorPosition.kHigh, 0.63);
+            ElevatorPosition.kSource, 0.229,
+            ElevatorPosition.kTrough, 0.172,
+            ElevatorPosition.kLow, 0.311,
+            ElevatorPosition.kMid, 0.432,
+            ElevatorPosition.kHigh, 0.654);
 
     private ElevatorInputsAutoLogged _inputs = new ElevatorInputsAutoLogged();
     private IElevator _elevatorIO;
