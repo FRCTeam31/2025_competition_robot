@@ -52,11 +52,11 @@ public class EndEffectorSubsystem extends SubsystemBase {
 
     private Map<ElevatorPosition, Double> _angleAtElevatorHeight = Map.of(
             ElevatorPosition.kAbsoluteMinimum, 0.0,
-            ElevatorPosition.kSource, 0.0,
-            ElevatorPosition.kTrough, 0.0,
-            ElevatorPosition.kLow, 0.0,
-            ElevatorPosition.kMid, 0.0,
-            ElevatorPosition.kHigh, 0.0);
+            ElevatorPosition.kSource, -42.36,
+            ElevatorPosition.kTrough, -92.0,
+            ElevatorPosition.kLow, -126.0,
+            ElevatorPosition.kMid, -126.0,
+            ElevatorPosition.kHigh, -130.0);
 
     private EndEffectorInputsAutoLogged _inputs = new EndEffectorInputsAutoLogged();
 
@@ -94,10 +94,17 @@ public class EndEffectorSubsystem extends SubsystemBase {
 
         Logger.recordOutput(getName() + "/WristPID-FinalOutput", pid);
 
-        if ((endEffectorManualControl != 0
-                || _endEffectorManuallyControlled) && !inDangerZone) {
-            _endEffector.setWristSpeed(-endEffectorManualControl * EndEffectorMap.WristMaxOutput);
+        var tryingToUseManualControl = endEffectorManualControl != 0 || _endEffectorManuallyControlled;
+        var finalManualSpeed = -endEffectorManualControl * EndEffectorMap.WristMaxOutput;
+
+        if (tryingToUseManualControl && !inDangerZone) {
+            _endEffector.setWristSpeed(finalManualSpeed);
             _endEffectorManuallyControlled = true;
+        } else if (tryingToUseManualControl && aboveMaxHeightThreshold) {
+            _endEffector.setWristSpeed(
+                    _inputs.EndEffectorAngleDegrees >= EndEffectorMap.SafeWristAngleAtUpperElevatorHeightLimit
+                            ? Math.min(finalManualSpeed, 0)
+                            : finalManualSpeed);
         } else {
             _endEffector.setWristSpeed(pid);
         }

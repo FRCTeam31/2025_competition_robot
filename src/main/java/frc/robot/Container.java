@@ -5,6 +5,8 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.dashboard.TeleopDashboardTab;
 import frc.robot.dashboard.DashboardSection;
 import frc.robot.oi.OperatorInterface;
@@ -70,54 +72,40 @@ public class Container {
       //     Swerve::setAutoAlignSetpointCommand,
       //     Swerve::setDefaultCommand,
       //     Swerve::driveFieldRelativeCommand);
-      // OperatorInterface.bindOperatorControls(
-      //     Elevator.goToElevatorPositionCommand(ElevatorPosition.kSource),
-      //     Elevator.goToElevatorPositionCommand(ElevatorPosition.kTrough),
-      //     Elevator.goToElevatorPositionCommand(ElevatorPosition.kLow),
-      //     Elevator.goToElevatorPositionCommand(ElevatorPosition.kMid),
-      //     Elevator.goToElevatorPositionCommand(ElevatorPosition.kHigh));
-      // OperatorInterface.OperatorController.povUp()
+      OperatorInterface.bindOperatorControls(Elevator, EndEffector);
+      // OperatorController.povUp()
       //     .onTrue(Elevator.runSysIdDynamicRoutineCommand(Direction.kForward))
       //     .onFalse(Elevator.stopMotorsCommand());
-      // OperatorInterface.OperatorController.povDown()
+      // OperatorController.povDown()
       //     .onTrue(Elevator.runSysIdDynamicRoutineCommand(Direction.kReverse))
       //     .onFalse(Elevator.stopMotorsCommand());
-      // OperatorInterface.OperatorController.povRight()
+      // OperatorController.povRight()
       //     .onTrue(Elevator.runSysIdQuasistaticRoutineCommand(Direction.kForward))
       //     .onFalse(Elevator.stopMotorsCommand());
-      // OperatorInterface.OperatorController.povLeft()
+      // OperatorController.povLeft()
       //     .onTrue(Elevator.runSysIdQuasistaticRoutineCommand(Direction.kReverse))
       //     .onFalse(Elevator.stopMotorsCommand());
-      // OperatorInterface.OperatorController.start().onTrue(Elevator.goToElevatorBottomCommand());
-      // OperatorInterface.OperatorController.a()
+      // OperatorController.start().onTrue(Elevator.goToElevatorBottomCommand());
+      // OperatorController.a()
       //     .onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kBottom));
-      // OperatorInterface.OperatorController.y().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kMid));
-      // OperatorInterface.OperatorController.x().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kBottom));
-      // OperatorInterface.OperatorController.b().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kLow));
+      // OperatorController.y().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kMid));
+      // OperatorController.x().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kBottom));
+      // OperatorController.b().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kLow));
       // Elevator.setDefaultCommand(Elevator.runElevatorAutomaticSeekCommand());
-      Elevator
-          .setDefaultCommand(Elevator.runElevatorWithController(OperatorInterface.OperatorController.getTriggerSupplier(
-              0.06, 0)));
-      EndEffector.setDefaultCommand(
-          EndEffector.defaultCommand(OperatorInterface.OperatorController.rightBumper(),
-              OperatorInterface.OperatorController.leftBumper(),
-              OperatorInterface.OperatorController.getLeftStickYSupplier(0.06, 0)));
 
-      // OperatorInterface.OperatorController.y().onTrue(EndEffector.setWristSetpointCommand(-4));
-      // OperatorInterface.OperatorController.x().onTrue(EndEffector.setWristSetpointCommand(-65));
-      // OperatorInterface.OperatorController.a().onTrue(EndEffector.setWristSetpointCommand(-130));
+      // OperatorController.y().onTrue(EndEffector.setWristSetpointCommand(-4));
+      // OperatorController.x().onTrue(EndEffector.setWristSetpointCommand(-65));
+      // OperatorController.a().onTrue(EndEffector.setWristSetpointCommand(-130));
 
-      OperatorInterface.OperatorController.leftStick().onTrue(EndEffector.resetWristManualControlCommand());
-
-      // OperatorInterface.OperatorController.rightBumper().whileTrue(EndEffector.setIntakeSpeedCommand(0.5))
+      // OperatorController.rightBumper().whileTrue(EndEffector.setIntakeSpeedCommand(0.5))
       //     .onFalse(EndEffector.stopIntakeMotorCommand());
 
-      // OperatorInterface.OperatorController.leftBumper().whileTrue(EndEffector.setIntakeSpeedCommand(-0.5))
+      // OperatorController.leftBumper().whileTrue(EndEffector.setIntakeSpeedCommand(-0.5))
       //     .onFalse(EndEffector.stopIntakeMotorCommand());
 
       // Elevator.setDefaultCommand(
       //     Elevator.elevatorDefaultCommand(
-      //         OperatorInterface.OperatorController.getTriggerSupplier(
+      //         OperatorController.getTriggerSupplier(
       //             Controls.AXIS_DEADBAND,
       //             SwerveMap.Control.DeadbandCurveWeight)));
 
@@ -125,4 +113,14 @@ public class Container {
       DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());
     }
   }
+
+  //#region Commands
+
+  public static Command setCombinedHeightAndAngle(ElevatorPosition position) {
+    return Commands.parallel(
+        Elevator.goToElevatorPositionCommand(position),
+        EndEffector.setWristSetpointCommand(position));
+  }
+
+  //#endregion
 }

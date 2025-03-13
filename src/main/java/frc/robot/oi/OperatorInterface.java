@@ -10,9 +10,12 @@ import org.prime.control.SwerveControlSuppliers;
 
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
-
+import frc.robot.Container;
 import frc.robot.subsystems.drivetrain.SwerveMap;
+import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorPosition;
+import frc.robot.subsystems.endEffector.EndEffectorSubsystem;
+import frc.robot.subsystems.endEffector.EndEffectorSubsystem.EndEffectorMap;
 
 public class OperatorInterface {
     public static class OIMap {
@@ -67,23 +70,68 @@ public class OperatorInterface {
         DriverController.pov(Controls.upLeft).onTrue(setSnapToSetpointCommandFunc.apply(Controls.upLeft + 90));
     }
 
-    public void bindOperatorControls(Function<ElevatorPosition, Command> setElevatorEndEffectorCombinedSetpointFunc,
-            Function<Double, Command> runIntakeFunc,
-            Command stopIntakeCommand,
-            Command resetEndEffectorManualControlCommand, Command resetElevatorManualControlCommand) {
+    // public void bindOperatorControls(
+    //         Function<ElevatorPosition, Command> setElevatorEndEffectorCombinedSetpointFunc,
+    //         Function<Double, Command> runIntakeFunc,
+    //         Command stopIntakeCommand,
+    //         Command resetEndEffectorManualControlCommand,
+    //         Command resetElevatorManualControlCommand,
+    //         Consumer<Command> setDefaultElevatorCommandConsumer,
+    //         Consumer<Command> setDefaultEndEffectorCommandConsumer,
+    //         Function<DoubleSupplier, Command> elevatorDefaultCommand,
+    //         TriFunction<BooleanSupplier, BooleanSupplier, DoubleSupplier, Command> endEffectorDefaultCommand) {
 
-        OperatorController.povDown().onTrue(setElevatorEndEffectorCombinedSetpointFunc.apply(ElevatorPosition.kTrough));
-        OperatorController.a().onTrue(setElevatorEndEffectorCombinedSetpointFunc.apply(ElevatorPosition.kLow));
-        OperatorController.x().onTrue(setElevatorEndEffectorCombinedSetpointFunc.apply(ElevatorPosition.kMid));
-        OperatorController.povUp().onTrue(setElevatorEndEffectorCombinedSetpointFunc.apply(ElevatorPosition.kHigh));
-        OperatorController.start().onTrue(setElevatorEndEffectorCombinedSetpointFunc.apply(ElevatorPosition.kSource));
-        OperatorController.b()
-                .onTrue(setElevatorEndEffectorCombinedSetpointFunc.apply(ElevatorPosition.kAbsoluteMinimum));
+    //     setDefaultElevatorCommandConsumer
+    //             .accept(elevatorDefaultCommand.apply(OperatorController.getTriggerSupplier(
+    //                     0.06, 0)));
 
-        // OperatorController.rightBumper().whileTrue(runIntakeFunc.apply(0.5)).onFalse(stopIntakeCommand);
-        // OperatorController.leftBumper().whileTrue(runIntakeFunc.apply(-0.5)).onFalse(stopIntakeCommand);
+    //     setDefaultEndEffectorCommandConsumer
+    //             .accept(endEffectorDefaultCommand.apply(OperatorController.rightBumper(),
+    //                     OperatorController.leftBumper(),
+    //                     OperatorController.getLeftStickYSupplier(0.06, 0)));
 
-        OperatorController.leftStick().onTrue(resetEndEffectorManualControlCommand);
+    //     OperatorController.povDown().onTrue(setElevatorEndEffectorCombinedSetpointFunc.apply(ElevatorPosition.kTrough));
+    //     OperatorController.a().onTrue(setElevatorEndEffectorCombinedSetpointFunc.apply(ElevatorPosition.kLow));
+    //     OperatorController.x().onTrue(setElevatorEndEffectorCombinedSetpointFunc.apply(ElevatorPosition.kMid));
+    //     OperatorController.povUp().onTrue(setElevatorEndEffectorCombinedSetpointFunc.apply(ElevatorPosition.kHigh));
+    //     OperatorController.start().onTrue(setElevatorEndEffectorCombinedSetpointFunc.apply(ElevatorPosition.kSource));
+    //     OperatorController.b()
+    //             .onTrue(setElevatorEndEffectorCombinedSetpointFunc.apply(ElevatorPosition.kAbsoluteMinimum));
+
+    //     // OperatorController.rightBumper().whileTrue(runIntakeFunc.apply(EndEffectorMap.EjectSpeed))
+    //     //         .onFalse(stopIntakeCommand);
+    //     // OperatorController.leftBumper().whileTrue(runIntakeFunc.apply(EndEffectorMap.IntakeSpeed))
+    //     //         .onFalse(stopIntakeCommand);
+
+    //     OperatorController.leftStick().onTrue(resetEndEffectorManualControlCommand);
+    // }
+
+    public void bindOperatorControls(ElevatorSubsystem elevatorSubsystem, EndEffectorSubsystem endEffectorSubsystem) {
+        elevatorSubsystem.setDefaultCommand(
+                elevatorSubsystem.runElevatorWithController(
+                        OperatorController.getTriggerSupplier(0.06, 0)));
+
+        endEffectorSubsystem.setDefaultCommand(
+                endEffectorSubsystem.defaultCommand(
+                        OperatorController.rightBumper(),
+                        OperatorController.leftBumper(),
+                        OperatorController.getLeftStickYSupplier(0.06, 0)));
+
+        OperatorController.povDown().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kTrough));
+        OperatorController.a().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kLow));
+        OperatorController.x().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kMid));
+        OperatorController.povUp().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kHigh));
+        OperatorController.start().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kSource));
+        OperatorController.b().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
+
+        OperatorController.rightBumper()
+                .whileTrue(endEffectorSubsystem.setIntakeSpeedCommand(EndEffectorMap.EjectSpeed))
+                .onFalse(endEffectorSubsystem.stopIntakeMotorCommand());
+        OperatorController.leftBumper()
+                .whileTrue(endEffectorSubsystem.setIntakeSpeedCommand(EndEffectorMap.IntakeSpeed))
+                .onFalse(endEffectorSubsystem.stopIntakeMotorCommand());
+
+        OperatorController.leftStick().onTrue(endEffectorSubsystem.resetWristManualControlCommand());
     }
 
     public void setDriverRumbleIntensity(double intensity) {
