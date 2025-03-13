@@ -108,6 +108,16 @@ public class Container {
       OperatorInterface.OperatorController.x().onTrue(EndEffector.setWristSetpointCommand(-65));
       OperatorInterface.OperatorController.a().onTrue(EndEffector.setWristSetpointCommand(-130));
 
+      Climber.setDefaultCommand(
+          Climber.defaultClimbingCommand(() -> (OperatorInterface.DriverController.leftBumper().getAsBoolean()
+              && OperatorInterface.DriverController.x().getAsBoolean()),
+              () -> (OperatorInterface.DriverController.rightBumper().getAsBoolean()
+                  && OperatorInterface.DriverController.x().getAsBoolean()),
+              () -> (OperatorInterface.DriverController.leftBumper().getAsBoolean()
+                  && OperatorInterface.DriverController.b().getAsBoolean()),
+              () -> (OperatorInterface.DriverController.rightBumper().getAsBoolean()
+                  && OperatorInterface.DriverController.b().getAsBoolean())));
+
       // OperatorInterface.OperatorController.rightBumper().whileTrue(EndEffector.setIntakeSpeedCommand(0.5))
       //     .onFalse(EndEffector.stopIntakeMotorCommand());
 

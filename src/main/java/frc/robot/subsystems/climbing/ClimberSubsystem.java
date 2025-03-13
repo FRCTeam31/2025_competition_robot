@@ -1,5 +1,7 @@
 package frc.robot.subsystems.climbing;
 
+import java.util.function.BooleanSupplier;
+
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.epilogue.Logged;
@@ -17,13 +19,11 @@ public class ClimberSubsystem extends SubsystemBase {
         public static final byte ClimberLeftMotorCANID = 17;
         public static final byte ClimberRightMotorCANID = 18;
         public static final byte ClimberGearRatio = 100;
-        public static final double ClimberInSpeed = 0.8;
-        public static final double ClimberOutSpeed = -0.8;
+        public static final double SetClimberStateSpeed = 0.8;
         public static final int ClimberOutLimitSwitchChannel = 5;
         public static final int ClimberInLimitSwitchChannel = 6;
         public static final double MaxMotorPercentOutput = 1;
-        public static final double ClimberMotorsReelingInSpeed = 0.8;
-        public static final double ClimberMotorsReelingOutSpeed = -0.8;
+        public static final double ActuallyClimbingSpeed = 0.8;
         public static final double MaxChangeClimberStateTime = 7;
         public static final int ClimberHookMotorCANID = 21;
         public static final int HooksOpenLimitSwitchChannel = 4;
@@ -89,13 +89,13 @@ public class ClimberSubsystem extends SubsystemBase {
 
         if (climberPosition == ClimberPosition.IN) {
             if (!_inputs.ClimbWenchInLimitSwitch) {
-                wenchSpeed = ClimberMap.ClimberInSpeed;
+                wenchSpeed = ClimberMap.SetClimberStateSpeed;
             } else {
                 wenchSpeed = 0; // Stop motor if InLimitSwitch is pressed
             }
         } else if (climberPosition == ClimberPosition.OUT) {
             if (!_inputs.ClimbWenchOutLimitSwitch) {
-                wenchSpeed = ClimberMap.ClimberOutSpeed;
+                wenchSpeed = -ClimberMap.SetClimberStateSpeed;
             } else {
                 wenchSpeed = 0; // Stop motor if OutLimitSwitch is pressed
             }
@@ -114,6 +114,23 @@ public class ClimberSubsystem extends SubsystemBase {
         } else {
             return new InstantCommand();
 
+        }
+    }
+
+    public Command defaultClimbingCommand(BooleanSupplier climbIn, BooleanSupplier climbOut,
+            BooleanSupplier hooksClosed, BooleanSupplier hooksOpen) {
+        if (climbIn.getAsBoolean()) {
+            return setClimberInCommand();
+        } else if (climbOut.getAsBoolean()) {
+            return setCLimberOutCommand();
+        } else if (hooksClosed.getAsBoolean()
+                && (_inputs.CommandedClimberPosition == ClimberPosition.OUT && _inputs.ClimbWenchOutLimitSwitch)) {
+            return setHooksStateCommand(HooksPosition.CLOSED);
+        } else if (hooksOpen.getAsBoolean()
+                && (_inputs.CommandedClimberPosition == ClimberPosition.OUT && _inputs.ClimbWenchOutLimitSwitch)) {
+            return setHooksStateCommand(HooksPosition.OPEN);
+        } else {
+            return new InstantCommand();
         }
     }
 
@@ -146,7 +163,7 @@ public class ClimberSubsystem extends SubsystemBase {
         // Only allowed to climb if the hooks are closed and the climber is in the out position
         return this.run(() -> {
             if (_inputs.ClimbWenchOutLimitSwitch && _inputs.CommandedHooksPosition == HooksPosition.CLOSED) {
-                _climber.setClimbingWenchSpeed(ClimberMap.ClimberMotorsReelingInSpeed);
+                _climber.setClimbingWenchSpeed(ClimberMap.ActuallyClimbingSpeed);
             }
         });
     }
@@ -155,7 +172,7 @@ public class ClimberSubsystem extends SubsystemBase {
         // Only allowed to climb if the hooks are closed and the climber is in the out position
         return Commands.run(() -> {
             if (_inputs.ClimbWenchOutLimitSwitch && _inputs.CommandedHooksPosition == HooksPosition.CLOSED) {
-                _climber.setClimbingWenchSpeed(ClimberMap.ClimberMotorsReelingOutSpeed);
+                _climber.setClimbingWenchSpeed(-ClimberMap.ActuallyClimbingSpeed);
             }
         });
     }
