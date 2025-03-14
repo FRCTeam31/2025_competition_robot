@@ -1,25 +1,26 @@
+{
   "version": "2025.0",
   "waypoints": [
     {
       "anchor": {
-        "x": 1.2,
-        "y": 7.0
+        "x": 1.22,
+        "y": 6.94
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.8796666666666657,
-        "y": 5.507666666666666
+        "x": 2.110999999999997,
+        "y": 6.625666666666667
       },
       "isLocked": false,
       "linkedName": "SRC1"
     },
     {
       "anchor": {
-        "x": 2.8,
-        "y": 4.0
+        "x": 3.04,
+        "y": 4.05
       },
       "prevControl": {
-        "x": 1.8773333333333324,
+        "x": 1.7673333333333325,
         "y": 6.499666666666668
       },
       "nextControl": null,
@@ -47,7 +48,7 @@
   "folder": "AB Paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 128.0
+    "rotation": 126.80150993249389
   },
   "useDefaultConstraints": true
 }

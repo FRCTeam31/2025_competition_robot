@@ -3,12 +3,12 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.15,
+        "x": 3.04,
         "y": 4.05
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.259666666666666,
+        "x": 2.149666666666666,
         "y": 5.631666666666666
       },
       "isLocked": false,
@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 1.1,
-        "y": 7.0
+        "x": 1.22,
+        "y": 6.94
       },
       "prevControl": {
-        "x": 2.3009999999999993,
-        "y": 5.765999999999999
+        "x": 2.4209999999999967,
+        "y": 5.7059999999999995
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 128.0
+    "rotation": 126.80150993249389
   },
   "reversed": false,
   "folder": "AB Paths",

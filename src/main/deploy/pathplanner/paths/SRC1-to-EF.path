@@ -3,41 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.2,
-        "y": 7.0
+        "x": 1.22,
+        "y": 6.94
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.272333333333334,
-        "y": 6.045
+        "x": 3.495666666666664,
+        "y": 7.318
       },
       "isLocked": false,
       "linkedName": "SRC1"
     },
     {
       "anchor": {
-        "x": 2.57097159090909,
-        "y": 3.161391690340908
+        "x": 5.22,
+        "y": 2.75
       },
       "prevControl": {
-        "x": 2.39684437950931,
-        "y": 3.749038380987848
-      },
-      "nextControl": {
-        "x": 2.993333333333333,
-        "y": 1.7359999999999989
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 5.344772727272727,
-        "y": 2.575
-      },
-      "prevControl": {
-        "x": 3.7889999999999997,
-        "y": 1.2408664772727267
+        "x": 1.6751315789473686,
+        "y": 0.17912280701754346
       },
       "nextControl": null,
       "isLocked": false,
@@ -58,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 122.0
+    "rotation": 119.99999999999999
   },
   "reversed": false,
   "folder": "EF Paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 128.0
+    "rotation": 126.80150993249389
   },
   "useDefaultConstraints": true
 }
