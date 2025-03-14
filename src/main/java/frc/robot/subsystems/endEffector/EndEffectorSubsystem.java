@@ -27,11 +27,8 @@ public class EndEffectorSubsystem extends SubsystemBase {
         public static final double IntakeSpeed = -1;
         public static final byte IntakeCurrentLimit = 20;
         public static final byte WristCurrentLimit = 30;
-
         public static final ExtendedPIDConstants WristPID = new ExtendedPIDConstants(0.007, 0, 0);
-
         public static final double GearRatio = 20;
-
         public static final double MaxWristAngle = -135;
         public static final double MinWristAngle = 0;
 

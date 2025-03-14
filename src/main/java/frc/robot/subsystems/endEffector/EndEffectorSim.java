@@ -1,8 +1,6 @@
 package frc.robot.subsystems.endEffector;
 
 import org.prime.control.ExtendedPIDConstants;
-
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
@@ -13,9 +11,7 @@ import frc.robot.subsystems.endEffector.EndEffectorSubsystem.EndEffectorMap;
 public class EndEffectorSim implements IEndEffector {
 
     private DCMotorSim _intakeMotor;
-
     private DCMotorSim _wristMotor;
-
     private DIOSim _coralLimitSwitch;
 
     private EndEffectorInputsAutoLogged _inputs = new EndEffectorInputsAutoLogged();
@@ -26,8 +22,6 @@ public class EndEffectorSim implements IEndEffector {
         setupIntakeMotor();
         setupWristMotor(EndEffectorMap.WristPID);
     }
-
-    // TODO: Update the gear ratios in these two methods once we have verified which motor the gear ratio is for
 
     private void setupIntakeMotor() {
         _intakeMotor = new DCMotorSim(
@@ -73,13 +67,9 @@ public class EndEffectorSim implements IEndEffector {
         _intakeMotor.update(0.02);
         _wristMotor.update(0.02);
 
-        var motorIntakeSpeed = _intakeMotor.getAngularVelocity().magnitude();
-        var motorWristSpeed = _wristMotor.getAngularVelocity().magnitude();
-        var limitSwitchState = getLimitSwitchState();
-
-        inputs.IntakeMotorSpeed = motorIntakeSpeed;
-        inputs.WristMotorSpeed = motorWristSpeed;
-        inputs.LimitSwitchState = limitSwitchState;
+        inputs.IntakeMotorSpeed = _intakeMotor.getAngularVelocity().magnitude();
+        inputs.WristMotorSpeed = _wristMotor.getAngularVelocity().magnitude();
+        inputs.LimitSwitchState = getLimitSwitchState();
     }
 
     private double getWristAngle() {

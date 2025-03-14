@@ -75,19 +75,7 @@ public class Container {
           Swerve::driveFieldRelativeCommand);
 
       OperatorInterface.bindOperatorControls(Elevator, EndEffector);
-      // OperatorController.povUp()
-      //     .onTrue(Elevator.runSysIdDynamicRoutineCommand(Direction.kForward))
-      //     .onFalse(Elevator.stopMotorsCommand());
-      // OperatorController.povDown()
-      //     .onTrue(Elevator.runSysIdDynamicRoutineCommand(Direction.kReverse))
-      //     .onFalse(Elevator.stopMotorsCommand());
-      // OperatorController.povRight()
-      //     .onTrue(Elevator.runSysIdQuasistaticRoutineCommand(Direction.kForward))
-      //     .onFalse(Elevator.stopMotorsCommand());
-      // OperatorController.povLeft()
-      //     .onTrue(Elevator.runSysIdQuasistaticRoutineCommand(Direction.kReverse))
-      //     .onFalse(Elevator.stopMotorsCommand());
-      // OperatorController.start().onTrue(Elevator.goToElevatorBottomCommand());
+
       // OperatorController.a()
       //     .onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kBottom));
       // OperatorController.y().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kMid));
