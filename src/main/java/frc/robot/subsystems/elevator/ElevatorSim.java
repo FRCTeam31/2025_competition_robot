@@ -48,4 +48,8 @@ public class ElevatorSim implements IElevator {
         _gearboxSim.setAngularVelocity(0);
     }
 
+    @Override
+    public void resetEncoderPos() {
+    }
+
 }

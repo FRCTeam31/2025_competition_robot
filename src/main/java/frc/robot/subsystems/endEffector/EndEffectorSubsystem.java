@@ -38,8 +38,8 @@ public class EndEffectorSubsystem extends SubsystemBase {
         public static final double WristReef = 135;
         public static final double WristMaxOutput = 0.175;
 
-        public static final double LowerElevatorHeightLimit = 0.11;
-        public static final double UpperElevatorHeightLimit = 0.38;
+        public static final double LowerElevatorHeightLimit = 0.14;
+        public static final double UpperElevatorHeightLimit = 0.15;
         public static final double SafeWristAngleAtUpperElevatorHeightLimit = -30;
     }
 
