@@ -28,7 +28,6 @@ public class OperatorInterface {
     public OperatorInterface() {
         DriverController = new SupplierXboxController(Controls.DRIVER_PORT);
         OperatorController = new SupplierXboxController(Controls.OPERATOR_PORT);
-        OperatorController = new SupplierXboxController(Controls.OPERATOR_PORT);
     }
 
     /**
@@ -115,7 +114,7 @@ public class OperatorInterface {
                 endEffectorSubsystem.defaultCommand(
                         OperatorController.rightBumper(),
                         OperatorController.leftBumper(),
-                        OperatorController.getLeftStickYSupplier(0.06, 0)));
+                        OperatorController.getLeftStickYSupplier(0.3, 0)));
 
         OperatorController.povDown().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kTrough));
         OperatorController.a().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kLow));

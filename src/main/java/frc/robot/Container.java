@@ -120,8 +120,9 @@ public class Container {
 
   public static Command setCombinedHeightAndAngle(ElevatorPosition position) {
     return Commands.parallel(
+        Commands.runOnce(() -> System.out.println("Setting combined height and angle: " + position)),
         Elevator.goToElevatorPositionCommand(position),
-        EndEffector.setWristSetpointCommand(position));
+        EndEffector.scheduleWristSetpointCommand(position));
   }
 
   //#endregion

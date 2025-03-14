@@ -178,7 +178,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void periodic() {
         _elevatorIO.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
-        // Logger.recordOutput("Elevator/ElevatorSetpoint", elevatorSetpoint);
+        Logger.recordOutput("Elevator/ElevatorSetpoint", _positionPidController.getSetpoint());
 
     }
 
@@ -197,6 +197,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public Command goToElevatorPositionCommand(ElevatorPosition pos) {
         return Commands.runOnce(() -> {
+            System.out.println("Setting elevator position to: " + _positionMap.get(pos));
             _positionPidController.setSetpoint(_positionMap.get(pos));
         });
     }

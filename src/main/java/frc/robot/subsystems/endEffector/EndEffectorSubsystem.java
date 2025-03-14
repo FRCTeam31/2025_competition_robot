@@ -6,6 +6,7 @@ import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.ExtendedPIDConstants;
+import org.prime.util.LockableEvent;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -49,6 +50,9 @@ public class EndEffectorSubsystem extends SubsystemBase {
     private PIDController _wristPID;
 
     private boolean _endEffectorManuallyControlled = false;
+
+    private LockableEvent<ElevatorPosition> _lockableSetpoint = new LockableEvent<>(null, this::setWristSetpointCommand,
+            true);
 
     private Map<ElevatorPosition, Double> _angleAtElevatorHeight = Map.of(
             ElevatorPosition.kAbsoluteMinimum, 0.0,
@@ -116,6 +120,12 @@ public class EndEffectorSubsystem extends SubsystemBase {
         } else {
             _endEffector.setWristSpeed(pid);
         }
+
+        if (inDangerZone) {
+            _lockableSetpoint.lock();
+        } else {
+            _lockableSetpoint.unlock();
+        }
     }
 
     private void resetWristManualControl() {
@@ -126,6 +136,9 @@ public class EndEffectorSubsystem extends SubsystemBase {
     public void periodic() {
         _endEffector.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
+
+        Logger.recordOutput("End Effector/Wrist Setpoint", _wristPID.getSetpoint());
+        Logger.recordOutput("End Effector/Scheduled Wrist Setpoint", _lockableSetpoint.getEvent());
     }
 
     /**
@@ -169,6 +182,20 @@ public class EndEffectorSubsystem extends SubsystemBase {
     public Command setWristSetpointCommand(ElevatorPosition position) {
         return Commands.runOnce(this::resetWristManualControl).andThen(() -> {
             _wristPID.setSetpoint(_angleAtElevatorHeight.get(position));
+        });
+    }
+
+    /**
+     * Schedules the setting of the wrist setpoint. If in a danger zone, the setpoint will be locked until the danger zone is exited.
+     * Only then it will set the setpoint. If not in a danger zone, it will set the setpoint immediately.
+     * 
+     * @param position
+     * @return
+     */
+    public Command scheduleWristSetpointCommand(ElevatorPosition position) {
+        return Commands.runOnce(this::resetWristManualControl).andThen(() -> {
+            _lockableSetpoint.setEvent(position);
+            _lockableSetpoint.schedule();
         });
     }
 
