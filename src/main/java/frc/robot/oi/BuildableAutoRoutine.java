@@ -715,8 +715,8 @@ public class BuildableAutoRoutine {
         }
 
         try {
-            // var pathfindCommand = Container.Swerve.pathfindToPoseCommand(startingPose);
-            // pathfindCommand.schedule();
+            var pathfindCommand = Container.Swerve.pathfindToPoseCommand(() -> startingPose, true);
+            pathfindCommand.schedule();
         } catch (Exception e) {
             Elastic.sendError("Auto Routine", "Failed to pathfind to starting pose: " + e.getMessage());
         }
