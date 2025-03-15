@@ -106,6 +106,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void manageElevatorControl(double manualControlSpeed) {
         boolean tryingToUseManualControl = manualControlSpeed != 0 || _elevatorManaullyControlled;
 
+        if (manualControlSpeed != 0) {
+            _elevatorManaullyControlled = true;
+        }
+
         if (tryingToUseManualControl) {
             setMotorSpeedsWithLimitSwitches(manualControlSpeed);
         } else {
@@ -195,7 +199,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         return this.run(() -> manageElevatorControl(elevatorManaulControl.getAsDouble()));
     }
 
-    public Command setElevatorSetpoint(ElevatorPosition pos) {
+    public Command setElevatorSetpointCommand(ElevatorPosition pos) {
         return Commands.runOnce(() -> {
             System.out.println("Setting elevator position to: " + _positionMap.get(pos));
             _positionPidController.setSetpoint(_positionMap.get(pos));
@@ -213,7 +217,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                 }));
     }
 
-    public Command resetElevatorManualControlCommand() {
+    public Command disableElevatorManualControlCommand() {
         return Commands.runOnce(this::disableElevatorManaulControl);
     }
 
@@ -224,11 +228,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     public Map<String, Command> elevatorNamedCommands() {
         return Map.of(
                 "Stop Elevator Motors Command", stopMotorsCommand(),
-                "Elevator High Position Command", setElevatorSetpoint(ElevatorPosition.kHigh),
-                "Elevator Middle Position Command", setElevatorSetpoint(ElevatorPosition.kMid),
-                "Elevator Low Position Command", setElevatorSetpoint(ElevatorPosition.kLow),
-                "Elevator Trough Position Command", setElevatorSetpoint(ElevatorPosition.kTrough),
-                "Elevator Source Position Command", setElevatorSetpoint(ElevatorPosition.kAbsoluteMinimum));
+                "Elevator High Position Command", setElevatorSetpointCommand(ElevatorPosition.kHigh),
+                "Elevator Middle Position Command", setElevatorSetpointCommand(ElevatorPosition.kMid),
+                "Elevator Low Position Command", setElevatorSetpointCommand(ElevatorPosition.kLow),
+                "Elevator Trough Position Command", setElevatorSetpointCommand(ElevatorPosition.kTrough),
+                "Elevator Source Position Command", setElevatorSetpointCommand(ElevatorPosition.kAbsoluteMinimum));
     }
 
     //#endregion

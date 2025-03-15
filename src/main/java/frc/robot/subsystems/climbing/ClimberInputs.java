@@ -28,6 +28,5 @@ public class ClimberInputs {
 
     public ClimberPosition CommandedClimberPosition = ClimberPosition.IN;
     public HooksPosition CommandedHooksPosition = HooksPosition.CLOSED;
-    public double RobotPitch;
 
 }

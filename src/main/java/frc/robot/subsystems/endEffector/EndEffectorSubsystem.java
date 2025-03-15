@@ -74,13 +74,15 @@ public class EndEffectorSubsystem extends SubsystemBase {
 
         boolean tryingToUseManualControl = manaulControlSpeed != 0 || _wristManuallyControlled;
         //Store if the wrist is currently manaully controlled, this will not be disabled until operator clicks the controller stick button
-        _wristManuallyControlled = manaulControlSpeed != 0;
+        if (manaulControlSpeed != 0) {
+            _wristManuallyControlled = true;
+        }
 
         boolean aboveMinHeightThreshold = Container.Elevator
                 .getElevatorPositionMeters() >= EndEffectorMap.LowerElevatorHeightLimit;
 
         if (tryingToUseManualControl && aboveMinHeightThreshold) {
-            runWristManaull(manaulControlSpeed);
+            runWristManaul(manaulControlSpeed);
         } else {
             seekWristAngle();
         }
@@ -121,7 +123,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
         }
     }
 
-    public void runWristManaull(double speed) {
+    public void runWristManaul(double speed) {
         double manualMotorControl = -speed * EndEffectorMap.WristMaxOutput;
         boolean aboveMaxHeightThreshold = Container.Elevator
                 .getElevatorPositionMeters() >= EndEffectorMap.UpperElevatorHeightLimit;
@@ -214,7 +216,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
         return Commands.runOnce(() -> _endEffector.setWristSpeed(speed));
     }
 
-    public Command resetWristManualControlCommand() {
+    public Command disabletWristManualControlCommand() {
         return Commands.runOnce(this::disableWristManaulControl);
     }
 

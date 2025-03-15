@@ -63,14 +63,15 @@ public class Container {
       Elevator = new ElevatorSubsystem(isReal);
 
       // Configure controller bindings
-      OperatorInterface.bindDriverControls(
-          Swerve.resetGyroCommand(),
-          Swerve.enableLockOnCommand(),
-          Swerve.disableAutoAlignCommand(),
-          Swerve::setAutoAlignSetpointCommand,
-          Swerve::setDefaultCommand,
-          Swerve::driveFieldRelativeCommand);
+      // OperatorInterface.bindDriverControls(
+      //     Swerve.resetGyroCommand(),
+      //     Swerve.enableLockOnCommand(),
+      //     Swerve.disableAutoAlignCommand(),
+      //     Swerve::setAutoAlignSetpointCommand,
+      //     Swerve::setDefaultCommand,
+      //     Swerve::driveFieldRelativeCommand);
 
+      OperatorInterface.bindDriverControls(Swerve, Climber);
       OperatorInterface.bindOperatorControls(Elevator, EndEffector);
 
     } catch (Exception e) {
@@ -83,7 +84,7 @@ public class Container {
   public static Command setCombinedHeightAndAngle(ElevatorPosition position) {
     return Commands.parallel(
         Commands.runOnce(() -> System.out.println("Setting combined height and angle: " + position)),
-        Elevator.setElevatorSetpoint(position),
+        Elevator.setElevatorSetpointCommand(position),
         EndEffector.scheduleWristSetpointCommand(position));
   }
 
