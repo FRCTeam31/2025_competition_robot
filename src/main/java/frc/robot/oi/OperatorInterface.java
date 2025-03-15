@@ -133,11 +133,9 @@ public class OperatorInterface {
 
         public void bindOperatorControls(ElevatorSubsystem elevatorSubsystem,
                         EndEffectorSubsystem endEffectorSubsystem) {
-                elevatorSubsystem.setDefaultCommand(
-                                elevatorSubsystem.runElevatorWithController(
-                                                OperatorController.getTriggerSupplier(0.06, 0)));
 
-                // elevatorSubsystem.setDefaultCommand(elevatorSubsystem.runElevatorAutomaticSeekCommand());
+                elevatorSubsystem.setDefaultCommand(elevatorSubsystem
+                                .ElevatorDefaultCommand(OperatorController.getTriggerSupplier(0.06, 0)));
 
                 endEffectorSubsystem.setDefaultCommand(
                                 endEffectorSubsystem.defaultCommand(
@@ -152,14 +150,8 @@ public class OperatorInterface {
                 OperatorController.start().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kSource));
                 OperatorController.b().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
 
-                OperatorController.rightBumper()
-                                .whileTrue(endEffectorSubsystem.setIntakeSpeedCommand(EndEffectorMap.EjectSpeed))
-                                .onFalse(endEffectorSubsystem.stopIntakeMotorCommand());
-                OperatorController.leftBumper()
-                                .whileTrue(endEffectorSubsystem.setIntakeSpeedCommand(EndEffectorMap.IntakeSpeed))
-                                .onFalse(endEffectorSubsystem.stopIntakeMotorCommand());
-
                 OperatorController.leftStick().onTrue(endEffectorSubsystem.resetWristManualControlCommand());
+                OperatorController.rightStick().onTrue(elevatorSubsystem.resetElevatorManualControlCommand());
         }
 
         public void setDriverRumbleIntensity(double intensity) {

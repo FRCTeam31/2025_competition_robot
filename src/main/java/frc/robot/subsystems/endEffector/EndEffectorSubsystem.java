@@ -170,7 +170,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
                 _endEffector.stopIntakeMotor();
             }
 
-            seekWristAngle(wristManualControl.getAsDouble());
+            manageWristControl(wristManualControl.getAsDouble());
         });
     }
 

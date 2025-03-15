@@ -62,9 +62,6 @@ public class Container {
       OperatorInterface = new OperatorInterface();
       Elevator = new ElevatorSubsystem(isReal);
 
-      Elevator.setDefaultCommand(
-          Elevator.runElevatorAutomaticSeekCommand());
-
       // Configure controller bindings
       OperatorInterface.bindDriverControls(
           Swerve.resetGyroCommand(),
@@ -76,29 +73,6 @@ public class Container {
 
       OperatorInterface.bindOperatorControls(Elevator, EndEffector);
 
-      // OperatorController.a()
-      //     .onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kBottom));
-      // OperatorController.y().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kMid));
-      // OperatorController.x().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kBottom));
-      // OperatorController.b().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kLow));
-      // Elevator.setDefaultCommand(Elevator.runElevatorAutomaticSeekCommand());
-
-      // OperatorController.y().onTrue(EndEffector.setWristSetpointCommand(-4));
-      // OperatorController.x().onTrue(EndEffector.setWristSetpointCommand(-65));
-      // OperatorController.a().onTrue(EndEffector.setWristSetpointCommand(-130));
-
-      // OperatorController.rightBumper().whileTrue(EndEffector.setIntakeSpeedCommand(0.5))
-      //     .onFalse(EndEffector.stopIntakeMotorCommand());
-
-      // OperatorController.leftBumper().whileTrue(EndEffector.setIntakeSpeedCommand(-0.5))
-      //     .onFalse(EndEffector.stopIntakeMotorCommand());
-
-      // Elevator.setDefaultCommand(
-      //     Elevator.elevatorDefaultCommand(
-      //         OperatorController.getTriggerSupplier(
-      //             Controls.AXIS_DEADBAND,
-      //             SwerveMap.Control.DeadbandCurveWeight)));
-
     } catch (Exception e) {
       DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());
     }
@@ -109,7 +83,7 @@ public class Container {
   public static Command setCombinedHeightAndAngle(ElevatorPosition position) {
     return Commands.parallel(
         Commands.runOnce(() -> System.out.println("Setting combined height and angle: " + position)),
-        Elevator.goToElevatorPositionCommand(position),
+        Elevator.setElevatorSetpoint(position),
         EndEffector.scheduleWristSetpointCommand(position));
   }
 
