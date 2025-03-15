@@ -162,6 +162,7 @@ public class ElevatorControlController {
                         foundG = downwardVelocity / upwardVelocity;
 
                         shouldCheckForG = false;
+                        constantsFound = true;
                     }
                 }
             }
