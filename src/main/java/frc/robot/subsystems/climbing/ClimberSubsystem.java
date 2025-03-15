@@ -76,6 +76,8 @@ public class ClimberSubsystem extends SubsystemBase {
             } else {
                 hooksMotorSpeed = 0; // Stop motor if OutLimitSwitch is pressed
             }
+        } else {
+            hooksMotorSpeed = 0;
         }
 
         Logger.recordOutput(getName() + "/HooksSpeed", hooksMotorSpeed);
