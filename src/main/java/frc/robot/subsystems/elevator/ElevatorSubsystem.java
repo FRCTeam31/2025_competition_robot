@@ -29,8 +29,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         public static final int MaxPercentOutput = 1;
         public static final double MaxElevatorHeight = 0.63;
         public static final double MaxSpeedCoefficient = 0.5;
-        public static final double MaxDownSpeedCoefficient = -0.25;
-        public static final double MaxUpSpeedCoefficient = 0.25;
 
         // public static final ExtendedPIDConstants PositionPID = new ExtendedPIDConstants(0.043861, 0, 0, 0,
         //         0.28922,
@@ -49,7 +47,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         public static final double FeedForwardKg = 0.085;
         public static final double OutputSprocketDiameterMeters = Units.Millimeters.of(32.2).in(Meters);
         public static final double GearRatio = 16;
-        public static final double maxVoltage = 12;
         public static final int ElevatorEncoderCANID = 22;
     }
 
@@ -82,7 +79,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     private ElevatorFeedforward _positionFeedforward;
     private ElevatorControlController _elevatorController = new ElevatorControlController(6.6, 4.5, 0, 1.1);
     // private ElevatorControlController _elevatorController = new ElevatorControlController(1, 1, 0.355, 1);
-    private double voltage = 0;
+    private boolean _elevatorManaullyControlled = false;
 
     public ElevatorSubsystem(boolean isReal) {
         setName("Elevator");
@@ -109,12 +106,28 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     //#region Control
 
+    public void manageElevatorControl(double manualControlSpeed) {
+        boolean tryingToUseManualControl = manualControlSpeed != 0 || _elevatorManaullyControlled;
+
+        if (manualControlSpeed != 0) {
+            _elevatorManaullyControlled = true;
+        }
+
+        if (tryingToUseManualControl) {
+            setMotorSpeedsWithLimitSwitches(manualControlSpeed);
+        } else {
+            updateMotorSpeedsWithPID();
+        }
+    }
+
     public void setMotorSpeedsWithLimitSwitches(double finalOutput) {
         if (_inputs.TopLimitSwitch && finalOutput > 0) {
             finalOutput = MathUtil.clamp(finalOutput, -ElevatorMap.MaxPercentOutput, 0);
         } else if (_inputs.BottomLimitSwitch && finalOutput < 0) {
             finalOutput = MathUtil.clamp(finalOutput, 0, ElevatorMap.MaxPercentOutput);
         }
+
+        finalOutput = MathUtil.clamp(finalOutput, -ElevatorMap.MaxSpeedCoefficient, ElevatorMap.MaxSpeedCoefficient);
 
         SmartDashboard.putNumber(getName() + "/Output-PIDFF", finalOutput);
         _elevatorIO.setMotorSpeeds(finalOutput);
@@ -165,24 +178,12 @@ public class ElevatorSubsystem extends SubsystemBase {
         return outputSpeed * speedScalingFactor;
     }
 
-    public void addVoltage(double change) {
-        voltage += change;
-
-    }
-
-    public void setMotorVoltages() {
-        // var vMag = volts.magnitude();
-        // if (_inputs.TopLimitSwitch && vMag > 0) {
-        //     vMag = MathUtil.clamp(vMag, -ElevatorMap.maxVoltage * ElevatorMap.MaxSpeedCoefficient, 0);
-        // } else if (_inputs.BottomLimitSwitch && vMag < 0) {
-        //     vMag = MathUtil.clamp(vMag, 0, ElevatorMap.maxVoltage * ElevatorMap.MaxSpeedCoefficient);
-        // }
-
-        _elevatorIO.setMotorVoltages(voltage);
-    }
-
     public void setMotorVoltages(double newVolatage) {
         _elevatorIO.setMotorVoltages(newVolatage);
+    }
+
+    public void disableElevatorManaulControl() {
+        _elevatorManaullyControlled = false;
     }
 
     @Override
@@ -190,7 +191,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         _elevatorIO.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
         Logger.recordOutput("Elevator/ElevatorSetpoint", _positionPidController.getSetpoint());
-        Logger.recordOutput("Elevator/Elevator Voltage", voltage);
 
         if (_inputs.BottomLimitSwitch) {
             _elevatorIO.resetEncoderPos();
@@ -215,16 +215,11 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     //#region Commands
 
-    public Command runElevatorWithController(DoubleSupplier dSup) {
-        return this.run(() -> setMotorSpeedsWithLimitSwitches(
-                MathUtil.clamp(dSup.getAsDouble(), -ElevatorMap.MaxSpeedCoefficient, ElevatorMap.MaxSpeedCoefficient)));
+    public Command ElevatorDefaultCommand(DoubleSupplier elevatorManaulControl) {
+        return this.run(() -> manageElevatorControl(elevatorManaulControl.getAsDouble()));
     }
 
-    public Command runElevatorAutomaticSeekCommand() {
-        return this.run(this::updateMotorSpeedsWithPID);
-    }
-
-    public Command goToElevatorPositionCommand(ElevatorPosition pos) {
+    public Command setElevatorSetpointCommand(ElevatorPosition pos) {
         return Commands.runOnce(() -> {
             System.out.println("Setting elevator position to: " + _positionMap.get(pos));
             // _positionPidController.setSetpoint(_positionMap.get(pos));
@@ -234,13 +229,17 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public Command goToElevatorBottomCommand() {
         return Commands
-                .run(() -> _elevatorIO.setMotorSpeeds(ElevatorMap.MaxDownSpeedCoefficient))
+                .run(() -> _elevatorIO.setMotorSpeeds(-ElevatorMap.MaxSpeedCoefficient / 2))
                 .until(() -> _inputs.BottomLimitSwitch)
                 .withTimeout(7)
                 .andThen(Commands.runOnce(() -> {
                     _elevatorIO.stopMotors();
                     _positionPidController.setSetpoint(0);
                 }));
+    }
+
+    public Command disableElevatorManualControlCommand() {
+        return Commands.runOnce(this::disableElevatorManaulControl);
     }
 
     public Command stopMotorsCommand() {
@@ -250,11 +249,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     public Map<String, Command> elevatorNamedCommands() {
         return Map.of(
                 "Stop Elevator Motors Command", stopMotorsCommand(),
-                "Elevator High Position Command", goToElevatorPositionCommand(ElevatorPosition.kHigh),
-                "Elevator Middle Position Command", goToElevatorPositionCommand(ElevatorPosition.kMid),
-                "Elevator Low Position Command", goToElevatorPositionCommand(ElevatorPosition.kLow),
-                "Elevator Trough Position Command", goToElevatorPositionCommand(ElevatorPosition.kTrough),
-                "Elevator Source Position Command", goToElevatorPositionCommand(ElevatorPosition.kAbsoluteMinimum));
+                "Elevator High Position Command", setElevatorSetpointCommand(ElevatorPosition.kHigh),
+                "Elevator Middle Position Command", setElevatorSetpointCommand(ElevatorPosition.kMid),
+                "Elevator Low Position Command", setElevatorSetpointCommand(ElevatorPosition.kLow),
+                "Elevator Trough Position Command", setElevatorSetpointCommand(ElevatorPosition.kTrough),
+                "Elevator Source Position Command", setElevatorSetpointCommand(ElevatorPosition.kAbsoluteMinimum));
     }
 
     //#endregion
