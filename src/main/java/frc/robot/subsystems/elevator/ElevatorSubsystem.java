@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.Logger;
+import org.prime.control.ElevatorControlController;
 import org.prime.control.ExtendedPIDConstants;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
@@ -79,6 +80,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     private IElevator _elevatorIO;
     private PIDController _positionPidController;
     private ElevatorFeedforward _positionFeedforward;
+    private ElevatorControlController _elevatorController = new ElevatorControlController(6.6, 4.5, 0, 1.1);
+    // private ElevatorControlController _elevatorController = new ElevatorControlController(1, 1, 0.355, 1);
     private double voltage = 0;
 
     public ElevatorSubsystem(boolean isReal) {
@@ -115,23 +118,28 @@ public class ElevatorSubsystem extends SubsystemBase {
 
         SmartDashboard.putNumber(getName() + "/Output-PIDFF", finalOutput);
         _elevatorIO.setMotorSpeeds(finalOutput);
+        // _elevatorIO.setMotorVoltages(finalOutput);
     }
 
     private void updateMotorSpeedsWithPID() {
-        var pid = _positionPidController.calculate(_inputs.ElevatorDistanceMeters);
-        var desiredVelocity = _positionPidController.getError() * ElevatorMap.MaxSpeedCoefficient;
-        var ff = _positionFeedforward.calculate(desiredVelocity);
-        var finalOutput = MathUtil.clamp(pid + ff, -ElevatorMap.MaxSpeedCoefficient, ElevatorMap.MaxSpeedCoefficient);
+        // var pid = _positionPidController.calculate(_inputs.ElevatorDistanceMeters);
+        // var desiredVelocity = _positionPidController.getError() * ElevatorMap.MaxSpeedCoefficient;
+        // var ff = _positionFeedforward.calculate(desiredVelocity);
+        // var finalOutput = MathUtil.clamp(pid + ff, -ElevatorMap.MaxSpeedCoefficient, ElevatorMap.MaxSpeedCoefficient);
 
-        Logger.recordOutput("Elevator/pidraw", pid + ff);
-        Logger.recordOutput("Elevator/desiredVelocity", desiredVelocity);
+        // Logger.recordOutput("Elevator/pidraw", pid + ff);
+        // Logger.recordOutput("Elevator/desiredVelocity", desiredVelocity);
+
+        var ec = _elevatorController.calculate(_inputs.ElevatorDistanceMeters, _inputs.ElevatorSpeedMetersPerSecond);
+        var finalOutput = MathUtil.clamp(ec, -ElevatorMap.MaxSpeedCoefficient, ElevatorMap.MaxSpeedCoefficient);
 
         // Within 5% of max height, reduce speed
         finalOutput = getScaledSpeed(finalOutput, _inputs.ElevatorDistanceMeters);
 
         SmartDashboard.putNumber(getName() + "/finalOutput", finalOutput);
-        SmartDashboard.putNumber(getName() + "/PID", pid);
-        SmartDashboard.putNumber(getName() + "/feedForward", ff);
+        SmartDashboard.putNumber(getName() + "/ec", ec);
+        // SmartDashboard.putNumber(getName() + "/PID", pid);
+        // SmartDashboard.putNumber(getName() + "/feedForward", ff);
         SmartDashboard.putNumber(getName() + "/setpoint", _positionPidController.getSetpoint());
 
         // setMotorSpeedsWithLimitSwitches(finalOutput);
@@ -189,6 +197,18 @@ public class ElevatorSubsystem extends SubsystemBase {
 
         }
 
+        double ec = _elevatorController.calculate(.45, _inputs.ElevatorDistanceMeters,
+                _inputs.ElevatorSpeedMetersPerSecond);
+
+        Logger.recordOutput("Elevator/EC Out", ec);
+
+        // setMotorVoltages(ec);
+
+    }
+
+    public Command runWithEC() {
+        return Commands.run(() -> setMotorVoltages(_elevatorController.calculate(.45, _inputs.ElevatorDistanceMeters,
+                _inputs.ElevatorSpeedMetersPerSecond)));
     }
 
     //#endregion
@@ -207,7 +227,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     public Command goToElevatorPositionCommand(ElevatorPosition pos) {
         return Commands.runOnce(() -> {
             System.out.println("Setting elevator position to: " + _positionMap.get(pos));
-            _positionPidController.setSetpoint(_positionMap.get(pos));
+            // _positionPidController.setSetpoint(_positionMap.get(pos));
+            _elevatorController.setSetpoint(_positionMap.get(pos));
         });
     }
 

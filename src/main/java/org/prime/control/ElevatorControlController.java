@@ -3,6 +3,7 @@ package org.prime.control;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 public class ElevatorControlController {
@@ -11,6 +12,8 @@ public class ElevatorControlController {
 
     private double _staticFriction;
     private double _gravity;
+
+    private double _setpoint = -0.01;
 
     // Used for finding constants
     private boolean constantsFound = false;
@@ -57,10 +60,30 @@ public class ElevatorControlController {
     public double calculate(double setpoint, double position, double velocity) {
         double error = setpoint - position;
         double ramped = error * _ramp;
+        double overcomeFriction = _staticFriction * Math.min(ramped != 0 ? ramped / 5 : 0, 1);
+        double directional = velocity >= 0
+                ? (ramped * _gravity) + overcomeFriction
+                : ramped - overcomeFriction;
+        double output = directional * _multiplier;
+
+        return output;
+    }
+
+    public double calculate(double position, double velocity) {
+        if (_setpoint < 0) {
+            _setpoint = position;
+        }
+
+        double error = _setpoint - position;
+        double ramped = error * _ramp;
         double directional = (velocity > 0 ? ramped * _gravity : ramped) + _staticFriction;
         double output = directional * _multiplier;
 
         return output;
+    }
+
+    public void setSetpoint(double setpoint) {
+        _setpoint = setpoint;
     }
 
     public void findConstants(

@@ -145,21 +145,24 @@ public class OperatorInterface {
                                                 OperatorController.leftBumper(),
                                                 OperatorController.getLeftStickYSupplier(0.3, 0)));
 
-                OperatorController.povDown().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kTrough));
-                OperatorController.a().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kLow));
-                OperatorController.x().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kMid));
-                OperatorController.povUp().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kHigh));
-                OperatorController.start().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kSource));
-                OperatorController.b().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
+                // OperatorController.povDown().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kTrough));
+                // OperatorController.a().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kLow));
+                // OperatorController.x().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kMid));
+                // OperatorController.povUp().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kHigh));
+                // OperatorController.start().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kSource));
+                // OperatorController.b().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
 
-                OperatorController.rightBumper()
-                                .whileTrue(endEffectorSubsystem.setIntakeSpeedCommand(EndEffectorMap.EjectSpeed))
-                                .onFalse(endEffectorSubsystem.stopIntakeMotorCommand());
-                OperatorController.leftBumper()
-                                .whileTrue(endEffectorSubsystem.setIntakeSpeedCommand(EndEffectorMap.IntakeSpeed))
-                                .onFalse(endEffectorSubsystem.stopIntakeMotorCommand());
+                // OperatorController.rightBumper()
+                //                 .whileTrue(endEffectorSubsystem.setIntakeSpeedCommand(EndEffectorMap.EjectSpeed))
+                //                 .onFalse(endEffectorSubsystem.stopIntakeMotorCommand());
+                // OperatorController.leftBumper()
+                //                 .whileTrue(endEffectorSubsystem.setIntakeSpeedCommand(EndEffectorMap.IntakeSpeed))
+                //                 .onFalse(endEffectorSubsystem.stopIntakeMotorCommand());
 
-                OperatorController.leftStick().onTrue(endEffectorSubsystem.resetWristManualControlCommand());
+                // OperatorController.leftStick().onTrue(endEffectorSubsystem.resetWristManualControlCommand());
+
+                OperatorController.b().whileTrue(elevatorSubsystem.runWithEC())
+                                .onFalse(Commands.runOnce(() -> elevatorSubsystem.setMotorVoltages(0)));
         }
 
         public void setDriverRumbleIntensity(double intensity) {
