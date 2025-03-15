@@ -7,5 +7,7 @@ public interface IElevator {
 
     public void setMotorSpeeds(double output);
 
+    public void resetEncoderPos();
+
     public void stopMotors();
 }
