@@ -70,15 +70,13 @@ public class ClimberSubsystem extends SubsystemBase {
             } else {
                 hooksMotorSpeed = 0; // Stop motor if InLimitSwitch is pressed
             }
-        } else if (hooksPosition == HooksPosition.OPEN && (!currentlyClimbing && allowedToOpenHooks)) {
-            if (!_inputs.HooksOpenLimitSwitch) {
+        } else if (hooksPosition == HooksPosition.OPEN ) {
+            if (!_inputs.HooksOpenLimitSwitch && (!currentlyClimbing && allowedToOpenHooks)) {
                 hooksMotorSpeed = -ClimberMap.HooksSpeed;
             } else {
                 hooksMotorSpeed = 0; // Stop motor if OutLimitSwitch is pressed
             }
-        } else {
-            hooksMotorSpeed = 0;
-        }
+        } 
 
         Logger.recordOutput(getName() + "/HooksSpeed", hooksMotorSpeed);
         _climber.setHookMotorSpeed(hooksMotorSpeed);
