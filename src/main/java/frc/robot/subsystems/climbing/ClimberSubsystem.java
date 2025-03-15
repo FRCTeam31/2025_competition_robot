@@ -5,6 +5,7 @@ import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -37,6 +38,7 @@ public class ClimberSubsystem extends SubsystemBase {
 
     private IClimberIO _climber;
     private ClimberInputsAutoLogged _inputs = new ClimberInputsAutoLogged();
+    boolean allowedToOpenHooks = false;
 
     // Ask mason how he wants you to update this using the gyro
     private double _robotPitch = 0;
@@ -55,13 +57,14 @@ public class ClimberSubsystem extends SubsystemBase {
     public void periodic() {
         _climber.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
+        SmartDashboard.putBoolean(getName() + "allowed to change hooks state", allowedToOpenHooks);
 
     }
 
     private void setHooksState(HooksPosition hooksPosition) {
         double hooksMotorSpeed = 0;
         boolean currentlyClimbing = _robotPitch >= ClimberMap.ClimbingPitchThresholdDegrees;
-        boolean allowedToOpenHooks = _inputs.ClimbWenchOutLimitSwitch;
+        allowedToOpenHooks = _inputs.ClimbWenchOutLimitSwitch;
         _inputs.CommandedHooksPosition = hooksPosition;
 
         if (hooksPosition == HooksPosition.CLOSED) {
@@ -70,13 +73,13 @@ public class ClimberSubsystem extends SubsystemBase {
             } else {
                 hooksMotorSpeed = 0; // Stop motor if InLimitSwitch is pressed
             }
-        } else if (hooksPosition == HooksPosition.OPEN ) {
+        } else if (hooksPosition == HooksPosition.OPEN) {
             if (!_inputs.HooksOpenLimitSwitch && (!currentlyClimbing && allowedToOpenHooks)) {
                 hooksMotorSpeed = -ClimberMap.HooksSpeed;
             } else {
                 hooksMotorSpeed = 0; // Stop motor if OutLimitSwitch is pressed
             }
-        } 
+        }
 
         Logger.recordOutput(getName() + "/HooksSpeed", hooksMotorSpeed);
         _climber.setHookMotorSpeed(hooksMotorSpeed);
@@ -159,6 +162,10 @@ public class ClimberSubsystem extends SubsystemBase {
 
     public Command stopHooksMotorsCommand() {
         return Commands.runOnce(_climber::stopHooksMotors);
+    }
+
+    public Command stopAllMotors() {
+        return stopClimbingMotorsCommand().andThen(stopHooksMotorsCommand());
     }
 
     //#endregion

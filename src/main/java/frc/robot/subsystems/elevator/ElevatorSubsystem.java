@@ -112,7 +112,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
         if (tryingToUseManualControl) {
             setMotorSpeedsWithLimitSwitches(manualControlSpeed);
-        } else {
+        } else if (!_elevatorManaullyControlled) {
             updateMotorSpeedsWithPID();
         }
     }
@@ -147,7 +147,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         SmartDashboard.putNumber(getName() + "/feedForward", ff);
         SmartDashboard.putNumber(getName() + "/setpoint", _positionPidController.getSetpoint());
 
-        // setMotorSpeedsWithLimitSwitches(finalOutput);
+        setMotorSpeedsWithLimitSwitches(finalOutput);
     }
 
     private double getScaledSpeed(double outputSpeed, double currentPosition) {
@@ -188,6 +188,7 @@ public class ElevatorSubsystem extends SubsystemBase {
             _elevatorIO.resetEncoderPos();
 
         }
+        SmartDashboard.putBoolean(getName() + " is elevator manaully controlled", _elevatorManaullyControlled);
 
     }
 

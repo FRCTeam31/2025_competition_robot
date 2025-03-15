@@ -127,6 +127,9 @@ public class Robot extends LoggedRobot {
     Container.LEDs.setBackgroundPattern(disabledPattern);
     Container.LEDs.clearForegroundPattern();
     Container.Swerve.disableAutoAlignCommand().schedule();
+    Container.Elevator.stopMotorsCommand().schedule();
+    Container.Swerve.stopAllMotors();
+    Container.Climber.stopAllMotors();
   }
 
   /**
@@ -202,6 +205,8 @@ public class Robot extends LoggedRobot {
       // Stop any subsystems still running
       Container.Elevator.stopMotorsCommand().schedule();
       Container.Swerve.stopAllMotors();
+      Container.Climber.stopAllMotors();
+
     } else {
       Container.Swerve.resetGyro();
     }
