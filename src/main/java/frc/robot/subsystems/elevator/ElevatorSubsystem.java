@@ -169,6 +169,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         if (_inputs.BottomLimitSwitch) {
             _elevatorIO.resetEncoderPos();
         }
+        SmartDashboard.putBoolean(getName() + " is elevator manaully controlled", _elevatorManaullyControlled);
+
     }
     //#endregion
 

@@ -112,9 +112,9 @@ public class OperatorInterface {
                                 .onTrue(climber.setHooksStateCommand(HooksPosition.CLOSED)));
                 DriverController.b().and(DriverController.rightBumper()
                                 .onTrue(climber.setHooksStateCommand(HooksPosition.OPEN)));
-                DriverController.a().and(DriverController.leftBumper()).whileTrue(climber.climbDownCommand())
+                DriverController.start().and(DriverController.leftBumper()).whileTrue(climber.climbDownCommand())
                                 .onFalse(climber.stopClimbingMotorsCommand());
-                DriverController.a().and(DriverController.rightBumper()).whileTrue(climber.climbUpCommand())
+                DriverController.start().and(DriverController.rightBumper()).whileTrue(climber.climbUpCommand())
                                 .onFalse(climber.stopClimbingMotorsCommand());
 
         }
