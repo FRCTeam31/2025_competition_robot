@@ -39,8 +39,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
         public static final double WristReef = 135;
         public static final double WristMaxOutput = 0.175;
 
-        public static final double LowerElevatorHeightLimitForPID = 0.16;
-        public static final double LowerElevatorHeightForManaulControl = 0.25;
+        public static final double LowerElevatorSafetyLimit = 0.16;
 
         // public static final double UpperElevatorHeightLimit = 0.4;
         public static final double SafeWristAngleAtUpperElevatorHeightLimit = -30;
@@ -74,21 +73,15 @@ public class EndEffectorSubsystem extends SubsystemBase {
     }
 
     public void manageWristControl(double manaulControlSpeed) {
+        boolean isSafeForManaulControl = Container.Elevator
+                .getElevatorPositionMeters() >= EndEffectorMap.LowerElevatorSafetyLimit
+                && _inputs.EndEffectorAngleDegrees <= -25;
 
         boolean tryingToUseManualControl = (manaulControlSpeed != 0 || _wristManuallyControlled);
-        //Store if the wrist is currently manaully controlled, this will not be disabled until operator clicks the controller stick button
-        if (manaulControlSpeed != 0 && Container.Elevator
-                .getElevatorPositionMeters() >= EndEffectorMap.LowerElevatorHeightForManaulControl) {
-            _wristManuallyControlled = true;
-        } else if (Container.Elevator
-                .getElevatorPositionMeters() <= EndEffectorMap.LowerElevatorHeightForManaulControl) {
-            _wristManuallyControlled = false;
-        }
 
-        boolean aboveMinHeightManaulThreshold = Container.Elevator
-                .getElevatorPositionMeters() >= EndEffectorMap.LowerElevatorHeightForManaulControl;
+        _wristManuallyControlled = (isSafeForManaulControl && tryingToUseManualControl) ? true : false;
 
-        if (aboveMinHeightManaulThreshold && tryingToUseManualControl) {
+        if (_wristManuallyControlled) {
             runWristManaul(manaulControlSpeed);
         } else {
             seekWristAnglePID();
@@ -97,17 +90,16 @@ public class EndEffectorSubsystem extends SubsystemBase {
     }
 
     public void seekWristAnglePID() {
-        var belowMinHeightPIDThreshold = Container.Elevator
-                .getElevatorPositionMeters() <= EndEffectorMap.LowerElevatorHeightLimitForPID;
+        var belowElevatorSafetyLimit = Container.Elevator
+                .getElevatorPositionMeters() <= EndEffectorMap.LowerElevatorSafetyLimit;
 
-        // boolean inDangerZone = belowMinHeightThreshold || aboveMaxHeightThreshold;
-        boolean inDangerZone = belowMinHeightPIDThreshold;
+        boolean inDangerZone = belowElevatorSafetyLimit;
 
-        double pid = belowMinHeightPIDThreshold
+        double pid = belowElevatorSafetyLimit
                 ? _wristPID.calculate(_inputs.EndEffectorAngleDegrees, 0)
                 : _wristPID.calculate(_inputs.EndEffectorAngleDegrees);
 
-        if (!belowMinHeightPIDThreshold) {
+        if (!belowElevatorSafetyLimit) {
             double previousSetpoint = _wristPID.getSetpoint();
             _wristPID.setSetpoint(
                     Math.min(previousSetpoint, EndEffectorMap.SafeWristAngleAtUpperElevatorHeightLimit));

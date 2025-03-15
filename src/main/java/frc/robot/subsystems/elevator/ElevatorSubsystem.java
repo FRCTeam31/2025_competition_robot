@@ -29,21 +29,21 @@ public class ElevatorSubsystem extends SubsystemBase {
         public static final double MaxElevatorHeight = 0.63;
         public static final double MaxSpeedCoefficient = 0.5;
 
-        // public static final ExtendedPIDConstants PositionPID = new ExtendedPIDConstants(0.043861, 0, 0, 0,
-        //         0.28922,
-        //         0.024268,
-        //         0.29376);
-
-        public static final ExtendedPIDConstants PositionPID = new ExtendedPIDConstants(0, 0, 0.04, 0,
-                0.28922 * 1.5,
+        public static final ExtendedPIDConstants PositionPID = new ExtendedPIDConstants(4, 0, 0.04, 0,
+                0.28922,
                 0.024268,
-                0.15);
+                0.29376);
+
+        // public static final ExtendedPIDConstants PositionPID = new ExtendedPIDConstants(0, 0, 0.04, 0,
+        //         0.28922 * 1.5,
+        //         0.024268,
+        //         0.15);
 
         // public static final ExtendedPIDConstants PositionPID = new ExtendedPIDConstants(0, 0, 0, 0,
         //         19.17 / 5,
         //         76.7 / 5,
         //         0.355);
-        public static final double FeedForwardKg = 0.085;
+        public static final double FeedForwardKg = 0.083665;
         public static final double OutputSprocketDiameterMeters = Units.Millimeters.of(32.2).in(Meters);
         public static final double GearRatio = 16;
         public static final int ElevatorEncoderCANID = 22;
@@ -133,7 +133,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     private void updateMotorSpeedsWithPID() {
         var pid = _positionPidController.calculate(_inputs.ElevatorDistanceMeters);
         var desiredVelocity = _positionPidController.getError() * ElevatorMap.MaxSpeedCoefficient;
-        var ff = _positionFeedforward.calculate(desiredVelocity);
+        var ff = _positionFeedforward.calculate(_positionPidController.getSetpoint());
         var finalOutput = MathUtil.clamp(pid + ff, -ElevatorMap.MaxSpeedCoefficient, ElevatorMap.MaxSpeedCoefficient);
 
         Logger.recordOutput("Elevator/pidraw", pid + ff);
