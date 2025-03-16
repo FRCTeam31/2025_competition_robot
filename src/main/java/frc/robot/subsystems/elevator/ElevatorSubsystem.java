@@ -12,10 +12,12 @@ import org.prime.control.MRSGConstants;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.wpilibj.event.BooleanEvent;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
 
 public class ElevatorSubsystem extends SubsystemBase {
 
@@ -29,6 +31,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         public static final double MaxSpeedCoefficient = 0.5;
         public static final double OutputSprocketDiameterMeters = Units.Millimeters.of(32.2).in(Meters);
         public static final double GearRatio = 16;
+        public static final double BottomLimitResetDebounceSeconds = 0.25;
         public static final int ElevatorEncoderCANID = 22;
         public static final MRSGConstants ElevatorControllerConstants = new MRSGConstants(
                 6.6, 4.5, 0, 1.1);
@@ -59,7 +62,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private ElevatorInputsAutoLogged _inputs = new ElevatorInputsAutoLogged();
     private IElevator _elevatorIO;
-    private ElevatorController _elevatorController = new ElevatorController(ElevatorMap.ElevatorControllerConstants);
+    public ElevatorController ElevatorController = new ElevatorController(ElevatorMap.ElevatorControllerConstants);
     private boolean _elevatorManaullyControlled = false;
 
     public ElevatorSubsystem(boolean isReal) {
@@ -68,6 +71,13 @@ public class ElevatorSubsystem extends SubsystemBase {
         _elevatorIO = isReal
                 ? new ElevatorReal()
                 : new ElevatorSim();
+
+        // TODO: Ask Mason about this, it is not set to a variable.
+
+        new BooleanEvent(Robot.EventLoop, () -> _inputs.BottomLimitSwitch)
+                .debounce(ElevatorMap.BottomLimitResetDebounceSeconds)
+                .rising()
+                .ifHigh(_elevatorIO::resetEncoderPos);
     }
 
     public double getElevatorPositionMeters() {
@@ -123,7 +133,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     private void updateMotorVoltageWithEC() {
-        var ec = _elevatorController.calculate(_inputs.ElevatorDistanceMeters, _inputs.ElevatorSpeedMetersPerSecond);
+        var ec = ElevatorController.calculate(_inputs.ElevatorDistanceMeters, _inputs.ElevatorSpeedMetersPerSecond);
 
         // Within 5% of max height, reduce speed
 
@@ -172,7 +182,7 @@ public class ElevatorSubsystem extends SubsystemBase {
             _elevatorIO.resetEncoderPos();
         }
         SmartDashboard.putBoolean(getName() + " is elevator manaully controlled", _elevatorManaullyControlled);
-        SmartDashboard.putNumber(getName() + "EC Setpoint", _elevatorController.getSetpoint());
+        SmartDashboard.putNumber(getName() + "EC Setpoint", ElevatorController.getSetpoint());
 
     }
     //#endregion
@@ -186,7 +196,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     public Command setElevatorSetpointCommand(ElevatorPosition pos) {
         return Commands.runOnce(() -> {
             System.out.println("Setting elevator position to: " + _positionMap.get(pos));
-            _elevatorController.setSetpoint(_positionMap.get(pos));
+            ElevatorController.setSetpoint(_positionMap.get(pos));
         }).andThen(disableElevatorManualControlCommand());
     }
 
@@ -197,7 +207,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                 .withTimeout(7)
                 .andThen(Commands.runOnce(() -> {
                     _elevatorIO.stopMotors();
-                    _elevatorController.setSetpoint(0);
+                    ElevatorController.setSetpoint(0);
                 }));
     }
 

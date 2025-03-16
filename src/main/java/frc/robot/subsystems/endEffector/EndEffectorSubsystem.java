@@ -5,6 +5,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.Logger;
+import org.prime.control.ElevatorController;
 import org.prime.control.ExtendedPIDConstants;
 import org.prime.control.MRSGController;
 import org.prime.util.LockableEvent;
@@ -25,7 +26,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
         public static final byte IntakeMotorCanID = 19;
         public static final byte WristMotorCanID = 20;
         public static final byte LimitSwitchDIOChannel = 9;
-        public static final double EjectSpeed = 0.5;
+        public static final double EjectSpeed = 1;
         public static final double IntakeSpeed = -1;
         public static final byte IntakeCurrentLimit = 20;
         public static final byte WristCurrentLimit = 30;
@@ -42,39 +43,24 @@ public class EndEffectorSubsystem extends SubsystemBase {
         public static final double WristMaxOutput = 0.175;
 
         public static final double LowerElevatorSafetyLimit = 0.15;
-
-        // public static final double UpperElevatorHeightLimit = 0.4;
     }
 
     private IEndEffector _endEffector;
     private PIDController _wristPID;
     private boolean _wristManuallyControlled = false;
 
-    // private MRSGController _wristController = new MRSGController(1, 1, 0, 1);
+    private LockableEvent<ElevatorPosition> _lockableSetpoint = new LockableEvent<>(
+            ElevatorPosition.kAbsoluteMinimum,
+            this::setWristSetpointCommand,
+            true);
 
-    // private LockableEvent<WristSetpointFromElevatorPosition> _lockableSetpoint = new LockableEvent<>(
-    //         WristSetpointFromElevatorPosition.kAbsoluteMinimum,
-    //         this::setWristSetpointCommand,
-    //         true);
-
-    private boolean _locked = true;
-
-    private Map<WristSetpointFromElevatorPosition, Double> _angleAtElevatorHeight = Map.of(
-            WristSetpointFromElevatorPosition.kAbsoluteMinimum, 0.0,
-            WristSetpointFromElevatorPosition.kSource, -42.36,
-            WristSetpointFromElevatorPosition.kTrough, -92.0,
-            WristSetpointFromElevatorPosition.kLow, -126.0,
-            WristSetpointFromElevatorPosition.kMid, -126.0,
-            WristSetpointFromElevatorPosition.kHigh, -130.0);
-
-    public enum WristSetpointFromElevatorPosition {
-        kAbsoluteMinimum,
-        kSource,
-        kTrough,
-        kLow,
-        kMid,
-        kHigh
-    }
+    private Map<ElevatorPosition, Double> _angleAtElevatorHeight = Map.of(
+            ElevatorPosition.kAbsoluteMinimum, 0.0,
+            ElevatorPosition.kSource, -42.36,
+            ElevatorPosition.kTrough, -92.0,
+            ElevatorPosition.kLow, -126.0,
+            ElevatorPosition.kMid, -126.0,
+            ElevatorPosition.kHigh, -130.0);
 
     private EndEffectorInputsAutoLogged _inputs = new EndEffectorInputsAutoLogged();
 
@@ -129,11 +115,9 @@ public class EndEffectorSubsystem extends SubsystemBase {
         _endEffector.setWristSpeed(pid);
 
         if (inDangerZone) {
-            // _lockableSetpoint.lock();
-            _locked = true;
+            _lockableSetpoint.lock();
         } else {
-            // _lockableSetpoint.unlock();
-            _locked = false;
+            _lockableSetpoint.unlock();
         }
     }
 
@@ -179,7 +163,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
                 _endEffector.setIntakeSpeed(EndEffectorMap.EjectSpeed);
 
             } else if (_inputs.EndEffectorAngleDegrees < EndEffectorMap.WristNonVerticalAngleThreshold
-                    && !_inputs.LimitSwitchState) {
+                    && !_inputs.CoralLimitSwitchState) {
                 _endEffector.setIntakeSpeed(EndEffectorMap.IntakeSpeed);
 
             } else {
@@ -207,7 +191,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
      * Sets the wrist setpoint
      * @param position Elevator position
      */
-    public Command setWristSetpointCommand(WristSetpointFromElevatorPosition position) {
+    public Command setWristSetpointCommand(ElevatorPosition position) {
         return Commands.runOnce(this::disableWristManualControl).andThen(() -> {
             _wristPID.setSetpoint(_angleAtElevatorHeight.get(position));
         });
@@ -220,19 +204,20 @@ public class EndEffectorSubsystem extends SubsystemBase {
      * @param position
      * @return
      */
-    public Command scheduleWristSetpointCommand(WristSetpointFromElevatorPosition position) {
-        // return Commands.runOnce(this::disableWristManaulControl).andThen(() -> _lockableSetpoint.setEvent(position))
-        //         .andThen(_lockableSetpoint.scheduleLockableEventCommand());
+    public Command scheduleWristSetpointCommand(ElevatorPosition position) {
+        return Commands.runOnce(this::disableWristManualControlCommand).andThen(() -> {
+            _lockableSetpoint.setEvent(position);
+            _lockableSetpoint.scheduleLockableEventCommand();
+        });
 
-        return Commands.run(() -> System.out.println("Waiting")).until(() -> !_locked)
-                .andThen(setWristSetpointCommand(position));
+        // TODO: May have to use .finallyDo() instead of .andThen()
     }
 
     public Command wristManualControlCommand(double speed) {
         return Commands.runOnce(() -> _endEffector.setWristSpeed(speed));
     }
 
-    public Command disabletWristManualControlCommand() {
+    public Command disableWristManualControlCommand() {
         return Commands.runOnce(this::disableWristManualControl);
     }
 
@@ -250,6 +235,16 @@ public class EndEffectorSubsystem extends SubsystemBase {
 
     public Command setIntakeSpeedCommand(double speed) {
         return this.run(() -> _endEffector.setIntakeSpeed(speed));
+    }
+
+    public Command scoreCoral() {
+        return Commands.waitUntil(() -> Container.Elevator.ElevatorController.atSetpoint()).andThen(
+                setIntakeSpeedCommand(EndEffectorMap.EjectSpeed).withTimeout(0.4).andThen(stopIntakeMotorCommand()));
+    }
+
+    public Command pickupCoral() {
+        return setIntakeSpeedCommand(EndEffectorMap.IntakeSpeed).until(() -> _inputs.CoralLimitSwitchState)
+                .andThen(stopIntakeMotorCommand());
     }
 
     // TODO: Add more named commands for running the intake and rotating the wrist to predefined setpoints (See above todo)

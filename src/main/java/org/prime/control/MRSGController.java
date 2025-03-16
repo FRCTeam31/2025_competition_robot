@@ -10,6 +10,10 @@ public class MRSGController {
     private double _setpoint = -0.01;
     private double _frictionDeadband = 0.1;
 
+    // Physical Variables
+    private double _position;
+    private double _velocity;
+
     public MRSGController(double M, double R, double S, double G) {
         _multiplier = M;
         _ramp = R;
@@ -43,6 +47,9 @@ public class MRSGController {
     }
 
     public double calculate(double setpoint, double position, double velocity) {
+        _position = position;
+        _velocity = velocity;
+
         double error = setpoint - position;
         double ramped = error * _ramp;
         double directional = velocity >= 0
@@ -69,6 +76,14 @@ public class MRSGController {
 
     public double getSetpoint() {
         return _setpoint;
+    }
+
+    public boolean atSetpoint(double deadband) {
+        return Math.abs(_setpoint - _position) < deadband;
+    }
+
+    public boolean atSetpoint() {
+        return atSetpoint(0.1);
     }
 
     public void setM(double M) {

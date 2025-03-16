@@ -56,6 +56,12 @@ public class SwerveSubsystem extends SubsystemBase {
       .steps(Map.of(0.0, Color.kRed, 0.25, Color.kBlack))
       .scrollAtRelativeSpeed(Units.Hertz.of(2));
 
+  // Reef Positioning
+  public enum ReefSide {
+    kLeft,
+    kRight
+  }
+
   /**
    * Creates a new Drivetrain.
    */
@@ -370,6 +376,10 @@ public class SwerveSubsystem extends SubsystemBase {
     cmd.setName("DisableAutoAlignRotationFeedback");
 
     return cmd;
+  }
+
+  public Command pathfindToReefSide(ReefSide side) {
+    return Commands.runOnce(() -> System.out.println("[NOT IMPLEMENTED] Pathfinding to reef side: " + side.toString()));
   }
 
   public Command pathfindToPoseCommand(Pose2d pose) {

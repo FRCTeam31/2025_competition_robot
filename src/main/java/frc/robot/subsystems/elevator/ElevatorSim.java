@@ -17,8 +17,8 @@ public class ElevatorSim implements IElevator {
     public ElevatorSim() {
         _gearboxSim = new DCMotorSim(
                 LinearSystemId.createDCMotorSystem(
-                        0,
-                        0),
+                        1,
+                        1),
                 DCMotor.getNeoVortex(1)
                         .withReduction(ElevatorMap.GearRatio));
         _topLimitSwitchSim = new DIOSim(ElevatorMap.TopLimitSwitchChannel);

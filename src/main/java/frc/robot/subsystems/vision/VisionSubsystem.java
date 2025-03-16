@@ -1,5 +1,7 @@
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -36,6 +38,10 @@ public class VisionSubsystem extends SubsystemBase {
                 _limelightInputs[0].FieldSpaceRobotPose,
                 _limelightInputs[1].FieldSpaceRobotPose
         };
+
+        UsbCamera camera = CameraServer.startAutomaticCapture();
+        camera.setResolution(320, 240);
+        camera.setFPS(30);
     }
 
     /**

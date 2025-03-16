@@ -69,7 +69,7 @@ public class EndEffectorSim implements IEndEffector {
 
         inputs.IntakeMotorSpeed = _intakeMotor.getAngularVelocity().magnitude();
         inputs.WristMotorSpeed = _wristMotor.getAngularVelocity().magnitude();
-        inputs.LimitSwitchState = getLimitSwitchState();
+        inputs.CoralLimitSwitchState = getLimitSwitchState();
     }
 
     private double getWristAngle() {

@@ -20,7 +20,6 @@ import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorMap;
 import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorPosition;
 import frc.robot.subsystems.endEffector.EndEffectorSubsystem;
 import frc.robot.subsystems.endEffector.EndEffectorSubsystem.EndEffectorMap;
-import frc.robot.subsystems.endEffector.EndEffectorSubsystem.WristSetpointFromElevatorPosition;
 
 public class OperatorInterface {
         public static class OIMap {
@@ -67,10 +66,11 @@ public class OperatorInterface {
                 //Climber Controls
                 DriverController.y().and(DriverController.leftBumper()).onTrue(climber.setClimberInCommand());
                 DriverController.y().and(DriverController.rightBumper()).onTrue(climber.setClimberOutCommand());
-                DriverController.b().and(DriverController.leftBumper()
-                                .onTrue(climber.setHooksStateCommand(HooksPosition.CLOSED)));
-                DriverController.b().and(DriverController.rightBumper()
-                                .onTrue(climber.setHooksStateCommand(HooksPosition.OPEN)));
+
+                DriverController.b().and(DriverController.leftBumper())
+                                .onTrue(climber.setHooksStateCommand(HooksPosition.CLOSED));
+                DriverController.b().and(DriverController.rightBumper())
+                                .onTrue(climber.setHooksStateCommand(HooksPosition.OPEN));
                 DriverController.start().and(DriverController.leftBumper()).whileTrue(climber.climbDownCommand())
                                 .onFalse(climber.stopClimbingMotorsCommand());
                 DriverController.start().and(DriverController.rightBumper()).whileTrue(climber.climbUpCommand())
@@ -91,18 +91,12 @@ public class OperatorInterface {
                                                 OperatorController.getLeftStickYSupplier(0.3, 0)));
 
                 // Elevator and Wrist Combined Controls                              
-                OperatorController.povDown().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kTrough,
-                                WristSetpointFromElevatorPosition.kTrough));
-                OperatorController.a().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kLow,
-                                WristSetpointFromElevatorPosition.kLow));
-                OperatorController.x().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kMid,
-                                WristSetpointFromElevatorPosition.kMid));
-                OperatorController.povUp().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kHigh,
-                                WristSetpointFromElevatorPosition.kHigh));
-                OperatorController.start().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kSource,
-                                WristSetpointFromElevatorPosition.kSource));
-                OperatorController.b().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum,
-                                WristSetpointFromElevatorPosition.kAbsoluteMinimum));
+                OperatorController.povDown().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kTrough));
+                OperatorController.a().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kLow));
+                OperatorController.x().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kMid));
+                OperatorController.povUp().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kHigh));
+                OperatorController.start().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kSource));
+                OperatorController.b().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
 
                 OperatorController.rightBumper()
                                 .whileTrue(endEffectorSubsystem.setIntakeSpeedCommand(EndEffectorMap.EjectSpeed))
@@ -111,8 +105,16 @@ public class OperatorInterface {
                                 .whileTrue(endEffectorSubsystem.setIntakeSpeedCommand(EndEffectorMap.IntakeSpeed))
                                 .onFalse(endEffectorSubsystem.stopIntakeMotorCommand());
 
-                OperatorController.leftStick().onTrue(endEffectorSubsystem.disabletWristManualControlCommand());
+                OperatorController.leftStick().onTrue(endEffectorSubsystem.disableWristManualControlCommand());
                 OperatorController.rightStick().onTrue(elevatorSubsystem.disableElevatorManualControlCommand());
+
+                OperatorController.back().whileTrue(Commands.runOnce(() -> {
+                        Container.Vision.setLedMode(0, 3);
+                        Container.Vision.setLedMode(1, 3);
+                })).onFalse(Commands.runOnce(() -> {
+                        Container.Vision.setLedMode(0, 0);
+                        Container.Vision.setLedMode(1, 0);
+                }));
 
         }
 

@@ -129,7 +129,7 @@ public class ClimberSubsystem extends SubsystemBase {
         return setClimberStateCommand(ClimberPosition.OUT);
     }
 
-    public ParallelCommandGroup setClimberInCommand() {
+    public Command setClimberInCommand() {
         return setHooksStateCommand(HooksPosition.CLOSED)
                 .alongWith(setClimberStateCommand(ClimberPosition.IN));
     }

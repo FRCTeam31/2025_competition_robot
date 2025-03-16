@@ -6,6 +6,6 @@ import org.littletonrobotics.junction.AutoLog;
 public class EndEffectorInputs {
     public double IntakeMotorSpeed = 0;
     public double WristMotorSpeed = 0;
-    public boolean LimitSwitchState;
+    public boolean CoralLimitSwitchState;
     public double EndEffectorAngleDegrees = 0;
 }

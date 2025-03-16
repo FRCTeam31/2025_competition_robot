@@ -4,6 +4,13 @@
 
 package frc.robot;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.naming.Name;
+
+import com.pathplanner.lib.auto.NamedCommands;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -15,12 +22,12 @@ import frc.robot.subsystems.*;
 import frc.robot.subsystems.climbing.ClimberSubsystem;
 import frc.robot.subsystems.drivetrain.SwerveMap;
 import frc.robot.subsystems.drivetrain.SwerveSubsystem;
+import frc.robot.subsystems.drivetrain.SwerveSubsystem.ReefSide;
 import frc.robot.subsystems.climbing.ClimberInputs.ClimberPosition;
 import frc.robot.subsystems.climbing.ClimberInputs.HooksPosition;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorPosition;
 import frc.robot.subsystems.endEffector.EndEffectorSubsystem;
-import frc.robot.subsystems.endEffector.EndEffectorSubsystem.WristSetpointFromElevatorPosition;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
 public class Container {
@@ -47,14 +54,8 @@ public class Container {
       Climber = new ClimberSubsystem(isReal);
       EndEffector = new EndEffectorSubsystem(isReal);
 
-      // Register the named commands from each subsystem that may be used in PathPlanner
-      // var namedCommandsMap = Swerve.getNamedCommands();
-      // ...add other named commands to the map using "otherNamedCommands.putAll(namedCommandsMap);"
-      // NamedCommands.registerCommands(namedCommandsMap);
-
       // Create our custom auto builder
       AutoDashboardSection = new DashboardSection("Auto");
-      // AutoBuilder = new BuildableAutoRoutine(namedCommandsMap);
       TeleopDashboardSection = new TeleopDashboardTab();
       CommandsDashboardSection = new DashboardSection("Commands");
       TestDashboardSection = new DashboardSection("Test");
@@ -63,17 +64,23 @@ public class Container {
       OperatorInterface = new OperatorInterface();
       Elevator = new ElevatorSubsystem(isReal);
 
-      // Configure controller bindings
-      // OperatorInterface.bindDriverControls(
-      //     Swerve.resetGyroCommand(),
-      //     Swerve.enableLockOnCommand(),
-      //     Swerve.disableAutoAlignCommand(),
-      //     Swerve::setAutoAlignSetpointCommand,
-      //     Swerve::setDefaultCommand,
-      //     Swerve::driveFieldRelativeCommand);
-
       OperatorInterface.bindDriverControls(Swerve, Climber);
       OperatorInterface.bindOperatorControls(Elevator, EndEffector);
+
+      // Register the named commands from each subsystem that may be used in PathPlanner
+      var swerveCommands = Swerve.getNamedCommands();
+      var containerCommands = getNamedCommands();
+
+      // ...add other named commands to the map using "otherNamedCommands.putAll(namedCommandsMap);"
+
+      NamedCommands.registerCommands(swerveCommands);
+      NamedCommands.registerCommands(containerCommands);
+
+      Map<String, Command> combinedCommands = new HashMap<>();
+      combinedCommands.putAll(swerveCommands);
+      combinedCommands.putAll(containerCommands);
+
+      AutoBuilder = new BuildableAutoRoutine(combinedCommands);
 
     } catch (Exception e) {
       DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());
@@ -82,12 +89,43 @@ public class Container {
 
   //#region Commands
 
-  public static Command setCombinedHeightAndAngle(ElevatorPosition position, WristSetpointFromElevatorPosition angle) {
+  public static Command setCombinedHeightAndAngle(ElevatorPosition position) {
     return Commands.parallel(
         Commands.runOnce(() -> System.out.println("Setting combined height and angle: " + position)),
         Elevator.setElevatorSetpointCommand(position),
-        EndEffector.scheduleWristSetpointCommand(angle))
+        EndEffector.scheduleWristSetpointCommand(position))
         .finallyDo(() -> System.out.println("Finished setting combined setpoints"));
+  }
+
+  public static Command scoreAtHeight(ElevatorPosition position) {
+    return setCombinedHeightAndAngle(position).andThen(EndEffector.scoreCoral());
+  }
+
+  public static Command scoreAtHeightAndLower(ElevatorPosition position) {
+    return scoreAtHeight(position).andThen(setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
+  }
+
+  public static Command pickupFromSource() {
+    return setCombinedHeightAndAngle(ElevatorPosition.kSource).andThen(EndEffector.pickupCoral());
+  }
+
+  public static Command pickupFromSourceAndLower() {
+    return pickupFromSource().andThen(setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
+  }
+
+  public static Command scoreOnSideAndLower(ReefSide side, ElevatorPosition position) {
+    return Swerve.pathfindToReefSide(side).andThen(scoreAtHeightAndLower(position));
+  }
+
+  public static Map<String, Command> getNamedCommands() {
+    return Map.of(
+        "Score-L4-L", scoreOnSideAndLower(ReefSide.kLeft, ElevatorPosition.kHigh),
+        "Score-L4-R", scoreOnSideAndLower(ReefSide.kRight, ElevatorPosition.kHigh),
+        "Score-L3-L", scoreOnSideAndLower(ReefSide.kLeft, ElevatorPosition.kMid),
+        "Score-L3-R", scoreOnSideAndLower(ReefSide.kRight, ElevatorPosition.kMid),
+        "Score-L2-L", scoreOnSideAndLower(ReefSide.kLeft, ElevatorPosition.kLow),
+        "Score-L2-R", scoreOnSideAndLower(ReefSide.kRight, ElevatorPosition.kLow),
+        "Score-Trough", scoreAtHeightAndLower(ElevatorPosition.kTrough));
   }
 
   //#endregion

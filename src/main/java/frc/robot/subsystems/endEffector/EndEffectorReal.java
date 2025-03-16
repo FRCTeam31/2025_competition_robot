@@ -53,7 +53,7 @@ public class EndEffectorReal implements IEndEffector {
 
         inputs.IntakeMotorSpeed = intakeMotorSpeed;
         inputs.WristMotorSpeed = wristMotorSpeed;
-        inputs.LimitSwitchState = limitSwitchState;
+        inputs.CoralLimitSwitchState = limitSwitchState;
         inputs.EndEffectorAngleDegrees = getWristAngle();
     }
 
