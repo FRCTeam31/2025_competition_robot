@@ -4,14 +4,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import edu.wpi.first.wpilibj2.command.Commands;
 
-public class ElevatorController {
-    private double _multiplier;
-    private double _ramp;
-
-    private double _staticFriction;
-    private double _gravity;
-
-    private double _setpoint = -0.01;
+public class ElevatorController extends MRSGController {
 
     // Used for finding constants
     private boolean constantsFound = false;
@@ -42,53 +35,19 @@ public class ElevatorController {
     private double foundG = 0;
 
     public ElevatorController(double M, double R, double S, double G) {
-        _multiplier = M;
-        _ramp = R;
-        _staticFriction = S;
-        _gravity = G;
+        super(M, R, S, G);
     }
 
-    public ElevatorController(ElevatorControllerConstants constants) {
-        _multiplier = constants.M;
-        _ramp = constants.R;
-        _staticFriction = constants.S;
-        _gravity = constants.G;
+    public ElevatorController(MRSGConstants constants) {
+        super(constants);
     }
 
-    public double calculate(double setpoint, double position, double velocity) {
-        double error = setpoint - position;
-        double ramped = error * _ramp;
-        double overcomeFriction = _staticFriction * Math.min(ramped != 0 ? ramped / 5 : 0, 1);
-        double directional = velocity >= 0
-                ? (ramped * _gravity) + overcomeFriction
-                : ramped - overcomeFriction;
-        double output = directional * _multiplier;
-
-        return output;
+    public ElevatorController(double M, double R, double S, double G, double frictionDeadband) {
+        super(M, R, S, G, frictionDeadband);
     }
 
-    public double calculate(double position, double velocity) {
-        if (_setpoint < 0) {
-            _setpoint = position;
-        }
-
-        double error = _setpoint - position;
-        double ramped = error * _ramp;
-        double overcomeFriction = _staticFriction * Math.min(ramped != 0 ? ramped / 5 : 0, 1);
-        double directional = velocity >= 0
-                ? (ramped * _gravity) + overcomeFriction
-                : ramped - overcomeFriction;
-        double output = directional * _multiplier;
-
-        return output;
-    }
-
-    public void setSetpoint(double setpoint) {
-        _setpoint = setpoint;
-    }
-
-    public double getSetpoint() {
-        return _setpoint;
+    public ElevatorController(MRSGConstants constants, double frictionDeadband) {
+        super(constants, frictionDeadband);
     }
 
     public void findConstants(
@@ -197,9 +156,9 @@ public class ElevatorController {
 
         }).until(() -> constantsFound).schedule();
 
-        _multiplier = 1;
-        _ramp = 1;
-        _staticFriction = foundS;
-        _gravity = foundG;
+        setM(1);
+        setR(1);
+        setS(foundS);
+        setG(foundG);
     }
 }

@@ -6,6 +6,7 @@ import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.ExtendedPIDConstants;
+import org.prime.control.MRSGController;
 import org.prime.util.LockableEvent;
 
 import edu.wpi.first.math.MathUtil;
@@ -48,6 +49,8 @@ public class EndEffectorSubsystem extends SubsystemBase {
     private IEndEffector _endEffector;
     private PIDController _wristPID;
     private boolean _wristManuallyControlled = false;
+
+    // private MRSGController _wristController = new MRSGController(1, 1, 0, 1);
 
     // private LockableEvent<WristSetpointFromElevatorPosition> _lockableSetpoint = new LockableEvent<>(
     //         WristSetpointFromElevatorPosition.kAbsoluteMinimum,

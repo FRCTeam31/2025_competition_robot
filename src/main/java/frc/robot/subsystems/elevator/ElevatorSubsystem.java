@@ -8,7 +8,7 @@ import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.ElevatorController;
-import org.prime.control.ElevatorControllerConstants;
+import org.prime.control.MRSGConstants;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.Units;
@@ -30,7 +30,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         public static final double OutputSprocketDiameterMeters = Units.Millimeters.of(32.2).in(Meters);
         public static final double GearRatio = 16;
         public static final int ElevatorEncoderCANID = 22;
-        public static final ElevatorControllerConstants ElevatorControllerConstants = new ElevatorControllerConstants(
+        public static final MRSGConstants ElevatorControllerConstants = new MRSGConstants(
                 6.6, 4.5, 0, 1.1);
     }
 
