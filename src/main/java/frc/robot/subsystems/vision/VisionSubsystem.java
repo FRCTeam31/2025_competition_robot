@@ -2,11 +2,11 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import org.littletonrobotics.junction.Logger;
 import org.prime.vision.LimelightInputs;
-import org.prime.vision.LimelightPose;
 
 public class VisionSubsystem extends SubsystemBase {
     public class VisionMap {
@@ -16,10 +16,11 @@ public class VisionSubsystem extends SubsystemBase {
 
     private LimeLightNT[] _limelights;
     private LimelightInputs[] _limelightInputs;
-    private LimelightPose[] _limelightRobotPoses;
+    private boolean _frontInDriverMode = false;
+    private boolean _rearInDriverMode = false;
 
     public VisionSubsystem() {
-        setName("VisionSubsystem");
+        setName("Vision");
         var defaultInstance = NetworkTableInstance.getDefault();
 
         _limelights = new LimeLightNT[] {
@@ -31,11 +32,6 @@ public class VisionSubsystem extends SubsystemBase {
         for (int i = 0; i < _limelights.length; i++) {
             _limelightInputs[i] = new LimelightInputs();
         }
-
-        _limelightRobotPoses = new LimelightPose[] {
-                _limelightInputs[0].FieldSpaceRobotPose,
-                _limelightInputs[1].FieldSpaceRobotPose
-        };
     }
 
     /**
@@ -51,13 +47,6 @@ public class VisionSubsystem extends SubsystemBase {
      */
     public LimelightInputs[] getAllLimelightInputs() {
         return _limelightInputs;
-    }
-
-    /**
-     * Gets all limelight inputs
-     */
-    public LimelightPose[] getAllFieldRobotPoses() {
-        return _limelightRobotPoses;
     }
 
     /**
@@ -140,6 +129,27 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     public static boolean isAprilTagIdValid(int apriltagId) {
-        return apriltagId >= 1 && apriltagId <= 16;
+        return apriltagId >= 1 && apriltagId <= 22;
     }
+
+    //#region Commands
+
+    /**
+     * Toggles the driver mode for the specified limelight.
+     * @param llIndex
+     * @return
+     */
+    public Command toggleDriverModeCommand(int llIndex) {
+        return runOnce(() -> {
+            if (llIndex == 0) {
+                _frontInDriverMode = !_frontInDriverMode;
+                setCameraMode(0, _frontInDriverMode ? 1 : 0);
+            } else if (llIndex == 1) {
+                _rearInDriverMode = !_rearInDriverMode;
+                setCameraMode(1, _rearInDriverMode ? 1 : 0);
+            }
+        });
+    }
+
+    //#endregion
 }

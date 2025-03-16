@@ -3,10 +3,7 @@ package org.prime.vision;
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.units.Units;
 
 public class LimelightInputs implements LoggableInputs, Cloneable {
 
@@ -56,9 +53,7 @@ public class LimelightInputs implements LoggableInputs, Cloneable {
     /**
      * Robot transform in field-space.
      */
-    public LimelightPose FieldSpaceRobotPose = new LimelightPose(
-            new Pose3d(1, 2, 3, new Rotation3d(Units.Degrees.of(1), Units.Degrees.of(2), Units.Degrees.of(3))),
-            new double[] { 1, 1, 2.5, 3, 4 });
+    public LimelightPose FieldSpaceRobotPose = new LimelightPose();
 
     /**
      * Robot transform in field-space (alliance driverstation WPILIB origin).
