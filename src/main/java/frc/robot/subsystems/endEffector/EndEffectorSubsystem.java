@@ -43,7 +43,6 @@ public class EndEffectorSubsystem extends SubsystemBase {
         public static final double LowerElevatorSafetyLimit = 0.15;
 
         // public static final double UpperElevatorHeightLimit = 0.4;
-        public static final double SafeWristAngleAtUpperElevatorHeightLimit = -30;
     }
 
     private IEndEffector _endEffector;
@@ -88,18 +87,17 @@ public class EndEffectorSubsystem extends SubsystemBase {
     public void manageWristControl(double manaulControlSpeed) {
         boolean isSafeForManaulControl = Container.Elevator
                 .getElevatorPositionMeters() >= EndEffectorMap.LowerElevatorSafetyLimit
-                && _inputs.EndEffectorAngleDegrees <= -25;
+                && _inputs.EndEffectorAngleDegrees <= EndEffectorMap.MaxWristAngle + 5;
 
         boolean tryingToUseManualControl = (manaulControlSpeed != 0 || _wristManuallyControlled);
 
         _wristManuallyControlled = (isSafeForManaulControl && tryingToUseManualControl) ? true : false;
 
         if (_wristManuallyControlled) {
-            runWristManaul(manaulControlSpeed);
+            runWristManual(manaulControlSpeed);
         } else if (!_wristManuallyControlled) {
             seekWristAnglePID();
         }
-
     }
 
     public void seekWristAnglePID() {
@@ -115,7 +113,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
         if (!belowElevatorSafetyLimit) {
             double previousSetpoint = _wristPID.getSetpoint();
             _wristPID.setSetpoint(
-                    Math.min(previousSetpoint, EndEffectorMap.SafeWristAngleAtUpperElevatorHeightLimit));
+                    Math.min(previousSetpoint, EndEffectorMap.MaxWristAngle));
         }
 
         SmartDashboard.putNumber(getName() + "/WristPIDRaw", pid);
@@ -136,7 +134,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
         }
     }
 
-    public void runWristManaul(double speed) {
+    public void runWristManual(double speed) {
         double manualMotorControl = -speed * EndEffectorMap.WristMaxOutput;
 
         // Artifically Limit the wrist angle
@@ -145,11 +143,10 @@ public class EndEffectorSubsystem extends SubsystemBase {
         } else if (_inputs.EndEffectorAngleDegrees >= EndEffectorMap.MaxWristAngle) {
             manualMotorControl = Math.min(manualMotorControl, 0);
         }
-
         _endEffector.setWristSpeed(manualMotorControl);
     }
 
-    private void disableWristManaulControl() {
+    private void disableWristManualControl() {
         _wristManuallyControlled = false;
     }
 
@@ -197,7 +194,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
      * @param angle Desired angle
      */
     public Command setWristSetpointCommand(double angle) {
-        return Commands.runOnce(this::disableWristManaulControl).andThen(() -> {
+        return Commands.runOnce(this::disableWristManualControl).andThen(() -> {
             _wristPID.setSetpoint(angle);
         });
     }
@@ -208,7 +205,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
      * @param position Elevator position
      */
     public Command setWristSetpointCommand(WristSetpointFromElevatorPosition position) {
-        return Commands.runOnce(this::disableWristManaulControl).andThen(() -> {
+        return Commands.runOnce(this::disableWristManualControl).andThen(() -> {
             _wristPID.setSetpoint(_angleAtElevatorHeight.get(position));
         });
     }
@@ -233,7 +230,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
     }
 
     public Command disabletWristManualControlCommand() {
-        return Commands.runOnce(this::disableWristManaulControl);
+        return Commands.runOnce(this::disableWristManualControl);
     }
 
     public Command stopIntakeMotorCommand() {
