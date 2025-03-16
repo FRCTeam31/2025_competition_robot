@@ -32,6 +32,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
         public static final double GearRatio = 20;
         public static final double MinWristAngle = -135;
         public static final double MaxWristAngle = -30;
+        public static final double WristNonVerticalAngleThreshold = -70;
 
         // Wrist Constants
         public static final double WristUp = 0;
@@ -177,8 +178,13 @@ public class EndEffectorSubsystem extends SubsystemBase {
             } else if (runIntakeOut.getAsBoolean()) {
                 _endEffector.setIntakeSpeed(EndEffectorMap.EjectSpeed);
 
+            } else if (_inputs.EndEffectorAngleDegrees < EndEffectorMap.WristNonVerticalAngleThreshold
+                    && !_inputs.LimitSwitchState) {
+                _endEffector.setIntakeSpeed(EndEffectorMap.IntakeSpeed);
+
             } else {
                 _endEffector.stopIntakeMotor();
+
             }
 
             manageWristControl(wristManualControl.getAsDouble());
