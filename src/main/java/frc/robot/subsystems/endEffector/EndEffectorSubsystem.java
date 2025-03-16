@@ -39,7 +39,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
         public static final double WristReef = 135;
         public static final double WristMaxOutput = 0.175;
 
-        public static final double LowerElevatorSafetyLimit = 0.16;
+        public static final double LowerElevatorSafetyLimit = 0.15;
 
         // public static final double UpperElevatorHeightLimit = 0.4;
         public static final double SafeWristAngleAtUpperElevatorHeightLimit = -30;
@@ -47,19 +47,31 @@ public class EndEffectorSubsystem extends SubsystemBase {
 
     private IEndEffector _endEffector;
     private PIDController _wristPID;
-
     private boolean _wristManuallyControlled = false;
 
-    private LockableEvent<ElevatorPosition> _lockableSetpoint = new LockableEvent<>(null, this::setWristSetpointCommand,
-            true);
+    // private LockableEvent<WristSetpointFromElevatorPosition> _lockableSetpoint = new LockableEvent<>(
+    //         WristSetpointFromElevatorPosition.kAbsoluteMinimum,
+    //         this::setWristSetpointCommand,
+    //         true);
 
-    private Map<ElevatorPosition, Double> _angleAtElevatorHeight = Map.of(
-            ElevatorPosition.kAbsoluteMinimum, 0.0,
-            ElevatorPosition.kSource, -42.36,
-            ElevatorPosition.kTrough, -92.0,
-            ElevatorPosition.kLow, -126.0,
-            ElevatorPosition.kMid, -126.0,
-            ElevatorPosition.kHigh, -130.0);
+    private boolean _locked = true;
+
+    private Map<WristSetpointFromElevatorPosition, Double> _angleAtElevatorHeight = Map.of(
+            WristSetpointFromElevatorPosition.kAbsoluteMinimum, 0.0,
+            WristSetpointFromElevatorPosition.kSource, -42.36,
+            WristSetpointFromElevatorPosition.kTrough, -92.0,
+            WristSetpointFromElevatorPosition.kLow, -126.0,
+            WristSetpointFromElevatorPosition.kMid, -126.0,
+            WristSetpointFromElevatorPosition.kHigh, -130.0);
+
+    public enum WristSetpointFromElevatorPosition {
+        kAbsoluteMinimum,
+        kSource,
+        kTrough,
+        kLow,
+        kMid,
+        kHigh
+    }
 
     private EndEffectorInputsAutoLogged _inputs = new EndEffectorInputsAutoLogged();
 
@@ -83,7 +95,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
 
         if (_wristManuallyControlled) {
             runWristManaul(manaulControlSpeed);
-        } else {
+        } else if (!_wristManuallyControlled) {
             seekWristAnglePID();
         }
 
@@ -115,9 +127,11 @@ public class EndEffectorSubsystem extends SubsystemBase {
         _endEffector.setWristSpeed(pid);
 
         if (inDangerZone) {
-            _lockableSetpoint.lock();
+            // _lockableSetpoint.lock();
+            _locked = true;
         } else {
-            _lockableSetpoint.unlock();
+            // _lockableSetpoint.unlock();
+            _locked = false;
         }
     }
 
@@ -144,8 +158,9 @@ public class EndEffectorSubsystem extends SubsystemBase {
         Logger.processInputs(getName(), _inputs);
 
         Logger.recordOutput("End Effector/Wrist Setpoint", _wristPID.getSetpoint());
-        Logger.recordOutput("End Effector/Scheduled Wrist Setpoint", _lockableSetpoint.getEvent());
+        // Logger.recordOutput("End Effector/Scheduled Wrist Setpoint", _lockableSetpoint.getEvent());
         SmartDashboard.putBoolean(getName() + "wristManuallyControlled", _wristManuallyControlled);
+        SmartDashboard.putNumber(getName() + " Wrist setpoint", _wristPID.getSetpoint());
     }
 
     /**
@@ -186,7 +201,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
      * Sets the wrist setpoint
      * @param position Elevator position
      */
-    public Command setWristSetpointCommand(ElevatorPosition position) {
+    public Command setWristSetpointCommand(WristSetpointFromElevatorPosition position) {
         return Commands.runOnce(this::disableWristManaulControl).andThen(() -> {
             _wristPID.setSetpoint(_angleAtElevatorHeight.get(position));
         });
@@ -199,11 +214,12 @@ public class EndEffectorSubsystem extends SubsystemBase {
      * @param position
      * @return
      */
-    public Command scheduleWristSetpointCommand(ElevatorPosition position) {
-        return Commands.runOnce(this::disableWristManaulControl).andThen(() -> {
-            _lockableSetpoint.setEvent(position);
-            _lockableSetpoint.schedule();
-        });
+    public Command scheduleWristSetpointCommand(WristSetpointFromElevatorPosition position) {
+        // return Commands.runOnce(this::disableWristManaulControl).andThen(() -> _lockableSetpoint.setEvent(position))
+        //         .andThen(_lockableSetpoint.scheduleLockableEventCommand());
+
+        return Commands.run(() -> System.out.println("Waiting")).until(() -> !_locked)
+                .andThen(setWristSetpointCommand(position));
     }
 
     public Command wristManualControlCommand(double speed) {

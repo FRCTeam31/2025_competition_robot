@@ -116,6 +116,8 @@ public class ElevatorSubsystem extends SubsystemBase {
 
         finalOutput = MathUtil.clamp(finalOutput, -12, 12);
 
+        finalOutput = Math.abs(finalOutput) > 0.1 ? finalOutput : 0;
+
         SmartDashboard.putNumber(getName() + "/Output-EC", finalOutput);
         _elevatorIO.setMotorVoltages(finalOutput);
     }
@@ -170,6 +172,7 @@ public class ElevatorSubsystem extends SubsystemBase {
             _elevatorIO.resetEncoderPos();
         }
         SmartDashboard.putBoolean(getName() + " is elevator manaully controlled", _elevatorManaullyControlled);
+        SmartDashboard.putNumber(getName() + "EC Setpoint", _elevatorController.getSetpoint());
 
     }
     //#endregion

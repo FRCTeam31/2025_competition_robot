@@ -87,6 +87,10 @@ public class ElevatorController {
         _setpoint = setpoint;
     }
 
+    public double getSetpoint() {
+        return _setpoint;
+    }
+
     public void findConstants(
             double lowerPositionBound,
             double upperPositionBound,

@@ -27,8 +27,6 @@ public class ElevatorReal implements IElevator {
         _topElevatorLimitSwitch = new DigitalInput(ElevatorMap.TopLimitSwitchChannel);
         _bottomElevatorLimitSwitch = new DigitalInput(ElevatorMap.BottomLimitSwitchChannel);
         _elevatorEncoder = new CANcoder(ElevatorMap.ElevatorEncoderCANID);
-        CANcoderConfiguration config = new CANcoderConfiguration();
-
     }
 
     public void setupElevatorMotors() {

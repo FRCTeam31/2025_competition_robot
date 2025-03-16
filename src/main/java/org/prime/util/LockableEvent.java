@@ -3,6 +3,7 @@ package org.prime.util;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 /**
@@ -76,7 +77,7 @@ public class LockableEvent<V> {
     /**
      * Schedules the event to be passed to the runner. Will run once the event is unlocked if currently locked, otherwise it will run instantly.
      */
-    public void schedule() {
-        Commands.waitUntil(() -> !_locked).andThen(() -> _runner.accept(_event)).schedule();
+    public Command scheduleLockableEventCommand() {
+        return Commands.waitUntil(() -> !_locked).finallyDo(() -> _runner.accept(_event));
     }
 }

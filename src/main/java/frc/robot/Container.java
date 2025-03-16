@@ -20,6 +20,7 @@ import frc.robot.subsystems.climbing.ClimberInputs.HooksPosition;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorPosition;
 import frc.robot.subsystems.endEffector.EndEffectorSubsystem;
+import frc.robot.subsystems.endEffector.EndEffectorSubsystem.WristSetpointFromElevatorPosition;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
 public class Container {
@@ -81,11 +82,12 @@ public class Container {
 
   //#region Commands
 
-  public static Command setCombinedHeightAndAngle(ElevatorPosition position) {
+  public static Command setCombinedHeightAndAngle(ElevatorPosition position, WristSetpointFromElevatorPosition angle) {
     return Commands.parallel(
         Commands.runOnce(() -> System.out.println("Setting combined height and angle: " + position)),
         Elevator.setElevatorSetpointCommand(position),
-        EndEffector.scheduleWristSetpointCommand(position));
+        EndEffector.scheduleWristSetpointCommand(angle))
+        .finallyDo(() -> System.out.println("Finished setting combined setpoints"));
   }
 
   //#endregion
