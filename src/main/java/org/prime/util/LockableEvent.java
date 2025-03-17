@@ -75,9 +75,39 @@ public class LockableEvent<V> {
     }
 
     /**
+     * Returns true when the event is not locked.
+     * @return BooleanSupplier
+     */
+    public BooleanSupplier isLocked() {
+        return () -> _locked;
+    }
+
+    /**
+     * Returns true when the event is locked.
+     * @return BooleanSupplier
+     */
+    public BooleanSupplier isNotLocked() {
+        return () -> !_locked;
+    }
+
+    /**
+     * Returns true if the event is not null
+     * @return BooleanSupplier
+     */
+    public BooleanSupplier isNotNull() {
+        return () -> _event != null;
+    }
+
+    public void runEvent(V event) {
+        _runner.accept(event);
+    }
+
+    /**
      * Schedules the event to be passed to the runner. Will run once the event is unlocked if currently locked, otherwise it will run instantly.
      */
     public Command scheduleLockableEventCommand() {
-        return Commands.waitUntil(() -> !_locked).finallyDo(() -> _runner.accept(_event));
+        return Commands.none().until(this.isNotLocked()).andThen(() -> this.runEvent(_event));
+
     }
+
 }

@@ -28,7 +28,7 @@ public class ClimberSubsystem extends SubsystemBase {
         public static final byte ClimberOutLimitSwitchChannel = 5;
         public static final byte ClimberInLimitSwitchChannel = 6;
         public static final double ClimberSpeed = 0.8;
-        public static final double HooksSpeed = 0.75;
+        public static final double HooksSpeed = 0.4;
         public static final double ClimberChangeStateTimeout = 7;
         public static final double HooksChangeStateTimeout = 5;
         public static final double ClimbingPitchThresholdDegrees = 5;
@@ -89,22 +89,27 @@ public class ClimberSubsystem extends SubsystemBase {
 
     }
 
+    public Command hooksManaul(double speed) {
+        return Commands.run(() -> _climber.setHookMotorSpeed(speed));
+
+    }
+
     //#region Commands
 
     public Command setClimberOutCommand() {
-        return Commands.runOnce(() -> setClimberSpeed(-ClimberMap.ClimberSpeed));
+        return Commands.run(() -> setClimberSpeed(-ClimberMap.ClimberSpeed));
     }
 
     public Command setClimberInCommand() {
-        return Commands.runOnce(() -> setClimberSpeed(ClimberMap.ClimberSpeed));
+        return Commands.run(() -> setClimberSpeed(ClimberMap.ClimberSpeed));
     }
 
     public Command setHooksClosedCommand() {
-        return Commands.runOnce(() -> setHooksSpeed(ClimberMap.HooksSpeed));
+        return Commands.run(() -> setHooksSpeed(ClimberMap.HooksSpeed));
     }
 
     public Command setHooksOpenCommand() {
-        return Commands.runOnce(() -> setHooksSpeed(-ClimberMap.HooksSpeed));
+        return Commands.run(() -> setHooksSpeed(-ClimberMap.HooksSpeed));
     }
 
     public Command stopClimbingMotorsCommand() {

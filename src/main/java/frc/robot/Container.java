@@ -61,8 +61,8 @@ public class Container {
       TestDashboardSection = new DashboardSection("Test");
 
       // Create Elevator Subsystem
-      OperatorInterface = new OperatorInterface();
       Elevator = new ElevatorSubsystem(isReal);
+      OperatorInterface = new OperatorInterface();
 
       OperatorInterface.bindDriverControls(Swerve, Climber);
       OperatorInterface.bindOperatorControls(Elevator, EndEffector);
@@ -98,7 +98,8 @@ public class Container {
   }
 
   public static Command scoreAtHeight(ElevatorPosition position) {
-    return setCombinedHeightAndAngle(position).andThen(EndEffector.scoreCoral());
+    return setCombinedHeightAndAngle(position).alongWith(EndEffector.enableIntakeCommand())
+        .alongWith(EndEffector.scoreCoral());
   }
 
   public static Command scoreAtHeightAndLower(ElevatorPosition position) {
@@ -125,7 +126,8 @@ public class Container {
         "Score-L3-R", scoreOnSideAndLower(ReefSide.kRight, ElevatorPosition.kMid),
         "Score-L2-L", scoreOnSideAndLower(ReefSide.kLeft, ElevatorPosition.kLow),
         "Score-L2-R", scoreOnSideAndLower(ReefSide.kRight, ElevatorPosition.kLow),
-        "Score-Trough", scoreAtHeightAndLower(ElevatorPosition.kTrough));
+        "Score-Trough", scoreAtHeightAndLower(ElevatorPosition.kTrough),
+        "Pickup-Source", pickupFromSourceAndLower());
   }
 
   //#endregion

@@ -13,6 +13,7 @@ public class MRSGController {
     // Physical Variables
     private double _position;
     private double _velocity;
+    private double _error;
 
     public MRSGController(double M, double R, double S, double G) {
         _multiplier = M;
@@ -57,8 +58,10 @@ public class MRSGController {
                 : ramped - _staticFriction;
         double scaled = directional * _multiplier;
 
-        double output = (scaled <= _staticFriction) || scaled - _staticFriction < _frictionDeadband ? 0 : scaled;
+        // double output = (scaled <= _staticFriction) || scaled - _staticFriction < _frictionDeadband ? 0 : scaled;
+        double output = scaled;
 
+        _error = error;
         return output;
     }
 
@@ -78,12 +81,16 @@ public class MRSGController {
         return _setpoint;
     }
 
+    public double getError() {
+        return _error;
+    }
+
     public boolean atSetpoint(double deadband) {
         return Math.abs(_setpoint - _position) < deadband;
     }
 
     public boolean atSetpoint() {
-        return atSetpoint(0.1);
+        return atSetpoint(0.01);
     }
 
     public void setM(double M) {

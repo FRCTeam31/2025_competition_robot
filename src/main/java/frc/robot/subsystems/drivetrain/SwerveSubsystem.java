@@ -378,6 +378,12 @@ public class SwerveSubsystem extends SubsystemBase {
     return cmd;
   }
 
+  /**
+   * Will move to a side of the reef, not implemented yet.
+   * @deprecated Not implemented
+   * @param side
+   * @return
+   */
   public Command pathfindToReefSide(ReefSide side) {
     return Commands.runOnce(() -> System.out.println("[NOT IMPLEMENTED] Pathfinding to reef side: " + side.toString()));
   }

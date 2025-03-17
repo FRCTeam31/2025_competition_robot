@@ -13,6 +13,7 @@ import org.prime.control.MRSGConstants;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.event.BooleanEvent;
+import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -65,6 +66,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     public ElevatorController ElevatorController = new ElevatorController(ElevatorMap.ElevatorControllerConstants);
     private boolean _elevatorManaullyControlled = false;
 
+    private BooleanEvent _positionResetEvent;
+    private static EventLoop _eventLoop = new EventLoop();
+
     public ElevatorSubsystem(boolean isReal) {
         setName("Elevator");
 
@@ -72,12 +76,14 @@ public class ElevatorSubsystem extends SubsystemBase {
                 ? new ElevatorReal()
                 : new ElevatorSim();
 
-        // TODO: Ask Mason about this, it is not set to a variable.
-
-        new BooleanEvent(Robot.EventLoop, () -> _inputs.BottomLimitSwitch)
+        _positionResetEvent = new BooleanEvent(_eventLoop, () -> _inputs.BottomLimitSwitch)
                 .debounce(ElevatorMap.BottomLimitResetDebounceSeconds)
-                .rising()
-                .ifHigh(_elevatorIO::resetEncoderPos);
+                .rising();
+
+        _positionResetEvent.ifHigh(() -> {
+            _elevatorIO.resetEncoderPos();
+
+        });
     }
 
     public double getElevatorPositionMeters() {
@@ -178,9 +184,12 @@ public class ElevatorSubsystem extends SubsystemBase {
         _elevatorIO.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
 
-        if (_inputs.BottomLimitSwitch) {
-            _elevatorIO.resetEncoderPos();
-        }
+        // if (_inputs.BottomLimitSwitch) {
+        //     _elevatorIO.resetEncoderPos();
+        // }
+
+        _eventLoop.poll();
+        Logger.recordOutput(getName() + "/elevator error", ElevatorController.getError());
         SmartDashboard.putBoolean(getName() + " is elevator manaully controlled", _elevatorManaullyControlled);
         SmartDashboard.putNumber(getName() + "EC Setpoint", ElevatorController.getSetpoint());
 

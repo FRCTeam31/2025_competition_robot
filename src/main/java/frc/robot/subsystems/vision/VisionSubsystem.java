@@ -39,9 +39,9 @@ public class VisionSubsystem extends SubsystemBase {
                 _limelightInputs[1].FieldSpaceRobotPose
         };
 
-        UsbCamera camera = CameraServer.startAutomaticCapture();
-        camera.setResolution(320, 240);
-        camera.setFPS(30);
+        // UsbCamera camera = CameraServer.startAutomaticCapture();
+        // camera.setResolution(320, 240);
+        // camera.setFPS(30);
     }
 
     /**

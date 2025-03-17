@@ -26,15 +26,15 @@ public class EndEffectorSubsystem extends SubsystemBase {
         public static final byte IntakeMotorCanID = 19;
         public static final byte WristMotorCanID = 20;
         public static final byte LimitSwitchDIOChannel = 9;
-        public static final double EjectSpeed = 1;
-        public static final double IntakeSpeed = -1;
+        public static final double EjectSpeed = -1;
+        public static final double IntakeSpeed = 1;
         public static final byte IntakeCurrentLimit = 20;
         public static final byte WristCurrentLimit = 30;
         public static final ExtendedPIDConstants WristPID = new ExtendedPIDConstants(0.007, 0, 0);
         public static final double GearRatio = 20;
         public static final double MinWristAngle = -135;
         public static final double MaxWristAngle = -30;
-        public static final double WristNonVerticalAngleThreshold = -70;
+        public static final double WristNonVerticalAngleThreshold = -110;
 
         // Wrist Constants
         public static final double WristUp = 0;
@@ -50,7 +50,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
     private boolean _wristManuallyControlled = false;
 
     private LockableEvent<ElevatorPosition> _lockableSetpoint = new LockableEvent<>(
-            ElevatorPosition.kAbsoluteMinimum,
+            null,
             this::setWristSetpointCommand,
             true);
 
@@ -63,6 +63,8 @@ public class EndEffectorSubsystem extends SubsystemBase {
             ElevatorPosition.kHigh, -130.0);
 
     private EndEffectorInputsAutoLogged _inputs = new EndEffectorInputsAutoLogged();
+
+    private boolean _isLocked = true;
 
     // TODO: Add a system to set the wrist angle to a predefined setpoint. Look at the system used in the elevator subsystem for reference. We will most likely use the same enums used in the elevator subsystem so it is easier to implement the auto rotating system later. For now, create a temporary enum.
 
@@ -115,9 +117,11 @@ public class EndEffectorSubsystem extends SubsystemBase {
         _endEffector.setWristSpeed(pid);
 
         if (inDangerZone) {
-            _lockableSetpoint.lock();
+            // _lockableSetpoint.lock();
+            _isLocked = true;
         } else {
-            _lockableSetpoint.unlock();
+            // _lockableSetpoint.unlock();
+            _isLocked = false;
         }
     }
 
@@ -145,7 +149,9 @@ public class EndEffectorSubsystem extends SubsystemBase {
         Logger.recordOutput("End Effector/Wrist Setpoint", _wristPID.getSetpoint());
         // Logger.recordOutput("End Effector/Scheduled Wrist Setpoint", _lockableSetpoint.getEvent());
         SmartDashboard.putBoolean(getName() + "wristManuallyControlled", _wristManuallyControlled);
+
         SmartDashboard.putNumber(getName() + " Wrist setpoint", _wristPID.getSetpoint());
+        SmartDashboard.putBoolean("EndEffector/isLocked", _lockableSetpoint.isLocked().getAsBoolean());
     }
 
     /**
@@ -173,6 +179,10 @@ public class EndEffectorSubsystem extends SubsystemBase {
 
             manageWristControl(wristManualControl.getAsDouble());
         });
+    }
+
+    public boolean wristAtSetpoint() {
+        return Math.abs(_inputs.EndEffectorAngleDegrees - _wristPID.getSetpoint()) < 3;
     }
 
     /**
@@ -205,12 +215,18 @@ public class EndEffectorSubsystem extends SubsystemBase {
      * @return
      */
     public Command scheduleWristSetpointCommand(ElevatorPosition position) {
-        return Commands.runOnce(this::disableWristManualControlCommand).andThen(() -> {
-            _lockableSetpoint.setEvent(position);
-            _lockableSetpoint.scheduleLockableEventCommand();
-        });
+        // return Commands.runOnce(this::disableWristManualControlCommand).andThen(() -> {
+        //     // _lockableSetpoint.setEvent(position);
+        //     // System.out.println("Event: " + position);
+        // });
+        //         // .andThen(_lockableSetpoint.scheduleLockableEventCommand())
+        //         // .andThen(() -> System.out.println(
+        //         //         _lockableSetpoint.getEvent().toString() + "\n" + _lockableSetpoint.isLocked().toString()));
 
-        // TODO: May have to use .finallyDo() instead of .andThen()
+        // // TODO: May have to use .finallyDo() instead of .andThen()
+
+        return Commands.runOnce(this::disableWristManualControlCommand)
+                .andThen(Commands.waitUntil(() -> !_isLocked).andThen(setWristSetpointCommand(position)));
     }
 
     public Command wristManualControlCommand(double speed) {
@@ -230,16 +246,26 @@ public class EndEffectorSubsystem extends SubsystemBase {
     }
 
     public Command stopBothMotorsCommand() {
-        return this.runOnce(() -> _endEffector.stopMotors());
+        return Commands.runOnce(() -> _endEffector.stopMotors());
     }
 
     public Command setIntakeSpeedCommand(double speed) {
-        return this.run(() -> _endEffector.setIntakeSpeed(speed));
+        return Commands.run(() -> _endEffector.setIntakeSpeed(speed));
+    }
+
+    public Command enableIntakeCommand() {
+        return setIntakeSpeedCommand(EndEffectorMap.IntakeSpeed);
+    }
+
+    public Command enableEjectCommand() {
+        return setIntakeSpeedCommand(EndEffectorMap.EjectSpeed);
     }
 
     public Command scoreCoral() {
-        return Commands.waitUntil(() -> Container.Elevator.ElevatorController.atSetpoint()).andThen(
-                setIntakeSpeedCommand(EndEffectorMap.EjectSpeed).withTimeout(0.4).andThen(stopIntakeMotorCommand()));
+        return Commands.run(() -> enableIntakeCommand())
+                .until(() -> Container.Elevator.ElevatorController.atSetpoint() && wristAtSetpoint());
+        // enableEjectCommand().withTimeout(3)
+        //         .andThen(stopIntakeMotorCommand()));
     }
 
     public Command pickupCoral() {
