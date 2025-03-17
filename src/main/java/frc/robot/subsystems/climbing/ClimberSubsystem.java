@@ -27,8 +27,7 @@ public class ClimberSubsystem extends SubsystemBase {
         public static final byte HooksOpenLimitSwitchChannel = 4;
         public static final byte ClimberOutLimitSwitchChannel = 5;
         public static final byte ClimberInLimitSwitchChannel = 6;
-        public static final double SetClimberStateSpeed = 0.8;
-        public static final double ActuallyClimbingSpeed = 0.8;
+        public static final double ClimberSpeed = 0.8;
         public static final double HooksSpeed = 0.75;
         public static final double ClimberChangeStateTimeout = 7;
         public static final double HooksChangeStateTimeout = 5;
@@ -61,99 +60,51 @@ public class ClimberSubsystem extends SubsystemBase {
 
     }
 
-    private void setHooksState(HooksPosition hooksPosition) {
-        double hooksMotorSpeed = 0;
+    private void setHooksSpeed(double speed) {
+        // Positive is closed, negative is open
         boolean currentlyClimbing = _robotPitch >= ClimberMap.ClimbingPitchThresholdDegrees;
-        allowedToOpenHooks = _inputs.ClimbWenchOutLimitSwitch;
-        _inputs.CommandedHooksPosition = hooksPosition;
-
-        if (hooksPosition == HooksPosition.CLOSED) {
-            if (!_inputs.HooksClosedLimitSwitch && (!currentlyClimbing)) {
-                hooksMotorSpeed = ClimberMap.HooksSpeed;
+        if (!currentlyClimbing) {
+            if (speed > 0 && !_inputs.HooksClosedLimitSwitch) {
+                _climber.setHookMotorSpeed(speed);
+            } else if (speed < 0 && !_inputs.HooksOpenLimitSwitch) {
+                _climber.setHookMotorSpeed(speed);
             } else {
-                hooksMotorSpeed = 0; // Stop motor if InLimitSwitch is pressed
-            }
-        } else if (hooksPosition == HooksPosition.OPEN) {
-            if (!_inputs.HooksOpenLimitSwitch && (!currentlyClimbing && allowedToOpenHooks)) {
-                hooksMotorSpeed = -ClimberMap.HooksSpeed;
-            } else {
-                hooksMotorSpeed = 0; // Stop motor if OutLimitSwitch is pressed
+                _climber.stopHooksMotors();
             }
         }
-
-        Logger.recordOutput(getName() + "/HooksSpeed", hooksMotorSpeed);
-        _climber.setHookMotorSpeed(hooksMotorSpeed);
+        SmartDashboard.putNumber(getName() + "/HooksSpeed", speed);
     }
 
-    private void setClimberState(ClimberPosition climberPosition) {
-        double wenchSpeed = 0;
-        _inputs.CommandedClimberPosition = climberPosition;
-
-        if (climberPosition == ClimberPosition.IN) {
-            if (!_inputs.ClimbWenchInLimitSwitch) {
-                wenchSpeed = ClimberMap.SetClimberStateSpeed;
-            } else {
-                wenchSpeed = 0; // Stop motor if InLimitSwitch is pressed
-            }
-        } else if (climberPosition == ClimberPosition.OUT) {
-            if (!_inputs.ClimbWenchOutLimitSwitch) {
-                wenchSpeed = -ClimberMap.SetClimberStateSpeed;
-            } else {
-                wenchSpeed = 0; // Stop motor if OutLimitSwitch is pressed
-            }
+    private void setClimberSpeed(double speed) {
+        // in is positive, out is negative
+        if (speed > 0 && !_inputs.ClimbWenchInLimitSwitch) {
+            _climber.setClimbingWenchSpeed(speed);
+        } else if (speed < 0 && !_inputs.ClimbWenchOutLimitSwitch) {
+            _climber.setClimbingWenchSpeed(speed);
+        } else {
+            _climber.stopWenchMotors();
         }
-        _climber.setClimbingWenchSpeed(wenchSpeed);
+
+        SmartDashboard.putNumber(getName() + "/ClimberSpeed", speed);
+
     }
 
     //#region Commands
 
-    public Command setHooksStateCommand(HooksPosition hooksPosition) {
-        return Commands.run(() -> setHooksState(hooksPosition))
-                .until(() -> hooksPosition == HooksPosition.CLOSED
-                        ? _inputs.HooksClosedLimitSwitch
-                        : _inputs.HooksOpenLimitSwitch)
-                .withTimeout(ClimberMap.HooksChangeStateTimeout)
-                .andThen(stopHooksMotorsCommand());
-    }
-
-    public Command setClimberStateCommand(ClimberPosition climberPosition) {
-        return Commands.run(() -> setClimberState(climberPosition))
-                .until(() -> climberPosition == ClimberPosition.IN
-                        ? _inputs.ClimbWenchInLimitSwitch
-                        : _inputs.ClimbWenchOutLimitSwitch)
-                .withTimeout(ClimberMap.ClimberChangeStateTimeout)
-                .andThen(stopClimbingMotorsCommand());
-    }
-
     public Command setClimberOutCommand() {
-        return setClimberStateCommand(ClimberPosition.OUT);
+        return Commands.runOnce(() -> setClimberSpeed(-ClimberMap.ClimberSpeed));
     }
 
     public Command setClimberInCommand() {
-        return setHooksStateCommand(HooksPosition.CLOSED)
-                .alongWith(setClimberStateCommand(ClimberPosition.IN));
+        return Commands.runOnce(() -> setClimberSpeed(ClimberMap.ClimberSpeed));
     }
 
-    public Command climbUpCommand() {
-        // Only allowed to climb if the hooks are open
-        return Commands.runOnce(() -> {
-            if (_inputs.HooksOpenLimitSwitch && !_inputs.ClimbWenchInLimitSwitch) {
-                _climber.setClimbingWenchSpeed(ClimberMap.ActuallyClimbingSpeed);
-            } else if (_inputs.ClimbWenchInLimitSwitch) {
-                stopClimbingMotorsCommand();
-            }
-        });
+    public Command setHooksClosedCommand() {
+        return Commands.runOnce(() -> setHooksSpeed(ClimberMap.HooksSpeed));
     }
 
-    public Command climbDownCommand() {
-        // Only allowed to climb if the hooks are open
-        return Commands.runOnce(() -> {
-            if (_inputs.HooksOpenLimitSwitch && !_inputs.ClimbWenchOutLimitSwitch) {
-                _climber.setClimbingWenchSpeed(-ClimberMap.ActuallyClimbingSpeed);
-            } else if (_inputs.ClimbWenchOutLimitSwitch) {
-                stopClimbingMotorsCommand();
-            }
-        });
+    public Command setHooksOpenCommand() {
+        return Commands.runOnce(() -> setHooksSpeed(-ClimberMap.HooksSpeed));
     }
 
     public Command stopClimbingMotorsCommand() {

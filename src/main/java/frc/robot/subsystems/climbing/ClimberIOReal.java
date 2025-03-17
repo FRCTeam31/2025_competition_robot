@@ -70,7 +70,6 @@ public class ClimberIOReal implements IClimberIO {
     }
 
     public void setHookMotorSpeed(double speed) {
-        System.out.println("Set Hook Motor Speed: " + speed);
         _climbHooksMotor.set(VictorSPXControlMode.PercentOutput, speed);
     }
 

@@ -64,17 +64,21 @@ public class OperatorInterface {
                                 .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.upLeft + 90));
 
                 //Climber Controls
-                DriverController.y().and(DriverController.leftBumper()).onTrue(climber.setClimberInCommand());
-                DriverController.y().and(DriverController.rightBumper()).onTrue(climber.setClimberOutCommand());
+                // DriverController.y().whileTrue(climber.setHooksOpenCommand()).onFalse(climber.stopHooksMotorsCommand());
+                // DriverController.x().whileTrue(climber.setHooksClosedCommand())
+                //                 .onFalse(climber.stopHooksMotorsCommand());
+
+                // DriverController.x().whileTrue(climber.setClimberInCommand()).onFalse(climber.stopAllMotors());
+                DriverController.y().and(DriverController.leftBumper()).whileTrue(climber.setClimberInCommand())
+                                .onFalse(climber.stopAllMotors());
+
+                DriverController.y().and(DriverController.rightBumper()).whileTrue(climber.setClimberOutCommand())
+                                .onFalse(climber.stopClimbingMotorsCommand());
 
                 DriverController.b().and(DriverController.leftBumper())
-                                .onTrue(climber.setHooksStateCommand(HooksPosition.CLOSED));
+                                .onTrue(climber.setHooksOpenCommand()).onFalse(climber.stopHooksMotorsCommand());
                 DriverController.b().and(DriverController.rightBumper())
-                                .onTrue(climber.setHooksStateCommand(HooksPosition.OPEN));
-                DriverController.start().and(DriverController.leftBumper()).whileTrue(climber.climbDownCommand())
-                                .onFalse(climber.stopClimbingMotorsCommand());
-                DriverController.start().and(DriverController.rightBumper()).whileTrue(climber.climbUpCommand())
-                                .onFalse(climber.stopClimbingMotorsCommand());
+                                .onTrue(climber.setHooksClosedCommand()).onFalse(climber.stopHooksMotorsCommand());
 
         }
 
