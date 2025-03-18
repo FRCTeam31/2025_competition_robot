@@ -70,6 +70,7 @@ public class ClimberSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+
         _eventLoop.poll();
         _climber.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
