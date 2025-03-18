@@ -87,9 +87,7 @@ public class ClimberSubsystem extends SubsystemBase {
         boolean currentlyClimbing = _robotPitch >= ClimberMap.ClimbingPitchThresholdDegrees;
         if (!currentlyClimbing) {
             if (speed > 0 && !_inputs.HooksClosedLimitSwitch) {
-                if (_inputs.climberShaftRotations > ClimberMap.fullyClimbedOutputRotations) {
-                    _climber.stopWenchMotors();
-                }
+                _climber.stopWenchMotors();
             } else if (speed < 0 && !_inputs.HooksOpenLimitSwitch) {
                 _climber.setHookMotorSpeed(speed);
             } else {
@@ -102,8 +100,11 @@ public class ClimberSubsystem extends SubsystemBase {
     private void setClimberSpeed(double speed) {
         // in is positive, out is negative
         if (speed > 0 && !_inputs.ClimbWenchInLimitSwitch) {
-            if (_inputs.climberShaftRotations > ClimberMap.fullyClimbedOutputRotations)
+            if (_inputs.climberShaftRotations > ClimberMap.fullyClimbedOutputRotations) {
+                _climber.stopWenchMotors();
+            } else {
                 _climber.setClimbingWenchSpeed(speed);
+            }
         } else if (speed < 0 && !_inputs.ClimbWenchOutLimitSwitch) {
             _climber.setClimbingWenchSpeed(speed);
         } else {

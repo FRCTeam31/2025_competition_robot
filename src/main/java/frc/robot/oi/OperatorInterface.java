@@ -22,6 +22,7 @@ import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorMap;
 import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorPosition;
 import frc.robot.subsystems.endEffector.EndEffectorSubsystem;
 import frc.robot.subsystems.endEffector.EndEffectorSubsystem.EndEffectorMap;
+import frc.robot.subsystems.vision.VisionSubsystem;
 
 public class OperatorInterface {
         public static class OIMap {
@@ -40,7 +41,8 @@ public class OperatorInterface {
                 _containerNamedCommands = Container.getNamedCommands();
         }
 
-        public void bindDriverControls(SwerveSubsystem swerveSubsystem, ClimberSubsystem climber) {
+        public void bindDriverControls(SwerveSubsystem swerveSubsystem, ClimberSubsystem climber,
+                        VisionSubsystem visionSubsystem) {
                 var controlProfile = DriverController.getSwerveControlProfile(
                                 OIMap.DefaultDriveControlStyle,
                                 SwerveMap.Control.DriveDeadband,
@@ -70,21 +72,25 @@ public class OperatorInterface {
                 DriverController.pov(Controls.upLeft)
                                 .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.upLeft + 90));
 
-                //Climber Controls
-
-                DriverController.x().whileTrue(climber.setClimberInCommand()).onFalse(climber.stopAllMotors());
+                // Climber Controls
+                // Climber in will only go in until it hits the artifical stop measured by the encoder
                 DriverController.y().and(DriverController.leftBumper()).whileTrue(climber.setClimberInCommand())
                                 .onFalse(climber.stopAllMotors());
-
                 DriverController.y().and(DriverController.rightBumper()).whileTrue(climber.setClimberOutCommand())
                                 .onFalse(climber.stopClimbingMotorsCommand());
 
+                // Hooks Controls
                 DriverController.b().and(DriverController.leftBumper())
                                 .whileTrue(climber.setHooksOpenCommand()).onFalse(climber.stopHooksMotorsCommand());
                 DriverController.b().and(DriverController.rightBumper())
                                 .whileTrue(climber.setHooksClosedCommand()).onFalse(climber.stopHooksMotorsCommand());
+
+                // Manual Control for setting the climber all the way in                
                 DriverController.back().whileTrue(climber.fullyClimbInManual())
                                 .onFalse(climber.stopClimbingMotorsCommand());
+
+                // Changes the vision mode for the rear limelight. 
+                DriverController.start().onTrue(visionSubsystem.toggleDriverModeCommand(1));
 
         }
 
