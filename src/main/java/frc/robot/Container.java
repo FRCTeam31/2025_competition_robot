@@ -62,7 +62,7 @@ public class Container {
       Elevator = new ElevatorSubsystem(isReal);
       OperatorInterface = new OperatorInterface();
 
-      OperatorInterface.bindDriverControls(Swerve, Climber);
+      OperatorInterface.bindDriverControls(Swerve, Climber, Vision);
       OperatorInterface.bindOperatorControls(Elevator, EndEffector);
 
       // Register the named commands from each subsystem that may be used in PathPlanner
