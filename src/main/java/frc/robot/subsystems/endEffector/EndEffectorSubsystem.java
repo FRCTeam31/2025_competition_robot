@@ -170,7 +170,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
 
             } else if (_inputs.EndEffectorAngleDegrees < EndEffectorMap.WristNonVerticalAngleThreshold
                     && !_inputs.CoralLimitSwitchState) {
-                _endEffector.setIntakeSpeed(EndEffectorMap.IntakeSpeed);
+                // _endEffector.setIntakeSpeed(EndEffectorMap.IntakeSpeed);
 
             } else {
                 _endEffector.stopIntakeMotor();

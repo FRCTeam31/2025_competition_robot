@@ -34,8 +34,11 @@ public class ElevatorSubsystem extends SubsystemBase {
         public static final double GearRatio = 16;
         public static final double BottomLimitResetDebounceSeconds = 0.25;
         public static final int ElevatorEncoderCANID = 22;
+        // public static final MRSGConstants ElevatorControllerConstants = new MRSGConstants(
+        //         8, 4.5, 0, 1.4);
+
         public static final MRSGConstants ElevatorControllerConstants = new MRSGConstants(
-                6.6, 4.5, 0, 1.1);
+                5.2, 3, 0, 1.4);
     }
 
     public enum ElevatorPosition {
@@ -63,7 +66,8 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private ElevatorInputsAutoLogged _inputs = new ElevatorInputsAutoLogged();
     private IElevator _elevatorIO;
-    public ElevatorController ElevatorController = new ElevatorController(ElevatorMap.ElevatorControllerConstants);
+    public ElevatorController ElevatorController = new ElevatorController(ElevatorMap.ElevatorControllerConstants,
+            ElevatorMap.MaxElevatorHeight);
     private boolean _elevatorManaullyControlled = false;
 
     private BooleanEvent _positionResetEvent;
@@ -131,8 +135,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         }
 
         finalOutput = MathUtil.clamp(finalOutput, -12, 12);
-
-        finalOutput = Math.abs(finalOutput) > 0.1 ? finalOutput : 0;
+        finalOutput = Math.abs(finalOutput) > 0.1 ? finalOutput : 0; // Deadband
+        finalOutput = getScaledVoltage(finalOutput, _inputs.ElevatorDistanceMeters);
 
         SmartDashboard.putNumber(getName() + "/Output-EC", finalOutput);
         _elevatorIO.setMotorVoltages(finalOutput);
@@ -142,9 +146,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         var ec = ElevatorController.calculate(_inputs.ElevatorDistanceMeters, _inputs.ElevatorSpeedMetersPerSecond);
 
         // Within 5% of max height, reduce speed
-
-        // TODO: Test to see if we still need this with ElevatorController (we probably don't)
-        // ec = getScaledSpeed(ec, _inputs.ElevatorDistanceMeters);
 
         SmartDashboard.putNumber(getName() + "/finalOutput", ec);
         SmartDashboard.putNumber(getName() + "/ec", ec);
@@ -169,6 +170,25 @@ public class ElevatorSubsystem extends SubsystemBase {
         }
 
         return outputSpeed * speedScalingFactor;
+    }
+
+    private double getScaledVoltage(double outputVoltage, double currentPosition) {
+        var lowPositionScaleDownThreshold = ElevatorMap.MaxElevatorHeight * 0.3;
+        var highPositionScaleDownThreshold = ElevatorMap.MaxElevatorHeight - lowPositionScaleDownThreshold;
+
+        var speedScalingFactor = 1.0;
+        if (currentPosition <= lowPositionScaleDownThreshold && outputVoltage < 0) {
+            var scale = currentPosition / lowPositionScaleDownThreshold;
+            speedScalingFactor = Math.max(0.1, scale);
+        } else if (currentPosition >= highPositionScaleDownThreshold && outputVoltage > 0) {
+            var scale = (ElevatorMap.MaxElevatorHeight - currentPosition) / lowPositionScaleDownThreshold;
+            speedScalingFactor = Math.max(0.1, scale);
+        }
+
+        Logger.recordOutput(getName() + "/ scalingFactor", speedScalingFactor);
+        Logger.recordOutput(getName() + "/ outputVoltage", speedScalingFactor * outputVoltage);
+
+        return outputVoltage * speedScalingFactor;
     }
 
     public void setMotorVoltages(double newVolatage) {
@@ -206,7 +226,15 @@ public class ElevatorSubsystem extends SubsystemBase {
         return Commands.runOnce(() -> {
             System.out.println("Setting elevator position to: " + _positionMap.get(pos));
             ElevatorController.setSetpoint(_positionMap.get(pos));
-        }).andThen(disableElevatorManualControlCommand());
+        }).andThen(disableElevatorManualControlCommand()).andThen(() -> {
+            if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.4) {
+                ElevatorController.setM(1);
+                ElevatorController.setR(1);
+            } else {
+                ElevatorController.setM(ElevatorMap.ElevatorControllerConstants.M);
+                ElevatorController.setR(ElevatorMap.ElevatorControllerConstants.R);
+            }
+        });
     }
 
     public Command goToElevatorBottomCommand() {
