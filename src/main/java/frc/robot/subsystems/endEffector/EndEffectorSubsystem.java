@@ -5,9 +5,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.Logger;
-import org.prime.control.ElevatorController;
 import org.prime.control.ExtendedPIDConstants;
-import org.prime.control.MRSGController;
 import org.prime.util.LockableEvent;
 
 import edu.wpi.first.math.MathUtil;
@@ -263,9 +261,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
 
     public Command scoreCoral() {
         return Commands.run(() -> enableIntakeCommand())
-                .until(() -> Container.Elevator.ElevatorController.atSetpoint() && wristAtSetpoint());
-        // enableEjectCommand().withTimeout(3)
-        //         .andThen(stopIntakeMotorCommand()));
+                .until(() -> Container.Elevator.atPositionSetpoint() && wristAtSetpoint());
     }
 
     public Command pickupCoral() {
