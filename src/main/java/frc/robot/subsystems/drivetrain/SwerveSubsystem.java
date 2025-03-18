@@ -6,6 +6,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -276,11 +277,12 @@ public class SwerveSubsystem extends SubsystemBase {
     var currentPose = _inputs.EstimatedRobotPose;
     var currentHeadingRadians = _inputs.GyroAngle.getRadians();
     var a = side == ReefPegSide.kLeft
-        ? currentHeadingRadians + (Math.PI * 2)
-        : currentHeadingRadians - (Math.PI * 2);
+        ? currentHeadingRadians + (Math.PI / 2)
+        : currentHeadingRadians - (Math.PI / 2);
 
-    var newX = currentPose.getX() + Centimeters.of(16.5).magnitude() + Math.cos(a);
-    var newY = currentPose.getY() + Centimeters.of(16.5).magnitude() + Math.sin(a);
+    // Zachary couldn't figure out how do the fancy unit conversions
+    var newX = currentPose.getX() + (16.5 / 100) * Math.cos(a);
+    var newY = currentPose.getY() + (16.5 / 100) * Math.sin(a);
 
     return new Pose2d(newX, newY, _inputs.GyroAngle);
   }
