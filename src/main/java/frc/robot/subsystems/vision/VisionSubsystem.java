@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import org.littletonrobotics.junction.Logger;
 import org.prime.vision.LimelightInputs;
+import org.prime.vision.LimelightPose;
 
 public class VisionSubsystem extends SubsystemBase {
     public class VisionMap {
@@ -18,6 +19,7 @@ public class VisionSubsystem extends SubsystemBase {
 
     private LimeLightNT[] _limelights;
     private LimelightInputs[] _limelightInputs;
+    private LimelightPose[] _limelightRobotPoses;
     private boolean _frontInDriverMode = false;
     private boolean _rearInDriverMode = false;
 
@@ -40,9 +42,9 @@ public class VisionSubsystem extends SubsystemBase {
                 _limelightInputs[1].FieldSpaceRobotPose
         };
 
-        // UsbCamera camera = CameraServer.startAutomaticCapture();
-        // camera.setResolution(320, 240);
-        // camera.setFPS(30);
+        UsbCamera camera = CameraServer.startAutomaticCapture();
+        camera.setResolution(320, 240);
+        camera.setFPS(30);
     }
 
     /**
