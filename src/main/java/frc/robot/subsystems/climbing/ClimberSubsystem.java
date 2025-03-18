@@ -5,6 +5,8 @@ import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.wpilibj.event.BooleanEvent;
+import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -32,11 +34,15 @@ public class ClimberSubsystem extends SubsystemBase {
         public static final double ClimberChangeStateTimeout = 7;
         public static final double HooksChangeStateTimeout = 5;
         public static final double ClimbingPitchThresholdDegrees = 5;
+        public static final double fullyClimbedAngle = 0;
+        public static final double ClimbAngleResetDebounceSeconds = 0.25;
 
     }
 
     private IClimberIO _climber;
     private ClimberInputsAutoLogged _inputs = new ClimberInputsAutoLogged();
+    BooleanEvent _positionResetEvent;
+    EventLoop _eventLoop = new EventLoop();
     boolean allowedToOpenHooks = false;
 
     // Ask mason how he wants you to update this using the gyro
@@ -50,13 +56,25 @@ public class ClimberSubsystem extends SubsystemBase {
         } else {
             _climber = new ClimberIOSim();
         }
+
+        _positionResetEvent = new BooleanEvent(_eventLoop, () -> _inputs.ClimbWenchOutLimitSwitch)
+                .debounce(ElevatorMap.BottomLimitResetDebounceSeconds)
+                .rising();
+
+        _positionResetEvent.ifHigh(() -> {
+            _climber.resetClimberAngle();
+
+        });
+
     }
 
     @Override
     public void periodic() {
+        _eventLoop.poll();
         _climber.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
         SmartDashboard.putBoolean(getName() + "allowed to change hooks state", allowedToOpenHooks);
+        Logger.recordOutput(getName() + "/climberAngleDegrees", _inputs.ClimberAngleDegrees);
 
     }
 
@@ -89,11 +107,6 @@ public class ClimberSubsystem extends SubsystemBase {
 
     }
 
-    public Command hooksManaul(double speed) {
-        return Commands.run(() -> _climber.setHookMotorSpeed(speed));
-
-    }
-
     //#region Commands
 
     public Command setClimberOutCommand() {
@@ -110,6 +123,11 @@ public class ClimberSubsystem extends SubsystemBase {
 
     public Command setHooksOpenCommand() {
         return Commands.run(() -> setHooksSpeed(-ClimberMap.HooksSpeed));
+    }
+
+    public Command climbOffTheGround() {
+        return setClimberInCommand().until(() -> _inputs.ClimberAngleDegrees > ClimberMap.fullyClimbedAngle)
+                .withTimeout(5).andThen(stopClimbingMotorsCommand());
     }
 
     public Command stopClimbingMotorsCommand() {

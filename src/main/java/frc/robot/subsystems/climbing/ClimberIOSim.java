@@ -36,6 +36,7 @@ public class ClimberIOSim implements IClimberIO {
         _hooksInLimitSwitchSim = new DIOSim(ClimberMap.HooksClosedLimitSwitchChannel);
     }
 
+    @Override
     public void updateInputs(ClimberInputsAutoLogged inputs) {
         double climbWenchMotorSpeed = _climbWenchMotorsSim.getAngularVelocity().magnitude();
         double climbHookMotorSpeed = _climbHooksMotorSim.getAngularVelocity().magnitude();
@@ -48,20 +49,29 @@ public class ClimberIOSim implements IClimberIO {
         _inputs.HooksOpenLimitSwitch = _hooksInLimitSwitchSim.getValue();
     }
 
+    @Override
     public void setClimbingWenchSpeed(double speed) {
         _climbWenchMotorsSim.setAngularVelocity(speed);
     }
 
+    @Override
     public void setHookMotorSpeed(double speed) {
         _climbHooksMotorSim.setAngularVelocity(speed);
     }
 
+    @Override
     public void stopWenchMotors() {
         _climbWenchMotorsSim.setAngularVelocity(0);
     }
 
+    @Override
     public void stopHooksMotors() {
         _climbHooksMotorSim.setAngularVelocity(0);
+    }
+
+    @Override
+    public void resetClimberAngle() {
+        // Not implemented
     }
 
 }

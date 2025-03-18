@@ -30,6 +30,7 @@ public class ClimberIOReal implements IClimberIO {
         _climbInLimitSwitch = new DigitalInput(ClimberMap.ClimberInLimitSwitchChannel);
         _hooksOpenLimitSwitch = new DigitalInput(ClimberMap.HooksOpenLimitSwitchChannel);
         _hooksClosedLimitSwitch = new DigitalInput(ClimberMap.HooksClosedLimitSwitchChannel);
+        _climbWenchLeftMotor.getEncoder();
 
         climbMotorsConfig();
     }
@@ -53,6 +54,7 @@ public class ClimberIOReal implements IClimberIO {
 
     }
 
+    @Override
     public void updateInputs(ClimberInputsAutoLogged inputs) {
         double climbWenchMotorSpeed = _climbWenchLeftMotor.get();
         double climbHookMotorSpeed = _climbHooksMotor.getMotorOutputPercent();
@@ -63,23 +65,37 @@ public class ClimberIOReal implements IClimberIO {
         inputs.ClimbWenchInLimitSwitch = _climbInLimitSwitch.get();
         inputs.HooksClosedLimitSwitch = _hooksClosedLimitSwitch.get();
         inputs.HooksOpenLimitSwitch = !_hooksOpenLimitSwitch.get();
+        inputs.ClimberAngleDegrees = getClimberAngleDegrees();
     }
 
+    @Override
     public void setClimbingWenchSpeed(double speed) {
         _climbWenchRightMotor.set(speed);
     }
 
+    @Override
     public void setHookMotorSpeed(double speed) {
         _climbHooksMotor.set(VictorSPXControlMode.PercentOutput, speed);
     }
 
+    @Override
     public void stopWenchMotors() {
         _climbWenchLeftMotor.stopMotor();
         _climbWenchRightMotor.stopMotor();
     }
 
+    @Override
     public void stopHooksMotors() {
         _climbHooksMotor.set(VictorSPXControlMode.PercentOutput, 0);
+    }
+
+    @Override
+    public void resetClimberAngle() {
+        _climbWenchLeftMotor.getEncoder().setPosition(0);
+    }
+
+    public double getClimberAngleDegrees() {
+        return _climbWenchLeftMotor.getEncoder().getPosition();
     }
 
 }
