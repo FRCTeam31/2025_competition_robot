@@ -36,6 +36,7 @@ public class ClimberSubsystem extends SubsystemBase {
         public static final double ClimbingPitchThresholdDegrees = 5;
         public static final double fullyClimbedAngle = 0;
         public static final double ClimbAngleResetDebounceSeconds = 0.25;
+        public static final double ClimberArmlengthMeters = 0.75;
 
     }
 
@@ -75,7 +76,7 @@ public class ClimberSubsystem extends SubsystemBase {
         _climber.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
         SmartDashboard.putBoolean(getName() + "allowed to change hooks state", allowedToOpenHooks);
-        Logger.recordOutput(getName() + "/climberAngleDegrees", _inputs.ClimberAngleDegrees);
+        Logger.recordOutput(getName() + "/climberAngleDegrees", _inputs.climberAngleDegrees);
 
     }
 
@@ -127,7 +128,7 @@ public class ClimberSubsystem extends SubsystemBase {
     }
 
     public Command climbOffTheGround() {
-        return setClimberInCommand().until(() -> _inputs.ClimberAngleDegrees > ClimberMap.fullyClimbedAngle)
+        return setClimberInCommand().until(() -> _inputs.climberAngleDegrees > ClimberMap.fullyClimbedAngle)
                 .withTimeout(5).andThen(stopClimbingMotorsCommand());
     }
 

@@ -25,6 +25,6 @@ public class ClimberInputs {
     public boolean ClimbWenchOutLimitSwitch;
     public boolean HooksOpenLimitSwitch;
     public boolean HooksClosedLimitSwitch;
-    public double ClimberAngleDegrees;
+    public double climberAngleDegrees;
 
 }

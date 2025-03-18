@@ -10,6 +10,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.subsystems.drivetrain.gyro.IGyro;
 import frc.robot.subsystems.climbing.ClimberSubsystem.ClimberMap;
@@ -65,7 +66,7 @@ public class ClimberIOReal implements IClimberIO {
         inputs.ClimbWenchInLimitSwitch = _climbInLimitSwitch.get();
         inputs.HooksClosedLimitSwitch = _hooksClosedLimitSwitch.get();
         inputs.HooksOpenLimitSwitch = !_hooksOpenLimitSwitch.get();
-        inputs.ClimberAngleDegrees = getClimberAngleDegrees();
+        inputs.climberAngleDegrees = getClimberAngleDegrees();
     }
 
     @Override
@@ -95,7 +96,12 @@ public class ClimberIOReal implements IClimberIO {
     }
 
     public double getClimberAngleDegrees() {
-        return _climbWenchLeftMotor.getEncoder().getPosition();
+        double motorRotations = _climbWenchLeftMotor.getEncoder().getPosition();
+        double motorDegrees = Rotation2d.fromRotations(motorRotations).getDegrees();
+        double distanceClimbed = motorDegrees * ClimberMap.ClimberGearRatio * Math.PI;
+        double theta = distanceClimbed / ClimberMap.ClimberArmlengthMeters;
+        return theta;
+
     }
 
 }
