@@ -4,7 +4,15 @@
 
 package frc.robot;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.naming.Name;
+
+import com.pathplanner.lib.auto.NamedCommands;
+
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.dashboard.TeleopDashboardTab;
 import frc.robot.dashboard.DashboardSection;
@@ -14,6 +22,7 @@ import frc.robot.subsystems.*;
 import frc.robot.subsystems.climbing.ClimberSubsystem;
 import frc.robot.subsystems.drivetrain.SwerveMap;
 import frc.robot.subsystems.drivetrain.SwerveSubsystem;
+import frc.robot.subsystems.drivetrain.SwerveSubsystem.ReefSide;
 import frc.robot.subsystems.climbing.ClimberInputs.ClimberPosition;
 import frc.robot.subsystems.climbing.ClimberInputs.HooksPosition;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -45,108 +54,81 @@ public class Container {
       Climber = new ClimberSubsystem(isReal);
       EndEffector = new EndEffectorSubsystem(isReal);
 
-      // Register the named commands from each subsystem that may be used in PathPlanner
-      // var namedCommandsMap = Swerve.getNamedCommands();
-      // ...add other named commands to the map using "otherNamedCommands.putAll(namedCommandsMap);"
-      // NamedCommands.registerCommands(namedCommandsMap);
-
       // Create our custom auto builder
       AutoDashboardSection = new DashboardSection("Auto");
-      // AutoBuilder = new BuildableAutoRoutine(namedCommandsMap);
       TeleopDashboardSection = new TeleopDashboardTab();
       CommandsDashboardSection = new DashboardSection("Commands");
       TestDashboardSection = new DashboardSection("Test");
 
       // Create Elevator Subsystem
-      OperatorInterface = new OperatorInterface();
       Elevator = new ElevatorSubsystem(isReal);
+      OperatorInterface = new OperatorInterface();
 
-      Elevator.setDefaultCommand(
-          Elevator.runElevatorAutomaticSeekCommand());
+      OperatorInterface.bindDriverControls(Swerve, Climber);
+      OperatorInterface.bindOperatorControls(Elevator, EndEffector);
 
-      // Configure controller bindings
-      OperatorInterface.bindDriverControls(
-          Swerve.resetGyroCommand(),
-          Swerve.enableLockOnCommand(),
-          Swerve.disableAutoAlignCommand(),
-          Swerve::setAutoAlignSetpointCommand,
-          Swerve::setDefaultCommand,
-          Swerve::driveFieldRelativeCommand);
+      // Register the named commands from each subsystem that may be used in PathPlanner
+      var swerveCommands = Swerve.getNamedCommands();
+      var containerCommands = getNamedCommands();
 
-      // OperatorInterface.bindOperatorControls(
-      //     Elevator.goToElevatorPositionCommand(ElevatorPosition.kSource),
-      //     Elevator.goToElevatorPositionCommand(ElevatorPosition.kTrough),
-      //     Elevator.goToElevatorPositionCommand(ElevatorPosition.kLow),
-      //     Elevator.goToElevatorPositionCommand(ElevatorPosition.kMid),
-      //     Elevator.goToElevatorPositionCommand(ElevatorPosition.kHigh));
-      // OperatorInterface.OperatorController.povUp()
-      //     .onTrue(Elevator.runSysIdDynamicRoutineCommand(Direction.kForward))
-      //     .onFalse(Elevator.stopMotorsCommand());
-      // OperatorInterface.OperatorController.povDown()
-      //     .onTrue(Elevator.runSysIdDynamicRoutineCommand(Direction.kReverse))
-      //     .onFalse(Elevator.stopMotorsCommand());
-      // OperatorInterface.OperatorController.povRight()
-      //     .onTrue(Elevator.runSysIdQuasistaticRoutineCommand(Direction.kForward))
-      //     .onFalse(Elevator.stopMotorsCommand());
-      // OperatorInterface.OperatorController.povLeft()
-      //     .onTrue(Elevator.runSysIdQuasistaticRoutineCommand(Direction.kReverse))
-      //     .onFalse(Elevator.stopMotorsCommand());
-      // OperatorInterface.OperatorController.start().onTrue(Elevator.goToElevatorBottomCommand());
-      // OperatorInterface.OperatorController.a()
-      //     .onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kBottom));
-      // OperatorInterface.OperatorController.y().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kMid));
-      // OperatorInterface.OperatorController.x().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kBottom));
-      // OperatorInterface.OperatorController.b().onTrue(Elevator.goToElevatorPositionCommand(ElevatorPosition.kLow));
-      // Elevator.setDefaultCommand(Elevator.runElevatorAutomaticSeekCommand());
-      Elevator
-          .setDefaultCommand(Elevator.runElevatorWithController(OperatorInterface.OperatorController.getTriggerSupplier(
-              0.06, 0)));
-      EndEffector.setDefaultCommand(
-          EndEffector.defaultCommand(OperatorInterface.OperatorController.rightBumper(),
-              OperatorInterface.OperatorController.leftBumper(),
-              OperatorInterface.OperatorController.getLeftStickYSupplier(0.06, 0)));
+      // ...add other named commands to the map using "otherNamedCommands.putAll(namedCommandsMap);"
 
-      OperatorInterface.OperatorController.y().onTrue(EndEffector.setWristSetpointCommand(-4));
+      NamedCommands.registerCommands(swerveCommands);
+      NamedCommands.registerCommands(containerCommands);
 
-      OperatorInterface.OperatorController.x().onTrue(EndEffector.setWristSetpointCommand(-65));
-      OperatorInterface.OperatorController.a().onTrue(EndEffector.setWristSetpointCommand(-130));
+      Map<String, Command> combinedCommands = new HashMap<>();
+      combinedCommands.putAll(swerveCommands);
+      combinedCommands.putAll(containerCommands);
 
-      var DriverController = OperatorInterface.DriverController;
-      // Climber.setDefaultCommand(
-      // Climber.defaultClimbingCommand(() -> (OperatorInterface.DriverController.leftBumper().getAsBoolean()
-      //     && OperatorInterface.DriverController.x().getAsBoolean()),
-      //     () -> (OperatorInterface.DriverController.rightBumper().getAsBoolean()
-      //         && OperatorInterface.DriverController.x().getAsBoolean()),
-      //     () -> (OperatorInterface.DriverController.leftBumper().getAsBoolean()
-      //         && OperatorInterface.DriverController.b().getAsBoolean()),
-      //     () -> (OperatorInterface.DriverController.rightBumper().getAsBoolean()
-      //         && OperatorInterface.DriverController.b().getAsBoolean())));
-
-      // Climber.defaultClimbingCommand(DriverController.leftBumper().and(DriverController.x()),
-      //     DriverController.rightBumper().and(DriverController.x()),
-      //     DriverController.leftBumper().and(DriverController.b()),
-      //     DriverController.rightBumper().and(DriverController.b())));
-
-      // OperatorInterface.DriverController.a().onTrue(Climber.setClimberOutCommand());
-      // OperatorInterface.DriverController.b().onTrue(Climber.setClimberInCommand());
-
-      // OperatorInterface.DriverController.y().onTrue(Climber.setHooksStateCommand(HooksPosition.OPEN));
-      // OperatorInterface.DriverController.x().onTrue(Climber.setHooksStateCommand(HooksPosition.CLOSED));
-
-      // OperatorInterface.OperatorController.rightBumper().whileTrue(EndEffector.setIntakeSpeedCommand(0.5))
-      //     .onFalse(EndEffector.stopIntakeMotorCommand());
-
-      // OperatorInterface.OperatorController.leftBumper().whileTrue(EndEffector.setIntakeSpeedCommand(-0.5))
-      //     .onFalse(EndEffector.stopIntakeMotorCommand());
-
-      // Elevator.setDefaultCommand(
-      //     Elevator.elevatorDefaultCommand(
-      //         OperatorInterface.OperatorController.getTriggerSupplier(
-      //             Controls.AXIS_DEADBAND,
-      //             SwerveMap.Control.DeadbandCurveWeight)));
+      AutoBuilder = new BuildableAutoRoutine(combinedCommands);
 
     } catch (Exception e) {
       DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());
     }
   }
+
+  //#region Commands
+
+  public static Command setCombinedHeightAndAngle(ElevatorPosition position) {
+    return Commands.parallel(
+        Commands.runOnce(() -> System.out.println("Setting combined height and angle: " + position)),
+        Elevator.setElevatorSetpointCommand(position),
+        EndEffector.scheduleWristSetpointCommand(position))
+        .finallyDo(() -> System.out.println("Finished setting combined setpoints"));
+  }
+
+  public static Command scoreAtHeight(ElevatorPosition position) {
+    return setCombinedHeightAndAngle(position).alongWith(EndEffector.enableIntakeCommand())
+        .alongWith(EndEffector.scoreCoral());
+  }
+
+  public static Command scoreAtHeightAndLower(ElevatorPosition position) {
+    return scoreAtHeight(position).andThen(setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
+  }
+
+  public static Command pickupFromSource() {
+    return setCombinedHeightAndAngle(ElevatorPosition.kSource).andThen(EndEffector.pickupCoral());
+  }
+
+  public static Command pickupFromSourceAndLower() {
+    return pickupFromSource().andThen(setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
+  }
+
+  public static Command scoreOnSideAndLower(ReefSide side, ElevatorPosition position) {
+    return Swerve.pathfindToReefSide(side).andThen(scoreAtHeightAndLower(position));
+  }
+
+  public static Map<String, Command> getNamedCommands() {
+    return Map.of(
+        "Score-L4-L", scoreOnSideAndLower(ReefSide.kLeft, ElevatorPosition.kHigh),
+        "Score-L4-R", scoreOnSideAndLower(ReefSide.kRight, ElevatorPosition.kHigh),
+        "Score-L3-L", scoreOnSideAndLower(ReefSide.kLeft, ElevatorPosition.kMid),
+        "Score-L3-R", scoreOnSideAndLower(ReefSide.kRight, ElevatorPosition.kMid),
+        "Score-L2-L", scoreOnSideAndLower(ReefSide.kLeft, ElevatorPosition.kLow),
+        "Score-L2-R", scoreOnSideAndLower(ReefSide.kRight, ElevatorPosition.kLow),
+        "Score-Trough", scoreAtHeightAndLower(ElevatorPosition.kTrough),
+        "Pickup-Source", pickupFromSourceAndLower());
+  }
+
+  //#endregion
 }

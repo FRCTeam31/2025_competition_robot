@@ -59,6 +59,12 @@ public class SwerveSubsystem extends SubsystemBase {
       .steps(Map.of(0.0, Color.kRed, 0.25, Color.kBlack))
       .scrollAtRelativeSpeed(Units.Hertz.of(2));
 
+  // Reef Positioning
+  public enum ReefSide {
+    kLeft,
+    kRight
+  }
+
   /**
    * Creates a new Drivetrain.
    */
@@ -381,6 +387,16 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   /**
+   * Will move to a side of the reef, not implemented yet.
+   * @deprecated Not implemented
+   * @param side
+   * @return
+   */
+  public Command pathfindToReefSide(ReefSide side) {
+    return Commands.runOnce(() -> System.out.println("[NOT IMPLEMENTED] Pathfinding to reef side: " + side.toString()));
+  }
+
+  /**
    * Creates a command which pathfinds to a given pose, flipping the path across the field center if necessary
    * @param poseSupplier A supplier for the target pose
    */
@@ -390,9 +406,7 @@ public class SwerveSubsystem extends SubsystemBase {
         SwerveMap.Chassis.MaxAngularSpeedRadians,
         SwerveMap.Chassis.MaxAngularSpeedRadians);
 
-    return flipped
-        ? AutoBuilder.pathfindToPoseFlipped(poseSupplier.get(), pathConstraints)
-        : AutoBuilder.pathfindToPose(poseSupplier.get(), pathConstraints);
+    return AutoBuilder.pathfindToPoseFlipped(poseSupplier.get(), pathConstraints);
   }
 
   /*

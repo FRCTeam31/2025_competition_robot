@@ -5,38 +5,51 @@ import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.event.BooleanEvent;
+import edu.wpi.first.wpilibj.event.EventLoop;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Container;
 import frc.robot.subsystems.climbing.ClimberInputs.ClimberPosition;
 import frc.robot.subsystems.climbing.ClimberInputs.HooksPosition;
+import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorMap;
 
 public class ClimberSubsystem extends SubsystemBase {
 
     public static class ClimberMap {
+        public static final byte ClimberGearRatio = 100;
         public static final byte ClimberLeftMotorCANID = 17;
         public static final byte ClimberRightMotorCANID = 18;
-        public static final byte ClimberGearRatio = 100;
-        public static final double SetClimberStateSpeed = 0.8;
-        public static final int ClimberOutLimitSwitchChannel = 5;
-        public static final int ClimberInLimitSwitchChannel = 6;
-        public static final double MaxMotorPercentOutput = 1;
-        public static final double ActuallyClimbingSpeed = 0.8;
-        public static final double MaxChangeClimberStateTime = 7;
-        public static final int ClimberHookMotorCANID = 21;
-        public static final int HooksOpenLimitSwitchChannel = 4;
-        public static final int HooksClosedLimitSwitchChannel = 2;
-        public static final double HooksOpenSpeed = -0.75;
-        public static final double HooksCloseSpeed = 0.75;
-        public static final double MaxChangeHookStateTime = 5;
+        public static final byte ClimberHookMotorCANID = 21;
+        public static final byte HooksClosedLimitSwitchChannel = 2;
+        public static final byte HooksOpenLimitSwitchChannel = 4;
+        public static final byte ClimberOutLimitSwitchChannel = 5;
+        public static final byte ClimberInLimitSwitchChannel = 6;
+        public static final double ClimberSpeed = 0.8;
+        public static final double HooksSpeed = 0.4;
+        public static final double ClimberChangeStateTimeout = 7;
+        public static final double HooksChangeStateTimeout = 5;
         public static final double ClimbingPitchThresholdDegrees = 5;
+        public static final double fullyClimbedOutputRotations = 100000;
+        public static final double ClimbAngleResetDebounceSeconds = 0.25;
+        public static final double ClimberArmlengthMeters = Units.inchesToMeters(16);
+        public static final double ClimberOutPutShaftDiamateterMeters = Units.inchesToMeters(0.5);
 
     }
 
     private IClimberIO _climber;
     private ClimberInputsAutoLogged _inputs = new ClimberInputsAutoLogged();
+    BooleanEvent _positionResetEvent;
+    EventLoop _eventLoop = new EventLoop();
+    boolean allowedToOpenHooks = false;
+
+    // Ask mason how he wants you to update this using the gyro
+    private double _robotPitch = 0;
 
     public ClimberSubsystem(Boolean isReal) {
         setName("Climber");
@@ -45,136 +58,89 @@ public class ClimberSubsystem extends SubsystemBase {
 
         } else {
             _climber = new ClimberIOSim();
-
         }
+
+        _positionResetEvent = new BooleanEvent(_eventLoop, () -> _inputs.ClimbWenchOutLimitSwitch)
+                .debounce(ElevatorMap.BottomLimitResetDebounceSeconds)
+                .rising();
+
+        _positionResetEvent.ifHigh(() -> {
+            _climber.resetClimberAngle();
+
+        });
+
     }
 
     @Override
     public void periodic() {
+
+        _eventLoop.poll();
         _climber.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
+        SmartDashboard.putBoolean(getName() + "allowed to change hooks state", allowedToOpenHooks);
+        Logger.recordOutput(getName() + "/climberAngleDegrees", _inputs.climberShaftRotations);
 
     }
 
-    private void setHooksState(HooksPosition hooksPosition) {
-        System.out.println("Set Hook State: " + hooksPosition.toString());
-        double hooksMotorSpeed = 0;
-        // boolean allowedToChangeHooksState = _inputs.ClimbWenchOutLimitSwitch
-        //         && _inputs.RobotPitch > ClimberMap.ClimbingPitchThresholdDegrees;
-
-        _inputs.CommandedHooksPosition = hooksPosition;
-        // Only Allow the hooks to change state if the climber is  out
-        // if (allowedToChangeHooksState) {
-        if (hooksPosition == HooksPosition.CLOSED) {
-            System.out.println("Hook will be closed");
-            if (!_inputs.HooksClosedLimitSwitch) {
-                System.out.println("Hooks Closed Limit Switch is false");
-                hooksMotorSpeed = ClimberMap.HooksCloseSpeed;
+    private void setHooksSpeed(double speed) {
+        // Positive is closed, negative is open
+        boolean currentlyClimbing = _robotPitch >= ClimberMap.ClimbingPitchThresholdDegrees;
+        if (!currentlyClimbing) {
+            if (speed > 0 && !_inputs.HooksClosedLimitSwitch) {
+                if (_inputs.climberShaftRotations > ClimberMap.fullyClimbedOutputRotations) {
+                    _climber.stopWenchMotors();
+                }
+            } else if (speed < 0 && !_inputs.HooksOpenLimitSwitch) {
+                _climber.setHookMotorSpeed(speed);
             } else {
-                hooksMotorSpeed = 0; // Stop motor if InLimitSwitch is pressed
-            }
-        } else if (hooksPosition == HooksPosition.OPEN) {
-            if (!_inputs.HooksOpenLimitSwitch) {
-                hooksMotorSpeed = ClimberMap.HooksOpenSpeed;
-            } else {
-                hooksMotorSpeed = 0; // Stop motor if OutLimitSwitch is pressed
+                _climber.stopHooksMotors();
             }
         }
-
-        Logger.recordOutput(getName() + "/HooksSpeed", hooksMotorSpeed);
-        _climber.setHookMotorSpeed(hooksMotorSpeed);
+        SmartDashboard.putNumber(getName() + "/HooksSpeed", speed);
     }
 
-    private void setClimberState(ClimberPosition climberPosition) {
-        double wenchSpeed = 0;
-        _inputs.CommandedClimberPosition = climberPosition;
-
-        if (climberPosition == ClimberPosition.IN) {
-            if (!_inputs.ClimbWenchInLimitSwitch) {
-                wenchSpeed = ClimberMap.SetClimberStateSpeed;
-            } else {
-                wenchSpeed = 0; // Stop motor if InLimitSwitch is pressed
-            }
-        } else if (climberPosition == ClimberPosition.OUT) {
-            if (!_inputs.ClimbWenchOutLimitSwitch) {
-                wenchSpeed = -ClimberMap.SetClimberStateSpeed;
-            } else {
-                wenchSpeed = 0; // Stop motor if OutLimitSwitch is pressed
-            }
+    private void setClimberSpeed(double speed) {
+        // in is positive, out is negative
+        if (speed > 0 && !_inputs.ClimbWenchInLimitSwitch) {
+            if (_inputs.climberShaftRotations > ClimberMap.fullyClimbedOutputRotations)
+                _climber.setClimbingWenchSpeed(speed);
+        } else if (speed < 0 && !_inputs.ClimbWenchOutLimitSwitch) {
+            _climber.setClimbingWenchSpeed(speed);
+        } else {
+            _climber.stopWenchMotors();
         }
-        _climber.setClimbingWenchSpeed(wenchSpeed);
+
+        SmartDashboard.putNumber(getName() + "/ClimberSpeed", speed);
+
     }
 
     //#region Commands
-    public Command toggleHooksStateCommand() {
-        HooksPosition commandedHooksState = (_inputs.CommandedHooksPosition == HooksPosition.CLOSED)
-                ? HooksPosition.OPEN
-                : HooksPosition.CLOSED;
-
-        return _inputs.CommandedClimberPosition == ClimberPosition.OUT
-                ? setHooksStateCommand(commandedHooksState)
-                : Commands.none();
-    }
-
-    // public Command defaultClimbingCommand(BooleanSupplier climbIn, BooleanSupplier climbOut,
-    //         BooleanSupplier hooksClosed, BooleanSupplier hooksOpen) {
-    //     if (climbIn.getAsBoolean()) {
-
-    //         return setClimberInCommand();
-    //     } else if (climbOut.getAsBoolean()) {
-    //         return setCLimberOutCommand();
-    //     } else if (hooksClosed.getAsBoolean()
-    //             && (_inputs.CommandedClimberPosition == ClimberPosition.OUT && _inputs.ClimbWenchOutLimitSwitch)) {
-    //         return setHooksStateCommand(HooksPosition.CLOSED);
-    //     } else if (hooksOpen.getAsBoolean()
-    //             && (_inputs.CommandedClimberPosition == ClimberPosition.OUT && _inputs.ClimbWenchOutLimitSwitch)) {
-    //         return setHooksStateCommand(HooksPosition.OPEN);
-    //     } else {
-    //         return new InstantCommand();
-    //     }
-    // }
-
-    public Command setHooksStateCommand(HooksPosition hooksPosition) {
-        return Commands.run(() -> setHooksState(hooksPosition))
-                .until(() -> hooksPosition == HooksPosition.CLOSED
-                        ? _inputs.HooksClosedLimitSwitch
-                        : _inputs.HooksOpenLimitSwitch)
-                .withTimeout(ClimberMap.MaxChangeHookStateTime)
-                .andThen(stopHooksMotorsCommand());
-    }
-
-    public Command setClimberStateCommand(ClimberPosition climberPosition) {
-        return Commands.run(() -> setClimberState(climberPosition))
-                .until(() -> climberPosition == ClimberPosition.IN
-                        ? _inputs.ClimbWenchInLimitSwitch
-                        : _inputs.ClimbWenchOutLimitSwitch)
-                .withTimeout(ClimberMap.MaxChangeClimberStateTime)
-                .andThen(stopClimbingMotorsCommand());
-    }
 
     public Command setClimberOutCommand() {
-        return setClimberStateCommand(ClimberPosition.OUT);
+        return Commands.run(() -> setClimberSpeed(-ClimberMap.ClimberSpeed));
     }
 
-    public ParallelCommandGroup setClimberInCommand() {
-        return setHooksStateCommand(HooksPosition.CLOSED)
-                .alongWith(setClimberStateCommand(ClimberPosition.IN));
+    public Command setClimberInCommand() {
+        return Commands.run(() -> setClimberSpeed(ClimberMap.ClimberSpeed));
     }
 
-    public Command climbUpCommand() {
-        // Only allowed to climb if the hooks are closed and the climber is in the out position
+    public Command setHooksClosedCommand() {
+        return Commands.run(() -> setHooksSpeed(ClimberMap.HooksSpeed));
+    }
+
+    public Command setHooksOpenCommand() {
+        return Commands.run(() -> setHooksSpeed(-ClimberMap.HooksSpeed));
+    }
+
+    public Command climbOffTheGround() {
+        return setClimberInCommand().until(() -> _inputs.climberShaftRotations > ClimberMap.fullyClimbedOutputRotations)
+                .withTimeout(5).andThen(stopClimbingMotorsCommand());
+    }
+
+    public Command fullyClimbInManual() {
         return Commands.run(() -> {
-            if (_inputs.ClimbWenchOutLimitSwitch && _inputs.CommandedHooksPosition == HooksPosition.CLOSED) {
-                _climber.setClimbingWenchSpeed(ClimberMap.ActuallyClimbingSpeed);
-            }
-        });
-    }
-
-    public Command climbDownCommand() {
-        // Only allowed to climb if the hooks are closed and the climber is in the out position
-        return Commands.run(() -> {
-            if (_inputs.ClimbWenchOutLimitSwitch && _inputs.CommandedHooksPosition == HooksPosition.CLOSED) {
-                _climber.setClimbingWenchSpeed(-ClimberMap.ActuallyClimbingSpeed);
+            if (!_inputs.ClimbWenchInLimitSwitch) {
+                _climber.setClimbingWenchSpeed(ClimberMap.ClimberSpeed);
             }
         });
     }
@@ -185,6 +151,10 @@ public class ClimberSubsystem extends SubsystemBase {
 
     public Command stopHooksMotorsCommand() {
         return Commands.runOnce(_climber::stopHooksMotors);
+    }
+
+    public Command stopAllMotors() {
+        return stopClimbingMotorsCommand().andThen(stopHooksMotorsCommand());
     }
 
     //#endregion

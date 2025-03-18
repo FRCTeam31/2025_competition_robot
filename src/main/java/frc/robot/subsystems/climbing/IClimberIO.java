@@ -12,4 +12,6 @@ public interface IClimberIO {
 
     public void stopHooksMotors();
 
+    public void resetClimberAngle();
+
 }

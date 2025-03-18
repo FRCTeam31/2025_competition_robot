@@ -1,7 +1,8 @@
 package frc.robot.subsystems.elevator;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.hardware.CANcoder;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -83,5 +84,10 @@ public class ElevatorReal implements IElevator {
     public double getElevatorSpeedMetersPerSecond() {
         var speedRPS = _elevatorEncoder.getVelocity().getValueAsDouble() / ElevatorMap.GearRatio;
         return speedRPS * Math.PI * ElevatorMap.OutputSprocketDiameterMeters;
+    }
+
+    @Override
+    public void resetEncoderPos() {
+        _elevatorEncoder.setPosition(0);
     }
 }

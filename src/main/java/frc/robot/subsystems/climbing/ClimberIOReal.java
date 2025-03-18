@@ -10,6 +10,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.subsystems.drivetrain.gyro.IGyro;
 import frc.robot.subsystems.climbing.ClimberSubsystem.ClimberMap;
@@ -32,6 +33,8 @@ public class ClimberIOReal implements IClimberIO {
         _hooksClosedLimitSwitch = new DigitalInput(ClimberMap.HooksClosedLimitSwitchChannel);
 
         climbMotorsConfig();
+        _climbWenchLeftMotor.getEncoder();
+
     }
 
     private void climbMotorsConfig() {
@@ -53,6 +56,7 @@ public class ClimberIOReal implements IClimberIO {
 
     }
 
+    @Override
     public void updateInputs(ClimberInputsAutoLogged inputs) {
         double climbWenchMotorSpeed = _climbWenchLeftMotor.get();
         double climbHookMotorSpeed = _climbHooksMotor.getMotorOutputPercent();
@@ -63,24 +67,40 @@ public class ClimberIOReal implements IClimberIO {
         inputs.ClimbWenchInLimitSwitch = _climbInLimitSwitch.get();
         inputs.HooksClosedLimitSwitch = _hooksClosedLimitSwitch.get();
         inputs.HooksOpenLimitSwitch = !_hooksOpenLimitSwitch.get();
+        inputs.climberShaftRotations = getClimberShaftRotations();
     }
 
+    @Override
     public void setClimbingWenchSpeed(double speed) {
         _climbWenchRightMotor.set(speed);
     }
 
+    @Override
     public void setHookMotorSpeed(double speed) {
-        System.out.println("Set Hook Motor Speed: " + speed);
         _climbHooksMotor.set(VictorSPXControlMode.PercentOutput, speed);
     }
 
+    @Override
     public void stopWenchMotors() {
         _climbWenchLeftMotor.stopMotor();
         _climbWenchRightMotor.stopMotor();
     }
 
+    @Override
     public void stopHooksMotors() {
         _climbHooksMotor.set(VictorSPXControlMode.PercentOutput, 0);
+    }
+
+    @Override
+    public void resetClimberAngle() {
+        _climbWenchLeftMotor.getEncoder().setPosition(0);
+    }
+
+    public double getClimberShaftRotations() {
+        double motorRotations = _climbWenchLeftMotor.getEncoder().getPosition();
+        double shaftRotations = motorRotations / 100;
+        return shaftRotations;
+
     }
 
 }
