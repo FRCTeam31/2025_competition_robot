@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.dashboard.TeleopDashboardTab;
+import frc.robot.game.ReefPegSide;
 import frc.robot.dashboard.DashboardSection;
 import frc.robot.oi.OperatorInterface;
 import frc.robot.oi.BuildableAutoRoutine;
@@ -22,7 +23,6 @@ import frc.robot.subsystems.*;
 import frc.robot.subsystems.climbing.ClimberSubsystem;
 import frc.robot.subsystems.drivetrain.SwerveMap;
 import frc.robot.subsystems.drivetrain.SwerveSubsystem;
-import frc.robot.subsystems.drivetrain.SwerveSubsystem.ReefSide;
 import frc.robot.subsystems.climbing.ClimberInputs.ClimberPosition;
 import frc.robot.subsystems.climbing.ClimberInputs.HooksPosition;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -40,7 +40,6 @@ public class Container {
   public static SwerveSubsystem Swerve;
   public static VisionSubsystem Vision;
   public static ClimberSubsystem Climber;
-  public static PwmLEDs LEDs;
   public static EndEffectorSubsystem EndEffector;
   public static ElevatorSubsystem Elevator;
   public static OperatorInterface OperatorInterface;
@@ -48,7 +47,6 @@ public class Container {
   public static void initialize(boolean isReal) {
     try {
       // Create subsystems
-      LEDs = new PwmLEDs();
       Vision = new VisionSubsystem();
       Swerve = new SwerveSubsystem(isReal);
       Climber = new ClimberSubsystem(isReal);
@@ -114,18 +112,18 @@ public class Container {
     return pickupFromSource().andThen(setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
   }
 
-  public static Command scoreOnSideAndLower(ReefSide side, ElevatorPosition position) {
-    return Swerve.pathfindToReefSide(side).andThen(scoreAtHeightAndLower(position));
+  public static Command scoreOnSideAndLower(ReefPegSide side, ElevatorPosition position) {
+    return Swerve.pathfindToReefPegSide(side).andThen(scoreAtHeightAndLower(position));
   }
 
   public static Map<String, Command> getNamedCommands() {
     return Map.of(
-        "Score-L4-L", scoreOnSideAndLower(ReefSide.kLeft, ElevatorPosition.kHigh),
-        "Score-L4-R", scoreOnSideAndLower(ReefSide.kRight, ElevatorPosition.kHigh),
-        "Score-L3-L", scoreOnSideAndLower(ReefSide.kLeft, ElevatorPosition.kMid),
-        "Score-L3-R", scoreOnSideAndLower(ReefSide.kRight, ElevatorPosition.kMid),
-        "Score-L2-L", scoreOnSideAndLower(ReefSide.kLeft, ElevatorPosition.kLow),
-        "Score-L2-R", scoreOnSideAndLower(ReefSide.kRight, ElevatorPosition.kLow),
+        "Score-L4-L", scoreOnSideAndLower(ReefPegSide.kLeft, ElevatorPosition.kHigh),
+        "Score-L4-R", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kHigh),
+        "Score-L3-L", scoreOnSideAndLower(ReefPegSide.kLeft, ElevatorPosition.kMid),
+        "Score-L3-R", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kMid),
+        "Score-L2-L", scoreOnSideAndLower(ReefPegSide.kLeft, ElevatorPosition.kLow),
+        "Score-L2-R", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kLow),
         "Score-Trough", scoreAtHeightAndLower(ElevatorPosition.kTrough),
         "Pickup-Source", pickupFromSourceAndLower());
   }
