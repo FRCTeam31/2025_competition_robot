@@ -419,9 +419,9 @@ public class SwerveSubsystem extends SubsystemBase {
         getName() + "-DisableAutoAlignRotationFeedback",
         disablePathPlannerAutoAlignRotationFeedbackCommand(),
         getName() + "-MoveToLeftPegs",
-        pathfindToPoseCommand(() -> getReefPegsPoseFromCurrent(ReefPegSide.kLeft), false),
+        pathfindToReefPegSide(ReefPegSide.kLeft),
         getName() + "-MoveToRightPegs",
-        pathfindToPoseCommand(() -> getReefPegsPoseFromCurrent(ReefPegSide.kRight), false));
+        pathfindToReefPegSide(ReefPegSide.kRight));
   }
   // #endregion
 }

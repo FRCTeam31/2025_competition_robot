@@ -552,6 +552,7 @@ public class BuildableAutoRoutine {
             }
         }
 
+        autoCommand = autoCommand.andThen(Commands.print("Auto routine completed"));
         Container.TeleopDashboardSection.clearFieldPath();
         String routineName = DriverStation.isFMSAttached()
                 ? DriverStation.getEventName() + " " + DriverStation.getMatchNumber()
