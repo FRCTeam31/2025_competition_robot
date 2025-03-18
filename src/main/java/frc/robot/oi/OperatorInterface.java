@@ -71,9 +71,6 @@ public class OperatorInterface {
                                 .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.upLeft + 90));
 
                 //Climber Controls
-                // DriverController.y().whileTrue(climber.setHooksOpenCommand()).onFalse(climber.stopHooksMotorsCommand());
-                // DriverController.x().whileTrue(climber.setHooksClosedCommand())
-                //                 .onFalse(climber.stopHooksMotorsCommand());
 
                 DriverController.x().whileTrue(climber.setClimberInCommand()).onFalse(climber.stopAllMotors());
                 DriverController.y().and(DriverController.leftBumper()).whileTrue(climber.setClimberInCommand())
@@ -86,6 +83,8 @@ public class OperatorInterface {
                                 .whileTrue(climber.setHooksOpenCommand()).onFalse(climber.stopHooksMotorsCommand());
                 DriverController.b().and(DriverController.rightBumper())
                                 .whileTrue(climber.setHooksClosedCommand()).onFalse(climber.stopHooksMotorsCommand());
+                DriverController.back().whileTrue(climber.fullyClimbInManual())
+                                .onFalse(climber.stopClimbingMotorsCommand());
 
         }
 

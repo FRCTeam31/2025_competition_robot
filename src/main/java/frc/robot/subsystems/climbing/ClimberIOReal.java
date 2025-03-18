@@ -31,9 +31,10 @@ public class ClimberIOReal implements IClimberIO {
         _climbInLimitSwitch = new DigitalInput(ClimberMap.ClimberInLimitSwitchChannel);
         _hooksOpenLimitSwitch = new DigitalInput(ClimberMap.HooksOpenLimitSwitchChannel);
         _hooksClosedLimitSwitch = new DigitalInput(ClimberMap.HooksClosedLimitSwitchChannel);
-        _climbWenchLeftMotor.getEncoder();
 
         climbMotorsConfig();
+        _climbWenchLeftMotor.getEncoder();
+
     }
 
     private void climbMotorsConfig() {
@@ -66,7 +67,7 @@ public class ClimberIOReal implements IClimberIO {
         inputs.ClimbWenchInLimitSwitch = _climbInLimitSwitch.get();
         inputs.HooksClosedLimitSwitch = _hooksClosedLimitSwitch.get();
         inputs.HooksOpenLimitSwitch = !_hooksOpenLimitSwitch.get();
-        inputs.climberAngleDegrees = getClimberAngleDegrees();
+        inputs.climberShaftRotations = getClimberShaftRotations();
     }
 
     @Override
@@ -95,12 +96,10 @@ public class ClimberIOReal implements IClimberIO {
         _climbWenchLeftMotor.getEncoder().setPosition(0);
     }
 
-    public double getClimberAngleDegrees() {
+    public double getClimberShaftRotations() {
         double motorRotations = _climbWenchLeftMotor.getEncoder().getPosition();
-        double motorDegrees = Rotation2d.fromRotations(motorRotations).getDegrees();
-        double distanceClimbed = motorDegrees * ClimberMap.ClimberGearRatio * Math.PI;
-        double theta = distanceClimbed / ClimberMap.ClimberArmlengthMeters;
-        return theta;
+        double shaftRotations = motorRotations / 100;
+        return shaftRotations;
 
     }
 

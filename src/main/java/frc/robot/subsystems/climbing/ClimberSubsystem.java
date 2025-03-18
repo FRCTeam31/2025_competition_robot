@@ -5,6 +5,7 @@ import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.event.BooleanEvent;
 import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -34,9 +35,10 @@ public class ClimberSubsystem extends SubsystemBase {
         public static final double ClimberChangeStateTimeout = 7;
         public static final double HooksChangeStateTimeout = 5;
         public static final double ClimbingPitchThresholdDegrees = 5;
-        public static final double fullyClimbedAngle = 0;
+        public static final double fullyClimbedOutputRotations = 100000;
         public static final double ClimbAngleResetDebounceSeconds = 0.25;
-        public static final double ClimberArmlengthMeters = 0.75;
+        public static final double ClimberArmlengthMeters = Units.inchesToMeters(16);
+        public static final double ClimberOutPutShaftDiamateterMeters = Units.inchesToMeters(0.5);
 
     }
 
@@ -76,7 +78,7 @@ public class ClimberSubsystem extends SubsystemBase {
         _climber.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
         SmartDashboard.putBoolean(getName() + "allowed to change hooks state", allowedToOpenHooks);
-        Logger.recordOutput(getName() + "/climberAngleDegrees", _inputs.climberAngleDegrees);
+        Logger.recordOutput(getName() + "/climberAngleDegrees", _inputs.climberShaftRotations);
 
     }
 
@@ -85,7 +87,9 @@ public class ClimberSubsystem extends SubsystemBase {
         boolean currentlyClimbing = _robotPitch >= ClimberMap.ClimbingPitchThresholdDegrees;
         if (!currentlyClimbing) {
             if (speed > 0 && !_inputs.HooksClosedLimitSwitch) {
-                _climber.setHookMotorSpeed(speed);
+                if (_inputs.climberShaftRotations > ClimberMap.fullyClimbedOutputRotations) {
+                    _climber.stopWenchMotors();
+                }
             } else if (speed < 0 && !_inputs.HooksOpenLimitSwitch) {
                 _climber.setHookMotorSpeed(speed);
             } else {
@@ -98,7 +102,8 @@ public class ClimberSubsystem extends SubsystemBase {
     private void setClimberSpeed(double speed) {
         // in is positive, out is negative
         if (speed > 0 && !_inputs.ClimbWenchInLimitSwitch) {
-            _climber.setClimbingWenchSpeed(speed);
+            if (_inputs.climberShaftRotations > ClimberMap.fullyClimbedOutputRotations)
+                _climber.setClimbingWenchSpeed(speed);
         } else if (speed < 0 && !_inputs.ClimbWenchOutLimitSwitch) {
             _climber.setClimbingWenchSpeed(speed);
         } else {
@@ -128,8 +133,16 @@ public class ClimberSubsystem extends SubsystemBase {
     }
 
     public Command climbOffTheGround() {
-        return setClimberInCommand().until(() -> _inputs.climberAngleDegrees > ClimberMap.fullyClimbedAngle)
+        return setClimberInCommand().until(() -> _inputs.climberShaftRotations > ClimberMap.fullyClimbedOutputRotations)
                 .withTimeout(5).andThen(stopClimbingMotorsCommand());
+    }
+
+    public Command fullyClimbInManual() {
+        return Commands.run(() -> {
+            if (!_inputs.ClimbWenchInLimitSwitch) {
+                _climber.setClimbingWenchSpeed(ClimberMap.ClimberSpeed);
+            }
+        });
     }
 
     public Command stopClimbingMotorsCommand() {
