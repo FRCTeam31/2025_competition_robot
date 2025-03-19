@@ -37,8 +37,15 @@ public class ElevatorSubsystem extends SubsystemBase {
         // public static final MRSGConstants ElevatorControllerConstants = new MRSGConstants(
         //         8, 4.5, 0, 1.4);
 
-        public static final MRSGConstants ElevatorControllerConstants = new MRSGConstants(
-                5.2, 3, 0, 1.4);
+        public static final MRSGConstants ElevatorControllerConstantsSmall = new MRSGConstants(
+                8, 4.5, 0, 1.4);
+
+        public static final MRSGConstants ElevatorControllerConstantsMedium = new MRSGConstants(
+                7, 3.8, 0, 0);
+
+        // Only M and R are used.
+        public static final MRSGConstants ElevatorControllerConstantsBig = new MRSGConstants(
+                5.2, 3, 0, 0);
     }
 
     public enum ElevatorPosition {
@@ -61,12 +68,12 @@ public class ElevatorSubsystem extends SubsystemBase {
             ElevatorPosition.kSource, 0.229,
             ElevatorPosition.kTrough, 0.172,
             ElevatorPosition.kLow, 0.311,
-            ElevatorPosition.kMid, 0.432,
+            ElevatorPosition.kMid, 0.45,
             ElevatorPosition.kHigh, 0.627);
 
     private ElevatorInputsAutoLogged _inputs = new ElevatorInputsAutoLogged();
     private IElevator _elevatorIO;
-    public ElevatorController ElevatorController = new ElevatorController(ElevatorMap.ElevatorControllerConstants,
+    public ElevatorController ElevatorController = new ElevatorController(ElevatorMap.ElevatorControllerConstantsSmall,
             ElevatorMap.MaxElevatorHeight);
     private boolean _elevatorManaullyControlled = false;
 
@@ -228,11 +235,14 @@ public class ElevatorSubsystem extends SubsystemBase {
             ElevatorController.setSetpoint(_positionMap.get(pos));
         }).andThen(disableElevatorManualControlCommand()).andThen(() -> {
             if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.4) {
-                ElevatorController.setM(1);
-                ElevatorController.setR(1);
-            } else {
-                ElevatorController.setM(ElevatorMap.ElevatorControllerConstants.M);
-                ElevatorController.setR(ElevatorMap.ElevatorControllerConstants.R);
+                ElevatorController.setM(ElevatorMap.ElevatorControllerConstantsBig.M);
+                ElevatorController.setR(ElevatorMap.ElevatorControllerConstantsBig.R);
+            } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.3) {
+                ElevatorController.setM(ElevatorMap.ElevatorControllerConstantsMedium.M);
+                ElevatorController.setR(ElevatorMap.ElevatorControllerConstantsMedium.R);
+            } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.2) {
+                ElevatorController.setM(ElevatorMap.ElevatorControllerConstantsSmall.M);
+                ElevatorController.setR(ElevatorMap.ElevatorControllerConstantsSmall.R);
             }
         });
     }
