@@ -55,7 +55,6 @@ public class Robot extends LoggedRobot {
 
     // Initialize the robot container
     Container.initialize(isReal());
-    PathfindingCommand.warmupCommand().schedule();
 
     Elastic.selectTab("Auto");
   }

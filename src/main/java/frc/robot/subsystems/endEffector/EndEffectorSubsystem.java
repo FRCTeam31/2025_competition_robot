@@ -1,5 +1,7 @@
 package frc.robot.subsystems.endEffector;
 
+import static edu.wpi.first.units.Units.Centimeters;
+
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -10,11 +12,13 @@ import org.prime.util.LockableEvent;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.event.BooleanEvent;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Container;
+import frc.robot.Robot;
 import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorMap;
 import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorPosition;
 
@@ -47,6 +51,13 @@ public class EndEffectorSubsystem extends SubsystemBase {
     private PIDController _wristPID;
     private boolean _wristManuallyControlled = false;
 
+    private BooleanEvent _elevatorReachedTroughHeight;
+    private BooleanEvent _elevatorReachedLowHeight;
+    private BooleanEvent _elevatorReachedMidHeight;
+    private BooleanEvent _elevatorReachedHighHeight;
+    private BooleanEvent _elevatorReachedSourceHeight;
+    private BooleanEvent _elevatorBelowDangerZone;
+
     private LockableEvent<ElevatorPosition> _lockableSetpoint = new LockableEvent<>(
             null,
             this::setWristSetpointCommand,
@@ -68,7 +79,36 @@ public class EndEffectorSubsystem extends SubsystemBase {
 
     public EndEffectorSubsystem(boolean isReal) {
         setName("End Effector");
-        _endEffector = isReal ? new EndEffectorReal() : new EndEffectorSim();
+        _endEffector = isReal
+                ? new EndEffectorReal()
+                : new EndEffectorSim();
+
+        // TODO: Use the below events to trigger automatic movement of the end effector, when using PID control
+        _elevatorReachedLowHeight = new BooleanEvent(Robot.EventLoop,
+                () -> Container.Elevator.positionIsNear(ElevatorPosition.kLow))
+                .rising()
+                .debounce(0.5);
+        _elevatorReachedMidHeight = new BooleanEvent(Robot.EventLoop,
+                () -> Container.Elevator.positionIsNear(ElevatorPosition.kMid))
+                .rising()
+                .debounce(0.5);
+        _elevatorReachedHighHeight = new BooleanEvent(Robot.EventLoop,
+                () -> Container.Elevator.positionIsNear(ElevatorPosition.kHigh))
+                .rising()
+                .debounce(0.5);
+        _elevatorReachedSourceHeight = new BooleanEvent(Robot.EventLoop,
+                () -> Container.Elevator.positionIsNear(ElevatorPosition.kSource))
+                .rising()
+                .debounce(0.5);
+        _elevatorReachedTroughHeight = new BooleanEvent(Robot.EventLoop,
+                () -> Container.Elevator.positionIsNear(ElevatorPosition.kTrough))
+                .rising()
+                .debounce(0.5);
+        _elevatorBelowDangerZone = new BooleanEvent(Robot.EventLoop, () -> Container.Elevator
+                .getElevatorPositionMeters() <= EndEffectorMap.LowerElevatorSafetyLimit)
+                .rising()
+                .debounce(1);
+
         _wristPID = EndEffectorMap.WristPID.createPIDController(0.02);
         SmartDashboard.putData(_wristPID);
     }
@@ -255,13 +295,16 @@ public class EndEffectorSubsystem extends SubsystemBase {
     }
 
     public Command scoreCoral() {
-        return Commands.run(() -> enableIntakeCommand())
-                .until(() -> Container.Elevator.atPositionSetpoint() && wristAtSetpoint());
+        return enableIntakeCommand() // intake until wrist is at setpoint
+                .andThen(Commands.waitUntil(this::wristAtSetpoint))
+                .andThen(enableEjectCommand()) // eject until limit switch is let go (or times out)
+                .until(() -> !_inputs.CoralLimitSwitchState).withTimeout(2)
+                .andThen(Commands.waitSeconds(0.5)); // slight delay to allow the coral to fully eject
     }
 
     public Command pickupCoral() {
-        return setIntakeSpeedCommand(EndEffectorMap.IntakeSpeed).until(() -> _inputs.CoralLimitSwitchState)
-                .andThen(stopIntakeMotorCommand());
+        return enableIntakeCommand()
+                .until(() -> _inputs.CoralLimitSwitchState);
     }
 
     // TODO: Add more named commands for running the intake and rotating the wrist to predefined setpoints (See above todo)
