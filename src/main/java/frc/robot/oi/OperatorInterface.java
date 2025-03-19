@@ -98,7 +98,7 @@ public class OperatorInterface {
                         EndEffectorSubsystem endEffectorSubsystem, VisionSubsystem visionSubsystem) {
 
                 elevatorSubsystem.setDefaultCommand(elevatorSubsystem
-                                .manageControlCommand(OperatorController.getTriggerSupplier(0.06, 0)));
+                                .elevatorDefaultCommand(OperatorController.getTriggerSupplier(0.06, 0)));
 
                 endEffectorSubsystem.setDefaultCommand(
                                 endEffectorSubsystem.defaultCommand(
