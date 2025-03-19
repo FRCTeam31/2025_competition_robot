@@ -91,7 +91,7 @@ public class Container {
 
   public static Command scoreAtHeight(ElevatorPosition position) {
     return setCombinedHeightAndAngle(position)
-        .alongWith(EndEffector.enableIntakeCommand())
+        // .alongWith(EndEffector.enableIntakeCommand().withTimeout(2))
         .alongWith(Commands.waitSeconds(0.25).andThen(EndEffector.scoreCoral()));
   }
 
@@ -111,8 +111,10 @@ public class Container {
   }
 
   public static Command scoreOnSideAndLower(ReefPegSide side, ElevatorPosition position) {
-    return Swerve.pathfindToReefPegSide(side)
-        .andThen(scoreAtHeightAndLower(position));
+    // return Swerve.pathfindToReefPegSide(side)
+    // .andThen(scoreAtHeightAndLower(position));
+
+    return scoreAtHeightAndLower(position);
   }
 
   public static Map<String, Command> getNamedCommands() {

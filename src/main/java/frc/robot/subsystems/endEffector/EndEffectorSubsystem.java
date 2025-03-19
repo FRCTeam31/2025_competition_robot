@@ -297,7 +297,8 @@ public class EndEffectorSubsystem extends SubsystemBase {
                 .andThen(Commands.waitUntil(this::wristAtSetpoint))
                 .andThen(enableEjectCommand()) // eject until limit switch is let go (or times out)
                 .until(() -> !_inputs.CoralLimitSwitchState).withTimeout(2)
-                .andThen(Commands.waitSeconds(0.5)); // slight delay to allow the coral to fully eject
+
+                .andThen(Commands.waitSeconds(0.5)).alongWith(setWristSetpointCommand(-30)); // slight delay to allow the coral to fully eject
     }
 
     public Command pickupCoral() {
