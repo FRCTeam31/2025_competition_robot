@@ -100,6 +100,10 @@ public class ElevatorSubsystem extends SubsystemBase {
         });
     }
 
+    public boolean atPositionSetpoint() {
+        return ElevatorController.getError() < 0.1;
+    }
+
     public double getElevatorPositionMeters() {
         return _inputs.ElevatorDistanceMeters;
     }
@@ -252,7 +256,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         return this.runOnce(_elevatorIO::stopMotors);
     }
 
-    public Map<String, Command> elevatorNamedCommands() {
+    public Map<String, Command> getNamedCommands() {
         return Map.of(
                 "Stop Elevator Motors Command", stopMotorsCommand(),
                 "Elevator High Position Command", setElevatorSetpointCommand(ElevatorPosition.kHigh),
