@@ -27,18 +27,18 @@ public class LimelightInputs implements LoggableInputs, Cloneable {
     /**
      * The pipeline's latency contribution (ms). Add to "cl" to get total latency.
      */
-    public int PipelineLatencyMs = 1;
+    public int PipelineLatencyMs = 0;
 
     /**
      * Time between the end of the exposure of the middle row of the sensor to 
      * the beginning of the tracking pipeline.
      */
-    public int CapturePipelineLatencyMs = 2;
+    public int CapturePipelineLatencyMs = 0;
 
     /**
      * The total latency of the capture and pipeline processing in milliseconds.
      */
-    public int TotalLatencyMs = 3;
+    public int TotalLatencyMs = 0;
 
     /**
      * ID of the primary in-view AprilTag
@@ -48,7 +48,7 @@ public class LimelightInputs implements LoggableInputs, Cloneable {
     /**
      * Returns the number of AprilTags in the image.
      */
-    public double TagCount = 1.1;
+    public double TagCount = 0;
 
     /**
      * Robot transform in field-space.

@@ -1,25 +1,15 @@
 package frc.robot.oi;
 
-import java.time.LocalTime;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import org.prime.control.Controls;
 import org.prime.control.HolonomicControlStyle;
 import org.prime.control.SupplierXboxController;
-import org.prime.control.SwerveControlSuppliers;
-
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Container;
 import frc.robot.subsystems.climbing.ClimberSubsystem;
-import frc.robot.subsystems.climbing.ClimberInputs.HooksPosition;
 import frc.robot.subsystems.drivetrain.SwerveMap;
 import frc.robot.subsystems.drivetrain.SwerveSubsystem;
+import frc.robot.subsystems.elevator.ElevatorPosition;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
-import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorMap;
-import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorPosition;
 import frc.robot.subsystems.endEffector.EndEffectorSubsystem;
 import frc.robot.subsystems.endEffector.EndEffectorSubsystem.EndEffectorMap;
 import frc.robot.subsystems.vision.VisionSubsystem;
@@ -32,13 +22,9 @@ public class OperatorInterface {
         public SupplierXboxController DriverController;
         public SupplierXboxController OperatorController;
 
-        private Map<String, Command> _containerNamedCommands;
-
         public OperatorInterface() {
                 DriverController = new SupplierXboxController(Controls.DRIVER_PORT);
                 OperatorController = new SupplierXboxController(Controls.OPERATOR_PORT);
-
-                _containerNamedCommands = Container.getNamedCommands();
         }
 
         public void bindDriverControls(SwerveSubsystem swerveSubsystem, ClimberSubsystem climber,

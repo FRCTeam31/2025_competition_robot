@@ -11,33 +11,37 @@ import org.prime.control.ElevatorController;
 import org.prime.control.MRSGConstants;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.DistanceUnit;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.event.BooleanEvent;
-import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
 
 public class ElevatorSubsystem extends SubsystemBase {
 
     public static class ElevatorMap {
+        // CAN ids
         public static final int LeftElevatorMotorCANID = 15;
         public static final int RightElevatorMotorCANID = 16;
+        public static final int ElevatorEncoderCANID = 22;
+
+        // Limit switch constants
         public static final int TopLimitSwitchChannel = 0;
         public static final int BottomLimitSwitchChannel = 1;
+        public static final double BottomLimitResetDebounceSeconds = 0.25;
+
+        // Physical constraints
         public static final double MaxElevatorHeight = 0.63;
         public static final double MaxSpeedCoefficient = 0.5;
         public static final double OutputSprocketDiameterMeters = Units.Millimeters.of(32.2).in(Meters);
         public static final double GearRatio = 16;
-        public static final double BottomLimitResetDebounceSeconds = 0.25;
-        public static final int ElevatorEncoderCANID = 22;
+
+        // MRSG constants
         // public static final MRSGConstants ElevatorControllerConstants = new MRSGConstants(
         //         8, 4.5, 0, 1.4);
 
@@ -70,60 +74,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         //         0.355);
     }
 
-    public enum ElevatorPosition {
-        /** The lowest the elevator can physically go */
-        kAbsoluteMinimum,
-        /** The position to intake from source */
-        kSource,
-        /** The position to score in the trough, L1 */
-        kTrough,
-        /** The position to score on the level just above the trough, L2 */
-        kLow,
-        /** The position to score on the level two above the trought, L3 */
-        kMid,
-        /** The position to score on the highest level of the reef, L4 */
-        kHigh;
-
-        /**
-         * Returns a string corresponding to the value of the enum. Used for filtering named
-         * commands used in autonmous.
-         * @return
-         */
-        public String getAsRawName() {
-            switch (this) {
-                default:
-                    return "L2";
-                case kSource:
-                    return "Source";
-                case kTrough:
-                    return "Trough";
-                case kLow:
-                    return "L2";
-                case kMid:
-                    return "L3";
-                case kHigh:
-                    return "L4";
-            }
-        }
-
-        public static ElevatorPosition getFromRawName(String name) {
-            switch (name) {
-                case "Source":
-                    return kSource;
-                case "Trough":
-                    return kTrough;
-                case "L2":
-                    return kLow;
-                case "L3":
-                    return kMid;
-                case "L4":
-                    return kHigh;
-            }
-
-            return null;
-        }
-    }
-
     private Map<ElevatorPosition, Double> _positionMap = Map.of(
             ElevatorPosition.kAbsoluteMinimum, 0.0,
             ElevatorPosition.kSource, 0.229,
@@ -139,7 +89,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     private boolean _elevatorManaullyControlled = false;
 
     private BooleanEvent _positionResetEvent;
-    private static EventLoop _eventLoop = new EventLoop();
 
     public ElevatorSubsystem(boolean isReal) {
         setName("Elevator");
@@ -148,14 +97,11 @@ public class ElevatorSubsystem extends SubsystemBase {
                 ? new ElevatorReal()
                 : new ElevatorSim();
 
-        _positionResetEvent = new BooleanEvent(_eventLoop, () -> _inputs.BottomLimitSwitch)
+        _positionResetEvent = new BooleanEvent(Robot.EventLoop, () -> _inputs.BottomLimitSwitch)
                 .debounce(ElevatorMap.BottomLimitResetDebounceSeconds)
                 .rising();
 
-        _positionResetEvent.ifHigh(() -> {
-            _elevatorIO.resetEncoderPos();
-
-        });
+        _positionResetEvent.ifHigh(_elevatorIO::resetEncoderPos);
     }
 
     public boolean positionIsNear(ElevatorPosition pos) {
@@ -194,7 +140,10 @@ public class ElevatorSubsystem extends SubsystemBase {
         if (tryingToUseManualControl) {
             setMotorVoltageWithLimitSwitches(manualControlSpeed * 12);
         } else {
-            updateMotorVoltageWithEC();
+            var ec = ElevatorController.calculate(_inputs.ElevatorDistanceMeters, _inputs.ElevatorSpeedMetersPerSecond);
+
+            SmartDashboard.putNumber(getName() + "/Raw-EC", ec);
+            setMotorVoltageWithLimitSwitches(ec);
         }
     }
 
@@ -206,40 +155,31 @@ public class ElevatorSubsystem extends SubsystemBase {
         }
 
         finalOutput = MathUtil.clamp(finalOutput, -12, 12);
-        finalOutput = Math.abs(finalOutput) > 0.1 ? finalOutput : 0; // Deadband
-        finalOutput = getScaledVoltage(finalOutput, _inputs.ElevatorDistanceMeters);
+        // Within 5% of max height, reduce speed
+        finalOutput = getScaledoutput(finalOutput, _inputs.ElevatorDistanceMeters);
+        finalOutput = MathUtil.applyDeadband(finalOutput, 0.1); // Deadband
 
-        SmartDashboard.putNumber(getName() + "/Output-EC", finalOutput);
+        SmartDashboard.putNumber(getName() + "/Filtered-EC", finalOutput);
         _elevatorIO.setMotorVoltages(finalOutput);
     }
 
-    private void updateMotorVoltageWithEC() {
-        var ec = ElevatorController.calculate(_inputs.ElevatorDistanceMeters, _inputs.ElevatorSpeedMetersPerSecond);
-
-        // Within 5% of max height, reduce speed
-
-        SmartDashboard.putNumber(getName() + "/finalOutput", ec);
-        SmartDashboard.putNumber(getName() + "/ec", ec);
-        setMotorVoltageWithLimitSwitches(ec);
-    }
-
-    private double getScaledVoltage(double outputVoltage, double currentPosition) {
+    private double getScaledoutput(double output, double currentPosition) {
         var lowPositionScaleDownThreshold = ElevatorMap.MaxElevatorHeight * 0.2;
         var highPositionScaleDownThreshold = ElevatorMap.MaxElevatorHeight - lowPositionScaleDownThreshold - 0.1;
 
         var speedScalingFactor = 1.0;
-        if (currentPosition <= lowPositionScaleDownThreshold && outputVoltage < 0) {
+        if (currentPosition <= lowPositionScaleDownThreshold && output < 0) {
             var scale = currentPosition / lowPositionScaleDownThreshold;
             speedScalingFactor = Math.max(0.4, scale);
-        } else if (currentPosition >= highPositionScaleDownThreshold && outputVoltage > 0) {
+        } else if (currentPosition >= highPositionScaleDownThreshold && output > 0) {
             var scale = (ElevatorMap.MaxElevatorHeight - currentPosition) / lowPositionScaleDownThreshold;
             speedScalingFactor = Math.max(0.4, scale);
         }
 
-        Logger.recordOutput(getName() + "/ scalingFactor", speedScalingFactor);
-        Logger.recordOutput(getName() + "/ outputVoltage", speedScalingFactor * outputVoltage);
+        Logger.recordOutput(getName() + "/output-scalingFactor", speedScalingFactor);
+        Logger.recordOutput(getName() + "/output-scaled", speedScalingFactor * output);
 
-        return outputVoltage * speedScalingFactor;
+        return output * speedScalingFactor;
     }
 
     public void setMotorVoltages(double newVolatage) {
@@ -255,11 +195,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         _elevatorIO.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
 
-        // if (_inputs.BottomLimitSwitch) {
-        //     _elevatorIO.resetEncoderPos();
-        // }
-
-        _eventLoop.poll();
         Logger.recordOutput(getName() + "/elevator error", ElevatorController.getError());
         SmartDashboard.putBoolean(getName() + " is elevator manaully controlled", _elevatorManaullyControlled);
         SmartDashboard.putNumber(getName() + "EC Setpoint", ElevatorController.getSetpoint());
@@ -269,29 +204,29 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     //#region Commands
 
-    public Command elevatorDefaultCommand(DoubleSupplier elevatorManaulControl) {
-        return this.run(() -> manageElevatorControl(elevatorManaulControl.getAsDouble()));
+    public Command elevatorDefaultCommand(DoubleSupplier elevatorManualControl) {
+        return this.run(() -> manageElevatorControl(elevatorManualControl.getAsDouble()));
     }
 
     public Command setElevatorSetpointCommand(ElevatorPosition pos) {
-        return Commands.runOnce(() -> {
-            System.out.println("Setting elevator position to: " + _positionMap.get(pos));
-            ElevatorController.setSetpoint(_positionMap.get(pos));
-        }).andThen(disableElevatorManualControlCommand()).andThen(() -> {
-            if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.5) {
-                ElevatorController.setM(ElevatorMap.ElevatorControllerConstantsAbsoultelyMassive.M);
-                ElevatorController.setR(ElevatorMap.ElevatorControllerConstantsAbsoultelyMassive.R);
-            } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.4) {
-                ElevatorController.setM(ElevatorMap.ElevatorControllerConstantsBig.M);
-                ElevatorController.setR(ElevatorMap.ElevatorControllerConstantsBig.R);
-            } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.2) {
-                ElevatorController.setM(ElevatorMap.ElevatorControllerConstantsMedium.M);
-                ElevatorController.setR(ElevatorMap.ElevatorControllerConstantsMedium.R);
-            } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) < 0.2) {
-                ElevatorController.setM(ElevatorMap.ElevatorControllerConstantsSmall.M);
-                ElevatorController.setR(ElevatorMap.ElevatorControllerConstantsSmall.R);
-            }
-        });
+        return Commands.print("Setting elevator position to: " + _positionMap.get(pos))
+                .andThen(() -> ElevatorController.setSetpoint(_positionMap.get(pos)))
+                .andThen(disableElevatorManualControlCommand())
+                .andThen(() -> {
+                    if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.5) {
+                        ElevatorController.setM(ElevatorMap.ElevatorControllerConstantsAbsoultelyMassive.M);
+                        ElevatorController.setR(ElevatorMap.ElevatorControllerConstantsAbsoultelyMassive.R);
+                    } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.4) {
+                        ElevatorController.setM(ElevatorMap.ElevatorControllerConstantsBig.M);
+                        ElevatorController.setR(ElevatorMap.ElevatorControllerConstantsBig.R);
+                    } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.2) {
+                        ElevatorController.setM(ElevatorMap.ElevatorControllerConstantsMedium.M);
+                        ElevatorController.setR(ElevatorMap.ElevatorControllerConstantsMedium.R);
+                    } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) < 0.2) {
+                        ElevatorController.setM(ElevatorMap.ElevatorControllerConstantsSmall.M);
+                        ElevatorController.setR(ElevatorMap.ElevatorControllerConstantsSmall.R);
+                    }
+                });
     }
 
     public Command goToElevatorBottomCommand() {
@@ -315,7 +250,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public Map<String, Command> getNamedCommands() {
         return Map.of(
-                "Elevator/Stop Motors", stopMotorsCommand(),
+                "Elevator/Stop", stopMotorsCommand(),
                 "Elevator/Goto High", setElevatorSetpointCommand(ElevatorPosition.kHigh),
                 "Elevator/Goto Middle", setElevatorSetpointCommand(ElevatorPosition.kMid),
                 "Elevator/Goto Low", setElevatorSetpointCommand(ElevatorPosition.kLow),

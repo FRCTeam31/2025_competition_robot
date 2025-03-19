@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Container;
-import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorPosition;
+import frc.robot.subsystems.elevator.ElevatorPosition;
 
 public class AutoRoutineAutoRaiseElevator {
     private Pattern _filterPattern = Pattern.compile("^Score|^Pickup");

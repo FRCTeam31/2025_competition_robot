@@ -1,7 +1,5 @@
 package frc.robot.subsystems.endEffector;
 
-import static edu.wpi.first.units.Units.Centimeters;
-
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -19,8 +17,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Container;
 import frc.robot.Robot;
-import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorMap;
-import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorPosition;
+import frc.robot.subsystems.elevator.ElevatorPosition;
 
 public class EndEffectorSubsystem extends SubsystemBase {
 
