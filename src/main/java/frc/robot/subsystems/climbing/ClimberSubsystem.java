@@ -87,7 +87,7 @@ public class ClimberSubsystem extends SubsystemBase {
         boolean currentlyClimbing = _robotPitch >= ClimberMap.ClimbingPitchThresholdDegrees;
         if (!currentlyClimbing) {
             if (speed > 0 && !_inputs.HooksClosedLimitSwitch) {
-                _climber.stopWenchMotors();
+                _climber.setHookMotorSpeed(speed);
             } else if (speed < 0 && !_inputs.HooksOpenLimitSwitch) {
                 _climber.setHookMotorSpeed(speed);
             } else {

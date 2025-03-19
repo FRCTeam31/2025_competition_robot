@@ -11,10 +11,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.LEDPattern;
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -28,6 +25,7 @@ import frc.robot.subsystems.vision.VisionSubsystem;
 
 import static edu.wpi.first.units.Units.Centimeters;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
@@ -52,19 +50,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
   // Vision, Kinematics, odometry
   public boolean WithinPoseEstimationVelocity = true;
-
-  private LEDPattern _alignOnTargetPattern = LEDPattern
-      .solid(Color.kGreen)
-      .blink(Units.Seconds.of(0.1));
-  private LEDPattern _alignOffTargetPattern = LEDPattern
-      .steps(Map.of(0.0, Color.kRed, 0.25, Color.kBlack))
-      .scrollAtRelativeSpeed(Units.Hertz.of(2));
-
-  // Reef Positioning
-  public enum ReefSide {
-    kLeft,
-    kRight
-  }
 
   /**
    * Creates a new Drivetrain.
@@ -140,8 +125,6 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   private void setAutoAlignEnabled(boolean enabled) {
     _useAutoAlign = enabled;
-    if (!enabled)
-      Container.LEDs.clearForegroundPattern();
   }
 
   /**
@@ -245,11 +228,6 @@ public class SwerveSubsystem extends SubsystemBase {
     Logger.recordOutput("Drive/autoAlignEnabled", _useAutoAlign);
     Logger.recordOutput("Drive/autoAlignSetpoint", _autoAlign.getSetpoint());
     Logger.recordOutput("Drive/autoAlignAtSetpoint", _autoAlign.atSetpoint());
-    if (_useAutoAlign) {
-      Container.LEDs.setForegroundPattern(_autoAlign.atSetpoint()
-          ? _alignOnTargetPattern
-          : _alignOffTargetPattern);
-    }
 
     // Update shuffleboard
     if (DriverStation.isEnabled()) {
@@ -280,11 +258,13 @@ public class SwerveSubsystem extends SubsystemBase {
         ? currentHeadingRadians + (Math.PI / 2)
         : currentHeadingRadians - (Math.PI / 2);
 
-    // Zachary couldn't figure out how do the fancy unit conversions
-    var newX = currentPose.getX() + (16.5 / 100) * Math.cos(a);
-    var newY = currentPose.getY() + (16.5 / 100) * Math.sin(a);
+    var newX = currentPose.getX() + Centimeters.mutable(16.5).in(Meters) * Math.cos(a);
+    var newY = currentPose.getY() + Centimeters.mutable(16.5).in(Meters) * Math.sin(a);
+    var desiredPose = new Pose2d(newX, newY, _inputs.GyroAngle);
 
-    return new Pose2d(newX, newY, _inputs.GyroAngle);
+    System.out.println("PATHFINDING: " + currentPose + " -> " + desiredPose);
+
+    return desiredPose;
   }
 
   // #region Commands
@@ -301,7 +281,7 @@ public class SwerveSubsystem extends SubsystemBase {
   /**
    * Command for stopping all motors
    */
-  public Command stopAllMotors() {
+  public Command stopAllMotorsCommand() {
     return this.runOnce(_swervePackager::stopAllMotors);
   }
 
@@ -389,26 +369,40 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   /**
-   * Will move to a side of the reef, not implemented yet.
-   * @deprecated Not implemented
+   * Will move to a side of the reef
    * @param side
-   * @return
    */
-  public Command pathfindToReefSide(ReefSide side) {
-    return Commands.runOnce(() -> System.out.println("[NOT IMPLEMENTED] Pathfinding to reef side: " + side.toString()));
+  public Command pathfindToReefPegSide(ReefPegSide side) {
+    return this.defer(() -> {
+      var pathConstraints = new PathConstraints(
+          SwerveMap.Chassis.MaxSpeedMetersPerSecond,
+          SwerveMap.Chassis.MaxSpeedMetersPerSecond,
+          SwerveMap.Chassis.MaxAngularSpeedRadians,
+          SwerveMap.Chassis.MaxAngularSpeedRadians);
+
+      var desiredPose = getReefPegsPoseFromCurrent(side);
+
+      return AutoBuilder.pathfindToPose(desiredPose, pathConstraints);
+    });
   }
 
   /**
-   * Creates a command which pathfinds to a given pose, flipping the path across the field center if necessary
+   * Creates a command which pathfinds to a given pose, flipping the path across the field center if desired
    * @param poseSupplier A supplier for the target pose
    */
   public Command pathfindToPoseCommand(Supplier<Pose2d> poseSupplier, boolean flipped) {
-    var pathConstraints = new PathConstraints(SwerveMap.Chassis.MaxSpeedMetersPerSecond,
-        SwerveMap.Chassis.MaxSpeedMetersPerSecond,
-        SwerveMap.Chassis.MaxAngularSpeedRadians,
-        SwerveMap.Chassis.MaxAngularSpeedRadians);
+    return this.defer(() -> {
+      var pathConstraints = new PathConstraints(SwerveMap.Chassis.MaxSpeedMetersPerSecond,
+          SwerveMap.Chassis.MaxSpeedMetersPerSecond,
+          SwerveMap.Chassis.MaxAngularSpeedRadians,
+          SwerveMap.Chassis.MaxAngularSpeedRadians);
 
-    return AutoBuilder.pathfindToPoseFlipped(poseSupplier.get(), pathConstraints);
+      var desiredPose = poseSupplier.get();
+
+      return flipped
+          ? AutoBuilder.pathfindToPoseFlipped(desiredPose, pathConstraints)
+          : AutoBuilder.pathfindToPose(desiredPose, pathConstraints);
+    });
   }
 
   /*
@@ -425,9 +419,9 @@ public class SwerveSubsystem extends SubsystemBase {
         getName() + "-DisableAutoAlignRotationFeedback",
         disablePathPlannerAutoAlignRotationFeedbackCommand(),
         getName() + "-MoveToLeftPegs",
-        pathfindToPoseCommand(() -> getReefPegsPoseFromCurrent(ReefPegSide.kLeft), false),
+        pathfindToReefPegSide(ReefPegSide.kLeft),
         getName() + "-MoveToRightPegs",
-        pathfindToPoseCommand(() -> getReefPegsPoseFromCurrent(ReefPegSide.kRight), false));
+        pathfindToReefPegSide(ReefPegSide.kRight));
   }
   // #endregion
 }

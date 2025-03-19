@@ -5,9 +5,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.Logger;
-import org.prime.control.ElevatorController;
 import org.prime.control.ExtendedPIDConstants;
-import org.prime.control.MRSGController;
 import org.prime.util.LockableEvent;
 
 import edu.wpi.first.math.MathUtil;
@@ -168,13 +166,8 @@ public class EndEffectorSubsystem extends SubsystemBase {
             } else if (runIntakeOut.getAsBoolean()) {
                 _endEffector.setIntakeSpeed(EndEffectorMap.EjectSpeed);
 
-            } else if (_inputs.EndEffectorAngleDegrees < EndEffectorMap.WristNonVerticalAngleThreshold
-                    && !_inputs.CoralLimitSwitchState) {
-                _endEffector.setIntakeSpeed(EndEffectorMap.IntakeSpeed);
-
             } else {
-                _endEffector.stopIntakeMotor();
-
+                _endEffector.setIntakeSpeed(EndEffectorMap.IntakeSpeed);
             }
 
             manageWristControl(wristManualControl.getAsDouble());
@@ -263,9 +256,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
 
     public Command scoreCoral() {
         return Commands.run(() -> enableIntakeCommand())
-                .until(() -> Container.Elevator.ElevatorController.atSetpoint() && wristAtSetpoint());
-        // enableEjectCommand().withTimeout(3)
-        //         .andThen(stopIntakeMotorCommand()));
+                .until(() -> Container.Elevator.atPositionSetpoint() && wristAtSetpoint());
     }
 
     public Command pickupCoral() {
