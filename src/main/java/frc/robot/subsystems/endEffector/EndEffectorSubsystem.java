@@ -60,7 +60,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
             ElevatorPosition.kTrough, -92.0,
             ElevatorPosition.kLow, -126.0,
             ElevatorPosition.kMid, -126.0,
-            ElevatorPosition.kHigh, -130.0);
+            ElevatorPosition.kHigh, -121.0);
 
     private EndEffectorInputsAutoLogged _inputs = new EndEffectorInputsAutoLogged();
 
