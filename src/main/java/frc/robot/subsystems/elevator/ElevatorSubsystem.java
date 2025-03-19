@@ -37,17 +37,23 @@ public class ElevatorSubsystem extends SubsystemBase {
         public static final double MaxElevatorHeight = 0.63;
         public static final double OutputSprocketDiameterMeters = Units.Millimeters.of(32.2).in(Meters);
         public static final double GearRatio = 16;
+        public static final double BottomLimitResetDebounceSeconds = 0.25;
+        public static final int ElevatorEncoderCANID = 22;
+        // public static final MRSGConstants ElevatorControllerConstants = new MRSGConstants(
+        //         8, 4.5, 0, 1.4);
 
-        // Manual control 
-        public static final int MaxPercentOutput = 1;
-        public static final double ManualSpeedLimitAbsolute = 0.5;
+        public static final MRSGConstants ElevatorControllerConstantsSmall = new MRSGConstants(
+                10.5, 4.5, 0, 1.05);
 
-        // PIDF constants
-        public static final double FeedForwardKg = 0.16733 / 2;
-        public static final ExtendedPIDConstants PositionPID = new ExtendedPIDConstants(35, 0, 0, 0,
-                2.5,
-                0.3,
-                0.355);
+        public static final MRSGConstants ElevatorControllerConstantsMedium = new MRSGConstants(
+                8, 4, 0, 0);
+
+        // Only M and R are used.
+        public static final MRSGConstants ElevatorControllerConstantsBig = new MRSGConstants(
+                8.5, 3, 0, 0);
+
+        public static final MRSGConstants ElevatorControllerConstantsAbsoultelyMassive = new MRSGConstants(7, 3, 0,
+                0);
     }
 
     public enum ElevatorPosition {
@@ -109,14 +115,13 @@ public class ElevatorSubsystem extends SubsystemBase {
             ElevatorPosition.kSource, 0.229,
             ElevatorPosition.kTrough, 0.172,
             ElevatorPosition.kLow, 0.311,
-            ElevatorPosition.kMid, 0.432,
+            ElevatorPosition.kMid, 0.45,
             ElevatorPosition.kHigh, 0.627);
 
     private ElevatorInputsAutoLogged _inputs = new ElevatorInputsAutoLogged();
     private IElevator _elevatorIO;
-    private TrapezoidProfile.Constraints _trapezoidConstraints;
-    private ProfiledPIDController _pidController;
-    private ElevatorFeedforward _feedforward;
+    public ElevatorController ElevatorController = new ElevatorController(ElevatorMap.ElevatorControllerConstantsSmall,
+            ElevatorMap.MaxElevatorHeight);
     private boolean _elevatorManaullyControlled = false;
     private BooleanEvent _positionResetEvent;
 
@@ -224,7 +229,30 @@ public class ElevatorSubsystem extends SubsystemBase {
             speedScalingFactor = Math.max(0.1, scale);
         }
 
-        return output * speedScalingFactor;
+        if (speedScalingFactor < 0.1) {
+            speedScalingFactor = 0.1;
+        }
+
+        return outputSpeed * speedScalingFactor;
+    }
+
+    private double getScaledVoltage(double outputVoltage, double currentPosition) {
+        var lowPositionScaleDownThreshold = ElevatorMap.MaxElevatorHeight * 0.2;
+        var highPositionScaleDownThreshold = ElevatorMap.MaxElevatorHeight - lowPositionScaleDownThreshold - 0.1;
+
+        var speedScalingFactor = 1.0;
+        if (currentPosition <= lowPositionScaleDownThreshold && outputVoltage < 0) {
+            var scale = currentPosition / lowPositionScaleDownThreshold;
+            speedScalingFactor = Math.max(0.4, scale);
+        } else if (currentPosition >= highPositionScaleDownThreshold && outputVoltage > 0) {
+            var scale = (ElevatorMap.MaxElevatorHeight - currentPosition) / lowPositionScaleDownThreshold;
+            speedScalingFactor = Math.max(0.4, scale);
+        }
+
+        Logger.recordOutput(getName() + "/ scalingFactor", speedScalingFactor);
+        Logger.recordOutput(getName() + "/ outputVoltage", speedScalingFactor * outputVoltage);
+
+        return outputVoltage * speedScalingFactor;
     }
 
     public void setMotorVoltages(double newVolatage) {
@@ -262,8 +290,22 @@ public class ElevatorSubsystem extends SubsystemBase {
     public Command setElevatorSetpointCommand(ElevatorPosition pos) {
         return Commands.runOnce(() -> {
             System.out.println("Setting elevator position to: " + _positionMap.get(pos));
-            _pidController.setGoal(_positionMap.get(pos));
-        }).andThen(disableElevatorManualControlCommand());
+            ElevatorController.setSetpoint(_positionMap.get(pos));
+        }).andThen(disableElevatorManualControlCommand()).andThen(() -> {
+            if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.5) {
+                ElevatorController.setM(ElevatorMap.ElevatorControllerConstantsAbsoultelyMassive.M);
+                ElevatorController.setR(ElevatorMap.ElevatorControllerConstantsAbsoultelyMassive.R);
+            } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.4) {
+                ElevatorController.setM(ElevatorMap.ElevatorControllerConstantsBig.M);
+                ElevatorController.setR(ElevatorMap.ElevatorControllerConstantsBig.R);
+            } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.2) {
+                ElevatorController.setM(ElevatorMap.ElevatorControllerConstantsMedium.M);
+                ElevatorController.setR(ElevatorMap.ElevatorControllerConstantsMedium.R);
+            } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) < 0.2) {
+                ElevatorController.setM(ElevatorMap.ElevatorControllerConstantsSmall.M);
+                ElevatorController.setR(ElevatorMap.ElevatorControllerConstantsSmall.R);
+            }
+        });
     }
 
     public Command goToElevatorBottomCommand() {
