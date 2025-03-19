@@ -44,10 +44,10 @@ public class ElevatorSubsystem extends SubsystemBase {
 
         // PIDF constants
         public static final double FeedForwardKg = 0.16733 / 2;
-        public static final ExtendedPIDConstants PositionPID = new ExtendedPIDConstants(4, 0, 0.04, 0,
-                0.028922,
-                0.024268,
-                0.029376);
+        public static final ExtendedPIDConstants PositionPID = new ExtendedPIDConstants(35, 0, 0, 0,
+                2.5,
+                0.3,
+                0.355);
     }
 
     public enum ElevatorPosition {
@@ -88,10 +88,10 @@ public class ElevatorSubsystem extends SubsystemBase {
                 ? new ElevatorReal()
                 : new ElevatorSim();
 
-        _trapezoidConstraints = new TrapezoidProfile.Constraints(ElevatorMap.MaxElevatorHeight / 2,
-                ElevatorMap.MaxElevatorHeight);
+        _trapezoidConstraints = new TrapezoidProfile.Constraints(ElevatorMap.MaxElevatorHeight,
+                ElevatorMap.MaxElevatorHeight * 4);
         _pidController = new ProfiledPIDController(
-                ElevatorMap.PositionPID.kA,
+                ElevatorMap.PositionPID.kP,
                 ElevatorMap.PositionPID.kI,
                 ElevatorMap.PositionPID.kD,
                 _trapezoidConstraints,
@@ -99,7 +99,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         _feedforward = new ElevatorFeedforward(
                 ElevatorMap.PositionPID.kS,
                 ElevatorMap.FeedForwardKg,
-                ElevatorMap.PositionPID.kV);
+                ElevatorMap.PositionPID.kV,
+                ElevatorMap.PositionPID.kA);
 
         _positionResetEvent = new BooleanEvent(Robot.EventLoop, () -> _inputs.BottomLimitSwitch)
                 .debounce(ElevatorMap.BottomLimitResetDebounceSeconds)
@@ -187,25 +188,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         return output * speedScalingFactor;
     }
 
-    private double getScaledVoltage(double outputVoltage, double currentPosition) {
-        var lowPositionScaleDownThreshold = ElevatorMap.MaxElevatorHeight * 0.3;
-        var highPositionScaleDownThreshold = ElevatorMap.MaxElevatorHeight - lowPositionScaleDownThreshold;
-
-        var speedScalingFactor = 1.0;
-        if (currentPosition <= lowPositionScaleDownThreshold && outputVoltage < 0) {
-            var scale = currentPosition / lowPositionScaleDownThreshold;
-            speedScalingFactor = Math.max(0.1, scale);
-        } else if (currentPosition >= highPositionScaleDownThreshold && outputVoltage > 0) {
-            var scale = (ElevatorMap.MaxElevatorHeight - currentPosition) / lowPositionScaleDownThreshold;
-            speedScalingFactor = Math.max(0.1, scale);
-        }
-
-        Logger.recordOutput(getName() + "/ scalingFactor", speedScalingFactor);
-        Logger.recordOutput(getName() + "/ outputVoltage", speedScalingFactor * outputVoltage);
-
-        return outputVoltage * speedScalingFactor;
-    }
-
     public void setMotorVoltages(double newVolatage) {
         _elevatorIO.setMotorVoltages(newVolatage);
     }
@@ -223,6 +205,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         _elevatorIO.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
 
+        SmartDashboard.putData(getName() + "/elevator_pid_controller", _pidController);
         Logger.recordOutput(getName() + "/elevator-pid-pos-error", _pidController.getPositionError());
         Logger.recordOutput(getName() + "/elevator-pid-vel-error", _pidController.getVelocityError());
         Logger.recordOutput(getName() + "/elevator-pid-setpoint", _pidController.getSetpoint().position);
