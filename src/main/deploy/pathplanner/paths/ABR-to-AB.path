@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.575,
-        "y": 6.15
+        "x": 3.04,
+        "y": 3.88
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.690456506180567,
-        "y": 5.121186923924789
+        "x": 2.8264383561643838,
+        "y": 4.022482876712329
       },
       "isLocked": false,
-      "linkedName": "S2"
+      "linkedName": "ABR"
     },
     {
       "anchor": {
-        "x": 5.95,
+        "x": 3.04,
         "y": 4.05
       },
       "prevControl": {
-        "x": 6.644684577150349,
-        "y": 5.013688529589024
+        "x": 2.845658022808174,
+        "y": 3.892738447479456
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "GH"
+      "linkedName": "AB"
     }
   ],
   "rotationTargets": [],
@@ -42,10 +42,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 0.0
   },
   "reversed": false,
-  "folder": "Start 2 Paths",
+  "folder": "AB Coral Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0
