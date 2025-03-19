@@ -19,6 +19,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import org.prime.control.MRSGController;
+import org.prime.control.MRSGConstants;
+import org.prime.control.ElevatorController;
 
 public class ElevatorSubsystem extends SubsystemBase {
 
@@ -129,20 +132,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         _elevatorIO = isReal
                 ? new ElevatorReal()
                 : new ElevatorSim();
-
-        _trapezoidConstraints = new TrapezoidProfile.Constraints(ElevatorMap.MaxElevatorHeight,
-                ElevatorMap.MaxElevatorHeight * 4);
-        _pidController = new ProfiledPIDController(
-                ElevatorMap.PositionPID.kP,
-                ElevatorMap.PositionPID.kI,
-                ElevatorMap.PositionPID.kD,
-                _trapezoidConstraints,
-                0.02);
-        _feedforward = new ElevatorFeedforward(
-                ElevatorMap.PositionPID.kS,
-                ElevatorMap.FeedForwardKg,
-                ElevatorMap.PositionPID.kV,
-                ElevatorMap.PositionPID.kA);
 
         _positionResetEvent = new BooleanEvent(Robot.EventLoop, () -> _inputs.BottomLimitSwitch)
                 .debounce(ElevatorMap.BottomLimitResetDebounceSeconds)
