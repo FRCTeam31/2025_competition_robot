@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.95,
+        "y": 4.21
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.184807017102432,
+        "y": 4.1241765491287
+      },
+      "isLocked": false,
+      "linkedName": "GHL"
+    },
+    {
+      "anchor": {
+        "x": 5.95,
+        "y": 4.05
+      },
+      "prevControl": {
+        "x": 6.197146392789808,
+        "y": 4.087665110261167
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "GH"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0.2,
+    "rotation": 180.0
+  },
+  "reversed": false,
+  "folder": "GH Coral Paths",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "useDefaultConstraints": true
+}
