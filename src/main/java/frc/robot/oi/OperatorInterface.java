@@ -8,6 +8,7 @@ import org.prime.control.SupplierXboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Container;
+import frc.robot.game.ReefPegSide;
 import frc.robot.subsystems.climbing.ClimberSubsystem;
 import frc.robot.subsystems.drivetrain.SwerveMap;
 import frc.robot.subsystems.drivetrain.SwerveSubsystem;
@@ -85,14 +86,14 @@ public class OperatorInterface {
         }
 
         public void bindOperatorControls(ElevatorSubsystem elevatorSubsystem,
-                        EndEffectorSubsystem endEffectorSubsystem, VisionSubsystem visionSubsystem) {
+                        EndEffectorSubsystem endEffectorSubsystem, VisionSubsystem visionSubsystem,
+                        SwerveSubsystem swerveSubsystem) {
 
                 elevatorSubsystem.setDefaultCommand(elevatorSubsystem
                                 .elevatorDefaultCommand(OperatorController.getTriggerSupplier(0.06, 0)));
 
                 endEffectorSubsystem.setDefaultCommand(
                                 endEffectorSubsystem.defaultCommand(
-                                                OperatorController.rightBumper(),
                                                 OperatorController.leftBumper(),
                                                 OperatorController.getLeftStickYSupplier(0.3, 0)));
 
@@ -110,13 +111,6 @@ public class OperatorInterface {
                 OperatorController.povUp().onTrue(_containerNamedCommands.get("Score-L4-L"));
                 OperatorController.start().onTrue(_containerNamedCommands.get("Pickup-Source"));
 
-                OperatorController.rightBumper()
-                                .whileTrue(endEffectorSubsystem.setIntakeSpeedCommand(EndEffectorMap.EjectSpeed))
-                                .onFalse(endEffectorSubsystem.stopIntakeMotorCommand());
-                OperatorController.leftBumper()
-                                .whileTrue(endEffectorSubsystem.setIntakeSpeedCommand(EndEffectorMap.IntakeSpeed))
-                                .onFalse(endEffectorSubsystem.stopIntakeMotorCommand());
-
                 OperatorController.leftStick().onTrue(endEffectorSubsystem.disableWristManualControlCommand());
                 OperatorController.rightStick().onTrue(elevatorSubsystem.disableElevatorManualControlCommand());
 
@@ -128,9 +122,10 @@ public class OperatorInterface {
                 //         Container.Vision.setLedMode(1, 0);
                 // }));
 
-                OperatorController.back().onTrue(visionSubsystem.setRearCameraMode(true))
-                                .onFalse(visionSubsystem.setRearCameraMode(false));
-
+                OperatorController.back().onTrue(visionSubsystem.setRearCameraPipeline(1).ignoringDisable(true))
+                                .onFalse(visionSubsystem.setRearCameraPipeline(0).ignoringDisable(true));
+                OperatorController.povLeft().onTrue(swerveSubsystem.pathfindToReefPegSide(ReefPegSide.kLeft));
+                OperatorController.povRight().onTrue(swerveSubsystem.pathfindToReefPegSide(ReefPegSide.kRight));
         }
 
         public void setDriverRumbleIntensity(double intensity) {

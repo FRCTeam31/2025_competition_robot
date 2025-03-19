@@ -84,7 +84,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private ElevatorInputsAutoLogged _inputs = new ElevatorInputsAutoLogged();
     private IElevator _elevatorIO;
-    public ElevatorController ElevatorController = new ElevatorController(ElevatorMap.ElevatorControllerConstantsSmall,
+    public ElevatorController _elevatorController = new ElevatorController(ElevatorMap.ElevatorControllerConstantsSmall,
             ElevatorMap.MaxElevatorHeight);
     private boolean _elevatorManaullyControlled = false;
 
@@ -102,6 +102,10 @@ public class ElevatorSubsystem extends SubsystemBase {
                 .rising();
 
         _positionResetEvent.ifHigh(_elevatorIO::resetEncoderPos);
+    }
+
+    public boolean atSetpoint() {
+        return _elevatorController.atSetpoint(0.02);
     }
 
     public boolean positionIsNear(ElevatorPosition pos) {
@@ -140,7 +144,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         if (tryingToUseManualControl) {
             setMotorVoltageWithLimitSwitches(manualControlSpeed * 12);
         } else {
-            var ec = ElevatorController.calculate(_inputs.ElevatorDistanceMeters, _inputs.ElevatorSpeedMetersPerSecond);
+            var ec = _elevatorController.calculate(_inputs.ElevatorDistanceMeters,
+                    _inputs.ElevatorSpeedMetersPerSecond);
 
             SmartDashboard.putNumber(getName() + "/Raw-EC", ec);
             setMotorVoltageWithLimitSwitches(ec);
@@ -195,9 +200,9 @@ public class ElevatorSubsystem extends SubsystemBase {
         _elevatorIO.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
 
-        Logger.recordOutput(getName() + "/elevator error", ElevatorController.getError());
+        Logger.recordOutput(getName() + "/elevator error", _elevatorController.getError());
         SmartDashboard.putBoolean(getName() + " is elevator manaully controlled", _elevatorManaullyControlled);
-        SmartDashboard.putNumber(getName() + "EC Setpoint", ElevatorController.getSetpoint());
+        SmartDashboard.putNumber(getName() + "EC Setpoint", _elevatorController.getSetpoint());
 
     }
     //#endregion
@@ -210,21 +215,21 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public Command setElevatorSetpointCommand(ElevatorPosition pos) {
         return Commands.print("Setting elevator position to: " + _positionMap.get(pos))
-                .andThen(() -> ElevatorController.setSetpoint(_positionMap.get(pos)))
+                .andThen(() -> _elevatorController.setSetpoint(_positionMap.get(pos)))
                 .andThen(disableElevatorManualControlCommand())
                 .andThen(() -> {
                     if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.5) {
-                        ElevatorController.setM(ElevatorMap.ElevatorControllerConstantsAbsoultelyMassive.M);
-                        ElevatorController.setR(ElevatorMap.ElevatorControllerConstantsAbsoultelyMassive.R);
+                        _elevatorController.setM(ElevatorMap.ElevatorControllerConstantsAbsoultelyMassive.M);
+                        _elevatorController.setR(ElevatorMap.ElevatorControllerConstantsAbsoultelyMassive.R);
                     } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.4) {
-                        ElevatorController.setM(ElevatorMap.ElevatorControllerConstantsBig.M);
-                        ElevatorController.setR(ElevatorMap.ElevatorControllerConstantsBig.R);
+                        _elevatorController.setM(ElevatorMap.ElevatorControllerConstantsBig.M);
+                        _elevatorController.setR(ElevatorMap.ElevatorControllerConstantsBig.R);
                     } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.2) {
-                        ElevatorController.setM(ElevatorMap.ElevatorControllerConstantsMedium.M);
-                        ElevatorController.setR(ElevatorMap.ElevatorControllerConstantsMedium.R);
+                        _elevatorController.setM(ElevatorMap.ElevatorControllerConstantsMedium.M);
+                        _elevatorController.setR(ElevatorMap.ElevatorControllerConstantsMedium.R);
                     } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) < 0.2) {
-                        ElevatorController.setM(ElevatorMap.ElevatorControllerConstantsSmall.M);
-                        ElevatorController.setR(ElevatorMap.ElevatorControllerConstantsSmall.R);
+                        _elevatorController.setM(ElevatorMap.ElevatorControllerConstantsSmall.M);
+                        _elevatorController.setR(ElevatorMap.ElevatorControllerConstantsSmall.R);
                     }
                 });
     }
@@ -236,7 +241,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                 .withTimeout(7)
                 .andThen(Commands.runOnce(() -> {
                     _elevatorIO.stopMotors();
-                    ElevatorController.setSetpoint(0);
+                    _elevatorController.setSetpoint(0);
                 }));
     }
 

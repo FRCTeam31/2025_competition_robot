@@ -162,5 +162,9 @@ public class VisionSubsystem extends SubsystemBase {
         return Commands.runOnce(() -> setCameraMode(1, drivingMode ? 1 : 0));
     }
 
+    public Command setRearCameraPipeline(int pipeline) {
+        return Commands.runOnce(() -> setPipeline(1, pipeline));
+    }
+
     //#endregion
 }

@@ -10,6 +10,7 @@ import org.prime.util.LockableEvent;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.event.BooleanEvent;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -71,6 +72,8 @@ public class EndEffectorSubsystem extends SubsystemBase {
     private EndEffectorInputsAutoLogged _inputs = new EndEffectorInputsAutoLogged();
 
     private boolean _isLocked = true;
+    private boolean _intakeIsEjecting = false;
+    private double _manualControlSpeed = 0;
 
     // TODO: Add a system to set the wrist angle to a predefined setpoint. Look at the system used in the elevator subsystem for reference. We will most likely use the same enums used in the elevator subsystem so it is easier to implement the auto rotating system later. For now, create a temporary enum.
 
@@ -110,17 +113,17 @@ public class EndEffectorSubsystem extends SubsystemBase {
         SmartDashboard.putData(_wristPID);
     }
 
-    public void manageWristControl(double manaulControlSpeed) {
-        boolean isSafeForManaulControl = Container.Elevator
+    public void manageWristControl() {
+        boolean isSafeForManualControl = Container.Elevator
                 .getElevatorPositionMeters() >= EndEffectorMap.LowerElevatorSafetyLimit
                 && _inputs.EndEffectorAngleDegrees <= EndEffectorMap.MaxWristAngle + 5;
 
-        boolean tryingToUseManualControl = (manaulControlSpeed != 0 || _wristManuallyControlled);
+        boolean tryingToUseManualControl = (_manualControlSpeed != 0 || _wristManuallyControlled);
 
-        _wristManuallyControlled = (isSafeForManaulControl && tryingToUseManualControl) ? true : false;
+        _wristManuallyControlled = (isSafeForManualControl && tryingToUseManualControl) ? true : false;
 
         if (_wristManuallyControlled) {
-            runWristManual(manaulControlSpeed);
+            runWristManual(_manualControlSpeed);
         } else if (!_wristManuallyControlled) {
             seekWristAnglePID();
         }
@@ -187,6 +190,11 @@ public class EndEffectorSubsystem extends SubsystemBase {
 
         SmartDashboard.putNumber(getName() + " Wrist setpoint", _wristPID.getSetpoint());
         SmartDashboard.putBoolean("EndEffector/isLocked", _lockableSetpoint.isLocked().getAsBoolean());
+        manageWristControl();
+    }
+
+    public boolean wristAtSetpoint() {
+        return Math.abs(_inputs.EndEffectorAngleDegrees - _wristPID.getSetpoint()) < 3;
     }
 
     /**
@@ -194,26 +202,19 @@ public class EndEffectorSubsystem extends SubsystemBase {
      * @param runIntakeIn
      * @param runIntakeOut
      */
-    public Command defaultCommand(BooleanSupplier runIntakeIn, BooleanSupplier runIntakeOut,
+    public Command defaultCommand(BooleanSupplier runIntakeOut,
             DoubleSupplier wristManualControl) {
         return this.run(() -> {
-            if (runIntakeIn.getAsBoolean()) {
-                _endEffector.setIntakeSpeed(EndEffectorMap.IntakeSpeed);
-
-            } else if (runIntakeOut.getAsBoolean()) {
+            if (runIntakeOut.getAsBoolean() && DriverStation.isTeleopEnabled()) {
                 _endEffector.setIntakeSpeed(EndEffectorMap.EjectSpeed);
-
             } else {
-
-                _endEffector.setIntakeSpeed(EndEffectorMap.IntakeSpeed);
+                _endEffector.setIntakeSpeed(_intakeIsEjecting
+                        ? EndEffectorMap.EjectSpeed
+                        : EndEffectorMap.IntakeSpeed);
             }
 
-            manageWristControl(wristManualControl.getAsDouble());
+            _manualControlSpeed = MathUtil.applyDeadband(wristManualControl.getAsDouble(), 0.05);
         });
-    }
-
-    public boolean wristAtSetpoint() {
-        return Math.abs(_inputs.EndEffectorAngleDegrees - _wristPID.getSetpoint()) < 3;
     }
 
     /**
@@ -222,9 +223,9 @@ public class EndEffectorSubsystem extends SubsystemBase {
      * @param angle Desired angle
      */
     public Command setWristSetpointCommand(double angle) {
-        return Commands.runOnce(this::disableWristManualControl).andThen(() -> {
-            _wristPID.setSetpoint(angle);
-        });
+        return Commands.runOnce(this::disableWristManualControl)
+                .andThen(enableIntakeCommand())
+                .andThen(() -> _wristPID.setSetpoint(angle));
     }
 
     /**
@@ -233,9 +234,8 @@ public class EndEffectorSubsystem extends SubsystemBase {
      * @param position Elevator position
      */
     public Command setWristSetpointCommand(ElevatorPosition position) {
-        return Commands.runOnce(this::disableWristManualControl).andThen(() -> {
-            _wristPID.setSetpoint(_angleAtElevatorHeight.get(position));
-        });
+        return Commands.runOnce(this::disableWristManualControl)
+                .andThen(setWristSetpointCommand(_angleAtElevatorHeight.get(position)));
     }
 
     /**
@@ -257,7 +257,8 @@ public class EndEffectorSubsystem extends SubsystemBase {
         // // TODO: May have to use .finallyDo() instead of .andThen()
 
         return Commands.runOnce(this::disableWristManualControlCommand)
-                .andThen(Commands.waitUntil(() -> !_isLocked).andThen(setWristSetpointCommand(position)));
+                .andThen(Commands.waitUntil(() -> !_isLocked)
+                        .andThen(setWristSetpointCommand(position)));
     }
 
     public Command wristManualControlCommand(double speed) {
@@ -277,19 +278,21 @@ public class EndEffectorSubsystem extends SubsystemBase {
     }
 
     public Command stopBothMotorsCommand() {
-        return Commands.runOnce(() -> _endEffector.stopMotors());
-    }
-
-    public Command setIntakeSpeedCommand(double speed) {
-        return Commands.run(() -> _endEffector.setIntakeSpeed(speed));
+        return this.runOnce(() -> _endEffector.stopMotors());
     }
 
     public Command enableIntakeCommand() {
-        return setIntakeSpeedCommand(EndEffectorMap.IntakeSpeed);
+        return this.runOnce(() -> {
+            _endEffector.setIntakeSpeed(EndEffectorMap.IntakeSpeed);
+            _intakeIsEjecting = false;
+        });
     }
 
     public Command enableEjectCommand() {
-        return setIntakeSpeedCommand(EndEffectorMap.EjectSpeed);
+        return this.runOnce(() -> {
+            _endEffector.setIntakeSpeed(EndEffectorMap.EjectSpeed);
+            _intakeIsEjecting = true;
+        });
     }
 
     public Command scoreCoral() {
@@ -297,21 +300,25 @@ public class EndEffectorSubsystem extends SubsystemBase {
                 .andThen(Commands.waitUntil(this::wristAtSetpoint))
                 .andThen(enableEjectCommand()) // eject until limit switch is let go (or times out)
                 .until(() -> !_inputs.CoralLimitSwitchState).withTimeout(2)
-
-                .andThen(Commands.waitSeconds(0.5)).alongWith(setWristSetpointCommand(-30)); // slight delay to allow the coral to fully eject
+                .andThen(Commands.waitSeconds(0.5)) // slight delay to allow the coral to begin ejecting
+                .andThen(setWristSetpointCommand(-30)) // set the angle up while ejecting
+                .andThen(Commands.waitSeconds(0.5))
+                .andThen(enableIntakeCommand());
     }
 
     public Command pickupCoral() {
         return enableIntakeCommand()
-                .until(() -> _inputs.CoralLimitSwitchState);
+                .andThen(Commands.waitUntil(() -> _inputs.CoralLimitSwitchState))
+                .andThen(setWristSetpointCommand(0))
+                .andThen(Commands.print(">> INTAKE: Coral picked up"));
     }
 
     // TODO: Add more named commands for running the intake and rotating the wrist to predefined setpoints (See above todo)
     public Map<String, Command> getNamedCommands() {
-        return Map.of("Stop Intake", stopIntakeMotorCommand(), "Stop Both Motors", stopBothMotorsCommand(),
-                "Intake Coral",
-                setIntakeSpeedCommand(EndEffectorMap.IntakeSpeed), "Eject Coral",
-                setIntakeSpeedCommand(EndEffectorMap.EjectSpeed));
+        return Map.of("Stop Intake", stopIntakeMotorCommand(),
+                "Stop Both Motors", stopBothMotorsCommand(),
+                "Intake Coral", enableIntakeCommand(),
+                "Eject Coral", enableEjectCommand());
     }
 
 }

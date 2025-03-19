@@ -31,7 +31,7 @@ public class ClimberSubsystem extends SubsystemBase {
         public static final byte ClimberOutLimitSwitchChannel = 5;
         public static final byte ClimberInLimitSwitchChannel = 6;
         public static final double ClimberSpeed = 0.8;
-        public static final double HooksSpeed = 0.4;
+        public static final double HooksSpeed = 0.7;
         public static final double ClimberChangeStateTimeout = 7;
         public static final double HooksChangeStateTimeout = 5;
         public static final double ClimbingPitchThresholdDegrees = 5;

@@ -42,6 +42,8 @@ public class Container {
       // Create subsystems
       Vision = new VisionSubsystem();
       Swerve = new SwerveSubsystem(isReal);
+      // Create Elevator Subsystem
+      Elevator = new ElevatorSubsystem(isReal);
       Climber = new ClimberSubsystem(isReal);
       EndEffector = new EndEffectorSubsystem(isReal);
 
@@ -51,12 +53,10 @@ public class Container {
       CommandsDashboardSection = new DashboardSection("Commands");
       TestDashboardSection = new DashboardSection("Test");
 
-      // Create Elevator Subsystem
-      Elevator = new ElevatorSubsystem(isReal);
       OperatorInterface = new OperatorInterface();
 
       OperatorInterface.bindDriverControls(Swerve, Climber, Vision);
-      OperatorInterface.bindOperatorControls(Elevator, EndEffector, Vision);
+      OperatorInterface.bindOperatorControls(Elevator, EndEffector, Vision, Swerve);
 
       // Register the named commands from each subsystem that may be used in PathPlanner
       var swerveCommands = Swerve.getNamedCommands();
@@ -86,27 +86,30 @@ public class Container {
         Commands.print("Setting combined height and angle: " + position),
         Elevator.setElevatorSetpointCommand(position),
         EndEffector.scheduleWristSetpointCommand(position))
+        .alongWith(Commands.waitUntil(() -> EndEffector.wristAtSetpoint() && Elevator.atSetpoint()).withTimeout(3))
         .finallyDo(() -> System.out.println("Finished setting combined setpoints"));
   }
 
   public static Command scoreAtHeight(ElevatorPosition position) {
     return setCombinedHeightAndAngle(position)
-        // .alongWith(EndEffector.enableIntakeCommand().withTimeout(2))
-        .alongWith(Commands.waitSeconds(0.25).andThen(EndEffector.scoreCoral()));
+        .andThen(EndEffector.scoreCoral());
   }
 
   public static Command scoreAtHeightAndLower(ElevatorPosition position) {
     return scoreAtHeight(position)
+        .andThen(Commands.print(">> COMMAND: Returning to AbsoluteMinimum"))
         .andThen(setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
   }
 
   public static Command pickupFromSource() {
     return setCombinedHeightAndAngle(ElevatorPosition.kSource)
+        .andThen(Commands.print(">> COMMAND: Picking up coral"))
         .andThen(EndEffector.pickupCoral());
   }
 
   public static Command pickupFromSourceAndLower() {
     return pickupFromSource()
+        .andThen(Commands.print(">> COMMAND: Returning to AbsoluteMinimum"))
         .andThen(setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
   }
 
