@@ -9,7 +9,7 @@
       "prevControl": null,
       "nextControl": {
         "x": 2.299999999999999,
-        "y": 1.9623333333333324
+        "y": 1.9623333333333326
       },
       "isLocked": false,
       "linkedName": "SRC2"
@@ -45,7 +45,7 @@
     "rotation": 59.99999999999999
   },
   "reversed": false,
-  "folder": "CD Paths",
+  "folder": "Reef Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": -128.0

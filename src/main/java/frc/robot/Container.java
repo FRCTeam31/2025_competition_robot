@@ -64,11 +64,12 @@ public class Container {
       Elevator = new ElevatorSubsystem(isReal);
       OperatorInterface = new OperatorInterface();
 
-      OperatorInterface.bindDriverControls(Swerve, Climber);
-      OperatorInterface.bindOperatorControls(Elevator, EndEffector);
+      OperatorInterface.bindDriverControls(Swerve, Climber, Vision);
+      OperatorInterface.bindOperatorControls(Elevator, EndEffector, Vision);
 
       // Register the named commands from each subsystem that may be used in PathPlanner
       var swerveCommands = Swerve.getNamedCommands();
+      var elevatorCommands = Elevator.getNamedCommands();
       var containerCommands = getNamedCommands();
 
       // ...add other named commands to the map using "otherNamedCommands.putAll(namedCommandsMap);"
@@ -79,6 +80,7 @@ public class Container {
       Map<String, Command> combinedCommands = new HashMap<>();
       combinedCommands.putAll(swerveCommands);
       combinedCommands.putAll(containerCommands);
+      combinedCommands.putAll(elevatorCommands);
 
       AutoBuilder = new BuildableAutoRoutine(combinedCommands);
 

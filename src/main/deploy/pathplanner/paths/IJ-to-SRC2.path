@@ -21,7 +21,7 @@
       },
       "prevControl": {
         "x": 3.253991228070175,
-        "y": 0.33315789473684265
+        "y": 0.33315789473684276
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": -128.0
   },
   "reversed": false,
-  "folder": "IJ Paths",
+  "folder": "Source 2 Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": -119.99999999999999

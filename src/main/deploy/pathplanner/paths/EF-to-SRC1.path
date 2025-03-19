@@ -20,7 +20,7 @@
         "y": 6.94
       },
       "prevControl": {
-        "x": 5.232039473684209,
+        "x": 5.2320394736842095,
         "y": 6.627105263157895
       },
       "nextControl": null,
@@ -45,7 +45,7 @@
     "rotation": 126.80150993249389
   },
   "reversed": false,
-  "folder": "EF Paths",
+  "folder": "Source 1 Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 119.99999999999999

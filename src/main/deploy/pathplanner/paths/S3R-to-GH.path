@@ -45,7 +45,7 @@
     "rotation": 180.0
   },
   "reversed": false,
-  "folder": "S3 Paths",
+  "folder": "Start 3 Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

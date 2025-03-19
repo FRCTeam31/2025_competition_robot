@@ -9,7 +9,7 @@
       "prevControl": null,
       "nextControl": {
         "x": 6.084385964912281,
-        "y": 5.435570175438597
+        "y": 5.435570175438598
       },
       "isLocked": false,
       "linkedName": "S6"
@@ -45,7 +45,7 @@
     "rotation": -59.99999999999999
   },
   "reversed": false,
-  "folder": "S6 Paths",
+  "folder": "Start 6 Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

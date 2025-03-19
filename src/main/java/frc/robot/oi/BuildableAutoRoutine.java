@@ -251,6 +251,9 @@ public class BuildableAutoRoutine {
     private SendableChooser<_startingLocationFilter> _toggleStartingFilterLocation;
     private SendableChooser<_startingDirectionFilter> _toggleStartingFilterDirection;
 
+    // Auto Raise Elevator
+    private AutoRoutineAutoRaiseElevator _autoRaiseElevator = new AutoRoutineAutoRaiseElevator();
+
     // History management
     private AutoRoutineHistory _routineHistory;
     private SendableChooser<String> _historyChooser;
@@ -558,6 +561,8 @@ public class BuildableAutoRoutine {
                 : "TestAuto" + System.currentTimeMillis();
         _routineHistory.addRoutineToHistory(routineName, _routineSteps);
         _historyChooser.addOption(routineName + " - " + String.join(", ", _routineSteps), routineName);
+
+        _autoRaiseElevator.constructAutoElevatorPositionsList(_routineSteps);
         return autoCommand;
     }
 

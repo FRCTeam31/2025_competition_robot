@@ -90,12 +90,12 @@ public class OperatorInterface {
                                 .onFalse(climber.stopClimbingMotorsCommand());
 
                 // Changes the vision mode for the rear limelight. 
-                DriverController.start().onTrue(visionSubsystem.toggleDriverModeCommand(1));
-
+                OperatorController.start().onTrue(visionSubsystem.setRearCameraMode(true))
+                                .onFalse(visionSubsystem.setRearCameraMode(false));
         }
 
         public void bindOperatorControls(ElevatorSubsystem elevatorSubsystem,
-                        EndEffectorSubsystem endEffectorSubsystem) {
+                        EndEffectorSubsystem endEffectorSubsystem, VisionSubsystem visionSubsystem) {
 
                 elevatorSubsystem.setDefaultCommand(elevatorSubsystem
                                 .ElevatorDefaultCommand(OperatorController.getTriggerSupplier(0.06, 0)));
@@ -130,13 +130,16 @@ public class OperatorInterface {
                 OperatorController.leftStick().onTrue(endEffectorSubsystem.disableWristManualControlCommand());
                 OperatorController.rightStick().onTrue(elevatorSubsystem.disableElevatorManualControlCommand());
 
-                OperatorController.back().whileTrue(Commands.runOnce(() -> {
-                        Container.Vision.setLedMode(0, 2);
-                        Container.Vision.setLedMode(1, 2);
-                })).onFalse(Commands.runOnce(() -> {
-                        Container.Vision.setLedMode(0, 0);
-                        Container.Vision.setLedMode(1, 0);
-                }));
+                // OperatorController.back().whileTrue(Commands.runOnce(() -> {
+                //         Container.Vision.setLedMode(0, 2);
+                //         Container.Vision.setLedMode(1, 2);
+                // })).onFalse(Commands.runOnce(() -> {
+                //         Container.Vision.setLedMode(0, 0);
+                //         Container.Vision.setLedMode(1, 0);
+                // }));
+
+                OperatorController.back().onTrue(visionSubsystem.setRearCameraMode(true))
+                                .onFalse(visionSubsystem.setRearCameraMode(false));
 
         }
 

@@ -5,6 +5,7 @@ import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import org.littletonrobotics.junction.Logger;
@@ -162,6 +163,10 @@ public class VisionSubsystem extends SubsystemBase {
                 setCameraMode(1, _rearInDriverMode ? 1 : 0);
             }
         });
+    }
+
+    public Command setRearCameraMode(boolean drivingMode) {
+        return Commands.runOnce(() -> setCameraMode(1, drivingMode ? 1 : 0));
     }
 
     //#endregion

@@ -8,7 +8,7 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.149666666666666,
+        "x": 2.1496666666666657,
         "y": 5.631666666666666
       },
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 126.80150993249389
   },
   "reversed": false,
-  "folder": "AB Paths",
+  "folder": "Source 1 Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

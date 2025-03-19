@@ -9,7 +9,7 @@
       "prevControl": null,
       "nextControl": {
         "x": 3.3021271929824563,
-        "y": 6.4271710526315795
+        "y": 6.427171052631579
       },
       "isLocked": false,
       "linkedName": "IJ"
@@ -45,7 +45,7 @@
     "rotation": 126.80150993249389
   },
   "reversed": false,
-  "folder": "IJ Paths",
+  "folder": "Source 1 Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": -119.99999999999999

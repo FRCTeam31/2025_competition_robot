@@ -8,7 +8,7 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.570999999999999,
+        "x": 3.5709999999999984,
         "y": 1.8486666666666656
       },
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 119.99999999999999
   },
   "reversed": false,
-  "folder": "EF Paths",
+  "folder": "Reef Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": -128.0

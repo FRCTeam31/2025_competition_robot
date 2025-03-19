@@ -50,7 +50,46 @@ public class ElevatorSubsystem extends SubsystemBase {
         /** The position to score on the level two above the trought, L3 */
         kMid,
         /** The position to score on the highest level of the reef, L4 */
-        kHigh
+        kHigh;
+
+        /**
+         * Returns a string corresponding to the value of the enum. Used for filtering named
+         * commands used in autonmous.
+         * @return
+         */
+        public String getAsRawName() {
+            switch (this) {
+                default:
+                    return "L2";
+                case kSource:
+                    return "Source";
+                case kTrough:
+                    return "Trough";
+                case kLow:
+                    return "L2";
+                case kMid:
+                    return "L3";
+                case kHigh:
+                    return "L4";
+            }
+        }
+
+        public static ElevatorPosition getFromRawName(String name) {
+            switch (name) {
+                case "Source":
+                    return kSource;
+                case "Trough":
+                    return kTrough;
+                case "L2":
+                    return kLow;
+                case "L3":
+                    return kMid;
+                case "L4":
+                    return kHigh;
+            }
+
+            return null;
+        }
     }
 
     private Map<ElevatorPosition, Double> _positionMap = Map.of(
@@ -228,7 +267,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         return this.runOnce(_elevatorIO::stopMotors);
     }
 
-    public Map<String, Command> elevatorNamedCommands() {
+    public Map<String, Command> getNamedCommands() {
         return Map.of(
                 "Stop Elevator Motors Command", stopMotorsCommand(),
                 "Elevator High Position Command", setElevatorSetpointCommand(ElevatorPosition.kHigh),
