@@ -31,14 +31,12 @@ public class ElevatorSubsystem extends SubsystemBase {
         // Limit Switch constants
         public static final int TopLimitSwitchChannel = 0;
         public static final int BottomLimitSwitchChannel = 1;
-        public static final double BottomLimitResetDebounceSeconds = 0.25;
 
         // Physical properties
         public static final double MaxElevatorHeight = 0.63;
         public static final double OutputSprocketDiameterMeters = Units.Millimeters.of(32.2).in(Meters);
         public static final double GearRatio = 16;
         public static final double BottomLimitResetDebounceSeconds = 0.25;
-        public static final int ElevatorEncoderCANID = 22;
         // public static final MRSGConstants ElevatorControllerConstants = new MRSGConstants(
         //         8, 4.5, 0, 1.4);
 
