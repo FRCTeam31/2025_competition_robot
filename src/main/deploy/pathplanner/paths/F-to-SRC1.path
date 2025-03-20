@@ -1,0 +1,59 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.3625,
+        "y": 2.832366071428571
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 7.9828125,
+        "y": 3.9901785714285714
+      },
+      "isLocked": false,
+      "linkedName": "F"
+    },
+    {
+      "anchor": {
+        "x": 1.22,
+        "y": 6.94
+      },
+      "prevControl": {
+        "x": 5.232039473684216,
+        "y": 6.627105263157895
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "SRC1"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": -130.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 126.80150993249389
+  },
+  "reversed": false,
+  "folder": "Reef-SRC1",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 119.99999999999999
+  },
+  "useDefaultConstraints": true
+}
