@@ -8,27 +8,32 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.188944223152962,
-        "y": 7.034842110417581
+        "x": 6.859821428571429,
+        "y": 4.8171875
       },
       "isLocked": false,
-      "linkedName": "S1"
+      "linkedName": "S1R"
     },
     {
       "anchor": {
-        "x": 3.04,
-        "y": 4.05
+        "x": 5.3625,
+        "y": 2.832366071428571
       },
       "prevControl": {
-        "x": 0.7379487179477544,
-        "y": 6.3558333333344015
+        "x": 7.277166666666668,
+        "y": 3.5870327380952363
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "AB"
+      "linkedName": "F"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.6433844406587168,
+      "rotationDegrees": 180.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -42,10 +47,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 119.99999999999999
   },
   "reversed": false,
-  "folder": "Start 1 Paths",
+  "folder": "S1-Reef",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0
