@@ -1,16 +1,7 @@
 {
-  "Clients": {
-    "open": true
-  },
-  "Connections": {
-    "open": true
-  },
   "NetworkTables Settings": {
     "mode": "Client (NT4)",
     "serverTeam": "127.0.0.1"
-  },
-  "Server": {
-    "open": true
   },
   "transitory": {
     "Shuffleboard": {
@@ -18,6 +9,12 @@
         "PrimeAutoBuilder": {
           "open": true
         },
+        "open": true
+      },
+      "open": true
+    },
+    "limelight-front": {
+      "double[]##v_/limelight-front/targetpose_robotspace": {
         "open": true
       },
       "open": true

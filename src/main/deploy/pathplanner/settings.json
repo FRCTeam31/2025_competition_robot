@@ -1,6 +1,6 @@
 {
   "robotWidth": 0.927,
-  "robotLength": 0.9271,
+  "robotLength": 0.927,
   "holonomicMode": true,
   "pathFolders": [
     "SRC2-Reef",
@@ -21,7 +21,7 @@
   "robotMass": 52.1631,
   "robotMOI": 7.47,
   "robotTrackwidth": 0.546,
-  "driveWheelRadius": 0.049,
+  "driveWheelRadius": 0.0508,
   "driveGearing": 5.9,
   "maxDriveSpeed": 5.4,
   "driveMotorType": "vortex",
