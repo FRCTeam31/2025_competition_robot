@@ -19,7 +19,7 @@ import frc.robot.subsystems.vision.VisionSubsystem;
 
 public class OperatorInterface {
         public static class OIMap {
-                public static final HolonomicControlStyle DefaultDriveControlStyle = HolonomicControlStyle.Standard;
+                public static final HolonomicControlStyle DefaultDriveControlStyle = HolonomicControlStyle.Drone;
         }
 
         private SupplierXboxController DriverController;
