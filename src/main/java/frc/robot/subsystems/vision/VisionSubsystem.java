@@ -36,7 +36,7 @@ public class VisionSubsystem extends SubsystemBase {
             _limelightInputs[i] = new LimelightInputs();
         }
 
-        UsbCamera camera = CameraServer.startAutomaticCapture(1);
+        UsbCamera camera = CameraServer.startAutomaticCapture();
         camera.setResolution(320, 240);
         camera.setFPS(30);
     }
