@@ -77,8 +77,8 @@ public class ClimberSubsystem extends SubsystemBase {
                 () -> DriverStation.getMatchTime() <= 50 && DriverStation.isTeleopEnabled());
 
         _setClimberOutTimedTrigger.onTrue(
-                setHooksClosedAuto()
-                        .alongWith(setClimberOutAuto()).asProxy());
+                setHooksClosedAuto().asProxy()
+                        .alongWith(setClimberOutAuto().asProxy()));
 
     }
 
