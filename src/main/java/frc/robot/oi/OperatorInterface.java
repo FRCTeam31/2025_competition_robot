@@ -97,18 +97,18 @@ public class OperatorInterface {
                                                 OperatorController.getLeftStickYSupplier(0.3, 0)));
 
                 // Elevator and Wrist Combined Controls                              
-                OperatorController.povDown().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kTrough));
-                OperatorController.a().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kLow));
-                OperatorController.x().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kMid));
-                OperatorController.povUp().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kHigh));
-                OperatorController.start().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kSource));
-                OperatorController.b().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
+                // OperatorController.povDown().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kTrough));
+                // OperatorController.a().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kLow));
+                // OperatorController.x().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kMid));
+                // OperatorController.povUp().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kHigh));
+                // OperatorController.start().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kSource));
+                // OperatorController.b().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
 
-                // OperatorController.povDown().onTrue(_containerNamedCommands.get("Score-Trough"));
-                // OperatorController.a().onTrue(_containerNamedCommands.get("Score-L2-L"));
-                // OperatorController.x().onTrue(_containerNamedCommands.get("Score-L3-L"));
-                // OperatorController.povUp().onTrue(_containerNamedCommands.get("Score-L4-L"));
-                // OperatorController.start().onTrue(_containerNamedCommands.get("Pickup-Source"));
+                OperatorController.povDown().onTrue(Container.scoreAtHeightAndLower(ElevatorPosition.kTrough));
+                OperatorController.a().onTrue(Container.scoreAtHeightAndLower(ElevatorPosition.kLow));
+                OperatorController.x().onTrue(Container.scoreAtHeightAndLower(ElevatorPosition.kMid));
+                OperatorController.povUp().onTrue(Container.scoreAtHeightAndLower(ElevatorPosition.kHigh));
+                OperatorController.start().onTrue(Container.pickupFromSourceAndLower());
 
                 OperatorController.leftStick().onTrue(endEffectorSubsystem.disableWristManualControlCommand());
                 OperatorController.rightStick().onTrue(elevatorSubsystem.disableElevatorManualControlCommand());
