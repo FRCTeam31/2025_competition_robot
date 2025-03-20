@@ -20,8 +20,8 @@
         "y": 5.23
       },
       "prevControl": {
-        "x": 5.472465753424658,
-        "y": 5.480804794520548
+        "x": 6.369887134729933,
+        "y": 5.585522206879948
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": -119.99999999999999
   },
   "reversed": false,
-  "folder": "IJ Coral Paths",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": -119.99999999999999

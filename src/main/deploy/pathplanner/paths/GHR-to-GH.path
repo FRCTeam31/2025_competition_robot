@@ -20,8 +20,8 @@
         "y": 4.05
       },
       "prevControl": {
-        "x": 6.254246575342465,
-        "y": 4.1273116438356166
+        "x": 6.113030014801739,
+        "y": 3.859627150890195
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 180.0
   },
   "reversed": false,
-  "folder": "GH Coral Paths",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

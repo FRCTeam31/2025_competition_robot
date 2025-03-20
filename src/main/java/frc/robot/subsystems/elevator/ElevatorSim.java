@@ -1,56 +1,58 @@
 package frc.robot.subsystems.elevator;
 
+import static edu.wpi.first.units.Units.Kilograms;
+
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import edu.wpi.first.wpilibj.simulation.DIOSim;
+import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorMap;
 
 public class ElevatorSim implements IElevator {
 
-    private DCMotorSim _gearboxSim;
-    private DIOSim _topLimitSwitchSim;
-    private DIOSim _bottomLimitSwitchSim;
+    private edu.wpi.first.wpilibj.simulation.ElevatorSim _elevatorSim;
 
-    // TODO: Add ElevatorControllerSim
     public ElevatorSim() {
-        _gearboxSim = new DCMotorSim(
-                LinearSystemId.createDCMotorSystem(
-                        1,
-                        1),
-                DCMotor.getNeoVortex(1)
-                        .withReduction(ElevatorMap.GearRatio));
-        _topLimitSwitchSim = new DIOSim(ElevatorMap.TopLimitSwitchChannel);
-        _bottomLimitSwitchSim = new DIOSim(ElevatorMap.BottomLimitSwitchChannel);
+        _elevatorSim = new edu.wpi.first.wpilibj.simulation.ElevatorSim(
+                DCMotor.getNeoVortex(2),
+                ElevatorMap.GearRatio,
+                Units.Pounds.of(3).in(Kilograms),
+                ElevatorMap.OutputSprocketDiameterMeters,
+                0,
+                ElevatorMap.MaxElevatorHeight,
+                true,
+                0,
+                0, 0);
     }
 
     @Override
     public void updateInputs(ElevatorInputsAutoLogged inputs) {
-
-        inputs.MotorSpeed = _gearboxSim.getAngularVelocity().in(Units.RotationsPerSecond);
-        inputs.TopLimitSwitch = _bottomLimitSwitchSim.getValue();
-        inputs.BottomLimitSwitch = _topLimitSwitchSim.getValue();
+        inputs.ElevatorDistanceMeters = _elevatorSim.getPositionMeters();
+        inputs.ElevatorSpeedMetersPerSecond = _elevatorSim.getVelocityMetersPerSecond();
+        inputs.TopLimitSwitch = _elevatorSim.hasHitUpperLimit();
+        inputs.BottomLimitSwitch = _elevatorSim.hasHitUpperLimit();
     }
 
     @Override
     public void setMotorVoltages(double volts) {
-        _gearboxSim.setInputVoltage(volts);
+        Logger.recordOutput("Elevator/MotorOutputVolts", volts);
+        _elevatorSim.setInputVoltage(volts);
     }
 
     @Override
     public void setMotorSpeeds(double output) {
-        var voltage = output * 12.0;
-        _gearboxSim.setInputVoltage(voltage);
+        var volts = output * RobotController.getBatteryVoltage();
+        setMotorVoltages(volts);
     }
 
     @Override
     public void stopMotors() {
-        _gearboxSim.setAngularVelocity(0);
+        setMotorVoltages(0);
     }
 
     @Override
     public void resetEncoderPos() {
+        _elevatorSim.setState(0, _elevatorSim.getVelocityMetersPerSecond());
     }
-
 }

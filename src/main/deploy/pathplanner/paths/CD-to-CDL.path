@@ -20,8 +20,8 @@
         "y": 2.84
       },
       "prevControl": {
-        "x": 3.4127739726027397,
-        "y": 2.6694006849315066
+        "x": 1.2569230769230768,
+        "y": 2.829679487179487
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 59.99999999999999
   },
   "reversed": false,
-  "folder": "CD Coral Paths",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 59.99999999999999

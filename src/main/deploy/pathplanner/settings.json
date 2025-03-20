@@ -1,5 +1,5 @@
 {
-  "robotWidth": 0.9271,
+  "robotWidth": 0.927,
   "robotLength": 0.9271,
   "holonomicMode": true,
   "pathFolders": [
@@ -13,10 +13,8 @@
     "Source 1 Paths",
     "Source 2 Paths",
     "Start 1 Paths",
-    "Start 2 Paths (NO)",
     "Start 3 Paths",
     "Start 4 Paths",
-    "Start 5 Paths (ALSO NO)",
     "Start 6 Paths"
   ],
   "autoFolders": [],
@@ -25,24 +23,27 @@
   "defaultMaxAngVel": 540.0,
   "defaultMaxAngAccel": 720.0,
   "defaultNominalVoltage": 12.0,
-  "robotMass": 25.0,
-  "robotMOI": 6.883,
+  "robotMass": 52.1631,
+  "robotMOI": 7.47,
   "robotTrackwidth": 0.546,
-  "driveWheelRadius": 0.0492,
+  "driveWheelRadius": 0.049,
   "driveGearing": 5.9,
   "maxDriveSpeed": 5.4,
   "driveMotorType": "vortex",
-  "driveCurrentLimit": 30.0,
+  "driveCurrentLimit": 40.0,
   "wheelCOF": 1.2,
   "flModuleX": 0.32,
   "flModuleY": 0.32,
   "frModuleX": 0.32,
-  "frModuleY": 0.0,
-  "blModuleX": 0.0,
+  "frModuleY": -0.32,
+  "blModuleX": -0.32,
   "blModuleY": 0.32,
-  "brModuleX": 0.0,
-  "brModuleY": 0.0,
+  "brModuleX": -0.32,
+  "brModuleY": -0.32,
   "bumperOffsetX": 0.0,
   "bumperOffsetY": 0.0,
-  "robotFeatures": []
+  "robotFeatures": [
+    "{\"name\":\"Rectangle\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":0.225,\"y\":0.0},\"size\":{\"width\":0.5,\"length\":0.1},\"borderRadius\":0.005,\"strokeWidth\":0.01,\"filled\":true}}",
+    "{\"name\":\"Rectangle\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":-0.15,\"y\":0.0},\"size\":{\"width\":0.275,\"length\":0.45},\"borderRadius\":0.025,\"strokeWidth\":0.02,\"filled\":true}}"
+  ]
 }

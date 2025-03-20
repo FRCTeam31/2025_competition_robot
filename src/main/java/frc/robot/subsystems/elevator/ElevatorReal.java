@@ -1,7 +1,5 @@
 package frc.robot.subsystems.elevator;
 
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -44,6 +42,7 @@ public class ElevatorReal implements IElevator {
         rightMotorConfig.idleMode(IdleMode.kBrake);
 
         rightMotorConfig.follow(ElevatorMap.LeftElevatorMotorCANID, true);
+
         _leftElevatorMotor.configure(leftMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         _rightElevatorMotor.configure(rightMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }

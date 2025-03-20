@@ -1,25 +1,19 @@
 package frc.robot.oi;
 
-import java.time.LocalTime;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
+
 import org.prime.control.Controls;
 import org.prime.control.HolonomicControlStyle;
 import org.prime.control.SupplierXboxController;
-import org.prime.control.SwerveControlSuppliers;
-
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Container;
+import frc.robot.game.ReefPegSide;
 import frc.robot.subsystems.climbing.ClimberSubsystem;
-import frc.robot.subsystems.climbing.ClimberInputs.HooksPosition;
 import frc.robot.subsystems.drivetrain.SwerveMap;
 import frc.robot.subsystems.drivetrain.SwerveSubsystem;
+import frc.robot.subsystems.elevator.ElevatorPosition;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
-import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorMap;
-import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorPosition;
 import frc.robot.subsystems.endEffector.EndEffectorSubsystem;
 import frc.robot.subsystems.endEffector.EndEffectorSubsystem.EndEffectorMap;
 import frc.robot.subsystems.vision.VisionSubsystem;
@@ -29,16 +23,13 @@ public class OperatorInterface {
                 public static final HolonomicControlStyle DefaultDriveControlStyle = HolonomicControlStyle.Drone;
         }
 
-        public SupplierXboxController DriverController;
-        public SupplierXboxController OperatorController;
-
-        private Map<String, Command> _containerNamedCommands;
+        private SupplierXboxController DriverController;
+        private SupplierXboxController OperatorController;
+        private Map<String, Command> _containerNamedCommands = Container.getNamedCommands();
 
         public OperatorInterface() {
                 DriverController = new SupplierXboxController(Controls.DRIVER_PORT);
                 OperatorController = new SupplierXboxController(Controls.OPERATOR_PORT);
-
-                _containerNamedCommands = Container.getNamedCommands();
         }
 
         public void bindDriverControls(SwerveSubsystem swerveSubsystem, ClimberSubsystem climber,
@@ -95,37 +86,30 @@ public class OperatorInterface {
         }
 
         public void bindOperatorControls(ElevatorSubsystem elevatorSubsystem,
-                        EndEffectorSubsystem endEffectorSubsystem, VisionSubsystem visionSubsystem) {
+                        EndEffectorSubsystem endEffectorSubsystem, VisionSubsystem visionSubsystem,
+                        SwerveSubsystem swerveSubsystem) {
 
                 elevatorSubsystem.setDefaultCommand(elevatorSubsystem
-                                .manageControlCommand(OperatorController.getTriggerSupplier(0.06, 0)));
+                                .elevatorDefaultCommand(OperatorController.getTriggerSupplier(0.06, 0)));
 
                 endEffectorSubsystem.setDefaultCommand(
                                 endEffectorSubsystem.defaultCommand(
-                                                OperatorController.rightBumper(),
                                                 OperatorController.leftBumper(),
                                                 OperatorController.getLeftStickYSupplier(0.3, 0)));
 
                 // Elevator and Wrist Combined Controls                              
-                OperatorController.povDown().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kTrough));
-                OperatorController.a().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kLow));
-                OperatorController.x().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kMid));
-                OperatorController.povUp().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kHigh));
-                OperatorController.start().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kSource));
-                OperatorController.b().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
+                // OperatorController.povDown().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kTrough));
+                // OperatorController.a().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kLow));
+                // OperatorController.x().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kMid));
+                // OperatorController.povUp().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kHigh));
+                // OperatorController.start().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kSource));
+                // OperatorController.b().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
 
-                // OperatorController.povDown().onTrue(_containerNamedCommands.get("Score-Trough"));
-                // OperatorController.a().onTrue(_containerNamedCommands.get("Score-L2-L"));
-                // OperatorController.x().onTrue(_containerNamedCommands.get("Score-L3-L"));
-                // OperatorController.povUp().onTrue(_containerNamedCommands.get("Score-L4-L"));
-                // OperatorController.start().onTrue(_containerNamedCommands.get("Pickup-Source"));
-
-                OperatorController.rightBumper()
-                                .whileTrue(endEffectorSubsystem.setIntakeSpeedCommand(EndEffectorMap.EjectSpeed))
-                                .onFalse(endEffectorSubsystem.stopIntakeMotorCommand());
-                OperatorController.leftBumper()
-                                .whileTrue(endEffectorSubsystem.setIntakeSpeedCommand(EndEffectorMap.IntakeSpeed))
-                                .onFalse(endEffectorSubsystem.stopIntakeMotorCommand());
+                OperatorController.povDown().onTrue(_containerNamedCommands.get("Score-Trough"));
+                OperatorController.a().onTrue(_containerNamedCommands.get("Score-L2-L"));
+                OperatorController.x().onTrue(_containerNamedCommands.get("Score-L3-L"));
+                OperatorController.povUp().onTrue(_containerNamedCommands.get("Score-L4-L"));
+                OperatorController.start().onTrue(_containerNamedCommands.get("Pickup-Source"));
 
                 OperatorController.leftStick().onTrue(endEffectorSubsystem.disableWristManualControlCommand());
                 OperatorController.rightStick().onTrue(elevatorSubsystem.disableElevatorManualControlCommand());
@@ -138,9 +122,10 @@ public class OperatorInterface {
                 //         Container.Vision.setLedMode(1, 0);
                 // }));
 
-                OperatorController.back().onTrue(visionSubsystem.setRearCameraMode(true))
-                                .onFalse(visionSubsystem.setRearCameraMode(false));
-
+                OperatorController.back().onTrue(visionSubsystem.setRearCameraPipeline(1).ignoringDisable(true))
+                                .onFalse(visionSubsystem.setRearCameraPipeline(0).ignoringDisable(true));
+                OperatorController.povLeft().onTrue(swerveSubsystem.pathfindToReefPegSide(ReefPegSide.kLeft));
+                OperatorController.povRight().onTrue(swerveSubsystem.pathfindToReefPegSide(ReefPegSide.kRight));
         }
 
         public void setDriverRumbleIntensity(double intensity) {

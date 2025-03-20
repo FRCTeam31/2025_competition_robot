@@ -14,8 +14,6 @@ public class EndEffectorSim implements IEndEffector {
     private DCMotorSim _wristMotor;
     private DIOSim _coralLimitSwitch;
 
-    private EndEffectorInputsAutoLogged _inputs = new EndEffectorInputsAutoLogged();
-
     public EndEffectorSim() {
         _coralLimitSwitch = new DIOSim(EndEffectorMap.LimitSwitchDIOChannel);
 
@@ -70,6 +68,7 @@ public class EndEffectorSim implements IEndEffector {
         inputs.IntakeMotorSpeed = _intakeMotor.getAngularVelocity().magnitude();
         inputs.WristMotorSpeed = _wristMotor.getAngularVelocity().magnitude();
         inputs.CoralLimitSwitchState = getLimitSwitchState();
+        inputs.EndEffectorAngleDegrees = getWristAngle();
     }
 
     private double getWristAngle() {

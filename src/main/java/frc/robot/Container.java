@@ -4,10 +4,7 @@
 
 package frc.robot;
 
-import java.util.HashMap;
 import java.util.Map;
-
-import javax.naming.Name;
 
 import com.pathplanner.lib.auto.NamedCommands;
 
@@ -18,15 +15,11 @@ import frc.robot.dashboard.TeleopDashboardTab;
 import frc.robot.game.ReefPegSide;
 import frc.robot.dashboard.DashboardSection;
 import frc.robot.oi.OperatorInterface;
-import frc.robot.oi.BuildableAutoRoutine;
-import frc.robot.subsystems.*;
+import frc.robot.oi.routine.BuildableAutoRoutine;
 import frc.robot.subsystems.climbing.ClimberSubsystem;
-import frc.robot.subsystems.drivetrain.SwerveMap;
 import frc.robot.subsystems.drivetrain.SwerveSubsystem;
-import frc.robot.subsystems.climbing.ClimberInputs.ClimberPosition;
-import frc.robot.subsystems.climbing.ClimberInputs.HooksPosition;
+import frc.robot.subsystems.elevator.ElevatorPosition;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
-import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorPosition;
 import frc.robot.subsystems.endEffector.EndEffectorSubsystem;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
@@ -49,6 +42,8 @@ public class Container {
       // Create subsystems
       Vision = new VisionSubsystem();
       Swerve = new SwerveSubsystem(isReal);
+      // Create Elevator Subsystem
+      Elevator = new ElevatorSubsystem(isReal);
       Climber = new ClimberSubsystem(isReal);
       EndEffector = new EndEffectorSubsystem(isReal);
 
@@ -58,30 +53,27 @@ public class Container {
       CommandsDashboardSection = new DashboardSection("Commands");
       TestDashboardSection = new DashboardSection("Test");
 
-      // Create Elevator Subsystem
-      Elevator = new ElevatorSubsystem(isReal);
       OperatorInterface = new OperatorInterface();
 
       OperatorInterface.bindDriverControls(Swerve, Climber, Vision);
-      OperatorInterface.bindOperatorControls(Elevator, EndEffector, Vision);
+      OperatorInterface.bindOperatorControls(Elevator, EndEffector, Vision, Swerve);
 
       // Register the named commands from each subsystem that may be used in PathPlanner
       var swerveCommands = Swerve.getNamedCommands();
       var elevatorCommands = Elevator.getNamedCommands();
       var containerCommands = getNamedCommands();
 
-      // ...add other named commands to the map using "otherNamedCommands.putAll(namedCommandsMap);"
-
       NamedCommands.registerCommands(swerveCommands);
+      NamedCommands.registerCommands(elevatorCommands);
       NamedCommands.registerCommands(containerCommands);
 
-      Map<String, Command> combinedCommands = new HashMap<>();
-      combinedCommands.putAll(swerveCommands);
-      combinedCommands.putAll(containerCommands);
-      combinedCommands.putAll(elevatorCommands);
+      // Map<String, Command> combinedCommands = new HashMap<>();
+      // // ...add other named commands to the map using "otherNamedCommands.putAll(namedCommandsMap);"
+      // combinedCommands.putAll(swerveCommands);
+      // combinedCommands.putAll(containerCommands);
+      // combinedCommands.putAll(elevatorCommands);
 
-      AutoBuilder = new BuildableAutoRoutine(combinedCommands);
-
+      AutoBuilder = new BuildableAutoRoutine(containerCommands);
     } catch (Exception e) {
       DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());
     }
@@ -91,31 +83,41 @@ public class Container {
 
   public static Command setCombinedHeightAndAngle(ElevatorPosition position) {
     return Commands.parallel(
-        Commands.runOnce(() -> System.out.println("Setting combined height and angle: " + position)),
+        Commands.print("Setting combined height and angle: " + position),
         Elevator.setElevatorSetpointCommand(position),
         EndEffector.scheduleWristSetpointCommand(position))
+        .alongWith(Commands.waitUntil(() -> EndEffector.wristAtSetpoint() && Elevator.atSetpoint()).withTimeout(3))
         .finallyDo(() -> System.out.println("Finished setting combined setpoints"));
   }
 
   public static Command scoreAtHeight(ElevatorPosition position) {
-    return setCombinedHeightAndAngle(position).alongWith(EndEffector.enableIntakeCommand())
-        .alongWith(EndEffector.scoreCoral());
+    return setCombinedHeightAndAngle(position)
+        .andThen(EndEffector.scoreCoral());
   }
 
   public static Command scoreAtHeightAndLower(ElevatorPosition position) {
-    return scoreAtHeight(position).andThen(setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
+    return scoreAtHeight(position)
+        .andThen(Commands.print(">> COMMAND: Returning to AbsoluteMinimum"))
+        .andThen(setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
   }
 
   public static Command pickupFromSource() {
-    return setCombinedHeightAndAngle(ElevatorPosition.kSource).andThen(EndEffector.pickupCoral());
+    return setCombinedHeightAndAngle(ElevatorPosition.kSource)
+        .andThen(Commands.print(">> COMMAND: Picking up coral"))
+        .andThen(EndEffector.pickupCoral());
   }
 
   public static Command pickupFromSourceAndLower() {
-    return pickupFromSource().andThen(setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
+    return pickupFromSource()
+        .andThen(Commands.print(">> COMMAND: Returning to AbsoluteMinimum"))
+        .andThen(setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
   }
 
   public static Command scoreOnSideAndLower(ReefPegSide side, ElevatorPosition position) {
-    return Swerve.pathfindToReefPegSide(side).andThen(scoreAtHeightAndLower(position));
+    // return Swerve.pathfindToReefPegSide(side)
+    // .andThen(scoreAtHeightAndLower(position));
+
+    return scoreAtHeightAndLower(position);
   }
 
   public static Map<String, Command> getNamedCommands() {

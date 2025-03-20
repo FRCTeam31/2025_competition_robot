@@ -31,11 +31,11 @@ public class ClimberSubsystem extends SubsystemBase {
         public static final byte ClimberOutLimitSwitchChannel = 5;
         public static final byte ClimberInLimitSwitchChannel = 6;
         public static final double ClimberSpeed = 0.8;
-        public static final double HooksSpeed = 0.4;
+        public static final double HooksSpeed = 0.7;
         public static final double ClimberChangeStateTimeout = 7;
         public static final double HooksChangeStateTimeout = 5;
         public static final double ClimbingPitchThresholdDegrees = 5;
-        public static final double fullyClimbedOutputRotations = 100000;
+        public static final double fullyClimbedOutputRotations = 3;
         public static final double ClimbAngleResetDebounceSeconds = 0.25;
         public static final double ClimberArmlengthMeters = Units.inchesToMeters(16);
         public static final double ClimberOutPutShaftDiamateterMeters = Units.inchesToMeters(0.5);
@@ -142,6 +142,8 @@ public class ClimberSubsystem extends SubsystemBase {
         return Commands.run(() -> {
             if (!_inputs.ClimbWenchInLimitSwitch) {
                 _climber.setClimbingWenchSpeed(ClimberMap.ClimberSpeed);
+            } else {
+                _climber.stopWenchMotors();
             }
         });
     }

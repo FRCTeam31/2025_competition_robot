@@ -6,15 +6,20 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
-import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.dashboard.DrivetrainDashboardSection;
 import frc.robot.game.ReefPegSide;
 import frc.robot.oi.ImpactRumbleHelper;
@@ -29,6 +34,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -83,7 +89,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     // Set up PP to feed current path poses to the dashboard's field widget
-    PathPlannerLogging.setLogCurrentPoseCallback(pose -> Container.TeleopDashboardSection.setFieldRobotPose(pose));
+    // PathPlannerLogging.setLogCurrentPoseCallback(pose -> Container.TeleopDashboardSection.setFieldRobotPose(pose));
     PathPlannerLogging
         .setLogTargetPoseCallback(pose -> Container.TeleopDashboardSection.getFieldTargetPose().setPose(pose));
     PathPlannerLogging
@@ -223,6 +229,7 @@ public class SwerveSubsystem extends SubsystemBase {
     Logger.processInputs(getName(), _inputs);
 
     processVisionEstimations();
+    Container.TeleopDashboardSection.setFieldRobotPose(_inputs.EstimatedRobotPose);
 
     // Update LEDs
     Logger.recordOutput("Drive/autoAlignEnabled", _useAutoAlign);
@@ -261,8 +268,6 @@ public class SwerveSubsystem extends SubsystemBase {
     var newX = currentPose.getX() + Centimeters.mutable(16.5).in(Meters) * Math.cos(a);
     var newY = currentPose.getY() + Centimeters.mutable(16.5).in(Meters) * Math.sin(a);
     var desiredPose = new Pose2d(newX, newY, _inputs.GyroAngle);
-
-    System.out.println("PATHFINDING: " + currentPose + " -> " + desiredPose);
 
     return desiredPose;
   }
@@ -374,15 +379,31 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public Command pathfindToReefPegSide(ReefPegSide side) {
     return this.defer(() -> {
-      var pathConstraints = new PathConstraints(
-          SwerveMap.Chassis.MaxSpeedMetersPerSecond,
-          SwerveMap.Chassis.MaxSpeedMetersPerSecond,
-          SwerveMap.Chassis.MaxAngularSpeedRadians,
-          SwerveMap.Chassis.MaxAngularSpeedRadians);
-
       var desiredPose = getReefPegsPoseFromCurrent(side);
+      Container.TeleopDashboardSection.getFieldTargetPose().setPose(desiredPose);
 
-      return AutoBuilder.pathfindToPose(desiredPose, pathConstraints);
+      // Create trajectory
+      Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
+          List.of(_inputs.EstimatedRobotPose, desiredPose),
+          new TrajectoryConfig(0.3, 0.165) // 16.5 cm/s max speed & acceleration
+      );
+
+      return new SwerveControllerCommand(
+          trajectory,
+          () -> _inputs.EstimatedRobotPose,
+          _swervePackager.Kinematics, // Your kinematics object
+          SwerveMap.PathPlannerTranslationPID.createPIDController(0.02), // X controller
+          SwerveMap.PathPlannerTranslationPID.createPIDController(0.02), // Y controller
+          new ProfiledPIDController(
+              SwerveMap.PathPlannerRotationPID.kP,
+              SwerveMap.PathPlannerRotationPID.kI,
+              SwerveMap.PathPlannerRotationPID.kD,
+              new Constraints(SwerveMap.Chassis.MaxAngularSpeedRadians, SwerveMap.Chassis.MaxAngularSpeedRadians / 2)), // Theta controller
+          () -> desiredPose.getRotation(),
+          _swervePackager::setDesiredModuleStates, // Sends the states to the SwerveModules
+          this)
+          .andThen(stopAllMotorsCommand())
+          .andThen(Commands.print("Reached desired pose " + desiredPose));
     });
   }
 

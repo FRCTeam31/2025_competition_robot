@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.6984246575342468,
-        "y": 5.55597602739726
+        "x": 6.065131578947367,
+        "y": 6.42717105263158
       },
       "isLocked": false,
       "linkedName": "KL"
@@ -20,8 +20,8 @@
         "y": 5.38
       },
       "prevControl": {
-        "x": 3.7219924575363654,
-        "y": 5.544782171295273
+        "x": 4.606644736842107,
+        "y": 5.97953947368421
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": -59.99999999999999
   },
   "reversed": false,
-  "folder": "KL Coral Paths",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": -59.99999999999999

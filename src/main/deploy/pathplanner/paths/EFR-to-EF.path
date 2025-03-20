@@ -20,8 +20,8 @@
         "y": 2.75
       },
       "prevControl": {
-        "x": 5.278712789790914,
-        "y": 2.5096283034150035
+        "x": 7.100356990563179,
+        "y": 2.4711633337566554
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 119.99999999999999
   },
   "reversed": false,
-  "folder": "EF Coral Paths",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 119.99999999999999

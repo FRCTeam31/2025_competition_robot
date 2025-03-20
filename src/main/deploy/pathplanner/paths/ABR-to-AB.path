@@ -20,8 +20,8 @@
         "y": 4.05
       },
       "prevControl": {
-        "x": 2.845658022808174,
-        "y": 3.892738447479456
+        "x": 0.7379487179477544,
+        "y": 6.3558333333344015
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "AB Coral Paths",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0
