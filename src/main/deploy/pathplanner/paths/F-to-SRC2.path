@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.76,
-        "y": 5.29
+        "x": 5.3625,
+        "y": 2.832366071428571
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.673666666666666,
-        "y": 5.320333333333333
+        "x": 4.580166666666665,
+        "y": 1.9336994047619034
       },
       "isLocked": false,
-      "linkedName": "KL"
+      "linkedName": "F"
     },
     {
       "anchor": {
@@ -20,8 +20,8 @@
         "y": 1.1300000000000001
       },
       "prevControl": {
-        "x": 2.2689999999999992,
-        "y": 0.8876666666666654
+        "x": 1.4297068259764223,
+        "y": 1.1765425632951703
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -128.0
+    "rotation": -126.0
   },
   "reversed": false,
   "folder": "Reef-SRC2",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -59.99999999999999
+    "rotation": 119.99999999999999
   },
   "useDefaultConstraints": true
 }

@@ -48,7 +48,7 @@
   "folder": "SRC2-Reef",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -128.0
+    "rotation": -126.0
   },
   "useDefaultConstraints": true
 }
