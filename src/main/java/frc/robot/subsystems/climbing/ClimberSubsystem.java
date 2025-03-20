@@ -74,9 +74,10 @@ public class ClimberSubsystem extends SubsystemBase {
         });
 
         _setClimberOutTimedTrigger = new Trigger(Robot.EventLoop,
-                () -> DriverStation.getMatchTime() <= 50 && DriverStation.isTeleopEnabled());
+                () -> DriverStation.getMatchTime() <= 50 && DriverStation.isTeleopEnabled()
+                        && DriverStation.isFMSAttached());
 
-        // _setClimberOutTimedTrigger.onTrue(setClimberOutAuto());
+        _setClimberOutTimedTrigger.onTrue(setClimberOutAuto());
 
     }
 
