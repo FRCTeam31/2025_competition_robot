@@ -78,7 +78,7 @@ public class ClimberSubsystem extends SubsystemBase {
 
         _setClimberOutTimedTrigger.onTrue(
                 setHooksClosedAuto()
-                        .alongWith(setClimberOutAuto()));
+                        .alongWith(setClimberOutAuto()).asProxy());
 
     }
 
