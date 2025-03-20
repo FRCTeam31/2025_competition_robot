@@ -127,6 +127,13 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   /**
+   * Resets the gyro angle
+   */
+  public void resetGyroInverted() {
+    _swervePackager.resetGyroInverted();
+  }
+
+  /**
    * Enabled/disables AutoAlign control
    */
   private void setAutoAlignEnabled(boolean enabled) {

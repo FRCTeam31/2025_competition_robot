@@ -326,12 +326,8 @@ public class BuildableAutoRoutine {
                         // This resets the pose estimation to the first point of the starting path, instead of
                         // letting it try to reach the ending position from where it *thinks* that it started.
                         // Replicates the PP Auto "Reset Odometry" flag
-                        var startingPose = path.getPathPoses().get(0);
-
-                        if (step.matches("^S\\dR-to-.+")) {
-                            startingPose = startingPose.transformBy(
-                                    new Transform2d(0, 0, path.getIdealStartingState().rotation()));
-                        }
+                        var startingPose = path.getPathPoses().get(0).transformBy(
+                                new Transform2d(0, 0, path.getIdealStartingState().rotation()));
 
                         autoCommand = autoCommand.andThen(AutoBuilder.resetOdom(startingPose));
                     }
