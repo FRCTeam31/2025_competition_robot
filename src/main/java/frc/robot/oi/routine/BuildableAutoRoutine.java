@@ -42,7 +42,6 @@ public class BuildableAutoRoutine {
     private Map<String, Command> _namedCommands;
     private boolean _filterEnabled = true;
     private StartingLocationFilter _filteredStart = StartingLocationFilter.kNone;
-    private StartingDirectionFilter _filteredStartDirection = StartingDirectionFilter.kReversed;
     private RoutinePreviewMode _currentPreviewMode = RoutinePreviewMode.kFull;
     private List<RecordableUndoEntry> _undoRecord = new ArrayList<>();
 
@@ -132,18 +131,11 @@ public class BuildableAutoRoutine {
         _toggleStartingFilterLocation = new SendableChooser<>();
         _toggleStartingFilterLocation.setDefaultOption("None", StartingLocationFilter.kNone);
         _toggleStartingFilterLocation.addOption("S1", StartingLocationFilter.kS1);
-        _toggleStartingFilterLocation.addOption("S2", StartingLocationFilter.kS2);
         _toggleStartingFilterLocation.addOption("S3", StartingLocationFilter.kS3);
+        _toggleStartingFilterLocation.addOption("S4", StartingLocationFilter.kS4);
+        _toggleStartingFilterLocation.addOption("S6", StartingLocationFilter.kS6);
         _toggleStartingFilterLocation.onChange(this::toggleStartingFilterLocation);
         Container.AutoDashboardSection.putData("Routine/Starting Filter/Location", _toggleStartingFilterLocation);
-
-        _toggleStartingFilterDirection = new SendableChooser<>();
-        _toggleStartingFilterDirection.setDefaultOption("None", StartingDirectionFilter.kNone);
-        _toggleStartingFilterDirection.addOption("Regular", StartingDirectionFilter.kRegular);
-        _toggleStartingFilterDirection.addOption("Reversed", StartingDirectionFilter.kReversed);
-        _toggleStartingFilterDirection.onChange(this::toggleStartingFilterDirection);
-        Container.AutoDashboardSection.putData("Routine/Starting Filter/Direction",
-                _toggleStartingFilterDirection);
 
         _undoLastChangeButton = new SendableButton("Undo", this::undoLastChange);
         Container.AutoDashboardSection.putData("Routine/Undo", _undoLastChangeButton);
@@ -210,32 +202,14 @@ public class BuildableAutoRoutine {
             case kS1:
                 Elastic.sendInfo("Starting Filter", "Filtering for S1 starting location");
                 break;
-            case kS2:
-                Elastic.sendInfo("Starting Filter", "Filtering for S2 starting location");
-                break;
             case kS3:
                 Elastic.sendInfo("Starting Filter", "Filtering for S3 starting location");
                 break;
-        }
-    }
-
-    /**
-    * Filters for a starting direction
-    * @param newValue
-    */
-    private void toggleStartingFilterDirection(StartingDirectionFilter newValue) {
-        _filteredStartDirection = _toggleStartingFilterDirection.getSelected();
-        updateChooserOptions();
-
-        switch (_filteredStartDirection) {
-            case kNone:
-                Elastic.sendInfo("Starting Filter", "No starting direction filter");
+            case kS4:
+                Elastic.sendInfo("Starting Filter", "Filtering for S4 starting location");
                 break;
-            case kRegular:
-                Elastic.sendInfo("Starting Filter", "Filtering for regular starting direction");
-                break;
-            case kReversed:
-                Elastic.sendInfo("Starting Filter", "Filtering for reversed starting direction");
+            case kS6:
+                Elastic.sendInfo("Starting Filter", "Filtering for S6 starting location");
                 break;
         }
     }
@@ -549,16 +523,8 @@ public class BuildableAutoRoutine {
                 if (_routineSteps.isEmpty()) {
                     // If the routine is empty, only show starting paths as options
                     for (var path : _pathNames) {
-                        if (stepIsStartingPath(path)
-                                && (_filteredStart != StartingLocationFilter.kNone
-                                        ? path.startsWith(_filteredStart.asName())
-                                        : true)
-                                && (_filteredStartDirection == StartingDirectionFilter.kReversed
-                                        ? path.split("-to-")[0].contains("R")
-                                        : true)
-                                && (_filteredStartDirection == StartingDirectionFilter.kRegular
-                                        ? !path.split("-to-")[0].contains("R")
-                                        : true)) {
+                        if (stepIsStartingPath(path)) {
+                            path.startsWith(_filteredStart.asName());
                             validNextSteps.put(path, path);
                         }
                     }
