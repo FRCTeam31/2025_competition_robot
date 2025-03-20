@@ -122,12 +122,9 @@ public class Container {
 
   public static Map<String, Command> getNamedCommands() {
     return Map.of(
-        "Score-L4-L", scoreOnSideAndLower(ReefPegSide.kLeft, ElevatorPosition.kHigh),
-        "Score-L4-R", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kHigh),
-        "Score-L3-L", scoreOnSideAndLower(ReefPegSide.kLeft, ElevatorPosition.kMid),
-        "Score-L3-R", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kMid),
-        "Score-L2-L", scoreOnSideAndLower(ReefPegSide.kLeft, ElevatorPosition.kLow),
-        "Score-L2-R", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kLow),
+        "Score-L4", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kHigh),
+        "Score-L3", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kMid),
+        "Score-L2", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kLow),
         "Score-Trough", scoreAtHeightAndLower(ElevatorPosition.kTrough),
         "Pickup-Source", pickupFromSourceAndLower());
   }
