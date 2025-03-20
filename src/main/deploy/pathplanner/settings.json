@@ -3,13 +3,14 @@
   "robotLength": 0.9271,
   "holonomicMode": true,
   "pathFolders": [
-    "Reef Paths",
+    "SRC2-Reef",
+    "Reef-SRC1",
+    "Reef-SRC2",
     "S1-Reef",
     "S3-Reef",
     "S4-Reef",
     "S6-Reef",
-    "SRC1",
-    "SRC2"
+    "SRC1-Reef"
   ],
   "autoFolders": [],
   "defaultMaxVel": 3.0,
