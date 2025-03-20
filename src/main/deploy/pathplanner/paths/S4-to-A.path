@@ -8,27 +8,32 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.438221946720054,
-        "y": 4.216777922671902
+        "x": 6.5561184210526315,
+        "y": 6.870021929824561
       },
       "isLocked": false,
-      "linkedName": "S4R"
+      "linkedName": "S4"
     },
     {
       "anchor": {
-        "x": 5.23,
-        "y": 5.31
+        "x": 3.04,
+        "y": 4.19
       },
       "prevControl": {
-        "x": 6.060745377847726,
-        "y": 4.636019379622176
+        "x": 2.551206140350877,
+        "y": 6.586425438596491
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "IJ"
+      "linkedName": "A"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.33560477001703587,
+      "rotationDegrees": -119.99999999999999
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -42,10 +47,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -119.99999999999999
+    "rotation": 0.0
   },
   "reversed": false,
-  "folder": "Start 4 Paths",
+  "folder": "S4-Reef",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

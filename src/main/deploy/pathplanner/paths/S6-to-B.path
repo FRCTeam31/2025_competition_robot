@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.811882967029368,
-        "y": 1.0266725569578823
+        "x": 3.821995614035088,
+        "y": 2.2297149122807016
       },
       "isLocked": false,
       "linkedName": "S6"
     },
     {
       "anchor": {
-        "x": 3.7600000000000002,
-        "y": 2.75
+        "x": 3.04,
+        "y": 3.86
       },
       "prevControl": {
-        "x": 4.994276315789474,
-        "y": 2.110833333333334
+        "x": 2.585614035087719,
+        "y": 2.91578947368421
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "CD"
+      "linkedName": "B"
     }
   ],
   "rotationTargets": [],
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 59.99999999999999
+    "rotation": 0.0
   },
   "reversed": false,
-  "folder": "Start 6 Paths",
+  "folder": "S6-Reef",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }
