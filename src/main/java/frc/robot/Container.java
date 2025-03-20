@@ -5,6 +5,7 @@
 package frc.robot;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import com.pathplanner.lib.auto.NamedCommands;
 
@@ -73,7 +74,7 @@ public class Container {
       // combinedCommands.putAll(containerCommands);
       // combinedCommands.putAll(elevatorCommands);
 
-      AutoBuilder = new BuildableAutoRoutine(containerCommands);
+      AutoBuilder = new BuildableAutoRoutine(getNamedCommandSuppliers());
     } catch (Exception e) {
       DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());
     }
@@ -118,6 +119,15 @@ public class Container {
     // .andThen(scoreAtHeightAndLower(position));
 
     return scoreAtHeightAndLower(position);
+  }
+
+  public static Map<String, Supplier<Command>> getNamedCommandSuppliers() {
+    return Map.of(
+        "Score-L4", () -> scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kHigh),
+        "Score-L3", () -> scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kMid),
+        "Score-L2", () -> scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kLow),
+        "Score-Trough", () -> scoreAtHeightAndLower(ElevatorPosition.kTrough),
+        "Pickup-Source", () -> pickupFromSourceAndLower());
   }
 
   public static Map<String, Command> getNamedCommands() {

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.prime.dashboard.SendableButton;
 import org.prime.dashboard.ManagedSendableChooser;
@@ -39,7 +40,7 @@ public class BuildableAutoRoutine {
     // Internal state
     private List<String> _routineSteps = new ArrayList<>();
     private String[] _pathNames = new String[0];
-    private Map<String, Command> _namedCommands;
+    private Map<String, Supplier<Command>> _namedCommands;
     private boolean _filterEnabled = true;
     private StartingLocationFilter _filteredStart = StartingLocationFilter.kNone;
     private RoutinePreviewMode _currentPreviewMode = RoutinePreviewMode.kFull;
@@ -75,7 +76,7 @@ public class BuildableAutoRoutine {
     private SendableButton _preloadRoutineButton;
     private AutoRoutinePreloader _preloadedRoutine;
 
-    public BuildableAutoRoutine(Map<String, Command> commands) {
+    public BuildableAutoRoutine(Map<String, Supplier<Command>> commands) {
         _namedCommands = commands;
         _pathNames = discoverPaths();
 
@@ -321,9 +322,9 @@ public class BuildableAutoRoutine {
                 }
             } else if (stepIsCommand(step)) {
                 // Step is a command
-                var command = _namedCommands.get(step);
-                if (command != null) {
-                    autoCommand = autoCommand.andThen(command);
+                var commandSupplier = _namedCommands.get(step);
+                if (commandSupplier != null) {
+                    autoCommand = autoCommand.andThen(commandSupplier.get());
                 } else {
                     DriverStation.reportError("[AUTOBUILDER] Command not found: " + step, false);
 
