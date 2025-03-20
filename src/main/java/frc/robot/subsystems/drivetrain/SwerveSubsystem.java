@@ -198,11 +198,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
     var limelightInputs = Container.Vision.getAllLimelightInputs();
 
-    if (Container.TeleopDashboardSection.getFrontPoseEstimationSwitch())
-      evaluatePoseEstimation(limelightInputs[0]);
-
-    if (Container.TeleopDashboardSection.getRearPoseEstimationSwitch())
-      evaluatePoseEstimation(limelightInputs[1]);
+    evaluatePoseEstimation(limelightInputs[0]);
+    evaluatePoseEstimation(limelightInputs[1]);
   }
 
   /**
