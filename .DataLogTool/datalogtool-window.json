@@ -3,11 +3,11 @@
     "GLOBAL": {
       "font": "Proggy Dotted",
       "fps": "120",
-      "height": "510",
+      "height": "1017",
       "maximized": "1",
       "style": "0",
       "userScale": "2",
-      "width": "925",
+      "width": "1920",
       "xpos": "0",
       "ypos": "23"
     }
@@ -20,7 +20,7 @@
     },
     "Download": {
       "Collapsed": "0",
-      "Pos": "0,250",
+      "Pos": "0,254",
       "Size": "375,260"
     },
     "Entries": {

@@ -1,6 +1,6 @@
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2025.2.1"
+    id "edu.wpi.first.GradleRIO" version "2025.3.1"
     id "com.peterabeles.gversion" version "1.10"
 }
 
@@ -134,13 +134,12 @@ task(eventDeploy) {
                     println '                        (##(#(((/#/*              %###(((#   #/.#               '
                     println '                 ,.*(((*,.//((((***(//,.///   ((((((((((##/*/// /#              '
                     println '                 ((/((/*,.*//(* ,/#*,,(***//*****/////*/***/.                   '
-                    println '                                                                                 '
+                    println '                                                                                '
                     println ''
                     println ''
                     println ''
                     println ''
                     println '            -~ You fool. the build failed, Mango Bird is dissapointed ~-                      '
-                    println ''
                     println ''
                     println ''
                     println ''
@@ -180,12 +179,10 @@ task(eventDeploy) {
                     println '              *./#//,..((///////#/.,/(/////*/((((///****/(//%/               '
                     println '               ##(//*///(#     (*( ((#/*/****/((((////*(                     '
                     println ''
-
                     println ''
                     println ''
                     println ''
                     println '                          -~ Mango Bird My Beloved ~-                        '
-                    println ''
                     println ''
                     println ''
                     println ''

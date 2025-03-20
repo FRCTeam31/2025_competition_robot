@@ -3,24 +3,24 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.1,
-        "y": 1.1
+        "x": 1.13,
+        "y": 1.1300000000000001
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.121539651798293,
-        "y": 1.6197537517049883
+        "x": 2.1515396517982923,
+        "y": 1.649753751704988
       },
       "isLocked": false,
       "linkedName": "SRC2"
     },
     {
       "anchor": {
-        "x": 3.15,
+        "x": 3.04,
         "y": 4.05
       },
       "prevControl": {
-        "x": 2.47462733775322,
+        "x": 2.36462733775322,
         "y": 3.8912972877678023
       },
       "nextControl": null,
@@ -45,7 +45,7 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "AB Paths",
+  "folder": "Reef Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": -128.0

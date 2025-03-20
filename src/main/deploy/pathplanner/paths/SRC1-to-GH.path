@@ -3,24 +3,24 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.1,
-        "y": 7.0
+        "x": 1.22,
+        "y": 6.94
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.0106666666666655,
-        "y": 5.869333333333333
+        "x": 6.130666666666663,
+        "y": 5.809333333333333
       },
       "isLocked": false,
       "linkedName": "SRC1"
     },
     {
       "anchor": {
-        "x": 5.8,
+        "x": 5.95,
         "y": 4.05
       },
       "prevControl": {
-        "x": 6.155333333333334,
+        "x": 6.305333333333334,
         "y": 5.0426666666666655
       },
       "nextControl": null,
@@ -45,10 +45,10 @@
     "rotation": 180.0
   },
   "reversed": false,
-  "folder": "GH Paths",
+  "folder": "Reef Paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 128.0
+    "rotation": 126.80150993249389
   },
   "useDefaultConstraints": true
 }

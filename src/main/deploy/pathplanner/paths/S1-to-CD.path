@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.786666666666667,
-        "y": 6.148333333333332
+        "x": 2.454934210526315,
+        "y": 6.224999999999999
       },
       "isLocked": false,
       "linkedName": "S1"
     },
     {
       "anchor": {
-        "x": 3.82,
-        "y": 2.84
+        "x": 3.7600000000000002,
+        "y": 2.75
       },
       "prevControl": {
-        "x": 1.5879999999999992,
-        "y": 2.789999999999999
+        "x": 1.5279999999999996,
+        "y": 2.6999999999999993
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 59.99999999999999
   },
   "reversed": false,
-  "folder": "S1 Paths",
+  "folder": "Start 1 Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

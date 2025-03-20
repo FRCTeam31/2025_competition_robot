@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.872587719298244,
-        "y": 5.888048245614035
+        "x": 6.065131578947367,
+        "y": 6.42717105263158
       },
       "isLocked": false,
       "linkedName": "S5"
     },
     {
       "anchor": {
-        "x": 3.78,
-        "y": 5.25
+        "x": 3.76,
+        "y": 5.29
       },
       "prevControl": {
-        "x": 4.476644736842105,
-        "y": 5.84953947368421
+        "x": 4.456644736842106,
+        "y": 5.88953947368421
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": -59.99999999999999
   },
   "reversed": false,
-  "folder": "S5 Paths",
+  "folder": "Start 5 Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

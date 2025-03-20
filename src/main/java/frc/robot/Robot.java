@@ -15,19 +15,15 @@ import org.prime.util.BuildConstants;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 
 import edu.wpi.first.net.WebServer;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.LEDPattern;
-import edu.wpi.first.wpilibj.LEDPattern.GradientType;
 import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.subsystems.PwmLEDs;
 import frc.robot.subsystems.drivetrain.util.LocalADStarADK;
 
 public class Robot extends LoggedRobot {
@@ -58,9 +54,6 @@ public class Robot extends LoggedRobot {
 
     // Initialize the robot container
     Container.initialize(isReal());
-
-    // Schedule the LED patterns to run at 120Hz
-    Container.LEDs.startUpdateLoop();
 
     Elastic.selectTab("Auto");
   }
@@ -122,10 +115,10 @@ public class Robot extends LoggedRobot {
   @Override
   public void disabledInit() {
     DataLogManager.log("Robot disabled");
-    var disabledPattern = LEDPattern.solid(getAllianceColor()).breathe(Units.Seconds.of(2.0));
-    Container.LEDs.setBackgroundPattern(disabledPattern);
-    Container.LEDs.clearForegroundPattern();
     Container.Swerve.disableAutoAlignCommand().schedule();
+    Container.Elevator.stopMotorsCommand().schedule();
+    Container.Swerve.stopAllMotorsCommand();
+    Container.Climber.stopAllMotors();
   }
 
   /**
@@ -146,16 +139,6 @@ public class Robot extends LoggedRobot {
   @Override
   public void autonomousInit() {
     Elastic.selectTab("Auto");
-    var autoPattern = LEDPattern.gradient(GradientType.kDiscontinuous, getAllianceColor(), Color.kBlack)
-        .offsetBy(-PwmLEDs.VMap.PixelsPerStrip / 2)
-        .scrollAtRelativeSpeed(Units.Hertz.of(2))
-        .reversed();
-    var combinedPattern = LEDPattern.gradient(GradientType.kDiscontinuous, getAllianceColor(), Color.kBlack)
-        .offsetBy(PwmLEDs.VMap.PixelsPerStrip / 2)
-        .scrollAtRelativeSpeed(Units.Hertz.of(2))
-        .blend(autoPattern);
-    Container.LEDs.setBackgroundPattern(combinedPattern);
-    Container.LEDs.clearForegroundPattern();
     Container.Swerve.disableAutoAlignCommand().schedule();
 
     // Cancel any auto command that's still running and reset the subsystem states
@@ -163,7 +146,7 @@ public class Robot extends LoggedRobot {
       _autonomousCommand.cancel();
 
       // Stop any subsystems still running
-      Container.Swerve.stopAllMotors();
+      Container.Swerve.stopAllMotorsCommand();
     }
 
     _autonomousCommand = Container.AutoBuilder.exportCombinedAutoRoutine();
@@ -199,16 +182,17 @@ public class Robot extends LoggedRobot {
       _autonomousCommand.cancel();
 
       // Stop any subsystems still running
-      Container.Swerve.stopAllMotors();
+      Container.Swerve.stopAllMotorsCommand();
+
     } else {
       Container.Swerve.resetGyro();
     }
 
     // Set teleop LED pattern
-    var telePattern = LEDPattern.solid(getAllianceColor()).scrollAtRelativeSpeed(Units.Hertz.of(2));
-    Container.LEDs.setBackgroundPattern(telePattern);
-    Container.LEDs.clearForegroundPattern();
     Container.Swerve.disableAutoAlignCommand().schedule();
+    Container.Climber.stopAllMotors();
+    Container.Elevator.stopMotorsCommand().schedule();
+
   }
 
   /**

@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 5.175,
-        "y": 5.25
+        "x": 5.23,
+        "y": 5.31
       },
       "prevControl": {
-        "x": 6.493391332546948,
-        "y": 5.118676153228687
+        "x": 6.548391332546949,
+        "y": 5.178676153228687
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": -119.99999999999999
   },
   "reversed": false,
-  "folder": "S3 Paths",
+  "folder": "Start 3 Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

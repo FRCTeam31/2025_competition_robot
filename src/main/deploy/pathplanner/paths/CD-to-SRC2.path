@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.82,
-        "y": 2.84
+        "x": 3.76,
+        "y": 2.75
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.066304973606198,
-        "y": 2.541270919134807
+        "x": 3.006304973606198,
+        "y": 2.451270919134807
       },
       "isLocked": false,
       "linkedName": "CD"
     },
     {
       "anchor": {
-        "x": 1.1,
-        "y": 1.1
+        "x": 1.13,
+        "y": 1.1300000000000001
       },
       "prevControl": {
-        "x": 2.0669871897085135,
-        "y": 1.9644409017624396
+        "x": 2.0969871897085133,
+        "y": 1.9944409017624394
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": -128.0
   },
   "reversed": false,
-  "folder": "CD Paths",
+  "folder": "Source 2 Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 59.99999999999999

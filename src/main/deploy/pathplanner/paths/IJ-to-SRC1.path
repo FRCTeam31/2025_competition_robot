@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.175,
-        "y": 5.25
+        "x": 5.23,
+        "y": 5.31
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.2524893227627647,
-        "y": 6.0060544402453715
+        "x": 3.302127192982456,
+        "y": 6.427171052631578
       },
       "isLocked": false,
       "linkedName": "IJ"
     },
     {
       "anchor": {
-        "x": 1.1,
-        "y": 7.0
+        "x": 1.22,
+        "y": 6.94
       },
       "prevControl": {
-        "x": 1.678234199645402,
-        "y": 6.701871661501132
+        "x": 1.7982341996454019,
+        "y": 6.641871661501132
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,10 +42,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 128.0
+    "rotation": 126.80150993249389
   },
   "reversed": false,
-  "folder": "IJ Paths",
+  "folder": "Source 1 Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": -119.99999999999999

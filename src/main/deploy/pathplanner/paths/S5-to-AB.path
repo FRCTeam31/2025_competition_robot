@@ -16,11 +16,11 @@
     },
     {
       "anchor": {
-        "x": 3.15,
+        "x": 3.04,
         "y": 4.05
       },
       "prevControl": {
-        "x": 3.0807017543859647,
+        "x": 2.970701754385965,
         "y": 2.845855263157895
       },
       "nextControl": null,
@@ -45,7 +45,7 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "S5 Paths",
+  "folder": "Start 5 Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

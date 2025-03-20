@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.79557017543981,
-        "y": 6.205745614036918
+        "x": 6.5561184210526315,
+        "y": 6.870021929824561
       },
       "isLocked": false,
       "linkedName": "S4"
     },
     {
       "anchor": {
-        "x": 3.15,
+        "x": 3.04,
         "y": 4.05
       },
       "prevControl": {
-        "x": 2.859276315790687,
-        "y": 6.465679824563233
+        "x": 2.551206140350877,
+        "y": 6.44642543859649
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "S4 Paths",
+  "folder": "Start 4 Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

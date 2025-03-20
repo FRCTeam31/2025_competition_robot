@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.026622807017543,
-        "y": 5.214144736842105
+        "x": 6.084385964912281,
+        "y": 5.435570175438599
       },
       "isLocked": false,
       "linkedName": "S6"
     },
     {
       "anchor": {
-        "x": 3.78,
-        "y": 5.25
+        "x": 3.76,
+        "y": 5.29
       },
       "prevControl": {
-        "x": 5.198684210526316,
-        "y": 6.2827631578947365
+        "x": 5.178684210526317,
+        "y": 6.3227631578947365
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": -59.99999999999999
   },
   "reversed": false,
-  "folder": "S6 Paths",
+  "folder": "Start 6 Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

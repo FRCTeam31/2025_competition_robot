@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.15,
-        "y": 2.8
+        "x": 5.21,
+        "y": 2.75
       },
       "prevControl": null,
       "nextControl": {
-        "x": 8.325333333333333,
-        "y": 4.877333333333333
+        "x": 8.558574561403509,
+        "y": 4.261052631578948
       },
       "isLocked": false,
       "linkedName": "EF"
     },
     {
       "anchor": {
-        "x": 1.1,
-        "y": 7.0
+        "x": 1.22,
+        "y": 6.94
       },
       "prevControl": {
-        "x": 2.073666666666666,
-        "y": 6.902666666666667
+        "x": 5.23203947368421,
+        "y": 6.627105263157895
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,10 +42,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 128.0
+    "rotation": 126.80150993249389
   },
   "reversed": false,
-  "folder": "EF Paths",
+  "folder": "Source 1 Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 119.99999999999999

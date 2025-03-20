@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 5.15,
-        "y": 2.8
+        "x": 5.21,
+        "y": 2.75
       },
       "prevControl": {
-        "x": 7.064666666666668,
-        "y": 3.4513333333333325
+        "x": 7.124666666666668,
+        "y": 3.4013333333333327
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 119.99999999999999
   },
   "reversed": false,
-  "folder": "S2 Paths",
+  "folder": "Start 2 Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

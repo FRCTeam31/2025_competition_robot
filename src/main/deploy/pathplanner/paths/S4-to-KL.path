@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 3.78,
-        "y": 5.25
+        "x": 3.76,
+        "y": 5.29
       },
       "prevControl": {
-        "x": 4.476644736842105,
-        "y": 5.84953947368421
+        "x": 4.948377192982456,
+        "y": 6.244254385964911
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": -59.99999999999999
   },
   "reversed": false,
-  "folder": "S4 Paths",
+  "folder": "Start 4 Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

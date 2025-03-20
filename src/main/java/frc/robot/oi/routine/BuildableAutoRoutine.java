@@ -1,4 +1,4 @@
-package frc.robot.oi;
+package frc.robot.oi.routine;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+
 import frc.robot.Container;
 import frc.robot.Elastic;
 
@@ -40,200 +41,10 @@ public class BuildableAutoRoutine {
     private String[] _pathNames = new String[0];
     private Map<String, Command> _namedCommands;
     private boolean _filterEnabled = true;
-    private _startingLocationFilter _filteredStart = _startingLocationFilter.kNone;
-    private _startingDirectionFilter _filteredStartDirection = _startingDirectionFilter.kNone;
-    private _previewMode _currentPreviewMode = _previewMode.kSingle;
+    private StartingLocationFilter _filteredStart = StartingLocationFilter.kNone;
+    private StartingDirectionFilter _filteredStartDirection = StartingDirectionFilter.kReversed;
+    private RoutinePreviewMode _currentPreviewMode = RoutinePreviewMode.kFull;
     private List<RecordableUndoEntry> _undoRecord = new ArrayList<>();
-
-    /**
-     * Different view modes for previewing an autonomus routine.
-     */
-    private enum _previewMode {
-        kSingle,
-        kFull,
-        kAfterImage
-    }
-
-    /**
-     * Different locations for filtering starting locations when building an autonomus routine.
-     * kNone is no filtering.
-     */
-    private enum _startingLocationFilter {
-        kNone,
-        kS1,
-        kS2,
-        kS3;
-
-        /**
-         * Returns the name of the starting location enum without the k. (S1 instead of kS1)
-         * @return
-         */
-        private String asName() {
-            return this.toString().replace("k", "");
-        }
-    }
-
-    /**
-     * Different directions for filtering starting direction while building an autonomus routine.
-     * kNone is no filtering.
-     */
-    private enum _startingDirectionFilter {
-        kNone,
-        kRegular,
-        kReversed
-    }
-
-    /**
-     * Different types of actions that can occur, used in the construction of a {@code RecordableUndoEntry}.
-     */
-    private enum _recordableAction {
-        kAdd,
-        kRemove,
-        kClear,
-        kLoad;
-
-        /**
-         * Undoes an action by passing in the routine in the form of a list and the {@code RecordableUndoEntry}
-         * for the change you want to undo. Data from the {@code RecordableUndoEntry} is used to alter the routine
-         * to match its state before the change.
-         * @param routine
-         * @param undoEntry
-         * @return
-         */
-        private List<String> performInverse(List<String> routine, RecordableUndoEntry undoEntry) {
-            switch (this) {
-                case kAdd:
-                    routine.remove(routine.size() - 1);
-                    break;
-                case kRemove:
-                    routine.addAll(undoEntry.getUnpackedStep());
-                    break;
-                case kClear:
-                    routine.addAll(undoEntry.getUnpackedStep());
-                    break;
-                case kLoad:
-                    routine.clear();
-                    routine.addAll(undoEntry.getUnpackedStep());
-                    break;
-            }
-            return routine;
-        }
-
-        /**
-         * Currently unimplemented. Could be used as a "redo" to preform an action based on the
-         * {@code RecordableUndoEntry}.
-         * @param routine
-         * @param undoEntry
-         * @return
-         */
-        private List<String> performAction(List<String> routine, RecordableUndoEntry undoEntry) {
-            switch (this) {
-                case kAdd:
-                    routine.addAll(undoEntry.getUnpackedStep());
-                    break;
-                case kRemove:
-                    routine.remove(routine.size() - 1);
-                    break;
-                case kClear:
-                    routine.clear();
-                    break;
-                case kLoad:
-                    routine.clear();
-                    routine.addAll(undoEntry.getStep().getLoadedStep());
-                    break;
-            }
-
-            return routine;
-        }
-    }
-
-    /**
-     * Used to store data required for a undo entry.
-     * There is an action, an enum that defines the action that was performed,
-     * and a step, a {@code RecordableStepEntry} that stores data about the routine.
-     * This data can be used to both undo an action (how it is currently used), or
-     * reconstruct an action (redo, currently not implemented).
-     */
-    private class RecordableUndoEntry {
-        private _recordableAction action;
-        private RecordableStepEntry step;
-
-        private RecordableUndoEntry(_recordableAction action, RecordableStepEntry step) {
-            this.action = action;
-            this.step = step;
-        }
-
-        private _recordableAction getAction() {
-            return this.action;
-        }
-
-        private RecordableStepEntry getStep() {
-            return this.step;
-        }
-
-        private List<String> getUnpackedStep() {
-            return this.step.getStep();
-        }
-
-    }
-
-    /**
-     * Used to store data about an auto routine, for use as part of a {@code RecordableUndoEntry}.
-     * This stores both a {@code parts} list that references the thing that was added, removed, or the entire routine before
-     * it was cleared, and a {@code loadedParts} list that is used when loading to save multiple routine parts (before and after a load).
-     */
-    private class RecordableStepEntry {
-        private List<String> parts = new ArrayList<>();
-        private List<String> loadedParts = new ArrayList<>();
-
-        /**
-         * Creates a {@code RecordableStepEntry} from a list of steps (paths or commands)
-         * @param step
-         */
-        private RecordableStepEntry(List<String> step) {
-            this.parts.clear();
-            this.parts.addAll(step);
-        }
-
-        /**
-         * Creates a {@code RecordableStepEntry} from single step (path or command)
-         * @param step
-         */
-        private RecordableStepEntry(String step) {
-            this.parts.clear();
-            this.parts.add(step);
-        }
-
-        /**
-         * Mainly used for a {@code RecordableUndoEntry} with an action of {@code kLoad}
-         * Creates a {@code RecordableStepEntry} from two lists of steps, one for the routine before the load and one for
-         * the routine that is being loaded.
-         * @param stepPrior
-         * @param stepLoaded
-         */
-        private RecordableStepEntry(List<String> stepPrior, List<String> stepLoaded) {
-            this.parts.clear();
-            this.loadedParts.clear();
-            this.parts.addAll(stepPrior);
-            this.loadedParts.addAll(stepLoaded);
-        }
-
-        /**
-         * Gets the step(s) in the {@code RecordableStepEntry} as a list of Strings.
-         * @return
-         */
-        private List<String> getStep() {
-            return this.parts;
-        }
-
-        /**
-         * Gets the loaded step(s) in the {@code RecordableStepEntry} as a list of Strings.
-         * @return
-         */
-        private List<String> getLoadedStep() {
-            return this.loadedParts;
-        }
-    }
 
     // Dashboard widgets
     private ManagedSendableChooser<String> _nextStepChooser;
@@ -247,9 +58,12 @@ public class BuildableAutoRoutine {
     private SendableButton _returnToS2RButton;
     private SendableButton _undoLastChangeButton;
     private SendableChooser<Boolean> _toggleFilterSwitch;
-    private SendableChooser<_previewMode> _toggleRoutinePreviewMode;
-    private SendableChooser<_startingLocationFilter> _toggleStartingFilterLocation;
-    private SendableChooser<_startingDirectionFilter> _toggleStartingFilterDirection;
+    private SendableChooser<RoutinePreviewMode> _toggleRoutinePreviewMode;
+    private SendableChooser<StartingLocationFilter> _toggleStartingFilterLocation;
+    private SendableChooser<StartingDirectionFilter> _toggleStartingFilterDirection;
+
+    // Auto Raise Elevator
+    private AutoRoutineAutoRaiseElevator _autoRaiseElevator = new AutoRoutineAutoRaiseElevator();
 
     // History management
     private AutoRoutineHistory _routineHistory;
@@ -309,24 +123,24 @@ public class BuildableAutoRoutine {
         Container.AutoDashboardSection.putData("Routine/Filter Status", _toggleFilterSwitch);
 
         _toggleRoutinePreviewMode = new SendableChooser<>();
-        _toggleRoutinePreviewMode.setDefaultOption("Single", _previewMode.kSingle);
-        _toggleRoutinePreviewMode.addOption("Full", _previewMode.kFull);
-        _toggleRoutinePreviewMode.addOption("After Image", _previewMode.kAfterImage);
+        _toggleRoutinePreviewMode.setDefaultOption("Single", RoutinePreviewMode.kSingle);
+        _toggleRoutinePreviewMode.addOption("Full", RoutinePreviewMode.kFull);
+        _toggleRoutinePreviewMode.addOption("After Image", RoutinePreviewMode.kAfterImage);
         _toggleRoutinePreviewMode.onChange(this::togglePreviewMode);
         Container.AutoDashboardSection.putData("Routine/Routine Preview Mode", _toggleRoutinePreviewMode);
 
         _toggleStartingFilterLocation = new SendableChooser<>();
-        _toggleStartingFilterLocation.setDefaultOption("None", _startingLocationFilter.kNone);
-        _toggleStartingFilterLocation.addOption("S1", _startingLocationFilter.kS1);
-        _toggleStartingFilterLocation.addOption("S2", _startingLocationFilter.kS2);
-        _toggleStartingFilterLocation.addOption("S3", _startingLocationFilter.kS3);
+        _toggleStartingFilterLocation.setDefaultOption("None", StartingLocationFilter.kNone);
+        _toggleStartingFilterLocation.addOption("S1", StartingLocationFilter.kS1);
+        _toggleStartingFilterLocation.addOption("S2", StartingLocationFilter.kS2);
+        _toggleStartingFilterLocation.addOption("S3", StartingLocationFilter.kS3);
         _toggleStartingFilterLocation.onChange(this::toggleStartingFilterLocation);
         Container.AutoDashboardSection.putData("Routine/Starting Filter/Location", _toggleStartingFilterLocation);
 
         _toggleStartingFilterDirection = new SendableChooser<>();
-        _toggleStartingFilterDirection.setDefaultOption("None", _startingDirectionFilter.kNone);
-        _toggleStartingFilterDirection.addOption("Regular", _startingDirectionFilter.kRegular);
-        _toggleStartingFilterDirection.addOption("Reversed", _startingDirectionFilter.kReversed);
+        _toggleStartingFilterDirection.setDefaultOption("None", StartingDirectionFilter.kNone);
+        _toggleStartingFilterDirection.addOption("Regular", StartingDirectionFilter.kRegular);
+        _toggleStartingFilterDirection.addOption("Reversed", StartingDirectionFilter.kReversed);
         _toggleStartingFilterDirection.onChange(this::toggleStartingFilterDirection);
         Container.AutoDashboardSection.putData("Routine/Starting Filter/Direction",
                 _toggleStartingFilterDirection);
@@ -363,7 +177,7 @@ public class BuildableAutoRoutine {
      * Toggles the preview mode for the field view.
      * @param newValue
      */
-    private void togglePreviewMode(_previewMode newValue) {
+    private void togglePreviewMode(RoutinePreviewMode newValue) {
         _currentPreviewMode = _toggleRoutinePreviewMode.getSelected();
         updateFieldView(_nextStepChooser.getUserSelected());
 
@@ -385,7 +199,7 @@ public class BuildableAutoRoutine {
     * Filters for a single starting location
     * @param newValue
     */
-    private void toggleStartingFilterLocation(_startingLocationFilter newValue) {
+    private void toggleStartingFilterLocation(StartingLocationFilter newValue) {
         _filteredStart = _toggleStartingFilterLocation.getSelected();
         updateChooserOptions();
 
@@ -409,7 +223,7 @@ public class BuildableAutoRoutine {
     * Filters for a starting direction
     * @param newValue
     */
-    private void toggleStartingFilterDirection(_startingDirectionFilter newValue) {
+    private void toggleStartingFilterDirection(StartingDirectionFilter newValue) {
         _filteredStartDirection = _toggleStartingFilterDirection.getSelected();
         updateChooserOptions();
 
@@ -552,12 +366,15 @@ public class BuildableAutoRoutine {
             }
         }
 
+        autoCommand = autoCommand.andThen(Commands.print("Auto routine completed"));
         Container.TeleopDashboardSection.clearFieldPath();
         String routineName = DriverStation.isFMSAttached()
                 ? DriverStation.getEventName() + " " + DriverStation.getMatchNumber()
                 : "TestAuto" + System.currentTimeMillis();
         _routineHistory.addRoutineToHistory(routineName, _routineSteps);
         _historyChooser.addOption(routineName + " - " + String.join(", ", _routineSteps), routineName);
+
+        _autoRaiseElevator.constructAutoElevatorPositionsList(_routineSteps);
         return autoCommand;
     }
 
@@ -576,7 +393,7 @@ public class BuildableAutoRoutine {
             return;
         }
 
-        _undoRecord.add(new RecordableUndoEntry(_recordableAction.kAdd, new RecordableStepEntry(newStep)));
+        _undoRecord.add(new RecordableUndoEntry(RecordableAction.kAdd, new RecordableStepEntry(newStep)));
         _routineSteps.add(newStep);
         updateChooserOptions();
     }
@@ -588,7 +405,7 @@ public class BuildableAutoRoutine {
         if (_routineSteps.isEmpty()) {
             Elastic.sendWarning("Auto Routine", "No steps to remove");
         } else {
-            _undoRecord.add(new RecordableUndoEntry(_recordableAction.kRemove,
+            _undoRecord.add(new RecordableUndoEntry(RecordableAction.kRemove,
                     new RecordableStepEntry(_routineSteps.get(_routineSteps.size() - 1))));
             _routineSteps.remove(_routineSteps.size() - 1);
             Elastic.sendInfo("Auto Routine", "Removed last routine step");
@@ -612,7 +429,7 @@ public class BuildableAutoRoutine {
             Elastic.sendWarning("Auto Routine", "Routine is already empty");
             return;
         } else {
-            _undoRecord.add(new RecordableUndoEntry(_recordableAction.kClear, new RecordableStepEntry(_routineSteps)));
+            _undoRecord.add(new RecordableUndoEntry(RecordableAction.kClear, new RecordableStepEntry(_routineSteps)));
             _routineSteps.clear();
             Container.TeleopDashboardSection.clearFieldPath();
             Container.TeleopDashboardSection.setFieldRobotPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
@@ -652,7 +469,7 @@ public class BuildableAutoRoutine {
             return;
         }
 
-        _undoRecord.add(new RecordableUndoEntry(_recordableAction.kLoad,
+        _undoRecord.add(new RecordableUndoEntry(RecordableAction.kLoad,
                 new RecordableStepEntry(_routineSteps, List.of(prevRoutineSteps))));
 
         if (!_routineSteps.isEmpty()) {
@@ -689,7 +506,7 @@ public class BuildableAutoRoutine {
      */
     private void loadPreloadedRoutine() {
         if (!_preloadedRoutine.readSavedRoutine().isEmpty()) {
-            _undoRecord.add(new RecordableUndoEntry(_recordableAction.kLoad,
+            _undoRecord.add(new RecordableUndoEntry(RecordableAction.kLoad,
                     new RecordableStepEntry(_routineSteps, _preloadedRoutine.readSavedRoutine())));
 
             _routineSteps.clear();
@@ -715,7 +532,7 @@ public class BuildableAutoRoutine {
         }
 
         try {
-            var pathfindCommand = Container.Swerve.pathfindToPoseCommand(startingPose);
+            var pathfindCommand = Container.Swerve.pathfindToPoseCommand(() -> startingPose, true);
             pathfindCommand.schedule();
         } catch (Exception e) {
             Elastic.sendError("Auto Routine", "Failed to pathfind to starting pose: " + e.getMessage());
@@ -737,13 +554,13 @@ public class BuildableAutoRoutine {
                     // If the routine is empty, only show starting paths as options
                     for (var path : _pathNames) {
                         if (stepIsStartingPath(path)
-                                && (_filteredStart != _startingLocationFilter.kNone
+                                && (_filteredStart != StartingLocationFilter.kNone
                                         ? path.startsWith(_filteredStart.asName())
                                         : true)
-                                && (_filteredStartDirection == _startingDirectionFilter.kReversed
+                                && (_filteredStartDirection == StartingDirectionFilter.kReversed
                                         ? path.split("-to-")[0].contains("R")
                                         : true)
-                                && (_filteredStartDirection == _startingDirectionFilter.kRegular
+                                && (_filteredStartDirection == StartingDirectionFilter.kRegular
                                         ? !path.split("-to-")[0].contains("R")
                                         : true)) {
                             validNextSteps.put(path, path);

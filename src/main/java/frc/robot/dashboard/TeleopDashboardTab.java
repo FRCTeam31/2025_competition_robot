@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import frc.robot.Robot;
-import frc.robot.oi.BuildableAutoRoutine;
+import frc.robot.oi.routine.BuildableAutoRoutine;
 
 import java.util.ArrayList;
 import java.util.List;

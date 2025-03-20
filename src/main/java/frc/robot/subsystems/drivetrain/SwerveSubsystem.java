@@ -6,31 +6,37 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.units.Units;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.LEDPattern;
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.dashboard.DrivetrainDashboardSection;
+import frc.robot.game.ReefPegSide;
 import frc.robot.oi.ImpactRumbleHelper;
 import frc.robot.Container;
 import frc.robot.Robot;
 import frc.robot.subsystems.drivetrain.util.AutoAlign;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
+import static edu.wpi.first.units.Units.Centimeters;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
+import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.SwerveControlSuppliers;
@@ -51,20 +57,11 @@ public class SwerveSubsystem extends SubsystemBase {
   // Vision, Kinematics, odometry
   public boolean WithinPoseEstimationVelocity = true;
 
-  private LEDPattern _alignOnTargetPattern = LEDPattern
-      .solid(Color.kGreen)
-      .blink(Units.Seconds.of(0.1));
-  private LEDPattern _alignOffTargetPattern = LEDPattern
-      .steps(Map.of(0.0, Color.kRed, 0.25, Color.kBlack))
-      .scrollAtRelativeSpeed(Units.Hertz.of(2));
-
-  SysIdRoutine _driveSysIdRoutine;
-
   /**
    * Creates a new Drivetrain.
    */
   public SwerveSubsystem(boolean isReal) {
-    setName("Drivetrain");
+    setName("Swerve");
 
     _rumbleHelper = new ImpactRumbleHelper();
 
@@ -78,29 +75,6 @@ public class SwerveSubsystem extends SubsystemBase {
     _drivetrainDashboardSection = new DrivetrainDashboardSection();
 
     configurePathPlanner();
-
-    // Create a new SysId routine for characterizing the drive.
-    // TODO: Remove when no longer needed
-    _driveSysIdRoutine = new SysIdRoutine(
-        // Ramp up at 1 volt per second for quasistatic tests, step at 2 volts in
-        // dynamic tests, run for 13 seconds.
-        new SysIdRoutine.Config(Units.Volts.of(2).per(Units.Second), Units.Volts.of(8),
-            Units.Seconds.of(15)),
-        new SysIdRoutine.Mechanism(
-            // Tell SysId how to plumb the driving voltage to the motors.
-            _swervePackager::setDriveVoltages,
-            // Tell SysId how to record a frame of data for each motor on the mechanism
-            // being characterized.
-            _swervePackager::logSysIdDrive,
-            // Tell SysId to make generated commands require this subsystem, suffix test
-            // state in WPILog with this subsystem's name
-            this));
-  }
-
-  public Command driveSwerveVoltage(double voltage) {
-    return Commands.runOnce(() -> {
-      _swervePackager.setDriveVoltages(Units.Volts.of(voltage));
-    }, this);
   }
 
   private void configurePathPlanner() {
@@ -115,7 +89,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     // Set up PP to feed current path poses to the dashboard's field widget
-    PathPlannerLogging.setLogCurrentPoseCallback(pose -> Container.TeleopDashboardSection.setFieldRobotPose(pose));
+    // PathPlannerLogging.setLogCurrentPoseCallback(pose -> Container.TeleopDashboardSection.setFieldRobotPose(pose));
     PathPlannerLogging
         .setLogTargetPoseCallback(pose -> Container.TeleopDashboardSection.getFieldTargetPose().setPose(pose));
     PathPlannerLogging
@@ -157,8 +131,6 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   private void setAutoAlignEnabled(boolean enabled) {
     _useAutoAlign = enabled;
-    if (!enabled)
-      Container.LEDs.clearForegroundPattern();
   }
 
   /**
@@ -257,16 +229,12 @@ public class SwerveSubsystem extends SubsystemBase {
     Logger.processInputs(getName(), _inputs);
 
     processVisionEstimations();
+    Container.TeleopDashboardSection.setFieldRobotPose(_inputs.EstimatedRobotPose);
 
     // Update LEDs
     Logger.recordOutput("Drive/autoAlignEnabled", _useAutoAlign);
     Logger.recordOutput("Drive/autoAlignSetpoint", _autoAlign.getSetpoint());
     Logger.recordOutput("Drive/autoAlignAtSetpoint", _autoAlign.atSetpoint());
-    if (_useAutoAlign) {
-      Container.LEDs.setForegroundPattern(_autoAlign.atSetpoint()
-          ? _alignOnTargetPattern
-          : _alignOffTargetPattern);
-    }
 
     // Update shuffleboard
     if (DriverStation.isEnabled()) {
@@ -287,11 +255,27 @@ public class SwerveSubsystem extends SubsystemBase {
     Container.OperatorInterface.setDriverRumbleIntensity(_rumbleHelper.getRumbleIntensity());
   }
 
+  /**
+   * Returns the pose of the desired side of reef pegs from the current robot pose (assumed to be the midpoint between pegs)
+   */
+  public Pose2d getReefPegsPoseFromCurrent(ReefPegSide side) {
+    var currentPose = _inputs.EstimatedRobotPose;
+    var currentHeadingRadians = _inputs.GyroAngle.getRadians();
+    var a = side == ReefPegSide.kLeft
+        ? currentHeadingRadians + (Math.PI / 2)
+        : currentHeadingRadians - (Math.PI / 2);
+
+    var newX = currentPose.getX() + Centimeters.mutable(16.5).in(Meters) * Math.cos(a);
+    var newY = currentPose.getY() + Centimeters.mutable(16.5).in(Meters) * Math.sin(a);
+    var desiredPose = new Pose2d(newX, newY, _inputs.GyroAngle);
+
+    return desiredPose;
+  }
+
   // #region Commands
 
   /**
    * Creates a command that drives the robot in field-relative mode using input controls
-   * 
    * @param controlSuppliers Controller input suppliers
    */
   public Command driveFieldRelativeCommand(SwerveControlSuppliers controlSuppliers) {
@@ -300,27 +284,17 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   /**
-   * Creates a command that drives the robot in robot-relative mode using input controls
-   * 
-   * @param controlSuppliers Controller input suppliers
-   */
-  public Command driveRobotRelativeCommand(SwerveControlSuppliers controlSuppliers) {
-    return this.run(() -> driveRobotRelative(controlSuppliers.getChassisSpeeds(true, _inputs.GyroAngle,
-        () -> setAutoAlignEnabled(false))));
-  }
-
-  /**
    * Command for stopping all motors
    */
-  public Command stopAllMotors() {
-    return this.runOnce(() -> _swervePackager.stopAllMotors());
+  public Command stopAllMotorsCommand() {
+    return this.runOnce(_swervePackager::stopAllMotors);
   }
 
   /**
    * Command for resetting the gyro
    */
   public Command resetGyroCommand() {
-    return Commands.runOnce(() -> _swervePackager.resetGyro());
+    return Commands.runOnce(_swervePackager::resetGyro);
   }
 
   /**
@@ -399,23 +373,57 @@ public class SwerveSubsystem extends SubsystemBase {
     return cmd;
   }
 
-  public Command pathfindToPoseCommand(Pose2d pose) {
-    var pathConstraints = new PathConstraints(SwerveMap.Chassis.MaxSpeedMetersPerSecond / 2,
-        SwerveMap.Chassis.MaxSpeedMetersPerSecond / 4,
-        SwerveMap.Chassis.MaxAngularSpeedRadians,
-        SwerveMap.Chassis.MaxAngularSpeedRadians / 2);
+  /**
+   * Will move to a side of the reef
+   * @param side
+   */
+  public Command pathfindToReefPegSide(ReefPegSide side) {
+    return this.defer(() -> {
+      var desiredPose = getReefPegsPoseFromCurrent(side);
+      Container.TeleopDashboardSection.getFieldTargetPose().setPose(desiredPose);
 
-    return AutoBuilder.pathfindToPoseFlipped(pose, pathConstraints);
+      // Create trajectory
+      Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
+          List.of(_inputs.EstimatedRobotPose, desiredPose),
+          new TrajectoryConfig(0.3, 0.165) // 16.5 cm/s max speed & acceleration
+      );
+
+      return new SwerveControllerCommand(
+          trajectory,
+          () -> _inputs.EstimatedRobotPose,
+          _swervePackager.Kinematics, // Your kinematics object
+          SwerveMap.PathPlannerTranslationPID.createPIDController(0.02), // X controller
+          SwerveMap.PathPlannerTranslationPID.createPIDController(0.02), // Y controller
+          new ProfiledPIDController(
+              SwerveMap.PathPlannerRotationPID.kP,
+              SwerveMap.PathPlannerRotationPID.kI,
+              SwerveMap.PathPlannerRotationPID.kD,
+              new Constraints(SwerveMap.Chassis.MaxAngularSpeedRadians, SwerveMap.Chassis.MaxAngularSpeedRadians / 2)), // Theta controller
+          () -> desiredPose.getRotation(),
+          _swervePackager::setDesiredModuleStates, // Sends the states to the SwerveModules
+          this)
+          .andThen(stopAllMotorsCommand())
+          .andThen(Commands.print("Reached desired pose " + desiredPose));
+    });
   }
 
-  // TODO: Remove when no longer needed
-  public Command runSysIdQuasistaticRoutineCommand(Direction dir) {
-    return _driveSysIdRoutine.quasistatic(dir);
-  }
+  /**
+   * Creates a command which pathfinds to a given pose, flipping the path across the field center if desired
+   * @param poseSupplier A supplier for the target pose
+   */
+  public Command pathfindToPoseCommand(Supplier<Pose2d> poseSupplier, boolean flipped) {
+    return this.defer(() -> {
+      var pathConstraints = new PathConstraints(SwerveMap.Chassis.MaxSpeedMetersPerSecond,
+          SwerveMap.Chassis.MaxSpeedMetersPerSecond,
+          SwerveMap.Chassis.MaxAngularSpeedRadians,
+          SwerveMap.Chassis.MaxAngularSpeedRadians);
 
-  // TODO: Remove when no longer needed
-  public Command runSysIdDynamicRoutineCommand(Direction dir) {
-    return _driveSysIdRoutine.dynamic(dir);
+      var desiredPose = poseSupplier.get();
+
+      return flipped
+          ? AutoBuilder.pathfindToPoseFlipped(desiredPose, pathConstraints)
+          : AutoBuilder.pathfindToPose(desiredPose, pathConstraints);
+    });
   }
 
   /*
@@ -423,14 +431,18 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public Map<String, Command> getNamedCommands() {
     return Map.of(
-        "EnableTargetLockOn",
+        getName() + "-EnableTargetLockOn",
         enableLockOnCommand(),
-        "DisableAutoAlign",
+        getName() + "-DisableAutoAlign",
         disableAutoAlignCommand(),
-        "EnableAutoAlignRotationFeedback",
+        getName() + "-EnableAutoAlignRotationFeedback",
         enablePathPlannerAutoAlignRotationFeedbackCommand(),
-        "DisableAutoAlignRotationFeedback",
-        disablePathPlannerAutoAlignRotationFeedbackCommand());
+        getName() + "-DisableAutoAlignRotationFeedback",
+        disablePathPlannerAutoAlignRotationFeedbackCommand(),
+        getName() + "-MoveToLeftPegs",
+        pathfindToReefPegSide(ReefPegSide.kLeft),
+        getName() + "-MoveToRightPegs",
+        pathfindToReefPegSide(ReefPegSide.kRight));
   }
   // #endregion
 }
