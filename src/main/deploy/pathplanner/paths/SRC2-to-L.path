@@ -8,27 +8,32 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.513666666666667,
-        "y": 1.0736666666666657
+        "x": 2.765800162469537,
+        "y": 0.4929021121039796
       },
       "isLocked": false,
       "linkedName": "SRC2"
     },
     {
       "anchor": {
-        "x": 5.95,
-        "y": 4.05
+        "x": 3.5953124999999995,
+        "y": 5.24375
       },
       "prevControl": {
-        "x": 6.325065789473683,
-        "y": 3.144298245614035
+        "x": 2.060093419983753,
+        "y": 5.097816815597075
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "GH"
+      "linkedName": "L"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.6464646464646459,
+      "rotationDegrees": 0.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -42,7 +47,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -59.99999999999999
   },
   "reversed": false,
   "folder": "SRC2-Reef",
