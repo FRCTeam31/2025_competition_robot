@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.605333333333334,
-        "y": 6.561666666666666
+        "x": 7.21674107142857,
+        "y": 3.4939732142857145
       },
       "isLocked": false,
       "linkedName": "S3"
     },
     {
       "anchor": {
-        "x": 3.76,
-        "y": 5.29
+        "x": 5.3625,
+        "y": 2.832366071428571
       },
       "prevControl": {
-        "x": 4.399333333333335,
-        "y": 5.7026666666666666
+        "x": 6.3984375,
+        "y": 3.206696428571429
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "KL"
+      "linkedName": "F"
     }
   ],
   "rotationTargets": [],
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -59.99999999999999
+    "rotation": 119.99999999999999
   },
   "reversed": false,
   "folder": "S3-Reef",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }
