@@ -76,8 +76,10 @@ public class OperatorInterface {
                                 .whileTrue(climber.setHooksClosedCommand()).onFalse(climber.stopHooksMotorsCommand());
 
                 // Manual Control for setting the climber all the way in                
-                DriverController.back().whileTrue(climber.fullyClimbInManual())
-                                .onFalse(climber.stopClimbingMotorsCommand());
+                // DriverController.back().whileTrue(climber.fullyClimbInManual())
+                //                 .onFalse(climber.stopClimbingMotorsCommand());
+
+                DriverController.back().onTrue(climber.setHooksClosedAuto().alongWith(climber.setClimberOutAuto()));
 
                 // Changes the vision mode for the rear limelight. 
                 OperatorController.start().onTrue(visionSubsystem.setRearCameraMode(true))

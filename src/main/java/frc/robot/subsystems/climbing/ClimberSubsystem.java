@@ -6,6 +6,8 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.MatchType;
 import edu.wpi.first.wpilibj.event.BooleanEvent;
 import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -14,7 +16,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Container;
+import frc.robot.Robot;
 import frc.robot.subsystems.climbing.ClimberInputs.ClimberPosition;
 import frc.robot.subsystems.climbing.ClimberInputs.HooksPosition;
 import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorMap;
@@ -30,8 +34,8 @@ public class ClimberSubsystem extends SubsystemBase {
         public static final byte HooksOpenLimitSwitchChannel = 4;
         public static final byte ClimberOutLimitSwitchChannel = 5;
         public static final byte ClimberInLimitSwitchChannel = 6;
-        public static final double ClimberSpeed = 0.8;
-        public static final double HooksSpeed = 0.7;
+        public static final double ClimberSpeed = 1;
+        public static final double HooksSpeed = 1;
         public static final double ClimberChangeStateTimeout = 7;
         public static final double HooksChangeStateTimeout = 5;
         public static final double ClimbingPitchThresholdDegrees = 5;
@@ -45,7 +49,7 @@ public class ClimberSubsystem extends SubsystemBase {
     private IClimberIO _climber;
     private ClimberInputsAutoLogged _inputs = new ClimberInputsAutoLogged();
     BooleanEvent _positionResetEvent;
-    EventLoop _eventLoop = new EventLoop();
+    Trigger _setClimberOutTimedTrigger;
     boolean allowedToOpenHooks = false;
 
     // Ask mason how he wants you to update this using the gyro
@@ -60,7 +64,7 @@ public class ClimberSubsystem extends SubsystemBase {
             _climber = new ClimberIOSim();
         }
 
-        _positionResetEvent = new BooleanEvent(_eventLoop, () -> _inputs.ClimbWenchOutLimitSwitch)
+        _positionResetEvent = new BooleanEvent(Robot.EventLoop, () -> _inputs.ClimbWenchOutLimitSwitch)
                 .debounce(ElevatorMap.BottomLimitResetDebounceSeconds)
                 .rising();
 
@@ -69,12 +73,17 @@ public class ClimberSubsystem extends SubsystemBase {
 
         });
 
+        _setClimberOutTimedTrigger = new Trigger(Robot.EventLoop,
+                () -> DriverStation.getMatchTime() <= 50 && DriverStation.isTeleopEnabled());
+
+        _setClimberOutTimedTrigger.onTrue(
+                setHooksClosedAuto()
+                        .alongWith(setClimberOutAuto()));
+
     }
 
     @Override
     public void periodic() {
-
-        _eventLoop.poll();
         _climber.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
         SmartDashboard.putBoolean(getName() + "allowed to change hooks state", allowedToOpenHooks);
@@ -118,19 +127,31 @@ public class ClimberSubsystem extends SubsystemBase {
     //#region Commands
 
     public Command setClimberOutCommand() {
-        return Commands.run(() -> setClimberSpeed(-ClimberMap.ClimberSpeed));
+        return this.run(() -> setClimberSpeed(-ClimberMap.ClimberSpeed));
     }
 
     public Command setClimberInCommand() {
-        return Commands.run(() -> setClimberSpeed(ClimberMap.ClimberSpeed));
+        return this.run(() -> setClimberSpeed(ClimberMap.ClimberSpeed));
     }
 
     public Command setHooksClosedCommand() {
-        return Commands.run(() -> setHooksSpeed(ClimberMap.HooksSpeed));
+        return this.run(() -> setHooksSpeed(ClimberMap.HooksSpeed));
     }
 
     public Command setHooksOpenCommand() {
-        return Commands.run(() -> setHooksSpeed(-ClimberMap.HooksSpeed));
+        return this.run(() -> setHooksSpeed(-ClimberMap.HooksSpeed));
+    }
+
+    public Command setHooksClosedAuto() {
+        return setHooksClosedCommand()
+                .until(() -> _inputs.HooksClosedLimitSwitch)
+                .andThen(stopHooksMotorsCommand());
+    }
+
+    public Command setClimberOutAuto() {
+        return setClimberOutCommand()
+                .until(() -> _inputs.ClimbWenchOutLimitSwitch)
+                .andThen(stopClimbingMotorsCommand());
     }
 
     public Command climbOffTheGround() {
@@ -139,7 +160,7 @@ public class ClimberSubsystem extends SubsystemBase {
     }
 
     public Command fullyClimbInManual() {
-        return Commands.run(() -> {
+        return this.run(() -> {
             if (!_inputs.ClimbWenchInLimitSwitch) {
                 _climber.setClimbingWenchSpeed(ClimberMap.ClimberSpeed);
             } else {
@@ -149,11 +170,11 @@ public class ClimberSubsystem extends SubsystemBase {
     }
 
     public Command stopClimbingMotorsCommand() {
-        return Commands.runOnce(_climber::stopWenchMotors);
+        return this.runOnce(_climber::stopWenchMotors);
     }
 
     public Command stopHooksMotorsCommand() {
-        return Commands.runOnce(_climber::stopHooksMotors);
+        return this.runOnce(_climber::stopHooksMotors);
     }
 
     public Command stopAllMotors() {
