@@ -76,7 +76,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private Map<ElevatorPosition, Double> _positionMap = Map.of(
             ElevatorPosition.kAbsoluteMinimum, 0.0,
-            ElevatorPosition.kSource, 0.229,
+            ElevatorPosition.kSource, 0.198,
             ElevatorPosition.kTrough, 0.172,
             ElevatorPosition.kLow, 0.311,
             ElevatorPosition.kMid, 0.45,

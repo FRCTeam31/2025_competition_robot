@@ -8,10 +8,10 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.084385964912281,
-        "y": 5.435570175438599
+        "x": 6.8706506849315065,
+        "y": 6.10472602739726
       },
-      "isLocked": true,
+      "isLocked": false,
       "linkedName": "S6"
     },
     {
