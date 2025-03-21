@@ -138,7 +138,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
         SmartDashboard.putNumber(getName() + "/dangerZoneCalculatedSafeAngle", safeAngle);
 
         double pid = inDangerZone
-                ? _wristPID.calculate(_inputs.EndEffectorAngleDegrees, 0) // Revert instructions: set this to 0
+                ? _wristPID.calculate(_inputs.EndEffectorAngleDegrees, safeAngle) // Revert instructions: set this to 0
                 : _wristPID.calculate(_inputs.EndEffectorAngleDegrees);
 
         if (!inDangerZone) {
