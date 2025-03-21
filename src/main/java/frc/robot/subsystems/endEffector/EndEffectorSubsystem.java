@@ -133,7 +133,8 @@ public class EndEffectorSubsystem extends SubsystemBase {
         var inDangerZone = Container.Elevator
                 .getElevatorPositionMeters() <= EndEffectorMap.LowerElevatorSafetyLimit;
 
-        var safeAngle = calculateDangerZoneAngle(_inputs.EndEffectorAngleDegrees);
+        var safeAngle = calculateDangerZoneAngle(Container.Elevator
+                .getElevatorPositionMeters());
         SmartDashboard.putNumber(getName() + "/dangerZoneCalculatedSafeAngle", safeAngle);
 
         double pid = inDangerZone
