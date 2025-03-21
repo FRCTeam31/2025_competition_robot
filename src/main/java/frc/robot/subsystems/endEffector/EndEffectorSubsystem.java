@@ -130,16 +130,17 @@ public class EndEffectorSubsystem extends SubsystemBase {
     }
 
     public void seekWristAnglePID() {
-        var belowElevatorSafetyLimit = Container.Elevator
+        var inDangerZone = Container.Elevator
                 .getElevatorPositionMeters() <= EndEffectorMap.LowerElevatorSafetyLimit;
 
-        boolean inDangerZone = belowElevatorSafetyLimit;
+        var safeAngle = calculateDangerZoneAngle(_inputs.EndEffectorAngleDegrees);
+        SmartDashboard.putNumber(getName() + "/dangerZoneCalculatedSafeAngle", safeAngle);
 
-        double pid = belowElevatorSafetyLimit
-                ? _wristPID.calculate(_inputs.EndEffectorAngleDegrees, 0)
+        double pid = inDangerZone
+                ? _wristPID.calculate(_inputs.EndEffectorAngleDegrees, 0) // Revert instructions: set this to 0
                 : _wristPID.calculate(_inputs.EndEffectorAngleDegrees);
 
-        if (!belowElevatorSafetyLimit) {
+        if (!inDangerZone) {
             double previousSetpoint = _wristPID.getSetpoint();
             _wristPID.setSetpoint(
                     Math.min(previousSetpoint, EndEffectorMap.MaxWristAngle));
@@ -161,6 +162,14 @@ public class EndEffectorSubsystem extends SubsystemBase {
             // _lockableSetpoint.unlock();
             _isLocked = false;
         }
+    }
+
+    private double calculateDangerZoneAngle(double currentAngle) {
+        var t1 = Math.pow((6686.42684 * currentAngle), 2);
+        var t2 = 1875.25759 * currentAngle;
+        var t3 = 5.58733;
+
+        return t1 - t2 - t3;
     }
 
     public void runWristManual(double speed) {
