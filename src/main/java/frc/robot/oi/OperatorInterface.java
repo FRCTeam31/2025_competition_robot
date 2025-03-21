@@ -104,11 +104,20 @@ public class OperatorInterface {
                 // OperatorController.start().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kSource));
                 // OperatorController.b().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
 
-                OperatorController.povDown().onTrue(Container.scoreAtHeightAndLower(ElevatorPosition.kTrough));
-                OperatorController.a().onTrue(Container.scoreAtHeightAndLower(ElevatorPosition.kLow));
-                OperatorController.x().onTrue(Container.scoreAtHeightAndLower(ElevatorPosition.kMid));
-                OperatorController.povUp().onTrue(Container.scoreAtHeightAndLower(ElevatorPosition.kHigh));
+                // OperatorController.povDown().onTrue(Container.scoreAtHeightAndLower(ElevatorPosition.kTrough));
+                // OperatorController.a().onTrue(Container.scoreAtHeightAndLower(ElevatorPosition.kLow));
+                // OperatorController.x().onTrue(Container.scoreAtHeightAndLower(ElevatorPosition.kMid));
+                // OperatorController.povUp().onTrue(Container.scoreAtHeightAndLower(ElevatorPosition.kHigh));
+                // OperatorController.start().onTrue(Container.pickupFromSourceAndLower());
+
+                OperatorController.povDown().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kTrough));
+                OperatorController.a().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kLow));
+                OperatorController.x().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kMid));
+                OperatorController.povUp().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kHigh));
                 OperatorController.start().onTrue(Container.pickupFromSourceAndLower());
+
+                OperatorController.rightBumper().onTrue(endEffectorSubsystem.scoreCoral()
+                                .andThen(Container.setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum)));
 
                 OperatorController.leftStick().onTrue(endEffectorSubsystem.disableWristManualControlCommand());
                 OperatorController.rightStick().onTrue(elevatorSubsystem.disableElevatorManualControlCommand());
@@ -123,8 +132,8 @@ public class OperatorInterface {
 
                 OperatorController.back().onTrue(visionSubsystem.setRearCameraPipeline(1).ignoringDisable(true))
                                 .onFalse(visionSubsystem.setRearCameraPipeline(0).ignoringDisable(true));
-                OperatorController.povLeft().onTrue(swerveSubsystem.pathfindToReefPegSide(ReefPegSide.kLeft));
-                OperatorController.povRight().onTrue(swerveSubsystem.pathfindToReefPegSide(ReefPegSide.kRight));
+                // OperatorController.povLeft().onTrue(swerveSubsystem.pathfindToReefPegSide(ReefPegSide.kLeft));
+                // OperatorController.povRight().onTrue(swerveSubsystem.pathfindToReefPegSide(ReefPegSide.kRight));
         }
 
         public void setDriverRumbleIntensity(double intensity) {
