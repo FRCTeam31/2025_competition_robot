@@ -30,7 +30,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
         public static final double IntakeSpeed = 1;
         public static final byte IntakeCurrentLimit = 20;
         public static final byte WristCurrentLimit = 30;
-        public static final ExtendedPIDConstants WristPID = new ExtendedPIDConstants(0.01, 0, 0);
+        public static final ExtendedPIDConstants WristPID = new ExtendedPIDConstants(0.007, 0, 0);
         public static final double GearRatio = 20;
         public static final double MinWristAngle = -135;
         public static final double MaxWristAngle = -30;
@@ -42,7 +42,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
         public static final double WristReef = 135;
         public static final double WristMaxOutput = 0.175;
 
-        public static final double LowerElevatorSafetyLimit = 0.15;
+        public static final double LowerElevatorSafetyLimit = -0.15;
     }
 
     private IEndEffector _endEffector;
@@ -104,24 +104,23 @@ public class EndEffectorSubsystem extends SubsystemBase {
                 () -> Container.Elevator.positionIsNear(ElevatorPosition.kTrough))
                 .rising()
                 .debounce(0.5);
-        // _elevatorBelowDangerZone = new BooleanEvent(Robot.EventLoop, () -> Container.Elevator
-        //         .getElevatorPositionMeters() <= EndEffectorMap.LowerElevatorSafetyLimit)
-        //         .rising()
-        //         .debounce(1);
+        _elevatorBelowDangerZone = new BooleanEvent(Robot.EventLoop, () -> Container.Elevator
+                .getElevatorPositionMeters() <= EndEffectorMap.LowerElevatorSafetyLimit)
+                .rising()
+                .debounce(1);
 
         _wristPID = EndEffectorMap.WristPID.createPIDController(0.02);
         SmartDashboard.putData(_wristPID);
     }
 
     public void manageWristControl() {
-        // boolean isSafeForManualControl = Container.Elevator
-        //         .getElevatorPositionMeters() >= EndEffectorMap.LowerElevatorSafetyLimit
-        //         && _inputs.EndEffectorAngleDegrees <= EndEffectorMap.MaxWristAngle + 5;
+        boolean isSafeForManualControl = Container.Elevator
+                .getElevatorPositionMeters() >= EndEffectorMap.LowerElevatorSafetyLimit
+                && _inputs.EndEffectorAngleDegrees <= EndEffectorMap.MaxWristAngle + 5;
 
         boolean tryingToUseManualControl = (_manualControlSpeed != 0 || _wristManuallyControlled);
 
-        // _wristManuallyControlled = (isSafeForManualControl && tryingToUseManualControl) ? true : false;
-        _wristManuallyControlled = (tryingToUseManualControl) ? true : false;
+        _wristManuallyControlled = (isSafeForManualControl && tryingToUseManualControl) ? true : false;
 
         if (_wristManuallyControlled) {
             runWristManual(_manualControlSpeed);
