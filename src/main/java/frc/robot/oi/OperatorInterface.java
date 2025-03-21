@@ -97,13 +97,6 @@ public class OperatorInterface {
                                                 OperatorController.getLeftStickYSupplier(0.3, 0)));
 
                 // Elevator and Wrist Combined Controls                              
-                // OperatorController.povDown().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kTrough));
-                // OperatorController.a().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kLow));
-                // OperatorController.x().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kMid));
-                // OperatorController.povUp().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kHigh));
-                // OperatorController.start().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kSource));
-                // OperatorController.b().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
-
                 // OperatorController.povDown().onTrue(Container.scoreAtHeightAndLower(ElevatorPosition.kTrough));
                 // OperatorController.a().onTrue(Container.scoreAtHeightAndLower(ElevatorPosition.kLow));
                 // OperatorController.x().onTrue(Container.scoreAtHeightAndLower(ElevatorPosition.kMid));
@@ -115,9 +108,9 @@ public class OperatorInterface {
                 OperatorController.x().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kMid));
                 OperatorController.povUp().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kHigh));
                 OperatorController.start().onTrue(Container.pickupFromSourceAndLower());
+                OperatorController.b().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
 
-                OperatorController.rightBumper().onTrue(endEffectorSubsystem.scoreCoral()
-                                .andThen(Container.setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum)));
+                OperatorController.rightBumper().onTrue(endEffectorSubsystem.scoreCoral());
 
                 OperatorController.leftStick().onTrue(endEffectorSubsystem.disableWristManualControlCommand());
                 OperatorController.rightStick().onTrue(elevatorSubsystem.disableElevatorManualControlCommand());

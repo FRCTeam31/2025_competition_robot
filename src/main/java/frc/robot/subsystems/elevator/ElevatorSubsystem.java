@@ -142,7 +142,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         }
 
         if (tryingToUseManualControl) {
-            setMotorVoltageWithLimitSwitches(manualControlSpeed * 12);
+            setMotorVoltageWithLimitSwitches((manualControlSpeed * 12) * 0.75);
         } else {
             var ec = _elevatorController.calculate(_inputs.ElevatorDistanceMeters,
                     _inputs.ElevatorSpeedMetersPerSecond);
