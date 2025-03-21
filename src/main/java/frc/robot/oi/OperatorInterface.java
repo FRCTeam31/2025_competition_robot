@@ -104,9 +104,9 @@ public class OperatorInterface {
                 // OperatorController.start().onTrue(Container.pickupFromSourceAndLower());
 
                 OperatorController.povDown().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kTrough));
-                OperatorController.a().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kLow));
-                OperatorController.x().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kMid));
-                OperatorController.povUp().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kHigh));
+                OperatorController.a().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kL2));
+                OperatorController.x().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kL3));
+                OperatorController.povUp().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kL4));
                 OperatorController.start().onTrue(Container.pickupFromSourceAndLower());
                 OperatorController.b().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
 

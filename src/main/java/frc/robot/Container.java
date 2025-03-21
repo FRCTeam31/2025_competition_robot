@@ -123,18 +123,18 @@ public class Container {
 
   public static Map<String, Supplier<Command>> getNamedCommandSuppliers() {
     return Map.of(
-        "Score-L4", () -> scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kHigh),
-        "Score-L3", () -> scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kMid),
-        "Score-L2", () -> scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kLow),
+        "Score-L4", () -> scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kL4),
+        "Score-L3", () -> scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kL3),
+        "Score-L2", () -> scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kL2),
         "Score-Trough", () -> scoreAtHeightAndLower(ElevatorPosition.kTrough),
         "Pickup-Source", () -> pickupFromSourceAndLower());
   }
 
   public static Map<String, Command> getNamedCommands() {
     return Map.of(
-        "Score-L4", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kHigh),
-        "Score-L3", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kMid),
-        "Score-L2", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kLow),
+        "Score-L4", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kL4),
+        "Score-L3", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kL3),
+        "Score-L2", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kL2),
         "Score-Trough", scoreAtHeightAndLower(ElevatorPosition.kTrough),
         "Pickup-Source", pickupFromSourceAndLower());
   }

@@ -8,11 +8,11 @@ public enum ElevatorPosition {
     /** The position to score in the trough, L1 */
     kTrough,
     /** The position to score on the level just above the trough, L2 */
-    kLow,
+    kL2,
     /** The position to score on the level two above the trought, L3 */
-    kMid,
+    kL3,
     /** The position to score on the highest level of the reef, L4 */
-    kHigh;
+    kL4;
 
     /**
      * Returns a string corresponding to the value of the enum. Used for filtering named
@@ -27,11 +27,11 @@ public enum ElevatorPosition {
                 return "Source";
             case kTrough:
                 return "Trough";
-            case kLow:
+            case kL2:
                 return "L2";
-            case kMid:
+            case kL3:
                 return "L3";
-            case kHigh:
+            case kL4:
                 return "L4";
         }
     }
@@ -43,11 +43,11 @@ public enum ElevatorPosition {
             case "Trough":
                 return kTrough;
             case "L2":
-                return kLow;
+                return kL2;
             case "L3":
-                return kMid;
+                return kL3;
             case "L4":
-                return kHigh;
+                return kL4;
         }
 
         return null;

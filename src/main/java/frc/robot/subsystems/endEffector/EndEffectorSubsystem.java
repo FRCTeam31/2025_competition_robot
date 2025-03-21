@@ -65,9 +65,9 @@ public class EndEffectorSubsystem extends SubsystemBase {
             ElevatorPosition.kAbsoluteMinimum, 0.0,
             ElevatorPosition.kSource, -42.36,
             ElevatorPosition.kTrough, -92.0,
-            ElevatorPosition.kLow, -126.0,
-            ElevatorPosition.kMid, -126.0,
-            ElevatorPosition.kHigh, -121.0);
+            ElevatorPosition.kL2, -126.0,
+            ElevatorPosition.kL3, -126.0,
+            ElevatorPosition.kL4, -121.0);
 
     private EndEffectorInputsAutoLogged _inputs = new EndEffectorInputsAutoLogged();
 
@@ -85,15 +85,15 @@ public class EndEffectorSubsystem extends SubsystemBase {
 
         // TODO: Use the below events to trigger automatic movement of the end effector, when using PID control
         _elevatorReachedLowHeight = new BooleanEvent(Robot.EventLoop,
-                () -> Container.Elevator.positionIsNear(ElevatorPosition.kLow))
+                () -> Container.Elevator.positionIsNear(ElevatorPosition.kL2))
                 .rising()
                 .debounce(0.5);
         _elevatorReachedMidHeight = new BooleanEvent(Robot.EventLoop,
-                () -> Container.Elevator.positionIsNear(ElevatorPosition.kMid))
+                () -> Container.Elevator.positionIsNear(ElevatorPosition.kL3))
                 .rising()
                 .debounce(0.5);
         _elevatorReachedHighHeight = new BooleanEvent(Robot.EventLoop,
-                () -> Container.Elevator.positionIsNear(ElevatorPosition.kHigh))
+                () -> Container.Elevator.positionIsNear(ElevatorPosition.kL4))
                 .rising()
                 .debounce(0.5);
         _elevatorReachedSourceHeight = new BooleanEvent(Robot.EventLoop,
