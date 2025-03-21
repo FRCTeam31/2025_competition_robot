@@ -165,7 +165,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
         }
     }
 
-    private double calculateDangerZoneAngle(double currentAngle) {$
+    private double calculateDangerZoneAngle(double currentAngle) {
         var t1 = 6686.42684 * Math.pow(currentAngle, 2);
         var t2 = 1875.25759 * currentAngle;
         var t3 = 5.58733;
