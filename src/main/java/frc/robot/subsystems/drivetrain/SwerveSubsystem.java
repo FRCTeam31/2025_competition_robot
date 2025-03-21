@@ -210,9 +210,7 @@ public class SwerveSubsystem extends SubsystemBase {
     if (!VisionSubsystem.isAprilTagIdValid(limelightInputs.ApriltagId))
       return;
 
-    var llPose = Robot.onBlueAlliance()
-        ? limelightInputs.BlueAllianceOriginFieldSpaceRobotPose
-        : limelightInputs.RedAllianceOriginFieldSpaceRobotPose;
+    var llPose = limelightInputs.BlueAllianceOriginFieldSpaceRobotPose;
 
     _swervePackager.addPoseEstimatorVisionMeasurement(
         llPose.Pose.toPose2d(),

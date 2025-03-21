@@ -1,7 +1,10 @@
 {
+  "Connections": {
+    "open": true
+  },
   "NetworkTables Settings": {
     "mode": "Client (NT4)",
-    "serverTeam": "127.0.0.1"
+    "serverTeam": "10.00.31.2"
   },
   "transitory": {
     "Shuffleboard": {

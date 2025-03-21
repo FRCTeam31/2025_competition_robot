@@ -109,7 +109,7 @@ public class LimeLightNT implements AutoCloseable {
     public LimelightPose getRobotPose() {
         var poseData = m_limelightTable.getEntry("botpose").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
 
-        return new LimelightPose(poseData, calculateTrust(poseData[7]));
+        return new LimelightPose(poseData);
     }
 
     /**
@@ -121,7 +121,7 @@ public class LimeLightNT implements AutoCloseable {
                 ? m_limelightTable.getEntry("botpose_wpiblue").getDoubleArray(new double[11])
                 : m_limelightTable.getEntry("botpose_wpired").getDoubleArray(new double[11]);
 
-        return new LimelightPose(poseData, calculateTrust(poseData[7]));
+        return new LimelightPose(poseData);
     }
 
     //#region DO NOT USE - only returning 6 elements - needs refactoring
