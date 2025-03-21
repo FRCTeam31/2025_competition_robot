@@ -57,7 +57,7 @@ public class VisionSubsystem extends SubsystemBase {
                     continue;
                 }
 
-                Core.flip(mat, flippedMat, -1);
+                Core.flip(mat, flippedMat, 0);
 
                 outputStream.putFrame(flippedMat);
             }
