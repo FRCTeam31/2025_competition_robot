@@ -9,6 +9,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import org.littletonrobotics.junction.Logger;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 import org.prime.vision.LimelightInputs;
 
 public class VisionSubsystem extends SubsystemBase {
@@ -21,6 +24,7 @@ public class VisionSubsystem extends SubsystemBase {
     private LimelightInputs[] _limelightInputs;
     private boolean _frontInDriverMode = false;
     private boolean _rearInDriverMode = false;
+    private Thread _usbThread;
 
     public VisionSubsystem() {
         setName("Vision");
@@ -36,9 +40,31 @@ public class VisionSubsystem extends SubsystemBase {
             _limelightInputs[i] = new LimelightInputs();
         }
 
-        UsbCamera camera = CameraServer.startAutomaticCapture();
-        camera.setResolution(320, 240);
-        camera.setFPS(30);
+        _usbThread = new Thread(() -> {
+            UsbCamera camera = CameraServer.startAutomaticCapture();
+            camera.setResolution(320, 240);
+            camera.setFPS(30);
+
+            var cvSink = CameraServer.getVideo();
+            var outputStream = CameraServer.putVideo("Flipped-USB0", 320, 240);
+
+            var mat = new Mat();
+            var flippedMat = new Mat();
+
+            while (!Thread.interrupted()) {
+                if (cvSink.grabFrame(mat) == 0) {
+                    outputStream.notifyError(cvSink.getError());
+                    continue;
+                }
+
+                Core.flip(mat, flippedMat, -1);
+
+                outputStream.putFrame(flippedMat);
+            }
+        });
+
+        _usbThread.setDaemon(true);
+        _usbThread.start();
     }
 
     /**
