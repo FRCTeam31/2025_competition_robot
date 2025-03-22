@@ -41,26 +41,27 @@ public class OperatorInterface {
                 swerveSubsystem.setDefaultCommand(swerveSubsystem.driveFieldRelativeCommand(controlProfile));
 
                 // While holding leftStick, auto-aim the robot to an apriltag target using snap angle
-                DriverController.leftStick().whileTrue(swerveSubsystem.enableReefAutoAlignCommand())
-                                .onFalse(swerveSubsystem.disableAutoAlignCommand());
+                // DriverController.leftStick().whileTrue(swerveSubsy\;
 
                 DriverController.x().onTrue(swerveSubsystem.disableAutoAlignCommand());
                 DriverController.a().onTrue(swerveSubsystem.resetGyroCommand());
                 //Map Autoalign to Pov
-                DriverController.pov(Controls.up).onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.up));
-                DriverController.pov(Controls.upRight)
-                                .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.upRight - 90));
-                DriverController.pov(Controls.right)
-                                .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.right - 180));
-                DriverController.pov(Controls.downRight)
-                                .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.downRight + 90));
-                DriverController.pov(Controls.down).onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.down));
-                DriverController.pov(Controls.downLeft)
-                                .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.downLeft - 90));
-                DriverController.pov(Controls.left)
-                                .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.left - 180));
-                DriverController.pov(Controls.upLeft)
-                                .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.upLeft + 90));
+                DriverController.pov(Controls.up).whileTrue(swerveSubsystem.enableReefAutoAlignCommand())
+                                .onFalse(swerveSubsystem.disableAutoAlignCommand());
+                // DriverController.pov(Controls.up).onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.up));
+                // DriverController.pov(Controls.upRight)
+                //                 .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.upRight - 90));
+                // DriverController.pov(Controls.right)
+                //                 .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.right - 180));
+                // DriverController.pov(Controls.downRight)
+                //                 .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.downRight + 90));
+                // DriverController.pov(Controls.down).onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.down));
+                // DriverController.pov(Controls.downLeft)
+                //                 .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.downLeft - 90));
+                // DriverController.pov(Controls.left)
+                //                 .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.left - 180));
+                // DriverController.pov(Controls.upLeft)
+                //                 .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.upLeft + 90));
 
                 // Climber Controls
                 // Climber in will only go in until it hits the artifical stop measured by the encoder

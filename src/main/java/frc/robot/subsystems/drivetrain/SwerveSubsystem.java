@@ -419,11 +419,11 @@ public class SwerveSubsystem extends SubsystemBase {
 
         // Set the drivetrain to align to the target heading
         _autoAlign.setSetpoint(Rotation2d.fromDegrees(adjustedTargetAngle));
-        // setAutoAlignEnabled(true);
-        // _inputs.DriveRobotRelative = true;
+        setAutoAlignEnabled(true);
+        // _inputs.DrivingRobotRelative = true;
       } else {
-        // setAutoAlignEnabled(false);
-        // _inputs.DriveRobotRelative = false;
+        setAutoAlignEnabled(false);
+        // _inputs.DrivingRobotRelative = false;
       }
     });
 
