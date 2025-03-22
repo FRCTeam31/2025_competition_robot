@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.Logger;
+import org.prime.control.PrimeHolonomicDriveController;
 import org.prime.control.SwerveControlSuppliers;
 import org.prime.pose.PoseUtil;
 import org.prime.vision.LimelightInputs;
@@ -59,6 +60,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   // Vision, Kinematics, odometry
   public boolean WithinPoseEstimationVelocity = true;
+  private PrimeHolonomicDriveController _primeHolonomicController;
 
   /**
    * Creates a new Drivetrain.
@@ -99,14 +101,15 @@ public class SwerveSubsystem extends SubsystemBase {
         .setLogActivePathCallback(poses -> Container.TeleopDashboardSection.getFieldPath().setPoses(poses));
 
     // Configure PathPlanner holonomic control
+    _primeHolonomicController = new PrimeHolonomicDriveController(
+        SwerveMap.PathPlannerTranslationPID.toPIDConstants(),
+        SwerveMap.PathPlannerRotationPID.toPIDConstants());
     AutoBuilder.configure(
         () -> _inputs.EstimatedRobotPose,
         _swervePackager::setEstimatorPose,
         () -> _inputs.RobotRelativeChassisSpeeds,
         (speeds, feedForwards) -> driveRobotRelative(speeds),
-        new PPHolonomicDriveController(
-            SwerveMap.PathPlannerTranslationPID.toPIDConstants(),
-            SwerveMap.PathPlannerRotationPID.toPIDConstants()),
+        _primeHolonomicController,
         config, () -> {
           // Boolean supplier that controls when the path will be mirrored for the red
           // alliance
@@ -293,6 +296,10 @@ public class SwerveSubsystem extends SubsystemBase {
     Logger.recordOutput("Drive/autoAlignEnabled", _useAutoAlign);
     Logger.recordOutput("Drive/autoAlignSetpoint", _autoAlign.getSetpoint());
     Logger.recordOutput("Drive/autoAlignAtSetpoint", _autoAlign.atSetpoint());
+
+    if (DriverStation.isAutonomousEnabled()) {
+      Logger.recordOutput(getName() + "/pp-translation-error", _primeHolonomicController.getTranslationError());
+    }
 
     // Update shuffleboard
     if (DriverStation.isEnabled()) {
