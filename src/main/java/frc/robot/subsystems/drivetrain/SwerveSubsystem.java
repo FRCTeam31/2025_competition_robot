@@ -327,22 +327,25 @@ public class SwerveSubsystem extends SubsystemBase {
   /**
    * Enables lock-on control to whichever target is in view
    */
-  public Command enableLockOnCommand() {
+  public Command enableReefAutoAlignCommand() {
     var cmd = Commands.run(() -> {
-      var rearLimelightInputs = Container.Vision.getLimelightInputs(1);
+      var frontLimelightInputs = Container.Vision.getLimelightInputs(0);
 
       // If targeted AprilTag is in validTargets, align to its offset
-      if (VisionSubsystem.isAprilTagIdValid(rearLimelightInputs.ApriltagId)) {
-        // Calculate the target heading
-        var horizontalOffsetDeg = rearLimelightInputs.TargetHorizontalOffset.getDegrees();
-        var robotHeadingDeg = _inputs.GyroAngle.getDegrees();
-        var targetHeadingDeg = robotHeadingDeg - horizontalOffsetDeg;
+      if (VisionSubsystem.isReefTag(frontLimelightInputs.ApriltagId)) {
+        var targetHeadingOffsetDeg = frontLimelightInputs.RobotSpaceTargetPose.Pose
+            .getRotation()
+            .toRotation2d()
+            // .plus(Rotation2d.fromDegrees(180)) // TODO: Enable this if the target pose facing the robot is flipped
+            .getDegrees();
+
+        var adjustedTargetAngle = _inputs.GyroAngle.getDegrees() + targetHeadingOffsetDeg;
 
         // Set the drivetrain to align to the target heading
-        _autoAlign.setSetpoint(Rotation2d.fromDegrees(targetHeadingDeg));
-        setAutoAlignEnabled(true);
+        _autoAlign.setSetpoint(Rotation2d.fromDegrees(adjustedTargetAngle));
+        // setAutoAlignEnabled(true);
       } else {
-        setAutoAlignEnabled(false);
+        // setAutoAlignEnabled(false);
       }
     });
 
@@ -434,7 +437,7 @@ public class SwerveSubsystem extends SubsystemBase {
   public Map<String, Command> getNamedCommands() {
     return Map.of(
         getName() + "-EnableTargetLockOn",
-        enableLockOnCommand(),
+        enableReefAutoAlignCommand(),
         getName() + "-DisableAutoAlign",
         disableAutoAlignCommand(),
         getName() + "-EnableAutoAlignRotationFeedback",

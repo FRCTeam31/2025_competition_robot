@@ -124,54 +124,50 @@ public class LimeLightNT implements AutoCloseable {
         return new LimelightPose(poseData);
     }
 
-    //#region DO NOT USE - only returning 6 elements - needs refactoring
+    /**
+     * 3D transform of the robot in the coordinate system of the primary in-view AprilTag
+     */
+    public LimelightPose getRobotPoseInTargetSpace() {
+        var poseData = m_limelightTable.getEntry("botpose_targetspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
 
-    // /**
-    //  * 3D transform of the robot in the coordinate system of the primary in-view AprilTag
-    //  */
-    // public LimelightPose getRobotPoseInTargetSpace() {
-    //     var poseData = m_limelightTable.getEntry("botpose_targetspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
+        return new LimelightPose(poseData);
+    }
 
-    //     return new LimelightPose(poseData, calculateTrust(poseData[7]));
-    // }
+    /**
+     * 3D transform of the camera in the coordinate system of the primary in-view AprilTag
+     */
+    public LimelightPose getCameraPoseInTargetSpace() {
+        var poseData = m_limelightTable.getEntry("camerapose_targetspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
 
-    // /**
-    //  * 3D transform of the camera in the coordinate system of the primary in-view AprilTag
-    //  */
-    // public LimelightPose getCameraPoseInTargetSpace() {
-    //     var poseData = m_limelightTable.getEntry("camerapose_targetspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
+        return new LimelightPose(poseData);
+    }
 
-    //     return new LimelightPose(poseData, calculateTrust(poseData[7]));
-    // }
+    /**
+     * 3D transform of the camera in the coordinate system of the robot
+     */
+    public LimelightPose getCameraPoseInRobotSpace() {
+        var poseData = m_limelightTable.getEntry("camerapose_robotspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
 
-    // /**
-    //  * 3D transform of the camera in the coordinate system of the robot
-    //  */
-    // public LimelightPose getCameraPoseInRobotSpace() {
-    //     var poseData = m_limelightTable.getEntry("camerapose_robotspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
+        return new LimelightPose(poseData);
+    }
 
-    //     return new LimelightPose(poseData, calculateTrust(poseData[7]));
-    // }
+    /**
+     * 3D transform of the primary in-view AprilTag in the coordinate system of the Camera
+     */
+    public LimelightPose getTargetPoseInCameraSpace() {
+        var poseData = m_limelightTable.getEntry("targetpose_cameraspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
 
-    // /**
-    //  * 3D transform of the primary in-view AprilTag in the coordinate system of the Camera
-    //  */
-    // public LimelightPose getTargetPoseInCameraSpace() {
-    //     var poseData = m_limelightTable.getEntry("targetpose_cameraspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
+        return new LimelightPose(poseData);
+    }
 
-    //     return new LimelightPose(poseData, calculateTrust(poseData[7]));
-    // }
+    /**
+     * 3D transform of the primary in-view AprilTag in the coordinate system of the Robot
+     */
+    public LimelightPose getTargetPoseInRobotSpace() {
+        var poseData = m_limelightTable.getEntry("targetpose_robotspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
 
-    // /**
-    //  * 3D transform of the primary in-view AprilTag in the coordinate system of the Robot
-    //  */
-    // public LimelightPose getTargetPoseInRobotSpace() {
-    //     var poseData = m_limelightTable.getEntry("targetpose_robotspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
-
-    //     return new LimelightPose(poseData, calculateTrust(poseData[7]));
-    // }
-
-    //#endregion
+        return new LimelightPose(poseData);
+    }
 
     /**
      * Calculates a trust value based on the number of tags in view.

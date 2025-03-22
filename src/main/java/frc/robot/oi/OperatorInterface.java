@@ -41,7 +41,7 @@ public class OperatorInterface {
                 swerveSubsystem.setDefaultCommand(swerveSubsystem.driveFieldRelativeCommand(controlProfile));
 
                 // While holding leftStick, auto-aim the robot to an apriltag target using snap angle
-                DriverController.leftStick().whileTrue(swerveSubsystem.enableLockOnCommand())
+                DriverController.leftStick().whileTrue(swerveSubsystem.enableReefAutoAlignCommand())
                                 .onFalse(swerveSubsystem.disableAutoAlignCommand());
 
                 DriverController.x().onTrue(swerveSubsystem.disableAutoAlignCommand());

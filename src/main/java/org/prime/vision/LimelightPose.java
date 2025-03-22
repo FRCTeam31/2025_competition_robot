@@ -36,7 +36,7 @@ public class LimelightPose implements LoggableInputs, Cloneable {
               Units.degreesToRadians(poseTagPipelineData[4]),
               Units.degreesToRadians(poseTagPipelineData[5])));
 
-      StdDeviations = calculateTrust(1, 0.25);
+      StdDeviations = calculateTrustByArea(0.5);
     }
 
     if (poseTagPipelineData.length >= 7) {
@@ -51,18 +51,12 @@ public class LimelightPose implements LoggableInputs, Cloneable {
       TagSpan = poseTagPipelineData[8];
       AvgTagDistanceMeters = poseTagPipelineData[9];
       AvgTagArea = poseTagPipelineData[10];
-      StdDeviations = calculateTrust(TagCount, AvgTagArea);
+      StdDeviations = calculateTrustByArea(AvgTagArea);
     }
   }
 
-  private double[] calculateTrust(double tagCount, double tagArea) {
-    double trustLevel;
-
-    if (tagCount <= 0) {
-      trustLevel = 20;
-    } else {
-      trustLevel = tagCount >= 2.0 ? 2 : 20;
-    }
+  private double[] calculateTrustByArea(double tagArea) {
+    var trustLevel = 25.12396 * Math.pow(0.00156944, tagArea);
 
     return VecBuilder.fill(trustLevel, trustLevel, 9999999).getData();
   }
