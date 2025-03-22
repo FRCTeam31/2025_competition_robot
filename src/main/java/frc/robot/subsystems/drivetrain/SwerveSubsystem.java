@@ -215,6 +215,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
       // Get the target pose, and then get the L and R branch offsets from that
       var targetPose = frontInputs.RobotSpaceTargetPose.Pose;
+      Logger.recordOutput(getName() + "/reef-targetpose", targetPose.toPose2d());
       var leftPose = getReefPegsPoseFromInput(ReefPegSide.kLeft, targetPose.toPose2d());
       var rightPose = getReefPegsPoseFromInput(ReefPegSide.kRight, targetPose.toPose2d());
 
@@ -233,12 +234,11 @@ public class SwerveSubsystem extends SubsystemBase {
       var leftPoses = PoseUtil.getTrajectoryPoses(leftLineTraj);
       var rightPoses = PoseUtil.getTrajectoryPoses(rightLineTraj);
 
-      var closestLeft = PoseUtil.getClosestPoseInList(_inputs.EstimatedRobotPose, leftPoses);
-      var closestRight = PoseUtil.getClosestPoseInList(_inputs.EstimatedRobotPose, rightPoses);
+      Pose2d closestLeft = PoseUtil.getClosestPoseInList(_inputs.EstimatedRobotPose, leftPoses);
+      Pose2d closestRight = PoseUtil.getClosestPoseInList(_inputs.EstimatedRobotPose, rightPoses);
 
       // If either of the closest poses are null, something went wrong
       if (closestLeft == null || closestRight == null) {
-        Logger.recordOutput(getName() + "/reef-auto-side-selection", "FAILED");
         Logger.recordOutput(getName() + "/reef-auto-side-selection", "FAILED");
         return;
       }
@@ -247,8 +247,8 @@ public class SwerveSubsystem extends SubsystemBase {
       Logger.recordOutput(getName() + "/reef-right-traj-closest-pose", closestRight);
 
       // Get the distance to the closest pose in each trajectory
-      var distanceToClosestLeft = PoseUtil.getDistanceBetweenPoses(_inputs.EstimatedRobotPose, closestLeft);
-      var distanceToClosestRight = PoseUtil.getDistanceBetweenPoses(_inputs.EstimatedRobotPose, closestRight);
+      double distanceToClosestLeft = PoseUtil.getDistanceBetweenPoses(_inputs.EstimatedRobotPose, closestLeft);
+      double distanceToClosestRight = PoseUtil.getDistanceBetweenPoses(_inputs.EstimatedRobotPose, closestRight);
 
       Logger.recordOutput(getName() + "/reef-left-dist-to-closest-traj-pose", distanceToClosestLeft);
       Logger.recordOutput(getName() + "/reef-right-dist-to-closest-traj-pose", distanceToClosestRight);
