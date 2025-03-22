@@ -337,19 +337,19 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public Command driveFieldRelativeCommand(SwerveControlSuppliers controlSuppliers) {
     return this.run(() -> {
-      if (_inputs.DrivingRobotRelative) {
-        // Robot-relative override
-        var inputChassisSpeeds = controlSuppliers.getChassisSpeeds(false, _inputs.GyroAngle,
-            () -> {
-              setAutoAlignEnabled(false);
-              _inputs.DrivingRobotRelative = false;
-            });
+      // if (_inputs.DrivingRobotRelative) {
+      //   // Robot-relative override
+      //   var inputChassisSpeeds = controlSuppliers.getChassisSpeeds(false, _inputs.GyroAngle,
+      //       () -> {
+      //         setAutoAlignEnabled(false);
+      //         _inputs.DrivingRobotRelative = false;
+      //       });
 
-        driveRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(inputChassisSpeeds, _inputs.GyroAngle));
-      } else {
-        driveRobotRelative(controlSuppliers.getChassisSpeeds(false, _inputs.GyroAngle,
-            () -> setAutoAlignEnabled(false)));
-      }
+      //   driveRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(inputChassisSpeeds, _inputs.GyroAngle));
+      // } else {
+      driveRobotRelative(controlSuppliers.getChassisSpeeds(false, _inputs.GyroAngle,
+          () -> setAutoAlignEnabled(false)));
+      // }
 
     });
   }
