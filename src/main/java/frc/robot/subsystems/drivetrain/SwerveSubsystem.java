@@ -415,7 +415,8 @@ public class SwerveSubsystem extends SubsystemBase {
             // .plus(Rotation2d.fromDegrees(180)) // TODO: Enable this if the target pose facing the robot is flipped
             .getDegrees();
 
-        var adjustedTargetAngle = _inputs.GyroAngle.getDegrees() + targetHeadingOffsetDeg;
+        var adjustedTargetAngle = targetHeadingOffsetDeg;
+        // var adjustedTargetAngle = _inputs.GyroAngle.getDegrees() + targetHeadingOffsetDeg;
 
         // Set the drivetrain to align to the target heading
         _autoAlign.setSetpoint(Rotation2d.fromDegrees(adjustedTargetAngle));
