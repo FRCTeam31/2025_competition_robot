@@ -32,6 +32,7 @@ public class LimeLightNT implements AutoCloseable {
         inputs.ApriltagId = getApriltagId();
         inputs.TagCount = getTagCount();
         inputs.FieldSpaceRobotPose = getRobotPose();
+        inputs.RobotSpaceTargetPose = getTargetPoseInRobotSpace();
         inputs.RedAllianceOriginFieldSpaceRobotPose = getRobotPose(Alliance.Red);
         inputs.BlueAllianceOriginFieldSpaceRobotPose = getRobotPose(Alliance.Blue);
     }
