@@ -67,4 +67,22 @@ public class PoseUtil {
                                                 getDistanceBetweenPoses(currentPose, pose2)))
                                 .orElse(null);
         }
+
+        /**
+         * Converts a pose from robot space to field space.
+         * @param robotPose_Field The robot's pose in field space.
+         * @param targetPose_Robot The target pose in robot space.
+         * @return
+         */
+        public static Pose2d convertPoseFromRobotToFieldSpace(Pose2d robotPose_Field, Pose2d targetPose_Robot) {
+                // Transform target translation from robot space to field space
+                Translation2d targetTranslation_Field = robotPose_Field.getTranslation()
+                                .plus(targetPose_Robot.getTranslation().rotateBy(robotPose_Field.getRotation()));
+
+                // Compute new field-space rotation
+                Rotation2d targetRotation_Field = robotPose_Field.getRotation()
+                                .plus(targetPose_Robot.getRotation());
+
+                return new Pose2d(targetTranslation_Field, targetRotation_Field);
+        }
 }

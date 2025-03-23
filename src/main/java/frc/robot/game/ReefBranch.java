@@ -14,7 +14,7 @@ public enum ReefBranch {
     kK,
     kL;
 
-    public static String getBranchName(ReefBranch branch) {
+    public static String getName(ReefBranch branch) {
         switch (branch) {
             case kA:
                 return "A";

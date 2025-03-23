@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.dashboard.TeleopDashboardTab;
-import frc.robot.game.ReefPegSide;
+import frc.robot.game.ReefBranchSide;
 import frc.robot.dashboard.DashboardSection;
 import frc.robot.oi.OperatorInterface;
 import frc.robot.oi.routine.BuildableAutoRoutine;
@@ -114,7 +114,7 @@ public class Container {
         .andThen(setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
   }
 
-  public static Command scoreOnSideAndLower(ReefPegSide side, ElevatorPosition position) {
+  public static Command scoreOnSideAndLower(ReefBranchSide side, ElevatorPosition position) {
     // return Swerve.pathfindToReefPegSide(side)
     // .andThen(scoreAtHeightAndLower(position));
 
@@ -123,18 +123,18 @@ public class Container {
 
   public static Map<String, Supplier<Command>> getNamedCommandSuppliers() {
     return Map.of(
-        "Score-L4", () -> scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kL4),
-        "Score-L3", () -> scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kL3),
-        "Score-L2", () -> scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kL2),
+        "Score-L4", () -> scoreOnSideAndLower(ReefBranchSide.kRight, ElevatorPosition.kL4),
+        "Score-L3", () -> scoreOnSideAndLower(ReefBranchSide.kRight, ElevatorPosition.kL3),
+        "Score-L2", () -> scoreOnSideAndLower(ReefBranchSide.kRight, ElevatorPosition.kL2),
         "Score-Trough", () -> scoreAtHeightAndLower(ElevatorPosition.kTrough),
         "Pickup-Source", () -> pickupFromSourceAndLower());
   }
 
   public static Map<String, Command> getNamedCommands() {
     return Map.of(
-        "Score-L4", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kL4),
-        "Score-L3", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kL3),
-        "Score-L2", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kL2),
+        "Score-L4", scoreOnSideAndLower(ReefBranchSide.kRight, ElevatorPosition.kL4),
+        "Score-L3", scoreOnSideAndLower(ReefBranchSide.kRight, ElevatorPosition.kL3),
+        "Score-L2", scoreOnSideAndLower(ReefBranchSide.kRight, ElevatorPosition.kL2),
         "Score-Trough", scoreAtHeightAndLower(ElevatorPosition.kTrough),
         "Pickup-Source", pickupFromSourceAndLower());
   }

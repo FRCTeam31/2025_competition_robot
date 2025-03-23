@@ -8,7 +8,7 @@ import org.prime.control.SupplierXboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Container;
-import frc.robot.game.ReefPegSide;
+import frc.robot.game.ReefBranchSide;
 import frc.robot.subsystems.climbing.ClimberSubsystem;
 import frc.robot.subsystems.drivetrain.SwerveMap;
 import frc.robot.subsystems.drivetrain.SwerveSubsystem;

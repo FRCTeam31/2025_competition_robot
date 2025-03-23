@@ -48,7 +48,7 @@ public class SwerveModuleSim implements ISwerveModule {
     inputs.ModulePosition.angle = _currentHeading;
     inputs.ModulePosition.distanceMeters = _driveMotorSim.getAngularPositionRotations()
         * SwerveMap.DriveWheelCircumferenceMeters;
-    Logger.recordOutput("Drive/" + _name + "/DriveMotorMeasuredVoltage", _driveMotorSim.getInputVoltage());
+    Logger.recordOutput("Swerve/Modules/" + _name + "/DriveMotorMeasuredVoltage", _driveMotorSim.getInputVoltage());
   }
 
   @Override
@@ -101,12 +101,12 @@ public class SwerveModuleSim implements ISwerveModule {
   public void setDesiredState(SwerveModuleState desiredState) {
     // Optimize the desired state
     var optimize = _dashboardSection.getBoolean(_optimizeModuleKey, true);
-    Logger.recordOutput("Drive/" + _name + "/Optimized", optimize);
+    Logger.recordOutput("Swerve/Modules/" + _name + "/Optimized", optimize);
     if (optimize) {
       desiredState = SwerveUtil.optimize(desiredState, _currentHeading);
     }
 
-    Logger.recordOutput("Drive/" + _name + "/SteeringMotorOutputSpeed", 0);
+    Logger.recordOutput("Swerve/Modules/" + _name + "/SteeringMotorOutputSpeed", 0);
     _currentHeading = desiredState.angle;
 
     // Set the drive motor to the desired speed
@@ -120,9 +120,9 @@ public class SwerveModuleSim implements ISwerveModule {
     var pid = _drivingPidController.calculate(currentSpeedRotationsPerSecond, desiredSpeedRotationsPerSecond);
     var driveOutput = MathUtil.clamp(ff + pid, -12.0, 12.0);
 
-    Logger.recordOutput("Drive/" + _name + "/DrivePID", pid);
-    Logger.recordOutput("Drive/" + _name + "/DriveFF", ff);
-    Logger.recordOutput("Drive/" + _name + "/DriveMotorOutputVoltage", driveOutput);
+    Logger.recordOutput("Swerve/Modules/" + _name + "/DrivePID", pid);
+    Logger.recordOutput("Swerve/Modules/" + _name + "/DriveFF", ff);
+    Logger.recordOutput("Swerve/Modules/" + _name + "/DriveMotorOutputVoltage", driveOutput);
     _driveMotorSim.setInputVoltage(driveOutput);
   }
 }

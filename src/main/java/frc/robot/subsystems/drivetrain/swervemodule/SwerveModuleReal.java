@@ -139,7 +139,7 @@ public class SwerveModuleReal implements ISwerveModule {
     inputs.ModulePosition.angle = rotation;
     inputs.ModulePosition.distanceMeters = distanceMeters.magnitude();
     inputs.DriveMotorVoltage = _driveMotor.getAppliedOutput() * _driveMotor.getBusVoltage();
-    Logger.recordOutput("Drive/" + _name + "/DriveMotorMeasuredVoltage",
+    Logger.recordOutput("Swerve/Modules/" + _name + "/DriveMotorMeasuredVoltage",
         _driveMotor.getAppliedOutput() * _driveMotor.getBusVoltage());
   }
 
@@ -165,7 +165,7 @@ public class SwerveModuleReal implements ISwerveModule {
   public void setDesiredState(SwerveModuleState desiredState) {
     // Optimize the desired state
     var optimize = _dashboardSection.getBoolean(_optimizeModuleKey, true);
-    Logger.recordOutput("Drive/" + _name + "/Optimized", optimize);
+    Logger.recordOutput("Swerve/Modules/" + _name + "/Optimized", optimize);
     if (optimize) {
       desiredState = SwerveUtil.optimize(desiredState, getCurrentHeading());
     }
@@ -192,9 +192,9 @@ public class SwerveModuleReal implements ISwerveModule {
     var ff = _driveFeedForward.calculate(desiredSpeedRotationsPerSecond);
     var driveOutput = MathUtil.clamp(pid + ff, -12, 12);
 
-    Logger.recordOutput("Drive/" + _name + "/DrivePID", pid);
-    Logger.recordOutput("Drive/" + _name + "/DriveFF", ff);
-    Logger.recordOutput("Drive/" + _name + "/DriveMotorOutputVoltage", driveOutput);
+    Logger.recordOutput("Swerve/Modules/" + _name + "/DrivePID", pid);
+    Logger.recordOutput("Swerve/Modules/" + _name + "/DriveFF", ff);
+    Logger.recordOutput("Swerve/Modules/" + _name + "/DriveMotorOutputVoltage", driveOutput);
     _driveMotor.setVoltage(driveOutput);
   }
 
@@ -209,7 +209,7 @@ public class SwerveModuleReal implements ISwerveModule {
     var steerSpeed = MathUtil.clamp(newOutput, -1, 1);
 
     // Set the steering motor's speed to the calculated output
-    Logger.recordOutput("Drive/" + _name + "/SteeringMotorOutputSpeed", steerSpeed);
+    Logger.recordOutput("Swerve/Modules/" + _name + "/SteeringMotorOutputSpeed", steerSpeed);
     _steeringMotor.set(steerSpeed);
   }
 

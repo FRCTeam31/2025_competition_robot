@@ -1,6 +1,6 @@
 package frc.robot.game;
 
-public enum ReefPegSide {
+public enum ReefBranchSide {
     kLeft,
     kRight,
 }

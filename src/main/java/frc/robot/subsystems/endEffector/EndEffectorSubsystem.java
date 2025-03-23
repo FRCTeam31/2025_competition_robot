@@ -194,8 +194,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
         _endEffector.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
 
-        Logger.recordOutput("End Effector/Wrist Setpoint", _wristPID.getSetpoint());
-        // Logger.recordOutput("End Effector/Scheduled Wrist Setpoint", _lockableSetpoint.getEvent());
+        Logger.recordOutput(getName() + "Wrist Setpoint", _wristPID.getSetpoint());
         SmartDashboard.putBoolean(getName() + "wristManuallyControlled", _wristManuallyControlled);
 
         SmartDashboard.putNumber(getName() + " Wrist setpoint", _wristPID.getSetpoint());
