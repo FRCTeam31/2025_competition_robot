@@ -76,11 +76,11 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private Map<ElevatorPosition, Double> _positionMap = Map.of(
             ElevatorPosition.kAbsoluteMinimum, 0.0,
-            ElevatorPosition.kSource, 0.229,
+            ElevatorPosition.kSource, 0.198,
             ElevatorPosition.kTrough, 0.172,
-            ElevatorPosition.kLow, 0.311,
-            ElevatorPosition.kMid, 0.45,
-            ElevatorPosition.kHigh, 0.627);
+            ElevatorPosition.kL2, 0.311,
+            ElevatorPosition.kL3, 0.428,
+            ElevatorPosition.kL4, 0.627);
 
     private ElevatorInputsAutoLogged _inputs = new ElevatorInputsAutoLogged();
     private IElevator _elevatorIO;
@@ -135,14 +135,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     //#region Control
 
     public void manageElevatorControl(double manualControlSpeed) {
-        boolean tryingToUseManualControl = manualControlSpeed != 0 || _elevatorManaullyControlled;
+        _elevatorManaullyControlled = manualControlSpeed != 0 || _elevatorManaullyControlled;
 
-        if (manualControlSpeed != 0) {
-            _elevatorManaullyControlled = true;
-        }
-
-        if (tryingToUseManualControl) {
-            setMotorVoltageWithLimitSwitches(manualControlSpeed * 12);
+        if (_elevatorManaullyControlled) {
+            setMotorVoltageWithLimitSwitches((manualControlSpeed * 12) * 0.75);
         } else {
             var ec = _elevatorController.calculate(_inputs.ElevatorDistanceMeters,
                     _inputs.ElevatorSpeedMetersPerSecond);
@@ -191,8 +187,27 @@ public class ElevatorSubsystem extends SubsystemBase {
         _elevatorIO.setMotorVoltages(newVolatage);
     }
 
-    public void disableElevatorManaulControl() {
+    public void disableElevatorManualControl() {
         _elevatorManaullyControlled = false;
+    }
+
+    public void setPositionSetpoint(ElevatorPosition pos) {
+        _elevatorController.setSetpoint(_positionMap.get(pos));
+        disableElevatorManualControl();
+
+        if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.5) {
+            _elevatorController.setM(ElevatorMap.ElevatorControllerConstantsAbsoultelyMassive.M);
+            _elevatorController.setR(ElevatorMap.ElevatorControllerConstantsAbsoultelyMassive.R);
+        } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.4) {
+            _elevatorController.setM(ElevatorMap.ElevatorControllerConstantsBig.M);
+            _elevatorController.setR(ElevatorMap.ElevatorControllerConstantsBig.R);
+        } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.2) {
+            _elevatorController.setM(ElevatorMap.ElevatorControllerConstantsMedium.M);
+            _elevatorController.setR(ElevatorMap.ElevatorControllerConstantsMedium.R);
+        } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) < 0.2) {
+            _elevatorController.setM(ElevatorMap.ElevatorControllerConstantsSmall.M);
+            _elevatorController.setR(ElevatorMap.ElevatorControllerConstantsSmall.R);
+        }
     }
 
     @Override
@@ -215,23 +230,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public Command setElevatorSetpointCommand(ElevatorPosition pos) {
         return Commands.print("Setting elevator position to: " + _positionMap.get(pos))
-                .andThen(() -> _elevatorController.setSetpoint(_positionMap.get(pos)))
-                .andThen(disableElevatorManualControlCommand())
-                .andThen(() -> {
-                    if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.5) {
-                        _elevatorController.setM(ElevatorMap.ElevatorControllerConstantsAbsoultelyMassive.M);
-                        _elevatorController.setR(ElevatorMap.ElevatorControllerConstantsAbsoultelyMassive.R);
-                    } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.4) {
-                        _elevatorController.setM(ElevatorMap.ElevatorControllerConstantsBig.M);
-                        _elevatorController.setR(ElevatorMap.ElevatorControllerConstantsBig.R);
-                    } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.2) {
-                        _elevatorController.setM(ElevatorMap.ElevatorControllerConstantsMedium.M);
-                        _elevatorController.setR(ElevatorMap.ElevatorControllerConstantsMedium.R);
-                    } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) < 0.2) {
-                        _elevatorController.setM(ElevatorMap.ElevatorControllerConstantsSmall.M);
-                        _elevatorController.setR(ElevatorMap.ElevatorControllerConstantsSmall.R);
-                    }
-                });
+                .andThen(() -> setPositionSetpoint(pos));
     }
 
     public Command goToElevatorBottomCommand() {
@@ -246,7 +245,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public Command disableElevatorManualControlCommand() {
-        return Commands.runOnce(this::disableElevatorManaulControl);
+        return Commands.runOnce(this::disableElevatorManualControl);
     }
 
     public Command stopMotorsCommand() {
@@ -256,9 +255,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     public Map<String, Command> getNamedCommands() {
         return Map.of(
                 "Elevator/Stop", stopMotorsCommand(),
-                "Elevator/Goto High", setElevatorSetpointCommand(ElevatorPosition.kHigh),
-                "Elevator/Goto Middle", setElevatorSetpointCommand(ElevatorPosition.kMid),
-                "Elevator/Goto Low", setElevatorSetpointCommand(ElevatorPosition.kLow),
+                "Elevator/Goto High", setElevatorSetpointCommand(ElevatorPosition.kL4),
+                "Elevator/Goto Middle", setElevatorSetpointCommand(ElevatorPosition.kL3),
+                "Elevator/Goto Low", setElevatorSetpointCommand(ElevatorPosition.kL2),
                 "Elevator/Goto Trough", setElevatorSetpointCommand(ElevatorPosition.kTrough),
                 "Elevator/Goto Source", setElevatorSetpointCommand(ElevatorPosition.kAbsoluteMinimum));
     }

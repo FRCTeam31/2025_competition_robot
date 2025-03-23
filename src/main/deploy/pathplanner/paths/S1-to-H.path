@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 5.95,
-        "y": 3.86
+        "x": 5.73780701754386,
+        "y": 4.193662280701755
       },
       "prevControl": {
-        "x": 6.503064712527231,
-        "y": 4.802638592162149
+        "x": 6.290871730071091,
+        "y": 5.136300872863902
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,7 +31,14 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "AutoRaiseElevator",
+      "waypointRelativePos": 0.0,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,

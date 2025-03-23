@@ -17,4 +17,5 @@ public class SwerveSubsystemInputs {
   public Pose2d EstimatedRobotPose = new Pose2d();
   public SwerveModuleState[] ModuleStates = new SwerveModuleState[4];
   public double AutoAlignCorrection = 0;
+  public boolean DrivingRobotRelative = false;
 }

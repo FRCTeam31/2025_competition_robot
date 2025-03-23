@@ -30,7 +30,7 @@ public class EndEffectorSubsystem extends SubsystemBase {
         public static final double IntakeSpeed = 1;
         public static final byte IntakeCurrentLimit = 20;
         public static final byte WristCurrentLimit = 30;
-        public static final ExtendedPIDConstants WristPID = new ExtendedPIDConstants(0.007, 0, 0);
+        public static final ExtendedPIDConstants WristPID = new ExtendedPIDConstants(0.01, 0, 0);
         public static final double GearRatio = 20;
         public static final double MinWristAngle = -135;
         public static final double MaxWristAngle = -30;
@@ -65,9 +65,9 @@ public class EndEffectorSubsystem extends SubsystemBase {
             ElevatorPosition.kAbsoluteMinimum, 0.0,
             ElevatorPosition.kSource, -42.36,
             ElevatorPosition.kTrough, -92.0,
-            ElevatorPosition.kLow, -126.0,
-            ElevatorPosition.kMid, -126.0,
-            ElevatorPosition.kHigh, -121.0);
+            ElevatorPosition.kL2, -126.0,
+            ElevatorPosition.kL3, -126.0,
+            ElevatorPosition.kL4, -121.0);
 
     private EndEffectorInputsAutoLogged _inputs = new EndEffectorInputsAutoLogged();
 
@@ -85,15 +85,15 @@ public class EndEffectorSubsystem extends SubsystemBase {
 
         // TODO: Use the below events to trigger automatic movement of the end effector, when using PID control
         _elevatorReachedLowHeight = new BooleanEvent(Robot.EventLoop,
-                () -> Container.Elevator.positionIsNear(ElevatorPosition.kLow))
+                () -> Container.Elevator.positionIsNear(ElevatorPosition.kL2))
                 .rising()
                 .debounce(0.5);
         _elevatorReachedMidHeight = new BooleanEvent(Robot.EventLoop,
-                () -> Container.Elevator.positionIsNear(ElevatorPosition.kMid))
+                () -> Container.Elevator.positionIsNear(ElevatorPosition.kL3))
                 .rising()
                 .debounce(0.5);
         _elevatorReachedHighHeight = new BooleanEvent(Robot.EventLoop,
-                () -> Container.Elevator.positionIsNear(ElevatorPosition.kHigh))
+                () -> Container.Elevator.positionIsNear(ElevatorPosition.kL4))
                 .rising()
                 .debounce(0.5);
         _elevatorReachedSourceHeight = new BooleanEvent(Robot.EventLoop,
@@ -130,16 +130,18 @@ public class EndEffectorSubsystem extends SubsystemBase {
     }
 
     public void seekWristAnglePID() {
-        var belowElevatorSafetyLimit = Container.Elevator
+        var inDangerZone = Container.Elevator
                 .getElevatorPositionMeters() <= EndEffectorMap.LowerElevatorSafetyLimit;
 
-        boolean inDangerZone = belowElevatorSafetyLimit;
+        var safeAngle = calculateDangerZoneAngle(Container.Elevator
+                .getElevatorPositionMeters());
+        SmartDashboard.putNumber(getName() + "/dangerZoneCalculatedSafeAngle", safeAngle);
 
-        double pid = belowElevatorSafetyLimit
-                ? _wristPID.calculate(_inputs.EndEffectorAngleDegrees, 0)
+        double pid = inDangerZone
+                ? _wristPID.calculate(_inputs.EndEffectorAngleDegrees, 0) // Revert instructions: set this to 0
                 : _wristPID.calculate(_inputs.EndEffectorAngleDegrees);
 
-        if (!belowElevatorSafetyLimit) {
+        if (!inDangerZone) {
             double previousSetpoint = _wristPID.getSetpoint();
             _wristPID.setSetpoint(
                     Math.min(previousSetpoint, EndEffectorMap.MaxWristAngle));
@@ -161,6 +163,14 @@ public class EndEffectorSubsystem extends SubsystemBase {
             // _lockableSetpoint.unlock();
             _isLocked = false;
         }
+    }
+
+    private double calculateDangerZoneAngle(double currentAngle) {
+        var t1 = 6686.42684 * Math.pow(currentAngle, 2);
+        var t2 = 1875.25759 * currentAngle;
+        var t3 = 5.58733;
+
+        return t1 - t2 - t3;
     }
 
     public void runWristManual(double speed) {
@@ -300,9 +310,9 @@ public class EndEffectorSubsystem extends SubsystemBase {
                 .andThen(Commands.waitUntil(this::wristAtSetpoint))
                 .andThen(enableEjectCommand()) // eject until limit switch is let go (or times out)
                 .until(() -> !_inputs.CoralLimitSwitchState).withTimeout(2)
-                .andThen(Commands.waitSeconds(0.5)) // slight delay to allow the coral to begin ejecting
+                .andThen(Commands.waitSeconds(0.75)) // slight delay to allow the coral to begin ejecting
                 .andThen(setWristSetpointCommand(-30)) // set the angle up while ejecting
-                .andThen(Commands.waitSeconds(0.5))
+                .andThen(Commands.waitSeconds(0.75))
                 .andThen(enableIntakeCommand());
     }
 

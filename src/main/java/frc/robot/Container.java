@@ -5,6 +5,7 @@
 package frc.robot;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import com.pathplanner.lib.auto.NamedCommands;
 
@@ -73,7 +74,7 @@ public class Container {
       // combinedCommands.putAll(containerCommands);
       // combinedCommands.putAll(elevatorCommands);
 
-      AutoBuilder = new BuildableAutoRoutine(containerCommands);
+      AutoBuilder = new BuildableAutoRoutine(getNamedCommandSuppliers());
     } catch (Exception e) {
       DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());
     }
@@ -120,14 +121,20 @@ public class Container {
     return scoreAtHeightAndLower(position);
   }
 
+  public static Map<String, Supplier<Command>> getNamedCommandSuppliers() {
+    return Map.of(
+        "Score-L4", () -> scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kL4),
+        "Score-L3", () -> scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kL3),
+        "Score-L2", () -> scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kL2),
+        "Score-Trough", () -> scoreAtHeightAndLower(ElevatorPosition.kTrough),
+        "Pickup-Source", () -> pickupFromSourceAndLower());
+  }
+
   public static Map<String, Command> getNamedCommands() {
     return Map.of(
-        "Score-L4-L", scoreOnSideAndLower(ReefPegSide.kLeft, ElevatorPosition.kHigh),
-        "Score-L4-R", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kHigh),
-        "Score-L3-L", scoreOnSideAndLower(ReefPegSide.kLeft, ElevatorPosition.kMid),
-        "Score-L3-R", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kMid),
-        "Score-L2-L", scoreOnSideAndLower(ReefPegSide.kLeft, ElevatorPosition.kLow),
-        "Score-L2-R", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kLow),
+        "Score-L4", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kL4),
+        "Score-L3", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kL3),
+        "Score-L2", scoreOnSideAndLower(ReefPegSide.kRight, ElevatorPosition.kL2),
         "Score-Trough", scoreAtHeightAndLower(ElevatorPosition.kTrough),
         "Pickup-Source", pickupFromSourceAndLower());
   }

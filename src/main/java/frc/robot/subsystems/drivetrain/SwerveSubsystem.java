@@ -4,6 +4,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -21,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.dashboard.DrivetrainDashboardSection;
+import frc.robot.game.AprilTagReefMap;
 import frc.robot.game.ReefPegSide;
 import frc.robot.oi.ImpactRumbleHelper;
 import frc.robot.Container;
@@ -39,7 +41,9 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.Logger;
+import org.prime.control.PrimeHolonomicDriveController;
 import org.prime.control.SwerveControlSuppliers;
+import org.prime.pose.PoseUtil;
 import org.prime.vision.LimelightInputs;
 
 public class SwerveSubsystem extends SubsystemBase {
@@ -56,6 +60,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   // Vision, Kinematics, odometry
   public boolean WithinPoseEstimationVelocity = true;
+  private PrimeHolonomicDriveController _primeHolonomicController;
 
   /**
    * Creates a new Drivetrain.
@@ -96,14 +101,15 @@ public class SwerveSubsystem extends SubsystemBase {
         .setLogActivePathCallback(poses -> Container.TeleopDashboardSection.getFieldPath().setPoses(poses));
 
     // Configure PathPlanner holonomic control
+    _primeHolonomicController = new PrimeHolonomicDriveController(
+        SwerveMap.PathPlannerTranslationPID.toPIDConstants(),
+        SwerveMap.PathPlannerRotationPID.toPIDConstants());
     AutoBuilder.configure(
         () -> _inputs.EstimatedRobotPose,
         _swervePackager::setEstimatorPose,
         () -> _inputs.RobotRelativeChassisSpeeds,
         (speeds, feedForwards) -> driveRobotRelative(speeds),
-        new PPHolonomicDriveController(
-            SwerveMap.PathPlannerTranslationPID.toPIDConstants(),
-            SwerveMap.PathPlannerRotationPID.toPIDConstants()),
+        _primeHolonomicController,
         config, () -> {
           // Boolean supplier that controls when the path will be mirrored for the red
           // alliance
@@ -198,11 +204,61 @@ public class SwerveSubsystem extends SubsystemBase {
 
     var limelightInputs = Container.Vision.getAllLimelightInputs();
 
-    if (Container.TeleopDashboardSection.getFrontPoseEstimationSwitch())
-      evaluatePoseEstimation(limelightInputs[0]);
+    evaluatePoseEstimation(limelightInputs[0]);
+    evaluatePoseEstimation(limelightInputs[1]);
 
-    if (Container.TeleopDashboardSection.getRearPoseEstimationSwitch())
-      evaluatePoseEstimation(limelightInputs[1]);
+    // TESTING
+    var frontInputs = limelightInputs[0];
+    if (VisionSubsystem.isReefTag(frontInputs.ApriltagId)) {
+      var reefBranch = AprilTagReefMap.getBranchPair(frontInputs.ApriltagId);
+      Logger.recordOutput(getName() + "/reef-targetpose-side-name", reefBranch.getFaceName());
+
+      // Get the target pose, and then get the L and R branch offsets from that
+      var targetPose = frontInputs.RobotSpaceTargetPose.Pose;
+      Logger.recordOutput(getName() + "/reef-targetpose", targetPose.toPose2d());
+      var leftPose = getReefPegsPoseFromInput(ReefPegSide.kLeft, targetPose.toPose2d());
+      var rightPose = getReefPegsPoseFromInput(ReefPegSide.kRight, targetPose.toPose2d());
+
+      Logger.recordOutput(getName() + "/reef-targetpose-left_branch", leftPose);
+      Logger.recordOutput(getName() + "/reef-targetpose-right_branch", rightPose);
+
+      // Generate a straight line trajectory from each side of the target pose
+      var tConfig = new TrajectoryConfig(1, 1)
+          .setStartVelocity(1)
+          .setEndVelocity(1)
+          .setKinematics(_swervePackager.Kinematics);
+      var leftLineTraj = PoseUtil.generateStraightLineTrajectory(leftPose, 2, tConfig);
+      var rightLineTraj = PoseUtil.generateStraightLineTrajectory(rightPose, 2, tConfig);
+
+      // Get the closest pose in each trajectory to the robot's current pose
+      var leftPoses = PoseUtil.getTrajectoryPoses(leftLineTraj);
+      var rightPoses = PoseUtil.getTrajectoryPoses(rightLineTraj);
+
+      Pose2d closestLeft = PoseUtil.getClosestPoseInList(_inputs.EstimatedRobotPose, leftPoses);
+      Pose2d closestRight = PoseUtil.getClosestPoseInList(_inputs.EstimatedRobotPose, rightPoses);
+
+      // If either of the closest poses are null, something went wrong
+      if (closestLeft == null || closestRight == null) {
+        Logger.recordOutput(getName() + "/reef-auto-side-selection", "FAILED");
+        return;
+      }
+
+      Logger.recordOutput(getName() + "/reef-left-traj-closest-pose", closestLeft);
+      Logger.recordOutput(getName() + "/reef-right-traj-closest-pose", closestRight);
+
+      // Get the distance to the closest pose in each trajectory
+      double distanceToClosestLeft = PoseUtil.getDistanceBetweenPoses(_inputs.EstimatedRobotPose, closestLeft);
+      double distanceToClosestRight = PoseUtil.getDistanceBetweenPoses(_inputs.EstimatedRobotPose, closestRight);
+
+      Logger.recordOutput(getName() + "/reef-left-dist-to-closest-traj-pose", distanceToClosestLeft);
+      Logger.recordOutput(getName() + "/reef-right-dist-to-closest-traj-pose", distanceToClosestRight);
+
+      if (distanceToClosestLeft < distanceToClosestRight) {
+        Logger.recordOutput(getName() + "/reef-auto-side-selection", "left");
+      } else {
+        Logger.recordOutput(getName() + "/reef-auto-side-selection", "right");
+      }
+    }
   }
 
   /**
@@ -213,9 +269,7 @@ public class SwerveSubsystem extends SubsystemBase {
     if (!VisionSubsystem.isAprilTagIdValid(limelightInputs.ApriltagId))
       return;
 
-    var llPose = Robot.onBlueAlliance()
-        ? limelightInputs.BlueAllianceOriginFieldSpaceRobotPose
-        : limelightInputs.RedAllianceOriginFieldSpaceRobotPose;
+    var llPose = limelightInputs.BlueAllianceOriginFieldSpaceRobotPose;
 
     _swervePackager.addPoseEstimatorVisionMeasurement(
         llPose.Pose.toPose2d(),
@@ -243,6 +297,10 @@ public class SwerveSubsystem extends SubsystemBase {
     Logger.recordOutput("Drive/autoAlignSetpoint", _autoAlign.getSetpoint());
     Logger.recordOutput("Drive/autoAlignAtSetpoint", _autoAlign.atSetpoint());
 
+    if (DriverStation.isAutonomousEnabled()) {
+      Logger.recordOutput(getName() + "/pp-translation-error", _primeHolonomicController.getTranslationError());
+    }
+
     // Update shuffleboard
     if (DriverStation.isEnabled()) {
       Container.TeleopDashboardSection.setFieldRobotPose(_inputs.EstimatedRobotPose);
@@ -265,15 +323,14 @@ public class SwerveSubsystem extends SubsystemBase {
   /**
    * Returns the pose of the desired side of reef pegs from the current robot pose (assumed to be the midpoint between pegs)
    */
-  public Pose2d getReefPegsPoseFromCurrent(ReefPegSide side) {
-    var currentPose = _inputs.EstimatedRobotPose;
+  public Pose2d getReefPegsPoseFromInput(ReefPegSide side, Pose2d inputPose) {
     var currentHeadingRadians = _inputs.GyroAngle.getRadians();
     var a = side == ReefPegSide.kLeft
         ? currentHeadingRadians + (Math.PI / 2)
         : currentHeadingRadians - (Math.PI / 2);
 
-    var newX = currentPose.getX() + Centimeters.mutable(16.5).in(Meters) * Math.cos(a);
-    var newY = currentPose.getY() + Centimeters.mutable(16.5).in(Meters) * Math.sin(a);
+    var newX = inputPose.getX() + Centimeters.mutable(16.5).in(Meters) * Math.cos(a);
+    var newY = inputPose.getY() + Centimeters.mutable(16.5).in(Meters) * Math.sin(a);
     var desiredPose = new Pose2d(newX, newY, _inputs.GyroAngle);
 
     return desiredPose;
@@ -286,8 +343,22 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param controlSuppliers Controller input suppliers
    */
   public Command driveFieldRelativeCommand(SwerveControlSuppliers controlSuppliers) {
-    return this.run(() -> driveRobotRelative(controlSuppliers.getChassisSpeeds(false, _inputs.GyroAngle,
-        () -> setAutoAlignEnabled(false))));
+    return this.run(() -> {
+      // if (_inputs.DrivingRobotRelative) {
+      //   // Robot-relative override
+      //   var inputChassisSpeeds = controlSuppliers.getChassisSpeeds(false, _inputs.GyroAngle,
+      //       () -> {
+      //         setAutoAlignEnabled(false);
+      //         _inputs.DrivingRobotRelative = false;
+      //       });
+
+      //   driveRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(inputChassisSpeeds, _inputs.GyroAngle));
+      // } else {
+      driveRobotRelative(controlSuppliers.getChassisSpeeds(false, _inputs.GyroAngle,
+          () -> setAutoAlignEnabled(false)));
+      // }
+
+    });
   }
 
   /**
@@ -332,22 +403,28 @@ public class SwerveSubsystem extends SubsystemBase {
   /**
    * Enables lock-on control to whichever target is in view
    */
-  public Command enableLockOnCommand() {
+  public Command enableReefAutoAlignCommand() {
     var cmd = Commands.run(() -> {
-      var rearLimelightInputs = Container.Vision.getLimelightInputs(1);
+      var frontLimelightInputs = Container.Vision.getLimelightInputs(0);
 
       // If targeted AprilTag is in validTargets, align to its offset
-      if (VisionSubsystem.isAprilTagIdValid(rearLimelightInputs.ApriltagId)) {
-        // Calculate the target heading
-        var horizontalOffsetDeg = rearLimelightInputs.TargetHorizontalOffset.getDegrees();
-        var robotHeadingDeg = _inputs.GyroAngle.getDegrees();
-        var targetHeadingDeg = robotHeadingDeg - horizontalOffsetDeg;
+      if (VisionSubsystem.isReefTag(frontLimelightInputs.ApriltagId)) {
+        var targetHeadingOffsetDeg = frontLimelightInputs.RobotSpaceTargetPose.Pose
+            .getRotation()
+            .toRotation2d()
+            // .plus(Rotation2d.fromDegrees(180)) // TODO: Enable this if the target pose facing the robot is flipped
+            .getDegrees();
+
+        // var adjustedTargetAngle = targetHeadingOffsetDeg;
+        var adjustedTargetAngle = _inputs.GyroAngle.getDegrees() + targetHeadingOffsetDeg;
 
         // Set the drivetrain to align to the target heading
-        _autoAlign.setSetpoint(Rotation2d.fromDegrees(targetHeadingDeg));
+        _autoAlign.setSetpoint(Rotation2d.fromDegrees(adjustedTargetAngle));
         setAutoAlignEnabled(true);
+        // _inputs.DrivingRobotRelative = true;
       } else {
         setAutoAlignEnabled(false);
+        // _inputs.DrivingRobotRelative = false;
       }
     });
 
@@ -386,7 +463,7 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public Command pathfindToReefPegSide(ReefPegSide side) {
     return this.defer(() -> {
-      var desiredPose = getReefPegsPoseFromCurrent(side);
+      var desiredPose = getReefPegsPoseFromInput(side, _inputs.EstimatedRobotPose);
       Container.TeleopDashboardSection.getFieldTargetPose().setPose(desiredPose);
 
       // Create trajectory
@@ -439,7 +516,7 @@ public class SwerveSubsystem extends SubsystemBase {
   public Map<String, Command> getNamedCommands() {
     return Map.of(
         getName() + "-EnableTargetLockOn",
-        enableLockOnCommand(),
+        enableReefAutoAlignCommand(),
         getName() + "-DisableAutoAlign",
         disableAutoAlignCommand(),
         getName() + "-EnableAutoAlignRotationFeedback",

@@ -15,7 +15,6 @@ import frc.robot.subsystems.drivetrain.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorPosition;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.endEffector.EndEffectorSubsystem;
-import frc.robot.subsystems.endEffector.EndEffectorSubsystem.EndEffectorMap;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
 public class OperatorInterface {
@@ -42,26 +41,27 @@ public class OperatorInterface {
                 swerveSubsystem.setDefaultCommand(swerveSubsystem.driveFieldRelativeCommand(controlProfile));
 
                 // While holding leftStick, auto-aim the robot to an apriltag target using snap angle
-                DriverController.leftStick().whileTrue(swerveSubsystem.enableLockOnCommand())
-                                .onFalse(swerveSubsystem.disableAutoAlignCommand());
+                // DriverController.leftStick().whileTrue(swerveSubsy\;
 
                 DriverController.x().onTrue(swerveSubsystem.disableAutoAlignCommand());
                 DriverController.a().onTrue(swerveSubsystem.resetGyroCommand());
                 //Map Autoalign to Pov
-                DriverController.pov(Controls.up).onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.up));
-                DriverController.pov(Controls.upRight)
-                                .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.upRight - 90));
-                DriverController.pov(Controls.right)
-                                .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.right - 180));
-                DriverController.pov(Controls.downRight)
-                                .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.downRight + 90));
-                DriverController.pov(Controls.down).onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.down));
-                DriverController.pov(Controls.downLeft)
-                                .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.downLeft - 90));
-                DriverController.pov(Controls.left)
-                                .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.left - 180));
-                DriverController.pov(Controls.upLeft)
-                                .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.upLeft + 90));
+                DriverController.pov(Controls.up).whileTrue(swerveSubsystem.enableReefAutoAlignCommand())
+                                .onFalse(swerveSubsystem.disableAutoAlignCommand());
+                // DriverController.pov(Controls.up).onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.up));
+                // DriverController.pov(Controls.upRight)
+                //                 .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.upRight - 90));
+                // DriverController.pov(Controls.right)
+                //                 .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.right - 180));
+                // DriverController.pov(Controls.downRight)
+                //                 .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.downRight + 90));
+                // DriverController.pov(Controls.down).onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.down));
+                // DriverController.pov(Controls.downLeft)
+                //                 .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.downLeft - 90));
+                // DriverController.pov(Controls.left)
+                //                 .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.left - 180));
+                // DriverController.pov(Controls.upLeft)
+                //                 .onTrue(swerveSubsystem.setAutoAlignSetpointCommand(Controls.upLeft + 90));
 
                 // Climber Controls
                 // Climber in will only go in until it hits the artifical stop measured by the encoder
@@ -98,18 +98,20 @@ public class OperatorInterface {
                                                 OperatorController.getLeftStickYSupplier(0.3, 0)));
 
                 // Elevator and Wrist Combined Controls                              
-                // OperatorController.povDown().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kTrough));
-                // OperatorController.a().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kLow));
-                // OperatorController.x().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kMid));
-                // OperatorController.povUp().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kHigh));
-                // OperatorController.start().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kSource));
-                // OperatorController.b().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
+                // OperatorController.povDown().onTrue(Container.scoreAtHeightAndLower(ElevatorPosition.kTrough));
+                // OperatorController.a().onTrue(Container.scoreAtHeightAndLower(ElevatorPosition.kLow));
+                // OperatorController.x().onTrue(Container.scoreAtHeightAndLower(ElevatorPosition.kMid));
+                // OperatorController.povUp().onTrue(Container.scoreAtHeightAndLower(ElevatorPosition.kHigh));
+                // OperatorController.start().onTrue(Container.pickupFromSourceAndLower());
 
-                OperatorController.povDown().onTrue(_containerNamedCommands.get("Score-Trough"));
-                OperatorController.a().onTrue(_containerNamedCommands.get("Score-L2-L"));
-                OperatorController.x().onTrue(_containerNamedCommands.get("Score-L3-L"));
-                OperatorController.povUp().onTrue(_containerNamedCommands.get("Score-L4-L"));
-                OperatorController.start().onTrue(_containerNamedCommands.get("Pickup-Source"));
+                OperatorController.povDown().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kTrough));
+                OperatorController.a().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kL2));
+                OperatorController.x().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kL3));
+                OperatorController.povUp().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kL4));
+                OperatorController.start().onTrue(Container.pickupFromSourceAndLower());
+                OperatorController.b().onTrue(Container.setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
+
+                OperatorController.rightBumper().onTrue(endEffectorSubsystem.scoreCoral());
 
                 OperatorController.leftStick().onTrue(endEffectorSubsystem.disableWristManualControlCommand());
                 OperatorController.rightStick().onTrue(elevatorSubsystem.disableElevatorManualControlCommand());
@@ -124,8 +126,8 @@ public class OperatorInterface {
 
                 OperatorController.back().onTrue(visionSubsystem.setRearCameraPipeline(1).ignoringDisable(true))
                                 .onFalse(visionSubsystem.setRearCameraPipeline(0).ignoringDisable(true));
-                OperatorController.povLeft().onTrue(swerveSubsystem.pathfindToReefPegSide(ReefPegSide.kLeft));
-                OperatorController.povRight().onTrue(swerveSubsystem.pathfindToReefPegSide(ReefPegSide.kRight));
+                // OperatorController.povLeft().onTrue(swerveSubsystem.pathfindToReefPegSide(ReefPegSide.kLeft));
+                // OperatorController.povRight().onTrue(swerveSubsystem.pathfindToReefPegSide(ReefPegSide.kRight));
         }
 
         public void setDriverRumbleIntensity(double intensity) {

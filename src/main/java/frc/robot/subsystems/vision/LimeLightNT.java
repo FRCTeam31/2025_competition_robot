@@ -32,6 +32,7 @@ public class LimeLightNT implements AutoCloseable {
         inputs.ApriltagId = getApriltagId();
         inputs.TagCount = getTagCount();
         inputs.FieldSpaceRobotPose = getRobotPose();
+        inputs.RobotSpaceTargetPose = getTargetPoseInRobotSpace();
         inputs.RedAllianceOriginFieldSpaceRobotPose = getRobotPose(Alliance.Red);
         inputs.BlueAllianceOriginFieldSpaceRobotPose = getRobotPose(Alliance.Blue);
     }
@@ -109,7 +110,7 @@ public class LimeLightNT implements AutoCloseable {
     public LimelightPose getRobotPose() {
         var poseData = m_limelightTable.getEntry("botpose").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
 
-        return new LimelightPose(poseData, calculateTrust(poseData[7]));
+        return new LimelightPose(poseData);
     }
 
     /**
@@ -121,7 +122,7 @@ public class LimeLightNT implements AutoCloseable {
                 ? m_limelightTable.getEntry("botpose_wpiblue").getDoubleArray(new double[11])
                 : m_limelightTable.getEntry("botpose_wpired").getDoubleArray(new double[11]);
 
-        return new LimelightPose(poseData, calculateTrust(poseData[7]));
+        return new LimelightPose(poseData);
     }
 
     /**
@@ -130,7 +131,7 @@ public class LimeLightNT implements AutoCloseable {
     public LimelightPose getRobotPoseInTargetSpace() {
         var poseData = m_limelightTable.getEntry("botpose_targetspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
 
-        return new LimelightPose(poseData, calculateTrust(poseData[7]));
+        return new LimelightPose(poseData);
     }
 
     /**
@@ -139,7 +140,7 @@ public class LimeLightNT implements AutoCloseable {
     public LimelightPose getCameraPoseInTargetSpace() {
         var poseData = m_limelightTable.getEntry("camerapose_targetspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
 
-        return new LimelightPose(poseData, calculateTrust(poseData[7]));
+        return new LimelightPose(poseData);
     }
 
     /**
@@ -148,7 +149,7 @@ public class LimeLightNT implements AutoCloseable {
     public LimelightPose getCameraPoseInRobotSpace() {
         var poseData = m_limelightTable.getEntry("camerapose_robotspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
 
-        return new LimelightPose(poseData, calculateTrust(poseData[7]));
+        return new LimelightPose(poseData);
     }
 
     /**
@@ -157,7 +158,7 @@ public class LimeLightNT implements AutoCloseable {
     public LimelightPose getTargetPoseInCameraSpace() {
         var poseData = m_limelightTable.getEntry("targetpose_cameraspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
 
-        return new LimelightPose(poseData, calculateTrust(poseData[7]));
+        return new LimelightPose(poseData);
     }
 
     /**
@@ -166,7 +167,7 @@ public class LimeLightNT implements AutoCloseable {
     public LimelightPose getTargetPoseInRobotSpace() {
         var poseData = m_limelightTable.getEntry("targetpose_robotspace").getDoubleArray(new double[11]); // Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw)
 
-        return new LimelightPose(poseData, calculateTrust(poseData[7]));
+        return new LimelightPose(poseData);
     }
 
     /**

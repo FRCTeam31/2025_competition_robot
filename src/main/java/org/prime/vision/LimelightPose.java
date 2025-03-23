@@ -5,6 +5,7 @@ import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -26,70 +27,77 @@ public class LimelightPose implements LoggableInputs, Cloneable {
   public LimelightPose() {
   }
 
-  public LimelightPose(double[] poseTagPipelineData, double[] stdDeviations) {
-    if (poseTagPipelineData.length < 11 || poseTagPipelineData.length > 11) {
-      System.err.println("Bad LL 3D Pose Data!");
-      return;
+  public LimelightPose(double[] poseTagPipelineData) {
+    if (poseTagPipelineData.length >= 6) {
+      Pose = new Pose3d(
+          new Translation3d(poseTagPipelineData[0], poseTagPipelineData[1], poseTagPipelineData[2]),
+          new Rotation3d(
+              Units.degreesToRadians(poseTagPipelineData[3]),
+              Units.degreesToRadians(poseTagPipelineData[4]),
+              Units.degreesToRadians(poseTagPipelineData[5])));
+
+      StdDeviations = calculateTrustByArea(0.5);
     }
 
-    if (stdDeviations.length < 3 || stdDeviations.length > 3) {
-      System.err.println("Bad LL StdDeviations Data!");
-      return;
+    if (poseTagPipelineData.length >= 7) {
+      var latencyMs = poseTagPipelineData[6];
+      Timestamp = Timer.getFPGATimestamp() - (latencyMs / 1000.0);
+    } else {
+      Timestamp = Timer.getFPGATimestamp();
     }
 
-    Pose = new Pose3d(
-        new Translation3d(poseTagPipelineData[0], poseTagPipelineData[1], poseTagPipelineData[2]),
-        new Rotation3d(
-            Units.degreesToRadians(poseTagPipelineData[3]),
-            Units.degreesToRadians(poseTagPipelineData[4]),
-            Units.degreesToRadians(poseTagPipelineData[5])));
-
-    var latencyMs = poseTagPipelineData[6];
-    Timestamp = Timer.getFPGATimestamp() - (latencyMs / 1000.0);
-    TagCount = poseTagPipelineData[7];
-    TagSpan = poseTagPipelineData[8];
-    AvgTagDistanceMeters = poseTagPipelineData[9];
-    AvgTagArea = poseTagPipelineData[10];
-    StdDeviations = stdDeviations;
+    if (poseTagPipelineData.length >= 11) {
+      TagCount = poseTagPipelineData[7];
+      TagSpan = poseTagPipelineData[8];
+      AvgTagDistanceMeters = poseTagPipelineData[9];
+      AvgTagArea = poseTagPipelineData[10];
+      StdDeviations = calculateTrustByArea(AvgTagArea);
+    }
   }
 
-  public LimelightPose(Pose3d pose, double[] tagPipelineData, double[] stdDeviations) {
-    if (tagPipelineData.length < 5 || tagPipelineData.length > 5) {
-      System.err.println("Bad LL 3D Pose Data!");
-      return;
-    }
+  private double[] calculateTrustByArea(double tagArea) {
+    var trustLevel = 25.12396 * Math.pow(0.00156944, tagArea);
 
-    if (stdDeviations.length < 3 || stdDeviations.length > 3) {
-      System.err.println("Bad LL StdDeviations Data!");
-      return;
-    }
-
-    Pose = pose;
-
-    var latencyMs = tagPipelineData[0];
-    Timestamp = Timer.getFPGATimestamp() - (latencyMs / 1000.0);
-    TagCount = tagPipelineData[1];
-    TagSpan = tagPipelineData[2];
-    AvgTagDistanceMeters = tagPipelineData[3];
-    AvgTagArea = tagPipelineData[4];
-    StdDeviations = stdDeviations;
+    return VecBuilder.fill(trustLevel, trustLevel, 9999999).getData();
   }
 
-  public LimelightPose(Pose3d pose, double[] tagPipelineData) {
-    if (tagPipelineData.length < 5 || tagPipelineData.length > 5) {
-      System.err.println("Bad LL 3D Pose Data!");
-      return;
-    }
+  // public LimelightPose(Pose3d pose, double[] tagPipelineData, double[] stdDeviations) {
+  //   if (tagPipelineData.length < 5 || tagPipelineData.length > 5) {
+  //     System.err.println("Bad LL 3D Pose Data!");
+  //     return;
+  //   }
 
-    Pose = pose;
+  //   if (stdDeviations.length < 3 || stdDeviations.length > 3) {
+  //     System.err.println("Bad LL StdDeviations Data!");
+  //     return;
+  //   }
 
-    var latencyMs = tagPipelineData[0];
-    Timestamp = Timer.getFPGATimestamp() - (latencyMs / 1000.0);
-    TagCount = tagPipelineData[1];
-    TagSpan = tagPipelineData[2];
-    AvgTagDistanceMeters = tagPipelineData[3];
-    AvgTagArea = tagPipelineData[4];
-  }
+  //   Pose = pose;
+
+  //   var latencyMs = tagPipelineData[0];
+  //   Timestamp = Timer.getFPGATimestamp() - (latencyMs / 1000.0);
+  //   TagCount = tagPipelineData[1];
+  //   TagSpan = tagPipelineData[2];
+  //   AvgTagDistanceMeters = tagPipelineData[3];
+  //   AvgTagArea = tagPipelineData[4];
+  //   StdDeviations = stdDeviations;
+  // }
+
+  // public LimelightPose(Pose3d pose, double[] tagPipelineData) {
+  //   if (tagPipelineData.length < 5 || tagPipelineData.length > 5) {
+  //     System.err.println("Bad LL 3D Pose Data!");
+  //     return;
+  //   }
+
+  //   Pose = pose;
+
+  //   var latencyMs = tagPipelineData[0];
+  //   Timestamp = Timer.getFPGATimestamp() - (latencyMs / 1000.0);
+  //   TagCount = tagPipelineData[1];
+  //   TagSpan = tagPipelineData[2];
+  //   AvgTagDistanceMeters = tagPipelineData[3];
+  //   AvgTagArea = tagPipelineData[4];
+  // }
 
   public Matrix<N3, N1> getStdDeviations() {
     return new Matrix<N3, N1>(new SimpleMatrix(StdDeviations));

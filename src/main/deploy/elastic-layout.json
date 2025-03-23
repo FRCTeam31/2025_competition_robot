@@ -3,20 +3,6 @@
   "grid_size": 128,
   "tabs": [
     {
-      "name": "Teleoperated",
-      "grid_layout": {
-        "layouts": [],
-        "containers": []
-      }
-    },
-    {
-      "name": "Autonomous",
-      "grid_layout": {
-        "layouts": [],
-        "containers": []
-      }
-    },
-    {
       "name": "Driver",
       "grid_layout": {
         "layouts": [
@@ -232,6 +218,96 @@
             "properties": {
               "topic": "/FMSInfo",
               "period": 0.06
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Drivetrain",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "AutoAlign Enabled",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Drivetrain/AutoAlign Enabled",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "AutoAlign Angle",
+            "x": 0.0,
+            "y": 128.0,
+            "width": 512.0,
+            "height": 512.0,
+            "type": "Gyro",
+            "properties": {
+              "topic": "/SmartDashboard/Drivetrain/AutoAlign Angle",
+              "period": 0.06,
+              "counter_clockwise_positive": true
+            }
+          },
+          {
+            "title": "FL Optimize",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Toggle Switch",
+            "properties": {
+              "topic": "/SmartDashboard/Drivetrain/FrontLeftModule/Optimize",
+              "period": 0.06,
+              "data_type": "boolean"
+            }
+          },
+          {
+            "title": "FR Optimize",
+            "x": 640.0,
+            "y": 0.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Toggle Switch",
+            "properties": {
+              "topic": "/SmartDashboard/Drivetrain/FrontRightModule/Optimize",
+              "period": 0.06,
+              "data_type": "boolean"
+            }
+          },
+          {
+            "title": "RL Optimize",
+            "x": 512.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Toggle Switch",
+            "properties": {
+              "topic": "/SmartDashboard/Drivetrain/RearLeftModule/Optimize",
+              "period": 0.06,
+              "data_type": "boolean"
+            }
+          },
+          {
+            "title": "RR Optimize",
+            "x": 640.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Toggle Switch",
+            "properties": {
+              "topic": "/SmartDashboard/Drivetrain/RearRightModule/Optimize",
+              "period": 0.06,
+              "data_type": "boolean"
             }
           }
         ]
@@ -565,96 +641,6 @@
       }
     },
     {
-      "name": "Drivetrain",
-      "grid_layout": {
-        "layouts": [],
-        "containers": [
-          {
-            "title": "AutoAlign Enabled",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 512.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/SmartDashboard/Drivetrain/AutoAlign Enabled",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "AutoAlign Angle",
-            "x": 0.0,
-            "y": 128.0,
-            "width": 512.0,
-            "height": 512.0,
-            "type": "Gyro",
-            "properties": {
-              "topic": "/SmartDashboard/Drivetrain/AutoAlign Angle",
-              "period": 0.06,
-              "counter_clockwise_positive": true
-            }
-          },
-          {
-            "title": "FL Optimize",
-            "x": 512.0,
-            "y": 0.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/SmartDashboard/Drivetrain/FrontLeftModule/Optimize",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
-          },
-          {
-            "title": "FR Optimize",
-            "x": 640.0,
-            "y": 0.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/SmartDashboard/Drivetrain/FrontRightModule/Optimize",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
-          },
-          {
-            "title": "RL Optimize",
-            "x": 512.0,
-            "y": 128.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/SmartDashboard/Drivetrain/RearLeftModule/Optimize",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
-          },
-          {
-            "title": "RR Optimize",
-            "x": 640.0,
-            "y": 128.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/SmartDashboard/Drivetrain/RearRightModule/Optimize",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
-          }
-        ]
-      }
-    },
-    {
       "name": "Test",
       "grid_layout": {
         "layouts": [
@@ -824,6 +810,30 @@
               "period": 0.06,
               "data_type": "boolean"
             }
+          },
+          {
+            "title": "High Position",
+            "x": 256.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Toggle Button",
+            "properties": {
+              "topic": "/SmartDashboard/Test/Elevator/High Position",
+              "period": 0.06
+            }
+          },
+          {
+            "title": "High Position",
+            "x": 640.0,
+            "y": 0.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Toggle Button",
+            "properties": {
+              "topic": "/SmartDashboard/Test/Elevator/High Position",
+              "period": 0.06
+            }
           }
         ]
       }
@@ -855,7 +865,7 @@
           },
           {
             "title": "Alliance",
-            "x": 1152.0,
+            "x": 640.0,
             "y": 0.0,
             "width": 256.0,
             "height": 128.0,
@@ -872,7 +882,7 @@
           },
           {
             "title": "Current Heading",
-            "x": 1152.0,
+            "x": 640.0,
             "y": 128.0,
             "width": 256.0,
             "height": 256.0,
@@ -893,7 +903,7 @@
           },
           {
             "title": "F Pose Est.",
-            "x": 1152.0,
+            "x": 512.0,
             "y": 384.0,
             "width": 128.0,
             "height": 128.0,
@@ -906,8 +916,8 @@
           },
           {
             "title": "R Pose Est.",
-            "x": 1280.0,
-            "y": 384.0,
+            "x": 512.0,
+            "y": 512.0,
             "width": 128.0,
             "height": 128.0,
             "type": "Toggle Switch",
@@ -921,7 +931,7 @@
             "title": "Alerts",
             "x": 0.0,
             "y": 384.0,
-            "width": 384.0,
+            "width": 512.0,
             "height": 384.0,
             "type": "Alerts",
             "properties": {
@@ -931,8 +941,8 @@
           },
           {
             "title": "FMSInfo",
-            "x": 640.0,
-            "y": 384.0,
+            "x": 896.0,
+            "y": 512.0,
             "width": 512.0,
             "height": 128.0,
             "type": "FMSInfo",
@@ -943,7 +953,7 @@
           },
           {
             "title": "Voltage",
-            "x": 384.0,
+            "x": 640.0,
             "y": 384.0,
             "width": 256.0,
             "height": 128.0,
@@ -961,7 +971,7 @@
           },
           {
             "title": "TotalCurrent",
-            "x": 384.0,
+            "x": 640.0,
             "y": 512.0,
             "width": 256.0,
             "height": 256.0,
@@ -973,6 +983,113 @@
               "time_displayed": 5.0,
               "color": 4278238420,
               "line_width": 2.0
+            }
+          },
+          {
+            "title": "limelight-front",
+            "x": 1408.0,
+            "y": 384.0,
+            "width": 512.0,
+            "height": 384.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/limelight-front",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          },
+          {
+            "title": "limelight-rear",
+            "x": 1408.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 384.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/limelight-rear",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          },
+          {
+            "title": "USB Camera 0",
+            "x": 896.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 512.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/USB Camera 0",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          },
+          {
+            "title": "Elevator is elevator manaully controlled",
+            "x": 896.0,
+            "y": 640.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Elevator is elevator manaully controlled",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "End EffectorwristManuallyControlled",
+            "x": 1024.0,
+            "y": 640.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/End EffectorwristManuallyControlled",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "CoralLimitSwitchState",
+            "x": 1152.0,
+            "y": 640.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/End Effector/CoralLimitSwitchState",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "TopLimitSwitch",
+            "x": 512.0,
+            "y": 640.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/Elevator/TopLimitSwitch",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
             }
           }
         ]

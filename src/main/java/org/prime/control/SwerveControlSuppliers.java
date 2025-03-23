@@ -2,10 +2,12 @@ package org.prime.control;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.robot.Container;
 import frc.robot.subsystems.drivetrain.SwerveMap;
 
 public class SwerveControlSuppliers {
@@ -48,6 +50,12 @@ public class SwerveControlSuppliers {
     var x = X.getAsDouble();
     var y = -Y.getAsDouble();
     var z = -Z.getAsDouble();
+
+    // var scaledX = x / (Container.Elevator.getElevatorPositionPercent() + 0.5);
+    // var scaledY = y / (Container.Elevator.getElevatorPositionPercent() + 0.5);
+    // var scaledZ = z / (Container.Elevator.getElevatorPositionPercent() + 0.5);
+
+    // var finalX = MathUtil.clamp(scaledX, 0.4 * x, x);
 
     return _useFiltering
         ? getFilteredChassisSpeeds(x, y, z, gyroAngle, robotRelative)
