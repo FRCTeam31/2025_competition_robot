@@ -1,4 +1,4 @@
-package frc.robot.subsystems.drivetrain.gyro;
+package frc.robot.subsystems.swerve.gyro;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.simulation.AnalogGyroSim;

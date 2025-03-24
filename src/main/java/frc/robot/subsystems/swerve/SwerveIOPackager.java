@@ -1,4 +1,4 @@
-package frc.robot.subsystems.drivetrain;
+package frc.robot.subsystems.swerve;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -12,14 +12,14 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Preferences;
 import frc.robot.Robot;
-import frc.robot.subsystems.drivetrain.gyro.GyroReal;
-import frc.robot.subsystems.drivetrain.gyro.GyroInputsAutoLogged;
-import frc.robot.subsystems.drivetrain.gyro.GyroSim;
-import frc.robot.subsystems.drivetrain.gyro.IGyro;
-import frc.robot.subsystems.drivetrain.swervemodule.ISwerveModule;
-import frc.robot.subsystems.drivetrain.swervemodule.SwerveModuleInputsAutoLogged;
-import frc.robot.subsystems.drivetrain.swervemodule.SwerveModuleReal;
-import frc.robot.subsystems.drivetrain.swervemodule.SwerveModuleSim;
+import frc.robot.subsystems.swerve.gyro.GyroReal;
+import frc.robot.subsystems.swerve.gyro.GyroInputsAutoLogged;
+import frc.robot.subsystems.swerve.gyro.GyroSim;
+import frc.robot.subsystems.swerve.gyro.IGyro;
+import frc.robot.subsystems.swerve.module.ISwerveModule;
+import frc.robot.subsystems.swerve.module.SwerveModuleInputsAutoLogged;
+import frc.robot.subsystems.swerve.module.SwerveModuleReal;
+import frc.robot.subsystems.swerve.module.SwerveModuleSim;
 
 /**
  * A class that controls the swerve modules and gyro

@@ -1,4 +1,4 @@
-package frc.robot.subsystems.drivetrain.swervemodule;
+package frc.robot.subsystems.swerve.module;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
@@ -19,7 +19,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.MutDistance;
 import edu.wpi.first.units.measure.MutLinearVelocity;
 import frc.robot.dashboard.DashboardSection;
-import frc.robot.subsystems.drivetrain.SwerveMap;
+import frc.robot.subsystems.swerve.SwerveMap;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;

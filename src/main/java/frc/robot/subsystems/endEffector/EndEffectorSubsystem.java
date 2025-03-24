@@ -1,81 +1,31 @@
 package frc.robot.subsystems.endEffector;
 
-import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.Logger;
-import org.prime.control.ExtendedPIDConstants;
-import org.prime.util.LockableEvent;
+import org.prime.util.MotorUtil;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.event.BooleanEvent;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import frc.robot.Container;
-import frc.robot.Robot;
 import frc.robot.subsystems.elevator.ElevatorPosition;
 
 public class EndEffectorSubsystem extends SubsystemBase {
-
-    public class EndEffectorMap {
-        public static final byte IntakeMotorCanID = 19;
-        public static final byte WristMotorCanID = 20;
-        public static final byte LimitSwitchDIOChannel = 9;
-        public static final double EjectSpeed = -1;
-        public static final double IntakeSpeed = 1;
-        public static final byte IntakeCurrentLimit = 20;
-        public static final byte WristCurrentLimit = 30;
-        public static final ExtendedPIDConstants WristPID = new ExtendedPIDConstants(0.01, 0, 0);
-        public static final double GearRatio = 20;
-        public static final double MinWristAngle = -135;
-        public static final double MaxWristAngle = -30;
-        public static final double WristNonVerticalAngleThreshold = -110;
-
-        // Wrist Constants
-        public static final double WristUp = 0;
-        public static final double WristSource = 45;
-        public static final double WristReef = 135;
-        public static final double WristMaxOutput = 0.175;
-
-        public static final double LowerElevatorSafetyLimit = 0.15;
-    }
-
     private IEndEffector _endEffector;
     private PIDController _wristPID;
-    private boolean _wristManuallyControlled = false;
-
-    private BooleanEvent _elevatorReachedTroughHeight;
-    private BooleanEvent _elevatorReachedLowHeight;
-    private BooleanEvent _elevatorReachedMidHeight;
-    private BooleanEvent _elevatorReachedHighHeight;
-    private BooleanEvent _elevatorReachedSourceHeight;
-    private BooleanEvent _elevatorBelowDangerZone;
-
-    private LockableEvent<ElevatorPosition> _lockableSetpoint = new LockableEvent<>(
-            null,
-            this::setWristSetpointCommand,
-            true);
-
-    private Map<ElevatorPosition, Double> _angleAtElevatorHeight = Map.of(
-            ElevatorPosition.kAbsoluteMinimum, 0.0,
-            ElevatorPosition.kSource, -42.36,
-            ElevatorPosition.kTrough, -92.0,
-            ElevatorPosition.kL2, -126.0,
-            ElevatorPosition.kL3, -126.0,
-            ElevatorPosition.kL4, -121.0);
 
     private EndEffectorInputsAutoLogged _inputs = new EndEffectorInputsAutoLogged();
 
-    private boolean _isLocked = true;
+    private boolean _wristManuallyControlled = false;
     private boolean _intakeIsEjecting = false;
     private double _manualControlSpeed = 0;
-
-    // TODO: Add a system to set the wrist angle to a predefined setpoint. Look at the system used in the elevator subsystem for reference. We will most likely use the same enums used in the elevator subsystem so it is easier to implement the auto rotating system later. For now, create a temporary enum.
 
     public EndEffectorSubsystem(boolean isReal) {
         setName("End Effector");
@@ -83,251 +33,204 @@ public class EndEffectorSubsystem extends SubsystemBase {
                 ? new EndEffectorReal()
                 : new EndEffectorSim();
 
-        // TODO: Use the below events to trigger automatic movement of the end effector, when using PID control
-        _elevatorReachedLowHeight = new BooleanEvent(Robot.EventLoop,
-                () -> Container.Elevator.positionIsNear(ElevatorPosition.kL2))
-                .rising()
-                .debounce(0.5);
-        _elevatorReachedMidHeight = new BooleanEvent(Robot.EventLoop,
-                () -> Container.Elevator.positionIsNear(ElevatorPosition.kL3))
-                .rising()
-                .debounce(0.5);
-        _elevatorReachedHighHeight = new BooleanEvent(Robot.EventLoop,
-                () -> Container.Elevator.positionIsNear(ElevatorPosition.kL4))
-                .rising()
-                .debounce(0.5);
-        _elevatorReachedSourceHeight = new BooleanEvent(Robot.EventLoop,
-                () -> Container.Elevator.positionIsNear(ElevatorPosition.kSource))
-                .rising()
-                .debounce(0.5);
-        _elevatorReachedTroughHeight = new BooleanEvent(Robot.EventLoop,
-                () -> Container.Elevator.positionIsNear(ElevatorPosition.kTrough))
-                .rising()
-                .debounce(0.5);
-        _elevatorBelowDangerZone = new BooleanEvent(Robot.EventLoop, () -> Container.Elevator
-                .getElevatorPositionMeters() <= EndEffectorMap.LowerElevatorSafetyLimit)
-                .rising()
-                .debounce(1);
-
         _wristPID = EndEffectorMap.WristPID.createPIDController(0.02);
-        SmartDashboard.putData(_wristPID);
+        SmartDashboard.putData(getName() + "/Wrist/PID", _wristPID);
     }
 
-    public void manageWristControl() {
-        boolean isSafeForManualControl = Container.Elevator
-                .getElevatorPositionMeters() >= EndEffectorMap.LowerElevatorSafetyLimit
-                && _inputs.EndEffectorAngleDegrees <= EndEffectorMap.MaxWristAngle + 5;
+    //#region Control Methods
 
-        boolean tryingToUseManualControl = (_manualControlSpeed != 0 || _wristManuallyControlled);
+    /** 
+     * Returns true if the wrist is at its PID setpoint 
+     */
+    public boolean wristAtSetpoint() {
+        var delta = _inputs.EndEffectorAngleDegrees - _wristPID.getSetpoint();
+        return Math.abs(delta) < EndEffectorMap.WristTolerance;
+    }
 
-        _wristManuallyControlled = (isSafeForManualControl && tryingToUseManualControl) ? true : false;
+    /** 
+     * Returns true if the coral limit switch is triggered
+     */
+    public boolean coralLimitSwitchTriggered() {
+        return _inputs.CoralLimitSwitchState;
+    }
+
+    /**
+     * Returns true if the wrist is safe for manual control
+     */
+    private boolean isSafeForManualControl() {
+        var belowSafetyLimit = Container.Elevator
+                .getElevatorPositionMeters() <= EndEffectorMap.LowerElevatorSafetyLimit;
+        var wristAngleSafe = _inputs.EndEffectorAngleDegrees <= EndEffectorMap.WristMaxManuallyControllableAngle;
+
+        return belowSafetyLimit && wristAngleSafe;
+    }
+
+    /**
+     * Returns true if the elevator is in the danger zone
+     */
+    private boolean inElevatorDangerZone() {
+        return Container.Elevator.getElevatorPositionMeters() <= EndEffectorMap.LowerElevatorSafetyLimit;
+    }
+
+    /**
+     * Manages the wrist control, either using manual control or PID control
+     */
+    private void controlWristMovement() {
+        _wristManuallyControlled = (isSafeForManualControl() && _manualControlSpeed != 0);
 
         if (_wristManuallyControlled) {
-            runWristManual(_manualControlSpeed);
-        } else if (!_wristManuallyControlled) {
-            seekWristAnglePID();
-        }
-    }
+            var manualSpeed = -_manualControlSpeed * EndEffectorMap.WristMaxOutput;
+            boolean revLimitReached = _inputs.EndEffectorAngleDegrees <= EndEffectorMap.WristMinAngle;
+            boolean fwdLimitReached = _inputs.EndEffectorAngleDegrees >= EndEffectorMap.WristMaxAngle;
 
-    public void seekWristAnglePID() {
-        var inDangerZone = Container.Elevator
-                .getElevatorPositionMeters() <= EndEffectorMap.LowerElevatorSafetyLimit;
-
-        var safeAngle = calculateDangerZoneAngle(Container.Elevator
-                .getElevatorPositionMeters());
-        SmartDashboard.putNumber(getName() + "/dangerZoneCalculatedSafeAngle", safeAngle);
-
-        double pid = inDangerZone
-                ? _wristPID.calculate(_inputs.EndEffectorAngleDegrees, 0) // Revert instructions: set this to 0
-                : _wristPID.calculate(_inputs.EndEffectorAngleDegrees);
-
-        if (!inDangerZone) {
-            double previousSetpoint = _wristPID.getSetpoint();
-            _wristPID.setSetpoint(
-                    Math.min(previousSetpoint, EndEffectorMap.MaxWristAngle));
-        }
-
-        SmartDashboard.putNumber(getName() + "/WristPIDRaw", pid);
-
-        pid = MathUtil.clamp(pid, -EndEffectorMap.WristMaxOutput, EndEffectorMap.WristMaxOutput);
-
-        SmartDashboard.putNumber(getName() + "/WristPID-FinalOutput", pid);
-        SmartDashboard.putNumber(getName() + "/WristSetpoint", _wristPID.getSetpoint());
-
-        _endEffector.setWristSpeed(pid);
-
-        if (inDangerZone) {
-            // _lockableSetpoint.lock();
-            _isLocked = true;
+            _endEffector.setWristSpeed(
+                    MotorUtil.getMotorspeedWithLimits(manualSpeed, fwdLimitReached, revLimitReached));
         } else {
-            // _lockableSetpoint.unlock();
-            _isLocked = false;
+            var safeAngle = calculateDangerZoneAngle(Container.Elevator.getElevatorPositionMeters()); // TODO: Unused right now, only logged - needs testing
+            double pid = inElevatorDangerZone()
+                    ? _wristPID.calculate(_inputs.EndEffectorAngleDegrees, 0)
+                    : _wristPID.calculate(_inputs.EndEffectorAngleDegrees);
+
+            pid = MathUtil.applyDeadband(pid, 0.1);
+            pid = MathUtil.clamp(pid, -EndEffectorMap.WristMaxOutput, EndEffectorMap.WristMaxOutput);
+            _endEffector.setWristSpeed(pid);
+
+            Logger.recordOutput(getName() + "/Wrist/pid-output-raw", pid);
+            Logger.recordOutput(getName() + "/Wrist/scaled-safe-angle", safeAngle);
         }
     }
 
-    private double calculateDangerZoneAngle(double currentAngle) {
-        var t1 = 6686.42684 * Math.pow(currentAngle, 2);
-        var t2 = 1875.25759 * currentAngle;
-        var t3 = 5.58733;
-
-        return t1 - t2 - t3;
+    /**
+     * Calculates the safe angle for the wrist to be at when the elevator is in the danger zone
+     * @param elevatorHeight The height of the elevator in meters
+     * @return
+     */
+    private double calculateDangerZoneAngle(double elevatorHeight) {
+        return EndEffectorMap.ElevatorDangerZoneWristAngleLookup.get(elevatorHeight);
     }
 
-    public void runWristManual(double speed) {
-        double manualMotorControl = -speed * EndEffectorMap.WristMaxOutput;
-
-        // Artifically Limit the wrist angle
-        if (_inputs.EndEffectorAngleDegrees <= EndEffectorMap.MinWristAngle) {
-            manualMotorControl = Math.max(manualMotorControl, 0);
-        } else if (_inputs.EndEffectorAngleDegrees >= EndEffectorMap.MaxWristAngle) {
-            manualMotorControl = Math.min(manualMotorControl, 0);
-        }
-        _endEffector.setWristSpeed(manualMotorControl);
-    }
-
-    private void disableWristManualControl() {
+    /**
+     * Sets the wrist setpoint using an angle and disables manual control
+     * @param angle
+     */
+    private void setWristSetpoint(double angle) {
+        _wristPID.setSetpoint(angle);
         _wristManuallyControlled = false;
     }
+
+    //#endregion
 
     @Override
     public void periodic() {
         _endEffector.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
+        Logger.recordOutput(getName() + "/Wrist/setpoint", _wristPID.getSetpoint());
+        Logger.recordOutput(getName() + "/Wrist/manually-controlled", _wristManuallyControlled);
 
-        Logger.recordOutput(getName() + "Wrist Setpoint", _wristPID.getSetpoint());
-        SmartDashboard.putBoolean(getName() + "wristManuallyControlled", _wristManuallyControlled);
-
-        SmartDashboard.putNumber(getName() + " Wrist setpoint", _wristPID.getSetpoint());
-        SmartDashboard.putBoolean("EndEffector/isLocked", _lockableSetpoint.isLocked().getAsBoolean());
-        manageWristControl();
-    }
-
-    public boolean wristAtSetpoint() {
-        return Math.abs(_inputs.EndEffectorAngleDegrees - _wristPID.getSetpoint()) < 3;
+        controlWristMovement();
     }
 
     /**
      * Default command which runs the wrist PID and runs the intake based on two buttons
      * @param runIntakeIn
-     * @param runIntakeOut
+     * @param ejectSupplier
      */
-    public Command defaultCommand(BooleanSupplier runIntakeOut,
-            DoubleSupplier wristManualControl) {
+    public Command defaultCommand(BooleanSupplier ejectSupplier, DoubleSupplier wristManualControl) {
         return this.run(() -> {
-            if (runIntakeOut.getAsBoolean() && DriverStation.isTeleopEnabled()) {
+            // Check if driver is manually ejecting in Teleop
+            if (ejectSupplier.getAsBoolean() && DriverStation.isTeleopEnabled()) {
                 _endEffector.setIntakeSpeed(EndEffectorMap.EjectSpeed);
             } else {
+                // If not ejecting, run the intake either at intake speed or eject speed based on the state
                 _endEffector.setIntakeSpeed(_intakeIsEjecting
                         ? EndEffectorMap.EjectSpeed
                         : EndEffectorMap.IntakeSpeed);
             }
 
-            _manualControlSpeed = MathUtil.applyDeadband(wristManualControl.getAsDouble(), 0.05);
+            _manualControlSpeed = wristManualControl.getAsDouble();
         });
     }
 
     /**
-    
-     * Sets the wrist setpoint
+     * Sets the wrist setpoint using an angle
      * @param angle Desired angle
      */
     public Command setWristSetpointCommand(double angle) {
-        return Commands.runOnce(this::disableWristManualControl)
-                .andThen(enableIntakeCommand())
-                .andThen(() -> _wristPID.setSetpoint(angle));
+        return Commands.runOnce(this::disableEjectCommand)
+                .andThen(() -> setWristSetpoint(angle));
     }
 
     /**
-    
-     * Sets the wrist setpoint
+     * Sets the wrist setpoint using an ElevatorPosition
      * @param position Elevator position
      */
     public Command setWristSetpointCommand(ElevatorPosition position) {
-        return Commands.runOnce(this::disableWristManualControl)
-                .andThen(setWristSetpointCommand(_angleAtElevatorHeight.get(position)));
+        return setWristSetpointCommand(EndEffectorMap.ElevatorHeightWristAngleMap.get(position));
     }
 
     /**
-     * Schedules the setting of the wrist setpoint. If in a danger zone, the setpoint will be locked until the danger zone is exited.
-     * Only then it will set the setpoint. If not in a danger zone, it will set the setpoint immediately.
-     * 
-     * @param position
-     * @return
+     * Stops the intake motor
      */
-    public Command scheduleWristSetpointCommand(ElevatorPosition position) {
-        // return Commands.runOnce(this::disableWristManualControlCommand).andThen(() -> {
-        //     // _lockableSetpoint.setEvent(position);
-        //     // System.out.println("Event: " + position);
-        // });
-        //         // .andThen(_lockableSetpoint.scheduleLockableEventCommand())
-        //         // .andThen(() -> System.out.println(
-        //         //         _lockableSetpoint.getEvent().toString() + "\n" + _lockableSetpoint.isLocked().toString()));
-
-        // // TODO: May have to use .finallyDo() instead of .andThen()
-
-        return Commands.runOnce(this::disableWristManualControlCommand)
-                .andThen(Commands.waitUntil(() -> !_isLocked)
-                        .andThen(setWristSetpointCommand(position)));
-    }
-
-    public Command wristManualControlCommand(double speed) {
-        return Commands.runOnce(() -> _endEffector.setWristSpeed(speed));
-    }
-
-    public Command disableWristManualControlCommand() {
-        return Commands.runOnce(this::disableWristManualControl);
-    }
-
     public Command stopIntakeMotorCommand() {
         return Commands.runOnce(() -> _endEffector.stopIntakeMotor());
     }
 
+    /**
+     * Stops the wrist motor
+     */
     public Command stopWristMotorCommand() {
         return Commands.runOnce(() -> _endEffector.stopWristMotor());
     }
 
+    /**
+     * Stops both motors
+     */
     public Command stopBothMotorsCommand() {
         return this.runOnce(() -> _endEffector.stopMotors());
     }
 
-    public Command enableIntakeCommand() {
-        return this.runOnce(() -> {
-            _endEffector.setIntakeSpeed(EndEffectorMap.IntakeSpeed);
-            _intakeIsEjecting = false;
-        });
+    /**
+     * Disables intake ejection
+     */
+    public Command disableEjectCommand() {
+        return this.runOnce(() -> _intakeIsEjecting = false);
     }
 
+    /**
+     * Enables intake ejection
+     */
     public Command enableEjectCommand() {
-        return this.runOnce(() -> {
-            _endEffector.setIntakeSpeed(EndEffectorMap.EjectSpeed);
-            _intakeIsEjecting = true;
-        });
+        return this.runOnce(() -> _intakeIsEjecting = true);
     }
 
+    /**
+     * Scores coral by ejecting it until the limit switch is let go, then pulling the wrist back to -30 degrees
+     * @return
+     */
     public Command scoreCoral() {
-        return enableIntakeCommand() // intake until wrist is at setpoint
+        return disableEjectCommand() // Maintain intake until wrist is at setpoint
                 .andThen(Commands.waitUntil(this::wristAtSetpoint))
-                .andThen(enableEjectCommand()) // eject until limit switch is let go (or times out)
+                // Eject until limit switch is let go (or times out)
+                .andThen(enableEjectCommand())
                 .until(() -> !_inputs.CoralLimitSwitchState).withTimeout(2)
-                .andThen(Commands.waitSeconds(0.75)) // slight delay to allow the coral to begin ejecting
-                .andThen(setWristSetpointCommand(-30)) // set the angle up while ejecting
+                // Slight delay to allow the coral to begin ejecting
                 .andThen(Commands.waitSeconds(0.75))
-                .andThen(enableIntakeCommand());
+                // Set the angle up while ejecting to "flick" the coral out
+                .andThen(setWristSetpointCommand(EndEffectorMap.WristMaxManuallyControllableAngle))
+                // Wait for the wrist to reach the setpoint
+                .andThen(Commands.waitUntil(this::wristAtSetpoint))
+                // Reset back to intaking
+                .andThen(disableEjectCommand());
     }
 
+    /**
+     * Picks up coral until the limit switch is triggered, then pulls the wrist back to 0 degrees
+     * @return
+     */
     public Command pickupCoral() {
-        return enableIntakeCommand()
-                .andThen(Commands.waitUntil(() -> _inputs.CoralLimitSwitchState))
+        return disableEjectCommand()
+                .andThen(Commands.waitUntil(this::coralLimitSwitchTriggered))
                 .andThen(setWristSetpointCommand(0))
                 .andThen(Commands.print(">> INTAKE: Coral picked up"));
     }
-
-    // TODO: Add more named commands for running the intake and rotating the wrist to predefined setpoints (See above todo)
-    public Map<String, Command> getNamedCommands() {
-        return Map.of("Stop Intake", stopIntakeMotorCommand(),
-                "Stop Both Motors", stopBothMotorsCommand(),
-                "Intake Coral", enableIntakeCommand(),
-                "Eject Coral", enableEjectCommand());
-    }
-
 }

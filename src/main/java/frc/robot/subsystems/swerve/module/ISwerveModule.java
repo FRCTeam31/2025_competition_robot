@@ -1,4 +1,4 @@
-package frc.robot.subsystems.drivetrain.swervemodule;
+package frc.robot.subsystems.swerve.module;
 
 import org.prime.control.ExtendedPIDConstants;
 

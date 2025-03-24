@@ -108,8 +108,9 @@ public class ElevatorSubsystem extends SubsystemBase {
         return _elevatorController.atSetpoint(0.02);
     }
 
-    public boolean positionIsNear(ElevatorPosition pos) {
-        return getElevatorPosition().isNear(getElevatorPositionAtLocation(pos), Units.Centimeters.of(2));
+    public boolean positionIsNear(ElevatorPosition pos, double withinCentimeters) {
+        return getElevatorPosition()
+                .isNear(getElevatorPositionAtLocation(pos), Units.Centimeters.of(withinCentimeters));
     }
 
     public boolean positionIsNear(double pos) {

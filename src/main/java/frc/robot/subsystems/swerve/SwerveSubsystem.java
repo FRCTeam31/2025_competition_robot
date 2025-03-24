@@ -1,4 +1,4 @@
-package frc.robot.subsystems.drivetrain;
+package frc.robot.subsystems.swerve;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
@@ -21,7 +21,8 @@ import frc.robot.game.ReefBranchSide;
 import frc.robot.oi.ImpactRumbleHelper;
 import frc.robot.Container;
 import frc.robot.Robot;
-import frc.robot.subsystems.drivetrain.util.AutoAlign;
+import frc.robot.subsystems.swerve.util.AutoAlign;
+import frc.robot.subsystems.vision.LimelightNameEnum;
 import frc.robot.subsystems.vision.VisionSubsystem;
 
 import static edu.wpi.first.units.Units.DegreesPerSecond;
@@ -177,69 +178,67 @@ public class SwerveSubsystem extends SubsystemBase {
       return;
     }
 
-    var limelightInputs = Container.Vision.getAllLimelightInputs();
+    evaluatePoseEstimation(Container.Vision.getLimelightInputs(LimelightNameEnum.kFront));
+    evaluatePoseEstimation(Container.Vision.getLimelightInputs(LimelightNameEnum.kRear));
 
-    evaluatePoseEstimation(limelightInputs[0]);
-    evaluatePoseEstimation(limelightInputs[1]);
+    // // TESTING
+    // var frontInputs = Container.Vision.getLimelightInputs(LimelightNameEnum.kFront);
+    // if (VisionSubsystem.isReefTag(frontInputs.ApriltagId)) {
+    //   var reefBranch = AprilTagReefMap.getReefSide(frontInputs.ApriltagId);
+    //   Logger.recordOutput(getName() + "/reef-targetpose-side-name", reefBranch.getFaceName());
 
-    // TESTING
-    var frontInputs = limelightInputs[0];
-    if (VisionSubsystem.isReefTag(frontInputs.ApriltagId)) {
-      var reefBranch = AprilTagReefMap.getReefSide(frontInputs.ApriltagId);
-      Logger.recordOutput(getName() + "/reef-targetpose-side-name", reefBranch.getFaceName());
+    //   // Get the target pose, and then get the L and R branch offsets from that
+    //   var targetPose = frontInputs.RobotSpaceTargetPose.Pose;
+    //   Logger.recordOutput(getName() + "/reef-targetpose", targetPose.toPose2d());
+    //   var leftPose = AprilTagReefMap.getBranchPoseFromTarget(
+    //       ReefBranchSide.kLeft,
+    //       targetPose.toPose2d(),
+    //       _inputs.GyroAngle);
+    //   var rightPose = AprilTagReefMap.getBranchPoseFromTarget(
+    //       ReefBranchSide.kRight,
+    //       targetPose.toPose2d(),
+    //       _inputs.GyroAngle);
 
-      // Get the target pose, and then get the L and R branch offsets from that
-      var targetPose = frontInputs.RobotSpaceTargetPose.Pose;
-      Logger.recordOutput(getName() + "/reef-targetpose", targetPose.toPose2d());
-      var leftPose = AprilTagReefMap.getBranchPoseFromTarget(
-          ReefBranchSide.kLeft,
-          targetPose.toPose2d(),
-          _inputs.GyroAngle);
-      var rightPose = AprilTagReefMap.getBranchPoseFromTarget(
-          ReefBranchSide.kRight,
-          targetPose.toPose2d(),
-          _inputs.GyroAngle);
+    //   Logger.recordOutput(getName() + "/reef-targetpose-left_branch", leftPose);
+    //   Logger.recordOutput(getName() + "/reef-targetpose-right_branch", rightPose);
 
-      Logger.recordOutput(getName() + "/reef-targetpose-left_branch", leftPose);
-      Logger.recordOutput(getName() + "/reef-targetpose-right_branch", rightPose);
+    //   // Generate a straight line trajectory from each side of the target pose
+    //   var tConfig = new TrajectoryConfig(1, 1)
+    //       .setStartVelocity(1)
+    //       .setEndVelocity(1)
+    //       .setKinematics(_swervePackager.Kinematics);
+    //   var leftLineTraj = PoseUtil.generateStraightLineTrajectory(leftPose, 2, tConfig);
+    //   var rightLineTraj = PoseUtil.generateStraightLineTrajectory(rightPose, 2, tConfig);
 
-      // Generate a straight line trajectory from each side of the target pose
-      var tConfig = new TrajectoryConfig(1, 1)
-          .setStartVelocity(1)
-          .setEndVelocity(1)
-          .setKinematics(_swervePackager.Kinematics);
-      var leftLineTraj = PoseUtil.generateStraightLineTrajectory(leftPose, 2, tConfig);
-      var rightLineTraj = PoseUtil.generateStraightLineTrajectory(rightPose, 2, tConfig);
+    //   // Get the closest pose in each trajectory to the robot's current pose
+    //   var leftPoses = PoseUtil.getTrajectoryPoses(leftLineTraj);
+    //   var rightPoses = PoseUtil.getTrajectoryPoses(rightLineTraj);
 
-      // Get the closest pose in each trajectory to the robot's current pose
-      var leftPoses = PoseUtil.getTrajectoryPoses(leftLineTraj);
-      var rightPoses = PoseUtil.getTrajectoryPoses(rightLineTraj);
+    //   Pose2d closestLeft = PoseUtil.getClosestPoseInList(_inputs.EstimatedRobotPose, leftPoses);
+    //   Pose2d closestRight = PoseUtil.getClosestPoseInList(_inputs.EstimatedRobotPose, rightPoses);
 
-      Pose2d closestLeft = PoseUtil.getClosestPoseInList(_inputs.EstimatedRobotPose, leftPoses);
-      Pose2d closestRight = PoseUtil.getClosestPoseInList(_inputs.EstimatedRobotPose, rightPoses);
+    //   // If either of the closest poses are null, something went wrong
+    //   if (closestLeft == null || closestRight == null) {
+    //     Logger.recordOutput(getName() + "/reef-auto-side-selection", "FAILED");
+    //     return;
+    //   }
 
-      // If either of the closest poses are null, something went wrong
-      if (closestLeft == null || closestRight == null) {
-        Logger.recordOutput(getName() + "/reef-auto-side-selection", "FAILED");
-        return;
-      }
+    //   Logger.recordOutput(getName() + "/reef-left-traj-closest-pose", closestLeft);
+    //   Logger.recordOutput(getName() + "/reef-right-traj-closest-pose", closestRight);
 
-      Logger.recordOutput(getName() + "/reef-left-traj-closest-pose", closestLeft);
-      Logger.recordOutput(getName() + "/reef-right-traj-closest-pose", closestRight);
+    //   // Get the distance to the closest pose in each trajectory
+    //   double distanceToClosestLeft = PoseUtil.getDistanceBetweenPoses(_inputs.EstimatedRobotPose, closestLeft);
+    //   double distanceToClosestRight = PoseUtil.getDistanceBetweenPoses(_inputs.EstimatedRobotPose, closestRight);
 
-      // Get the distance to the closest pose in each trajectory
-      double distanceToClosestLeft = PoseUtil.getDistanceBetweenPoses(_inputs.EstimatedRobotPose, closestLeft);
-      double distanceToClosestRight = PoseUtil.getDistanceBetweenPoses(_inputs.EstimatedRobotPose, closestRight);
+    //   Logger.recordOutput(getName() + "/reef-left-dist-to-closest-traj-pose", distanceToClosestLeft);
+    //   Logger.recordOutput(getName() + "/reef-right-dist-to-closest-traj-pose", distanceToClosestRight);
 
-      Logger.recordOutput(getName() + "/reef-left-dist-to-closest-traj-pose", distanceToClosestLeft);
-      Logger.recordOutput(getName() + "/reef-right-dist-to-closest-traj-pose", distanceToClosestRight);
-
-      if (distanceToClosestLeft < distanceToClosestRight) {
-        Logger.recordOutput(getName() + "/reef-auto-side-selection", "left");
-      } else {
-        Logger.recordOutput(getName() + "/reef-auto-side-selection", "right");
-      }
-    }
+    //   if (distanceToClosestLeft < distanceToClosestRight) {
+    //     Logger.recordOutput(getName() + "/reef-auto-side-selection", "left");
+    //   } else {
+    //     Logger.recordOutput(getName() + "/reef-auto-side-selection", "right");
+    //   }
+    // }
   }
 
   /**
@@ -333,7 +332,7 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public Command driveToInViewReefTargetBranch(ReefBranchSide branchSide) {
     return this.defer(() -> {
-      var llInputs = Container.Vision.getLimelightInputs(0);
+      var llInputs = Container.Vision.getLimelightInputs(LimelightNameEnum.kFront);
 
       var reefSide = AprilTagReefMap.getReefSide(llInputs.ApriltagId);
       Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/targeted-face", reefSide.getFaceName());
@@ -408,7 +407,7 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public Command enableReefAutoAlignCommand() {
     var cmd = Commands.run(() -> {
-      var frontLimelightInputs = Container.Vision.getLimelightInputs(0);
+      var frontLimelightInputs = Container.Vision.getLimelightInputs(LimelightNameEnum.kFront);
 
       // If targeted AprilTag is in validTargets, align to its offset
       if (VisionSubsystem.isReefTag(frontLimelightInputs.ApriltagId)) {

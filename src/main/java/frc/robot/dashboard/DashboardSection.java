@@ -29,11 +29,11 @@ public class DashboardSection {
         return SmartDashboard.getBoolean(tabbedKey(title), defaultValue);
     }
 
-    public void putDouble(String title, double defaultValue) {
+    public void putNumber(String title, double defaultValue) {
         SmartDashboard.putNumber(tabbedKey(title), defaultValue);
     }
 
-    public double getDouble(String title, double defaultValue) {
+    public double getNumber(String title, double defaultValue) {
         return SmartDashboard.getNumber(tabbedKey(title), defaultValue);
     }
 

@@ -18,7 +18,7 @@ import frc.robot.dashboard.DashboardSection;
 import frc.robot.oi.OperatorInterface;
 import frc.robot.oi.routine.BuildableAutoRoutine;
 import frc.robot.subsystems.climbing.ClimberSubsystem;
-import frc.robot.subsystems.drivetrain.SwerveSubsystem;
+import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorPosition;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.endEffector.EndEffectorSubsystem;
@@ -68,12 +68,6 @@ public class Container {
       NamedCommands.registerCommands(elevatorCommands);
       NamedCommands.registerCommands(containerCommands);
 
-      // Map<String, Command> combinedCommands = new HashMap<>();
-      // // ...add other named commands to the map using "otherNamedCommands.putAll(namedCommandsMap);"
-      // combinedCommands.putAll(swerveCommands);
-      // combinedCommands.putAll(containerCommands);
-      // combinedCommands.putAll(elevatorCommands);
-
       AutoBuilder = new BuildableAutoRoutine(getNamedCommandSuppliers());
     } catch (Exception e) {
       DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());
@@ -86,7 +80,7 @@ public class Container {
     return Commands.parallel(
         Commands.print("Setting combined height and angle: " + position),
         Elevator.setElevatorSetpointCommand(position),
-        EndEffector.scheduleWristSetpointCommand(position))
+        EndEffector.setWristSetpointCommand(position))
         .alongWith(Commands.waitUntil(() -> EndEffector.wristAtSetpoint() && Elevator.atSetpoint()).withTimeout(3))
         .finallyDo(() -> System.out.println("Finished setting combined setpoints"));
   }

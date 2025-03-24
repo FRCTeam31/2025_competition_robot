@@ -1,4 +1,4 @@
-package frc.robot.subsystems.drivetrain.gyro;
+package frc.robot.subsystems.swerve.gyro;
 
 public interface IGyro {
     public void updateInputs(GyroInputsAutoLogged inputs, double omegaRadiansPerSecond);

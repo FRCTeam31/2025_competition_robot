@@ -8,7 +8,7 @@ import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Container;
-import frc.robot.subsystems.drivetrain.SwerveMap;
+import frc.robot.subsystems.swerve.SwerveMap;
 
 public class SwerveControlSuppliers {
 

@@ -1,4 +1,4 @@
-package frc.robot.subsystems.drivetrain.swervemodule;
+package frc.robot.subsystems.swerve.module;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -10,7 +10,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.dashboard.DashboardSection;
-import frc.robot.subsystems.drivetrain.SwerveMap;
+import frc.robot.subsystems.swerve.SwerveMap;
 
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.ExtendedPIDConstants;

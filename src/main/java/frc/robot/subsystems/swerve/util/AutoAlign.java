@@ -1,11 +1,11 @@
-package frc.robot.subsystems.drivetrain.util;
+package frc.robot.subsystems.swerve.util;
 
 import org.prime.control.ExtendedPIDConstants;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.robot.subsystems.drivetrain.SwerveMap;
+import frc.robot.subsystems.swerve.SwerveMap;
 
 /**
  * A class that uses a PID controller to calculate a rotational correction speed for the robot to face a setpoint angle

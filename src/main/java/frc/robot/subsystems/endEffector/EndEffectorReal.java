@@ -12,7 +12,6 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DigitalInput;
-import frc.robot.subsystems.endEffector.EndEffectorSubsystem.EndEffectorMap;
 
 public class EndEffectorReal implements IEndEffector {
 
@@ -84,7 +83,7 @@ public class EndEffectorReal implements IEndEffector {
     }
 
     private double getWristAngle() {
-        double wristRotations = _wristMotor.getEncoder().getPosition() / EndEffectorMap.GearRatio;
+        double wristRotations = _wristMotor.getEncoder().getPosition() / EndEffectorMap.WristGearRatio;
 
         return Rotation2d.fromRotations(wristRotations).getDegrees();
     }

@@ -8,6 +8,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.littletonrobotics.junction.Logger;
 import org.prime.vision.LimelightInputs;
 
@@ -21,43 +24,31 @@ public class VisionSubsystem extends SubsystemBase {
         };
     }
 
-    private LimeLightNT[] _limelights;
-    private LimelightInputs[] _limelightInputs;
-    private boolean _frontInDriverMode = false;
-    private boolean _rearInDriverMode = false;
+    Map<LimelightNameEnum, LimeLightNT> _limelights = new HashMap<>();
+    Map<LimelightNameEnum, LimelightInputs> _limelightInputs = new HashMap<>();
+    private UsbCamera _usbCamera;
 
     public VisionSubsystem() {
         setName("Vision");
         var defaultInstance = NetworkTableInstance.getDefault();
 
-        _limelights = new LimeLightNT[] {
-                new LimeLightNT(defaultInstance, VisionMap.LimelightFrontName),
-                new LimeLightNT(defaultInstance, VisionMap.LimelightRearName)
-        };
+        _limelights.put(LimelightNameEnum.kFront, new LimeLightNT(defaultInstance, VisionMap.LimelightFrontName));
+        _limelights.put(LimelightNameEnum.kRear, new LimeLightNT(defaultInstance, VisionMap.LimelightRearName));
 
-        _limelightInputs = new LimelightInputs[_limelights.length];
-        for (int i = 0; i < _limelights.length; i++) {
-            _limelightInputs[i] = new LimelightInputs();
-        }
+        _limelightInputs.put(LimelightNameEnum.kFront, new LimelightInputs());
+        _limelightInputs.put(LimelightNameEnum.kRear, new LimelightInputs());
 
-        UsbCamera camera = CameraServer.startAutomaticCapture();
-        camera.setResolution(320, 240);
-        camera.setFPS(30);
+        _usbCamera = CameraServer.startAutomaticCapture();
+        _usbCamera.setResolution(320, 240);
+        _usbCamera.setFPS(30);
     }
 
     /**
      * Gets the inputs for the specified limelight.
      * @param llIndex The index of the limelight to get inputs from.
      */
-    public LimelightInputs getLimelightInputs(int llIndex) {
-        return _limelightInputs[llIndex];
-    }
-
-    /**
-     * Gets all limelight inputs
-     */
-    public LimelightInputs[] getAllLimelightInputs() {
-        return _limelightInputs;
+    public LimelightInputs getLimelightInputs(LimelightNameEnum ll) {
+        return _limelightInputs.get(ll);
     }
 
     /**
@@ -69,8 +60,8 @@ public class VisionSubsystem extends SubsystemBase {
      * @param llIndex The index of the desired limelight
      * @param mode The LED mode to set
      */
-    public void setLedMode(int llIndex, int mode) {
-        _limelights[llIndex].setLedMode(mode);
+    public void setLedMode(LimelightNameEnum ll, int mode) {
+        _limelights.get(ll).setLedMode(mode);
     }
 
     /**
@@ -78,19 +69,8 @@ public class VisionSubsystem extends SubsystemBase {
      * @param llIndex The index of the desired limelight
      * @param blinkCount The number of times to blink the LED
      */
-    public void blinkLed(int llIndex, int blinkCount) {
-        _limelights[llIndex].blinkLed(blinkCount);
-    }
-
-    /**
-     * Sets limelight’s operation mode.
-     *    0 = Vision processor.
-     *    1 = Driver Camera (Increases exposure, disables vision processing).
-     * @param llIndex The index of the desired limelight
-     * @param mode The camera mode to set
-     */
-    public void setCameraMode(int llIndex, int mode) {
-        _limelights[llIndex].setCameraMode(mode);
+    public void blinkLed(LimelightNameEnum ll, int blinkCount) {
+        _limelights.get(ll).blinkLed(blinkCount);
     }
 
     /**
@@ -98,8 +78,8 @@ public class VisionSubsystem extends SubsystemBase {
      * @param llIndex The index of the desired limelight
      * @param pipeline The pipeline to set active
      */
-    public void setPipeline(int llIndex, int pipeline) {
-        _limelights[llIndex].setPipeline(pipeline);
+    public void setPipeline(LimelightNameEnum ll, int pipeline) {
+        _limelights.get(ll).setPipeline(pipeline);
     }
 
     /**
@@ -110,16 +90,8 @@ public class VisionSubsystem extends SubsystemBase {
      * @param llIndex The index of the desired limelight
      * @param mode The streaming mode to set
      */
-    public void setPiPStreamingMode(int llIndex, int mode) {
-        _limelights[llIndex].setPiPStreamingMode(mode);
-    }
-
-    /**
-     * Takes an instantaneous snapshot of the limelight's camera feed.
-     * @param llIndex The index of the desired limelight
-     */
-    public void takeSnapshot(int llIndex) {
-        _limelights[llIndex].takeSnapshot();
+    public void setPiPStreamingMode(LimelightNameEnum ll, int mode) {
+        _limelights.get(ll).setPiPStreamingMode(mode);
     }
 
     /**
@@ -127,15 +99,16 @@ public class VisionSubsystem extends SubsystemBase {
      * @param llIndex The index of the desired limelight
      * @param pose The Camera's pose to set in Robot space
      */
-    public void setCameraPose(int llIndex, Pose3d pose) {
-        _limelights[llIndex].setCameraPose(pose);
+    public void setCameraPose(LimelightNameEnum ll, Pose3d pose) {
+        _limelights.get(ll).setCameraPose(pose);
     }
 
+    @Override
     public void periodic() {
         // Update all limelight inputs
-        for (int i = 0; i < _limelights.length; i++) {
-            _limelights[i].updateInputs(_limelightInputs[i]);
-            Logger.processInputs("Vision/LL" + i + "/TagID", _limelightInputs[i]);
+        for (var ll : _limelights.keySet()) {
+            _limelights.get(ll).updateInputs(_limelightInputs.get(ll));
+            Logger.processInputs("Vision/LL/" + ll.name(), _limelightInputs.get(ll));
         }
     }
 
@@ -154,29 +127,8 @@ public class VisionSubsystem extends SubsystemBase {
 
     //#region Commands
 
-    /**
-     * Toggles the driver mode for the specified limelight.
-     * @param llIndex
-     * @return
-     */
-    public Command toggleDriverModeCommand(int llIndex) {
-        return runOnce(() -> {
-            if (llIndex == 0) {
-                _frontInDriverMode = !_frontInDriverMode;
-                setCameraMode(0, _frontInDriverMode ? 1 : 0);
-            } else if (llIndex == 1) {
-                _rearInDriverMode = !_rearInDriverMode;
-                setCameraMode(1, _rearInDriverMode ? 1 : 0);
-            }
-        });
-    }
-
-    public Command setRearCameraMode(boolean drivingMode) {
-        return Commands.runOnce(() -> setCameraMode(1, drivingMode ? 1 : 0));
-    }
-
-    public Command setRearCameraPipeline(int pipeline) {
-        return Commands.runOnce(() -> setPipeline(1, pipeline));
+    public Command setLimelightPipeline(LimelightNameEnum ll, int pipeline) {
+        return Commands.runOnce(() -> setPipeline(ll, pipeline));
     }
 
     //#endregion

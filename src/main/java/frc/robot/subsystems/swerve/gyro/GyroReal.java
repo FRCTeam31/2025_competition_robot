@@ -1,10 +1,10 @@
-package frc.robot.subsystems.drivetrain.gyro;
+package frc.robot.subsystems.swerve.gyro;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.subsystems.drivetrain.SwerveMap;
+import frc.robot.subsystems.swerve.SwerveMap;
 
 public class GyroReal implements IGyro {
     private Pigeon2 _gyro;

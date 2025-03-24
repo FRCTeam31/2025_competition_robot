@@ -12,7 +12,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DigitalInput;
-import frc.robot.subsystems.drivetrain.gyro.IGyro;
+import frc.robot.subsystems.swerve.gyro.IGyro;
 import frc.robot.subsystems.climbing.ClimberSubsystem.ClimberMap;
 
 public class ClimberIOReal implements IClimberIO {
