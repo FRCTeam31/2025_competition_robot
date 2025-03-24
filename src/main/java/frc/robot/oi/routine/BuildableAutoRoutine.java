@@ -60,7 +60,6 @@ public class BuildableAutoRoutine {
     private SendableChooser<Boolean> _toggleFilterSwitch;
     private SendableChooser<RoutinePreviewMode> _toggleRoutinePreviewMode;
     private SendableChooser<StartingLocationFilter> _toggleStartingFilterLocation;
-    private SendableChooser<StartingDirectionFilter> _toggleStartingFilterDirection;
 
     // Auto Raise Elevator
     private AutoRoutineAutoRaiseElevator _autoRaiseElevator = new AutoRoutineAutoRaiseElevator();

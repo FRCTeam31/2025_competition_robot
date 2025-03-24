@@ -2,12 +2,10 @@ package org.prime.control;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.robot.Container;
 import frc.robot.subsystems.swerve.SwerveMap;
 
 public class SwerveControlSuppliers {

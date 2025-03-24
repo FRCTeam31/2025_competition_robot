@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Container;
-import frc.robot.Robot;
 import frc.robot.subsystems.elevator.ElevatorPosition;
 
 public class EndEffector extends SubsystemBase {
