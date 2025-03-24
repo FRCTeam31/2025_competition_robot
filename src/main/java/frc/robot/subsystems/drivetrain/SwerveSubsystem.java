@@ -46,11 +46,9 @@ public class SwerveSubsystem extends SubsystemBase {
   private SwerveSubsystemInputsAutoLogged _inputs = new SwerveSubsystemInputsAutoLogged();
 
   // AutoAlign
-  private boolean _useAutoAlign = false;
   private AutoAlign _autoAlign;
 
   // Vision, Kinematics, odometry
-  public boolean WithinPoseEstimationVelocity = true;
   private PrimeHolonomicDriveController _primeHolonomicController;
   private RobotConfig _pathplannerRobotConfig;
 
@@ -75,8 +73,7 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   private void configurePathPlanner() {
-    // Load the RobotConfig from the GUI settings, or use the default if an
-    // exception occurs
+    // Load the RobotConfig from the GUI settings, or use the default if an exception occurs
     _pathplannerRobotConfig = SwerveMap.PathPlannerRobotConfiguration;
     try {
       _pathplannerRobotConfig = RobotConfig.fromGUISettings();
@@ -108,7 +105,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
     // Override PathPlanner's rotation feedback
     // PPHolonomicDriveController.overrideRotationFeedback(() -> _inputs.AutoAlignCorrection);
-
   }
 
   // #region Control methods
@@ -121,25 +117,15 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   /**
-   * Resets the gyro angle
-   */
-  public void resetGyroInverted() {
-    _swervePackager.resetGyroInverted();
-  }
-
-  /**
-   * Enabled/disables AutoAlign control
+   * Enabled/disables AutoAlign control. Also overrides PathPlanner's rotation, if enabled
    */
   private void setAutoAlignEnabled(boolean enabled) {
-    _useAutoAlign = enabled;
-  }
-
-  /**
-   * Sets the pose estimator's pose
-   * @param pose
-   */
-  public void setEstimatorPose(Pose2d pose) {
-    _swervePackager.setEstimatorPose(pose);
+    _inputs.UseAutoAlign = enabled;
+    if (enabled) {
+      PPHolonomicDriveController.overrideRotationFeedback(() -> _inputs.AutoAlignCorrection);
+    } else {
+      PPHolonomicDriveController.clearRotationFeedbackOverride();
+    }
   }
 
   /**
@@ -151,7 +137,7 @@ public class SwerveSubsystem extends SubsystemBase {
     // If AutoAlign is enabled, override the input rotational speed to reach the setpoint
     Logger.recordOutput(getName() + "/autoAlignCorrection", _inputs.AutoAlignCorrection);
 
-    robotRelativeChassisSpeeds.omegaRadiansPerSecond = _useAutoAlign
+    robotRelativeChassisSpeeds.omegaRadiansPerSecond = _inputs.UseAutoAlign
         ? _inputs.AutoAlignCorrection
         : robotRelativeChassisSpeeds.omegaRadiansPerSecond;
 
@@ -182,11 +168,12 @@ public class SwerveSubsystem extends SubsystemBase {
     var currentXVelocity = MetersPerSecond.of(_inputs.RobotRelativeChassisSpeeds.vxMetersPerSecond);
     var currentYVelocity = MetersPerSecond.of(_inputs.RobotRelativeChassisSpeeds.vyMetersPerSecond);
 
-    WithinPoseEstimationVelocity = currentRotationalVelocity.lt(DegreesPerSecond.of(60))
+    var withinPoseEstimationVelocity = currentRotationalVelocity.lt(DegreesPerSecond.of(60))
         && currentXVelocity.lt(MetersPerSecond.of(2))
         && currentYVelocity.lt(MetersPerSecond.of(2));
 
-    if (!WithinPoseEstimationVelocity) {
+    Logger.recordOutput(getName() + "/withinPoseEstimationVelocity", withinPoseEstimationVelocity);
+    if (!withinPoseEstimationVelocity) {
       return;
     }
 
@@ -287,9 +274,9 @@ public class SwerveSubsystem extends SubsystemBase {
     Container.TeleopDashboardSection.setFieldRobotPose(_inputs.EstimatedRobotPose);
 
     // Update LEDs
-    Logger.recordOutput(getName() + "/autoAlignEnabled", _useAutoAlign);
-    Logger.recordOutput(getName() + "/autoAlignSetpoint", _autoAlign.getSetpoint());
-    Logger.recordOutput(getName() + "/autoAlignAtSetpoint", _autoAlign.atSetpoint());
+    Logger.recordOutput(getName() + "/autoAlign/Enabled", _inputs.UseAutoAlign);
+    Logger.recordOutput(getName() + "/autoAlign/Setpoint", _autoAlign.getSetpoint());
+    Logger.recordOutput(getName() + "/autoAlign/AtSetpoint", _autoAlign.atSetpoint());
 
     if (DriverStation.isAutonomousEnabled()) {
       Logger.recordOutput(getName() + "/pp-translation-error", _primeHolonomicController.getTranslationError());
@@ -301,7 +288,7 @@ public class SwerveSubsystem extends SubsystemBase {
       Container.TeleopDashboardSection.setGyroHeading(_inputs.GyroAngle);
     }
     Logger.recordOutput(getName() + "/estimatedRobotPose", _inputs.EstimatedRobotPose);
-    _drivetrainDashboardSection.setAutoAlignEnabled(_useAutoAlign);
+    _drivetrainDashboardSection.setAutoAlignEnabled(_inputs.UseAutoAlign);
     _drivetrainDashboardSection.setAutoAlignTarget(_autoAlign.getSetpoint());
 
     // Update rumble

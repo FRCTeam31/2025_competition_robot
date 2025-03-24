@@ -195,16 +195,6 @@ public class SwerveIOPackager {
   }
 
   /**
-   * Resets the gyro and pose estimator
-   */
-  public void resetGyroInverted() {
-    _gyro.reset(Robot.onBlueAlliance() ? 0 : 180);
-    _gyro.updateInputs(_gyroInputs, 0);
-    m_poseEstimator.resetPosition(_gyroInputs.Rotation, getModulePositions(),
-        m_poseEstimator.getEstimatedPosition());
-  }
-
-  /**
    * Sets the pose estimator's pose
    * @param pose
    */
