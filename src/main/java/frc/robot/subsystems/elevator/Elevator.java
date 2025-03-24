@@ -8,7 +8,6 @@ import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.ElevatorController;
-import org.prime.control.MRSGConstants;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.DistanceUnit;
@@ -22,58 +21,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 
-public class ElevatorSubsystem extends SubsystemBase {
-
-    public static class ElevatorMap {
-        // CAN ids
-        public static final int LeftElevatorMotorCANID = 15;
-        public static final int RightElevatorMotorCANID = 16;
-        public static final int ElevatorEncoderCANID = 22;
-
-        // Limit switch constants
-        public static final int TopLimitSwitchChannel = 0;
-        public static final int BottomLimitSwitchChannel = 1;
-        public static final double BottomLimitResetDebounceSeconds = 0.25;
-
-        // Physical constraints
-        public static final double MaxElevatorHeight = 0.63;
-        public static final double MaxSpeedCoefficient = 0.5;
-        public static final double OutputSprocketDiameterMeters = Units.Millimeters.of(32.2).in(Meters);
-        public static final double GearRatio = 16;
-
-        // MRSG constants
-        // public static final MRSGConstants ElevatorControllerConstants = new MRSGConstants(
-        //         8, 4.5, 0, 1.4);
-
-        public static final MRSGConstants ElevatorControllerConstantsSmall = new MRSGConstants(
-                10.5, 4.5, 0, 1.05);
-
-        public static final MRSGConstants ElevatorControllerConstantsMedium = new MRSGConstants(
-                8, 4, 0, 0);
-
-        // Only M and R are used.
-        public static final MRSGConstants ElevatorControllerConstantsBig = new MRSGConstants(
-                8.5, 3, 0, 0);
-
-        public static final MRSGConstants ElevatorControllerConstantsAbsoultelyMassive = new MRSGConstants(7, 3, 0,
-                0);
-
-        // Manual control 
-        public static final int MaxPercentOutput = 1;
-        public static final double ManualSpeedLimitAbsolute = 0.5;
-
-        // PIDF constants
-        // public static final double FeedForwardKg = 0.16733;
-        // public static final ExtendedPIDConstants PositionPID = new ExtendedPIDConstants(
-        //         26,
-        //         0,
-        //         1.6,
-        //         0,
-        //         3.9,
-        //         0.3,
-        //         0.355);
-    }
-
+public class Elevator extends SubsystemBase {
     private Map<ElevatorPosition, Double> _positionMap = Map.of(
             ElevatorPosition.kAbsoluteMinimum, 0.0,
             ElevatorPosition.kSource, 0.198,
@@ -90,7 +38,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private BooleanEvent _positionResetEvent;
 
-    public ElevatorSubsystem(boolean isReal) {
+    public Elevator(boolean isReal) {
         setName("Elevator");
 
         _elevatorIO = isReal
@@ -104,38 +52,74 @@ public class ElevatorSubsystem extends SubsystemBase {
         _positionResetEvent.ifHigh(_elevatorIO::resetEncoderPos);
     }
 
+    /**
+     * Returns true if the elevator is at its PID setpoint
+     * @return
+     */
     public boolean atSetpoint() {
         return _elevatorController.atSetpoint(0.02);
     }
 
+    /**
+     * Returns true when the elevator is withing a given distance from a position
+     * @param pos
+     * @param withinCentimeters
+     * @return
+     */
     public boolean positionIsNear(ElevatorPosition pos, double withinCentimeters) {
         return getElevatorPosition()
                 .isNear(getElevatorPositionAtLocation(pos), Units.Centimeters.of(withinCentimeters));
     }
 
+    /**
+     * Returns true when the elevator is within 2cm of a given position
+     * @param pos
+     * @return
+     */
     public boolean positionIsNear(double pos) {
         return getElevatorPosition().isNear(Meters.of(pos), Units.Centimeters.of(2));
     }
 
+    /**
+     * Gets the position of the elevator at a given location
+     * @param pos
+     * @return
+     */
     public Measure<DistanceUnit> getElevatorPositionAtLocation(ElevatorPosition pos) {
         return Meters.of(_positionMap.get(pos));
     }
 
+    /**
+     * Gets the current position of the elevator in meters
+     * @return
+     */
     public double getElevatorPositionMeters() {
         return _inputs.ElevatorDistanceMeters;
     }
 
+    /**
+     * Gets the current position of the elevator as a Distance object in Meters
+     * @return
+     */
     public Distance getElevatorPosition() {
         return Meters.of(getElevatorPositionMeters());
     }
 
+    /**
+     * Gets the current position of the elevator as a percentage of the max height
+     * @return
+     */
     public double getElevatorPositionPercent() {
         return getElevatorPositionMeters() / ElevatorMap.MaxElevatorHeight;
     }
 
     //#region Control
 
-    public void manageElevatorControl(double manualControlSpeed) {
+    /**
+     * 
+     * @param manualControlSpeed
+     */
+    private void controlElevator(double manualControlSpeed) {
         _elevatorManaullyControlled = manualControlSpeed != 0 || _elevatorManaullyControlled;
 
         if (_elevatorManaullyControlled) {
@@ -149,7 +133,13 @@ public class ElevatorSubsystem extends SubsystemBase {
         }
     }
 
-    public void setMotorVoltageWithLimitSwitches(double finalOutput) {
+    /**
+     * Sets the motor voltage, respecting the limit switches
+     * @param finalOutput
+     */
+    private void setMotorVoltageWithLimitSwitches(double finalOutput) {
+        Logger.recordOutput(getName() + "/output-raw", finalOutput);
+        // If the elevator is at the top or bottom, stop the motor from moving in that direction
         if (_inputs.TopLimitSwitch && finalOutput > 0) {
             finalOutput = MathUtil.clamp(finalOutput, -12, 0);
         } else if (_inputs.BottomLimitSwitch && finalOutput < 0) {
@@ -158,14 +148,14 @@ public class ElevatorSubsystem extends SubsystemBase {
 
         finalOutput = MathUtil.clamp(finalOutput, -12, 12);
         // Within 5% of max height, reduce speed
-        finalOutput = getScaledoutput(finalOutput, _inputs.ElevatorDistanceMeters);
-        finalOutput = MathUtil.applyDeadband(finalOutput, 0.1); // Deadband
+        finalOutput = scaleOutputApproachingLimits(finalOutput, _inputs.ElevatorDistanceMeters);
+        finalOutput = MathUtil.applyDeadband(finalOutput, 0.1); // Deadband at 10%
 
-        SmartDashboard.putNumber(getName() + "/Filtered-EC", finalOutput);
+        Logger.recordOutput(getName() + "/output-final", finalOutput);
         _elevatorIO.setMotorVoltages(finalOutput);
     }
 
-    private double getScaledoutput(double output, double currentPosition) {
+    private double scaleOutputApproachingLimits(double output, double currentPosition) {
         var lowPositionScaleDownThreshold = ElevatorMap.MaxElevatorHeight * 0.2;
         var highPositionScaleDownThreshold = ElevatorMap.MaxElevatorHeight - lowPositionScaleDownThreshold - 0.1;
 
@@ -178,21 +168,17 @@ public class ElevatorSubsystem extends SubsystemBase {
             speedScalingFactor = Math.max(0.4, scale);
         }
 
-        Logger.recordOutput(getName() + "/output-scalingFactor", speedScalingFactor);
-        Logger.recordOutput(getName() + "/output-scaled", speedScalingFactor * output);
+        Logger.recordOutput(getName() + "/output-limit-scalar", speedScalingFactor);
+        Logger.recordOutput(getName() + "/output-limit-scaled", speedScalingFactor * output);
 
         return output * speedScalingFactor;
     }
 
-    public void setMotorVoltages(double newVolatage) {
-        _elevatorIO.setMotorVoltages(newVolatage);
-    }
-
-    public void disableElevatorManualControl() {
+    private void disableElevatorManualControl() {
         _elevatorManaullyControlled = false;
     }
 
-    public void setPositionSetpoint(ElevatorPosition pos) {
+    private void setPositionSetpoint(ElevatorPosition pos) {
         _elevatorController.setSetpoint(_positionMap.get(pos));
         disableElevatorManualControl();
 
@@ -215,18 +201,17 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void periodic() {
         _elevatorIO.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
+        Logger.recordOutput(getName() + "EC-setpoint", _elevatorController.getSetpoint());
+        Logger.recordOutput(getName() + "/EC-error", _elevatorController.getError());
 
-        Logger.recordOutput(getName() + "/elevator error", _elevatorController.getError());
         SmartDashboard.putBoolean(getName() + " is elevator manaully controlled", _elevatorManaullyControlled);
-        SmartDashboard.putNumber(getName() + "EC Setpoint", _elevatorController.getSetpoint());
-
     }
     //#endregion
 
     //#region Commands
 
     public Command elevatorDefaultCommand(DoubleSupplier elevatorManualControl) {
-        return this.run(() -> manageElevatorControl(elevatorManualControl.getAsDouble()));
+        return this.run(() -> controlElevator(elevatorManualControl.getAsDouble()));
     }
 
     public Command setElevatorSetpointCommand(ElevatorPosition pos) {

@@ -10,7 +10,6 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DigitalInput;
-import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorMap;
 
 public class ElevatorReal implements IElevator {
 

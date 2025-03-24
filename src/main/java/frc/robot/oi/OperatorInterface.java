@@ -5,14 +5,14 @@ import org.prime.control.HolonomicControlStyle;
 import org.prime.control.SupplierXboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import frc.robot.Container;
-import frc.robot.subsystems.climbing.ClimberSubsystem;
 import frc.robot.subsystems.swerve.SwerveMap;
-import frc.robot.subsystems.swerve.SwerveSubsystem;
+import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.elevator.ElevatorPosition;
-import frc.robot.subsystems.elevator.ElevatorSubsystem;
-import frc.robot.subsystems.endEffector.EndEffectorSubsystem;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.endEffector.EndEffector;
 import frc.robot.subsystems.vision.LimelightNameEnum;
-import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.subsystems.vision.Vision;
 
 public class OperatorInterface {
         public static class OIMap {
@@ -27,8 +27,8 @@ public class OperatorInterface {
                 OperatorController = new SupplierXboxController(Controls.OPERATOR_PORT);
         }
 
-        public void bindDriverControls(SwerveSubsystem swerveSubsystem, ClimberSubsystem climber,
-                        VisionSubsystem visionSubsystem) {
+        public void bindDriverControls(Swerve swerveSubsystem, Climber climber,
+                        Vision visionSubsystem) {
                 var controlProfile = DriverController.getSwerveControlProfile(
                                 OIMap.DefaultDriveControlStyle,
                                 SwerveMap.Control.DriveDeadband,
@@ -49,24 +49,24 @@ public class OperatorInterface {
                 // Climber Controls
                 // Climber in will only go in until it hits the artifical stop measured by the encoder
                 DriverController.y().and(DriverController.leftBumper())
-                                .whileTrue(climber.setClimberInCommand())
+                                .whileTrue(climber.retractWinchCommand())
                                 .onFalse(climber.stopAllMotors());
                 DriverController.y().and(DriverController.rightBumper())
-                                .whileTrue(climber.setClimberOutCommand())
-                                .onFalse(climber.stopClimbingMotorsCommand());
+                                .whileTrue(climber.extendWinchCommand())
+                                .onFalse(climber.stopWinchMotorsCommand());
 
                 // Hooks Controls
                 DriverController.b().and(DriverController.leftBumper())
-                                .whileTrue(climber.setHooksOpenCommand())
-                                .onFalse(climber.stopHooksMotorsCommand());
+                                .whileTrue(climber.runHooksOpenCommand())
+                                .onFalse(climber.stopHooksMotorCommand());
                 DriverController.b().and(DriverController.rightBumper())
-                                .whileTrue(climber.setHooksClosedCommand())
-                                .onFalse(climber.stopHooksMotorsCommand());
+                                .whileTrue(climber.runHooksClosedCommand())
+                                .onFalse(climber.stopHooksMotorCommand());
 
                 // Manual Control for setting the climber all the way in                
                 DriverController.back()
-                                .whileTrue(climber.fullyClimbInManual())
-                                .onFalse(climber.stopClimbingMotorsCommand());
+                                .whileTrue(climber.retractWinchCommand())
+                                .onFalse(climber.stopWinchMotorsCommand());
 
                 // Changes the vision mode for the rear limelight. 
                 OperatorController.start()
@@ -74,9 +74,9 @@ public class OperatorInterface {
                                 .onFalse(visionSubsystem.setLimelightPipeline(LimelightNameEnum.kRear, 0));
         }
 
-        public void bindOperatorControls(ElevatorSubsystem elevatorSubsystem,
-                        EndEffectorSubsystem endEffectorSubsystem, VisionSubsystem visionSubsystem,
-                        SwerveSubsystem swerveSubsystem) {
+        public void bindOperatorControls(Elevator elevatorSubsystem,
+                        EndEffector endEffectorSubsystem, Vision visionSubsystem,
+                        Swerve swerveSubsystem) {
 
                 elevatorSubsystem.setDefaultCommand(elevatorSubsystem
                                 .elevatorDefaultCommand(OperatorController.getTriggerSupplier(0.06, 0)));

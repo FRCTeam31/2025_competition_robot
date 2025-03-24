@@ -1,4 +1,4 @@
-package frc.robot.subsystems.climbing;
+package frc.robot.subsystems.climber;
 
 import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
@@ -9,70 +9,61 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
-import edu.wpi.first.epilogue.Logged;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DigitalInput;
-import frc.robot.subsystems.swerve.gyro.IGyro;
-import frc.robot.subsystems.climbing.ClimberSubsystem.ClimberMap;
 
-public class ClimberIOReal implements IClimberIO {
+public class ClimberReal implements IClimber {
 
-    private SparkFlex _climbWenchLeftMotor;
-    private SparkFlex _climbWenchRightMotor;
+    private SparkFlex _climbWinchLeftMotor;
+    private SparkFlex _climbWinchRightMotor;
     private VictorSPX _climbHooksMotor;
+
     private DigitalInput _climbOutLimitSwitch;
     private DigitalInput _climbInLimitSwitch;
     private DigitalInput _hooksOpenLimitSwitch;
     private DigitalInput _hooksClosedLimitSwitch;
 
-    public ClimberIOReal() {
-
+    public ClimberReal() {
         _climbOutLimitSwitch = new DigitalInput(ClimberMap.ClimberOutLimitSwitchChannel);
         _climbInLimitSwitch = new DigitalInput(ClimberMap.ClimberInLimitSwitchChannel);
         _hooksOpenLimitSwitch = new DigitalInput(ClimberMap.HooksOpenLimitSwitchChannel);
         _hooksClosedLimitSwitch = new DigitalInput(ClimberMap.HooksClosedLimitSwitchChannel);
 
         climbMotorsConfig();
-        _climbWenchLeftMotor.getEncoder();
-
     }
 
     private void climbMotorsConfig() {
-
         SparkMaxConfig leftMotorConfig = new SparkMaxConfig();
-        SparkMaxConfig rightMotorConfig = new SparkMaxConfig();
-
         leftMotorConfig.follow(ClimberMap.ClimberRightMotorCANID, true);
         leftMotorConfig.idleMode(IdleMode.kBrake);
-        rightMotorConfig.idleMode(IdleMode.kBrake);
-
-        _climbWenchLeftMotor = new SparkFlex(ClimberMap.ClimberLeftMotorCANID, MotorType.kBrushless);
-        _climbWenchRightMotor = new SparkFlex(ClimberMap.ClimberRightMotorCANID, MotorType.kBrushless);
-        _climbHooksMotor = new VictorSPX(ClimberMap.ClimberHookMotorCANID);
-        _climbWenchLeftMotor.configure(leftMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        _climbWenchRightMotor.configure(rightMotorConfig, ResetMode.kResetSafeParameters,
+        leftMotorConfig.encoder.positionConversionFactor(1 / ClimberMap.ClimberGearRatio);
+        _climbWinchLeftMotor = new SparkFlex(ClimberMap.ClimberLeftMotorCANID, MotorType.kBrushless);
+        _climbWinchLeftMotor.configure(leftMotorConfig, ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
-        _climbHooksMotor.configFactoryDefault();
 
+        SparkMaxConfig rightMotorConfig = new SparkMaxConfig();
+        rightMotorConfig.idleMode(IdleMode.kBrake);
+        _climbWinchRightMotor = new SparkFlex(ClimberMap.ClimberRightMotorCANID, MotorType.kBrushless);
+        _climbWinchRightMotor.configure(rightMotorConfig, ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters);
+
+        _climbHooksMotor = new VictorSPX(ClimberMap.ClimberHookMotorCANID);
+        _climbHooksMotor.configFactoryDefault();
     }
 
     @Override
     public void updateInputs(ClimberInputsAutoLogged inputs) {
-        double climbWenchMotorSpeed = _climbWenchLeftMotor.get();
-        double climbHookMotorSpeed = _climbHooksMotor.getMotorOutputPercent();
-
-        inputs.ClimbWenchMotorSpeed = climbWenchMotorSpeed;
-        inputs.HooksMotorSpeed = climbHookMotorSpeed;
-        inputs.ClimbWenchOutLimitSwitch = _climbOutLimitSwitch.get();
-        inputs.ClimbWenchInLimitSwitch = _climbInLimitSwitch.get();
+        inputs.WinchMotorSpeed = _climbWinchLeftMotor.get();
+        inputs.HooksMotorSpeed = _climbHooksMotor.getMotorOutputPercent();
+        inputs.WinchOuterLimitSwitch = _climbOutLimitSwitch.get();
+        inputs.WinchInnerLimitSwitch = _climbInLimitSwitch.get();
         inputs.HooksClosedLimitSwitch = _hooksClosedLimitSwitch.get();
         inputs.HooksOpenLimitSwitch = !_hooksOpenLimitSwitch.get();
         inputs.climberShaftRotations = getClimberShaftRotations();
     }
 
     @Override
-    public void setClimbingWenchSpeed(double speed) {
-        _climbWenchRightMotor.set(speed);
+    public void setWinchSpeed(double speed) {
+        _climbWinchRightMotor.set(speed);
     }
 
     @Override
@@ -81,9 +72,9 @@ public class ClimberIOReal implements IClimberIO {
     }
 
     @Override
-    public void stopWenchMotors() {
-        _climbWenchLeftMotor.stopMotor();
-        _climbWenchRightMotor.stopMotor();
+    public void stopWinchMotors() {
+        _climbWinchLeftMotor.stopMotor();
+        _climbWinchRightMotor.stopMotor();
     }
 
     @Override
@@ -93,14 +84,11 @@ public class ClimberIOReal implements IClimberIO {
 
     @Override
     public void resetClimberAngle() {
-        _climbWenchLeftMotor.getEncoder().setPosition(0);
+        _climbWinchLeftMotor.getEncoder().setPosition(0);
     }
 
     public double getClimberShaftRotations() {
-        double motorRotations = _climbWenchLeftMotor.getEncoder().getPosition();
-        double shaftRotations = motorRotations / 100;
-        return shaftRotations;
-
+        // Scaled to gear ratio in config
+        return _climbWinchLeftMotor.getEncoder().getPosition();
     }
-
 }

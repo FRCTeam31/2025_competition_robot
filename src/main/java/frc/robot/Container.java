@@ -10,6 +10,8 @@ import java.util.function.Supplier;
 import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.dashboard.TeleopDashboardTab;
@@ -17,12 +19,13 @@ import frc.robot.game.ReefBranchSide;
 import frc.robot.dashboard.DashboardSection;
 import frc.robot.oi.OperatorInterface;
 import frc.robot.oi.routine.BuildableAutoRoutine;
-import frc.robot.subsystems.climbing.ClimberSubsystem;
-import frc.robot.subsystems.swerve.SwerveSubsystem;
+import frc.robot.subsystems.PwmLEDs;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.elevator.ElevatorPosition;
-import frc.robot.subsystems.elevator.ElevatorSubsystem;
-import frc.robot.subsystems.endEffector.EndEffectorSubsystem;
-import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.endEffector.EndEffector;
+import frc.robot.subsystems.vision.Vision;
 
 public class Container {
   public static TeleopDashboardTab TeleopDashboardSection;
@@ -31,43 +34,41 @@ public class Container {
   public static DashboardSection TestDashboardSection;
   public static BuildableAutoRoutine AutoBuilder;
 
-  public static SwerveSubsystem Swerve;
-  public static VisionSubsystem Vision;
-  public static ClimberSubsystem Climber;
-  public static EndEffectorSubsystem EndEffector;
-  public static ElevatorSubsystem Elevator;
+  public static PwmLEDs LEDs;
+  public static Swerve Swerve;
+  public static Vision Vision;
+  public static Climber Climber;
+  public static EndEffector EndEffector;
+  public static Elevator Elevator;
   public static OperatorInterface OperatorInterface;
 
   public static void initialize(boolean isReal) {
     try {
-      // Create subsystems
-      Vision = new VisionSubsystem();
-      Swerve = new SwerveSubsystem(isReal);
-      // Create Elevator Subsystem
-      Elevator = new ElevatorSubsystem(isReal);
-      Climber = new ClimberSubsystem(isReal);
-      EndEffector = new EndEffectorSubsystem(isReal);
-
-      // Create our custom auto builder
+      // Create dashboard sections
       AutoDashboardSection = new DashboardSection("Auto");
       TeleopDashboardSection = new TeleopDashboardTab();
       CommandsDashboardSection = new DashboardSection("Commands");
       TestDashboardSection = new DashboardSection("Test");
 
-      OperatorInterface = new OperatorInterface();
+      // Create subsystems
+      LEDs = new PwmLEDs();
+      Vision = new Vision();
+      Swerve = new Swerve(isReal);
+      Elevator = new Elevator(isReal);
+      Climber = new Climber(isReal);
+      EndEffector = new EndEffector(isReal);
 
+      // Create and bind the operator interface
+      OperatorInterface = new OperatorInterface();
       OperatorInterface.bindDriverControls(Swerve, Climber, Vision);
       OperatorInterface.bindOperatorControls(Elevator, EndEffector, Vision, Swerve);
 
       // Register the named commands from each subsystem that may be used in PathPlanner
-      var swerveCommands = Swerve.getNamedCommands();
-      var elevatorCommands = Elevator.getNamedCommands();
-      var containerCommands = getNamedCommands();
+      NamedCommands.registerCommands(Swerve.getNamedCommands());
+      NamedCommands.registerCommands(Elevator.getNamedCommands());
+      NamedCommands.registerCommands(getNamedCommands());
 
-      NamedCommands.registerCommands(swerveCommands);
-      NamedCommands.registerCommands(elevatorCommands);
-      NamedCommands.registerCommands(containerCommands);
-
+      // Create our custom auto builder
       AutoBuilder = new BuildableAutoRoutine(getNamedCommandSuppliers());
     } catch (Exception e) {
       DriverStation.reportError("[ERROR] >> Failed to initialize Container: " + e.getMessage(), e.getStackTrace());
@@ -79,10 +80,16 @@ public class Container {
   public static Command setCombinedHeightAndAngle(ElevatorPosition position) {
     return Commands.parallel(
         Commands.print("Setting combined height and angle: " + position),
+        LEDs.setAllSectionPatternsCommand(LEDPattern.solid(Color.kYellow)
+            .mask(LEDPattern.progressMaskLayer(Elevator::getElevatorPositionPercent))),
         Elevator.setElevatorSetpointCommand(position),
         EndEffector.setWristSetpointCommand(position))
         .alongWith(Commands.waitUntil(() -> EndEffector.wristAtSetpoint() && Elevator.atSetpoint()).withTimeout(3))
-        .finallyDo(() -> System.out.println("Finished setting combined setpoints"));
+        .andThen(LEDs.setAllSectionPatternsCommand(LEDPattern.solid(Color.kGreen)))
+        .finallyDo(() -> {
+          System.out.println("Finished setting combined setpoints");
+          LEDs.setAllSectionPatterns(LEDPattern.solid(Color.kGreen));
+        });
   }
 
   public static Command scoreAtHeight(ElevatorPosition position) {
@@ -109,9 +116,6 @@ public class Container {
   }
 
   public static Command scoreOnSideAndLower(ReefBranchSide side, ElevatorPosition position) {
-    // return Swerve.pathfindToReefPegSide(side)
-    // .andThen(scoreAtHeightAndLower(position));
-
     return scoreAtHeightAndLower(position);
   }
 

@@ -1,28 +1,21 @@
-package frc.robot.subsystems.climbing;
+package frc.robot.subsystems.climber;
 
-import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
-import frc.robot.subsystems.climbing.ClimberSubsystem.ClimberMap;
 
-public class ClimberIOSim implements IClimberIO {
-    private DCMotorSim _climbWenchMotorsSim;
-
+public class ClimberSim implements IClimber {
+    private DCMotorSim _climbWinchMotorsSim;
     private DCMotorSim _climbHooksMotorSim;
-
-    // private DoubleSolenoidSim climbSolenoidSim;
 
     private DIOSim _climbOutLimitSwitchSim;
     private DIOSim _climbInLimitSwitchSim;
     private DIOSim _hooksOutLimitSwitchSim;
     private DIOSim _hooksInLimitSwitchSim;
-    private ClimberInputs _inputs = new ClimberInputs();
 
-    public ClimberIOSim() {
-
-        _climbWenchMotorsSim = new DCMotorSim(
+    public ClimberSim() {
+        _climbWinchMotorsSim = new DCMotorSim(
                 LinearSystemId.createDCMotorSystem(DCMotor.getNeoVortex(1), 0.001, ClimberMap.ClimberGearRatio),
                 DCMotor.getNeoVortex(2));
 
@@ -38,20 +31,17 @@ public class ClimberIOSim implements IClimberIO {
 
     @Override
     public void updateInputs(ClimberInputsAutoLogged inputs) {
-        double climbWenchMotorSpeed = _climbWenchMotorsSim.getAngularVelocity().magnitude();
-        double climbHookMotorSpeed = _climbHooksMotorSim.getAngularVelocity().magnitude();
-
-        _inputs.ClimbWenchMotorSpeed = climbWenchMotorSpeed;
-        _inputs.HooksMotorSpeed = climbHookMotorSpeed;
-        _inputs.ClimbWenchOutLimitSwitch = _climbOutLimitSwitchSim.getValue();
-        _inputs.ClimbWenchInLimitSwitch = _climbInLimitSwitchSim.getValue();
-        _inputs.HooksClosedLimitSwitch = _hooksOutLimitSwitchSim.getValue();
-        _inputs.HooksOpenLimitSwitch = _hooksInLimitSwitchSim.getValue();
+        inputs.WinchMotorSpeed = _climbWinchMotorsSim.getAngularVelocity().magnitude();
+        inputs.HooksMotorSpeed = _climbHooksMotorSim.getAngularVelocity().magnitude();
+        inputs.WinchOuterLimitSwitch = _climbOutLimitSwitchSim.getValue();
+        inputs.WinchInnerLimitSwitch = _climbInLimitSwitchSim.getValue();
+        inputs.HooksClosedLimitSwitch = _hooksOutLimitSwitchSim.getValue();
+        inputs.HooksOpenLimitSwitch = _hooksInLimitSwitchSim.getValue();
     }
 
     @Override
-    public void setClimbingWenchSpeed(double speed) {
-        _climbWenchMotorsSim.setAngularVelocity(speed);
+    public void setWinchSpeed(double speed) {
+        _climbWinchMotorsSim.setAngularVelocity(speed);
     }
 
     @Override
@@ -60,8 +50,8 @@ public class ClimberIOSim implements IClimberIO {
     }
 
     @Override
-    public void stopWenchMotors() {
-        _climbWenchMotorsSim.setAngularVelocity(0);
+    public void stopWinchMotors() {
+        _climbWinchMotorsSim.setAngularVelocity(0);
     }
 
     @Override

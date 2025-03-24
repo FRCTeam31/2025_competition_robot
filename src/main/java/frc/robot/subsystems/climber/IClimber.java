@@ -1,17 +1,16 @@
-package frc.robot.subsystems.climbing;
+package frc.robot.subsystems.climber;
 
-public interface IClimberIO {
+public interface IClimber {
 
     public void updateInputs(ClimberInputsAutoLogged inputs);
 
-    public void setClimbingWenchSpeed(double Speed);
+    public void setWinchSpeed(double Speed);
 
     public void setHookMotorSpeed(double Speed);
 
-    public void stopWenchMotors();
+    public void stopWinchMotors();
 
     public void stopHooksMotors();
 
     public void resetClimberAngle();
-
 }

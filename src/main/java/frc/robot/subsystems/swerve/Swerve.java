@@ -10,7 +10,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -23,7 +22,7 @@ import frc.robot.Container;
 import frc.robot.Robot;
 import frc.robot.subsystems.swerve.util.AutoAlign;
 import frc.robot.subsystems.vision.LimelightNameEnum;
-import frc.robot.subsystems.vision.VisionSubsystem;
+import frc.robot.subsystems.vision.Vision;
 
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -38,7 +37,7 @@ import org.prime.control.SwerveControlSuppliers;
 import org.prime.pose.PoseUtil;
 import org.prime.vision.LimelightInputs;
 
-public class SwerveSubsystem extends SubsystemBase {
+public class Swerve extends SubsystemBase {
   private DrivetrainDashboardSection _drivetrainDashboardSection;
   private ImpactRumbleHelper _rumbleHelper;
 
@@ -56,7 +55,7 @@ public class SwerveSubsystem extends SubsystemBase {
   /**
    * Creates a new Drivetrain.
    */
-  public SwerveSubsystem(boolean isReal) {
+  public Swerve(boolean isReal) {
     setName("Swerve");
 
     _rumbleHelper = new ImpactRumbleHelper();
@@ -246,7 +245,7 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   private void evaluatePoseEstimation(LimelightInputs limelightInputs) {
     // If we have a valid target, update the pose estimator
-    if (!VisionSubsystem.isAprilTagIdValid(limelightInputs.ApriltagId))
+    if (!Vision.isAprilTagIdValid(limelightInputs.ApriltagId))
       return;
 
     var llPose = limelightInputs.BlueAllianceOriginFieldSpaceRobotPose;
@@ -410,7 +409,7 @@ public class SwerveSubsystem extends SubsystemBase {
       var frontLimelightInputs = Container.Vision.getLimelightInputs(LimelightNameEnum.kFront);
 
       // If targeted AprilTag is in validTargets, align to its offset
-      if (VisionSubsystem.isReefTag(frontLimelightInputs.ApriltagId)) {
+      if (Vision.isReefTag(frontLimelightInputs.ApriltagId)) {
         var targetPose_FieldSpace = PoseUtil.convertPoseFromRobotToFieldSpace(_inputs.EstimatedRobotPose,
             frontLimelightInputs.RobotSpaceTargetPose.Pose.toPose2d());
         var targetFieldRotationFlipped = targetPose_FieldSpace.getRotation()

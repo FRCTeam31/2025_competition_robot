@@ -1,5 +1,7 @@
 package frc.robot.subsystems.endEffector;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
@@ -9,15 +11,18 @@ import org.prime.util.MotorUtil;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Container;
+import frc.robot.Robot;
 import frc.robot.subsystems.elevator.ElevatorPosition;
 
-public class EndEffectorSubsystem extends SubsystemBase {
+public class EndEffector extends SubsystemBase {
     private IEndEffector _endEffector;
     private PIDController _wristPID;
 
@@ -27,7 +32,9 @@ public class EndEffectorSubsystem extends SubsystemBase {
     private boolean _intakeIsEjecting = false;
     private double _manualControlSpeed = 0;
 
-    public EndEffectorSubsystem(boolean isReal) {
+    private LEDPattern _waitingForCoralLEDPattern = LEDPattern.solid(Color.kYellow).blink(Seconds.of(0.3));
+
+    public EndEffector(boolean isReal) {
         setName("End Effector");
         _endEffector = isReal
                 ? new EndEffectorReal()
@@ -229,7 +236,9 @@ public class EndEffectorSubsystem extends SubsystemBase {
      */
     public Command pickupCoral() {
         return disableEjectCommand()
+                .andThen(Container.LEDs.setAllSectionPatternsCommand(_waitingForCoralLEDPattern))
                 .andThen(Commands.waitUntil(this::coralLimitSwitchTriggered))
+                .andThen(Container.LEDs.setAllSectionPatternsCommand(LEDPattern.solid(Color.kGreen)))
                 .andThen(setWristSetpointCommand(0))
                 .andThen(Commands.print(">> INTAKE: Coral picked up"));
     }

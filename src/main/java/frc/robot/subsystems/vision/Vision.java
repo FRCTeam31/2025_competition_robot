@@ -14,7 +14,7 @@ import java.util.Map;
 import org.littletonrobotics.junction.Logger;
 import org.prime.vision.LimelightInputs;
 
-public class VisionSubsystem extends SubsystemBase {
+public class Vision extends SubsystemBase {
     public class VisionMap {
         public static final String LimelightFrontName = "limelight-front";
         public static final String LimelightRearName = "limelight-rear";
@@ -28,7 +28,7 @@ public class VisionSubsystem extends SubsystemBase {
     Map<LimelightNameEnum, LimelightInputs> _limelightInputs = new HashMap<>();
     private UsbCamera _usbCamera;
 
-    public VisionSubsystem() {
+    public Vision() {
         setName("Vision");
         var defaultInstance = NetworkTableInstance.getDefault();
 
