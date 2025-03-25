@@ -8,6 +8,7 @@ import com.pathplanner.lib.util.PathPlannerLogging;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -38,6 +39,17 @@ import org.prime.pose.PoseUtil;
 import org.prime.vision.LimelightInputs;
 
 public class Swerve extends SubsystemBase {
+
+  private static final InterpolatingDoubleTreeMap DriveSpeedSlowCoeffient = InterpolatingDoubleTreeMap
+      .ofEntries(
+          Map.entry(0.3135d, 0.9d),
+          Map.entry(0.35d, 0.8d),
+          Map.entry(0.39d, 0.7d),
+          Map.entry(0.43d, 0.6d),
+          Map.entry(0.47d, 0.5d),
+          Map.entry(0.51d, 0.4d),
+          Map.entry(0.55d, 0.3d),
+          Map.entry(0.6d, 0.2d));
   private DrivetrainDashboardSection _drivetrainDashboardSection;
   private ImpactRumbleHelper _rumbleHelper;
 
@@ -145,6 +157,16 @@ public class Swerve extends SubsystemBase {
     // per-period speed. This is known as "discretizing"
     robotRelativeChassisSpeeds = ChassisSpeeds.discretize(robotRelativeChassisSpeeds, 0.02);
     Logger.recordOutput(getName() + "/desiredChassisSpeeds", robotRelativeChassisSpeeds);
+
+    if (DriverStation.isTeleopEnabled()) {
+      double elevatorHeight = Container.Elevator.getElevatorPositionMeters();
+      double speedCoef = DriveSpeedSlowCoeffient.get(elevatorHeight);
+      speedCoef = elevatorHeight < 0.3 ? 1 : speedCoef;
+
+      robotRelativeChassisSpeeds.vxMetersPerSecond = robotRelativeChassisSpeeds.vxMetersPerSecond * speedCoef;
+      robotRelativeChassisSpeeds.vyMetersPerSecond = robotRelativeChassisSpeeds.vyMetersPerSecond * speedCoef;
+      robotRelativeChassisSpeeds.omegaRadiansPerSecond = robotRelativeChassisSpeeds.omegaRadiansPerSecond * speedCoef;
+    }
 
     // Calculate the module states from the chassis speeds
     var swerveModuleStates = _swervePackager.Kinematics.toSwerveModuleStates(robotRelativeChassisSpeeds);
