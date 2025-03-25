@@ -145,8 +145,9 @@ public class Container {
         "Score-L3", scoreOnSideAndLower(ReefBranchSide.kRight, ElevatorPosition.kL3),
         "Score-L2", scoreOnSideAndLower(ReefBranchSide.kRight, ElevatorPosition.kL2),
         "Score-Trough", scoreAtHeightAndLower(ElevatorPosition.kTrough),
-        "Pickup-Source", pickupFromSourceAndLower());
+        "Pickup-Source", pickupFromSourceAndLower(),
+        "AutoSetElevatorL4", setCombinedHeightAndAngle(ElevatorPosition.kL4),
+        "AutoSetElevatorSource", setCombinedHeightAndAngle(ElevatorPosition.kSource));
   }
-
   //#endregion
 }
