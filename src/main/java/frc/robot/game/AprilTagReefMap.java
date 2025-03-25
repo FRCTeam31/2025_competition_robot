@@ -33,7 +33,7 @@ public class AprilTagReefMap {
     /**
     * Returns the pose of the desired side of reef pegs from the current robot pose (assumed to be the midpoint between pegs)
     */
-    public static Pose2d getBranchPoseFromTarget(ReefBranchSide side, Pose2d inputPose, Rotation2d currentHeading) {
+    public static Pose2d getBranchPoseFromAprilTag(ReefBranchSide side, Pose2d inputPose, Rotation2d currentHeading) {
         var currentHeadingRadians = currentHeading.getRadians();
         var a = side == ReefBranchSide.kLeft
                 ? currentHeadingRadians + (Math.PI / 2)
@@ -49,22 +49,22 @@ public class AprilTagReefMap {
     public static Pose2d getBranchApproachPose(
             ReefBranchSide branchSide,
             Pose2d currentRobotPose,
-            Pose2d targetPose,
+            Pose2d aprilTagPose,
             double approachDistance) {
         // Select the correct reef branch (left or right)
-        var selectedReefPose = getBranchPoseFromTarget(branchSide, targetPose, currentRobotPose.getRotation());
+        var selectedBranchPose = getBranchPoseFromAprilTag(branchSide, aprilTagPose, currentRobotPose.getRotation());
 
         // Get the direction vector from the AprilTag to the selected branch
-        var directionToBranch = selectedReefPose.getTranslation().minus(targetPose.getTranslation());
+        var directionToBranch = selectedBranchPose.getTranslation().minus(aprilTagPose.getTranslation());
 
         // Normalize direction vector (unit vector) to maintain relative positioning
         var normalizedDirection = directionToBranch.div(directionToBranch.getNorm());
 
         // Compute the final approach position by extending N meters from the reefTagPose in this direction
-        var approachTranslation = targetPose.getTranslation()
+        var approachTranslation = aprilTagPose.getTranslation()
                 .plus(normalizedDirection.times(approachDistance));
 
         // The robot should be facing the reef, so use the AprilTag's rotation
-        return new Pose2d(approachTranslation, targetPose.getRotation());
+        return new Pose2d(approachTranslation, aprilTagPose.getRotation());
     }
 }

@@ -361,18 +361,18 @@ public class Swerve extends SubsystemBase {
           reefSide.getBranchName(branchSide));
 
       // Get the target pose, and convert it to field space
-      var targetPose = PoseUtil.convertPoseFromRobotToFieldSpace(
+      var aprilTagPoseFieldSpace = PoseUtil.convertPoseFromRobotToFieldSpace(
           _inputs.EstimatedRobotPose,
           llInputs.RobotSpaceTargetPose.Pose.toPose2d());
-      Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/target-pose", targetPose);
+      Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/target-pose", aprilTagPoseFieldSpace);
 
       // Get the approach pose for the desired branch side
       var approachPose = AprilTagReefMap.getBranchApproachPose(
           branchSide,
           _inputs.EstimatedRobotPose,
-          targetPose,
+          aprilTagPoseFieldSpace,
           (SwerveMap.Chassis.WheelBaseMeters / 2) + SwerveMap.Chassis.BumperWidthMeters);
-      Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/branch-approach-pose", targetPose);
+      Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/branch-approach-pose", aprilTagPoseFieldSpace);
 
       var pathfindConstraints = new PathConstraints(
           SwerveMap.Chassis.MaxSpeedMetersPerSecond,

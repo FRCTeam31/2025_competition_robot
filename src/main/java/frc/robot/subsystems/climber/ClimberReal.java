@@ -35,7 +35,7 @@ public class ClimberReal implements IClimber {
         SparkMaxConfig leftMotorConfig = new SparkMaxConfig();
         leftMotorConfig.follow(ClimberMap.ClimberRightMotorCANID, true);
         leftMotorConfig.idleMode(IdleMode.kBrake);
-        leftMotorConfig.encoder.positionConversionFactor(1 / ClimberMap.ClimberGearRatio);
+        // leftMotorConfig.encoder.positionConversionFactor(1 / ClimberMap.ClimberGearRatio);
         _climbWinchLeftMotor = new SparkFlex(ClimberMap.ClimberLeftMotorCANID, MotorType.kBrushless);
         _climbWinchLeftMotor.configure(leftMotorConfig, ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters);
@@ -89,6 +89,6 @@ public class ClimberReal implements IClimber {
 
     public double getClimberShaftRotations() {
         // Scaled to gear ratio in config
-        return _climbWinchLeftMotor.getEncoder().getPosition();
+        return _climbWinchLeftMotor.getEncoder().getPosition() / ClimberMap.ClimberGearRatio;
     }
 }

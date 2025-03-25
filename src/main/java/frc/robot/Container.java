@@ -34,7 +34,7 @@ public class Container {
   public static DashboardSection TestDashboardSection;
   public static BuildableAutoRoutine AutoBuilder;
 
-  public static PwmLEDs LEDs;
+  // public static PwmLEDs LEDs;
   public static Swerve Swerve;
   public static Vision Vision;
   public static Climber Climber;
@@ -51,7 +51,7 @@ public class Container {
       TestDashboardSection = new DashboardSection("Test");
 
       // Create subsystems
-      LEDs = new PwmLEDs();
+      // LEDs = new PwmLEDs();
       Vision = new Vision();
       Swerve = new Swerve(isReal);
       Elevator = new Elevator(isReal);
@@ -77,18 +77,29 @@ public class Container {
 
   //#region Commands
 
+  // public static Command setCombinedHeightAndAngle(ElevatorPosition position) {
+  //   return Commands.parallel(
+  //       Commands.print("Setting combined height and angle: " + position),
+  //       LEDs.setAllSectionPatternsCommand(LEDPattern.solid(Color.kYellow)
+  //           .mask(LEDPattern.progressMaskLayer(Elevator::getElevatorPositionPercent))),
+  //       Elevator.setElevatorSetpointCommand(position),
+  //       EndEffector.setWristSetpointCommand(position))
+  //       .alongWith(Commands.waitUntil(() -> EndEffector.wristAtSetpoint() && Elevator.atSetpoint()).withTimeout(3))
+  //       .andThen(LEDs.setAllSectionPatternsCommand(LEDPattern.solid(Color.kGreen)))
+  //       .finallyDo(() -> {
+  //         System.out.println("Finished setting combined setpoints");
+  //         LEDs.setAllSectionPatterns(LEDPattern.solid(Color.kGreen));
+  //       });
+  // }
+
   public static Command setCombinedHeightAndAngle(ElevatorPosition position) {
     return Commands.parallel(
         Commands.print("Setting combined height and angle: " + position),
-        LEDs.setAllSectionPatternsCommand(LEDPattern.solid(Color.kYellow)
-            .mask(LEDPattern.progressMaskLayer(Elevator::getElevatorPositionPercent))),
         Elevator.setElevatorSetpointCommand(position),
         EndEffector.setWristSetpointCommand(position))
         .alongWith(Commands.waitUntil(() -> EndEffector.wristAtSetpoint() && Elevator.atSetpoint()).withTimeout(3))
-        .andThen(LEDs.setAllSectionPatternsCommand(LEDPattern.solid(Color.kGreen)))
         .finallyDo(() -> {
           System.out.println("Finished setting combined setpoints");
-          LEDs.setAllSectionPatterns(LEDPattern.solid(Color.kGreen));
         });
   }
 
