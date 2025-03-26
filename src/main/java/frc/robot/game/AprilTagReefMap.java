@@ -34,25 +34,24 @@ public class AprilTagReefMap {
     /**
     * Returns the pose of the desired side of reef pegs from the current robot pose (assumed to be the midpoint between pegs)
     */
-    public static Pose2d getBranchPoseFromAprilTag(ReefBranchSide side, Pose2d inputPose, Rotation2d currentHeading) {
+    public static Pose2d getBranchPoseFromAprilTag(ReefBranchSide side, Pose2d inputPose) {
         // Determine the translation direction (left = +90°, right = -90°)
-        var offsetRotation = currentHeading.plus(side == ReefBranchSide.kLeft
+        var offsetRotation = inputPose.getRotation().plus(side == ReefBranchSide.kLeft
                 ? Rotation2d.fromDegrees(90)
                 : Rotation2d.fromDegrees(-90));
 
         // Apply a translation of 16.5 cm in the calculated direction
         var branchTranslation = new Translation2d(Centimeters.mutable(16.5).in(Meters), offsetRotation);
 
-        return new Pose2d(inputPose.getTranslation().plus(branchTranslation), currentHeading);
+        return new Pose2d(inputPose.getTranslation().plus(branchTranslation), inputPose.getRotation());
     }
 
     public static Pose2d getBranchApproachPose(
             ReefBranchSide branchSide,
-            Pose2d currentRobotPose,
             Pose2d aprilTagPose,
             double approachDistance) {
         // Select the correct reef branch (left or right)
-        var selectedBranchPose = getBranchPoseFromAprilTag(branchSide, aprilTagPose, currentRobotPose.getRotation());
+        var selectedBranchPose = getBranchPoseFromAprilTag(branchSide, aprilTagPose);
 
         // Translate the pose approachDistance meters forward in the direction of its rotation
         var approachTranslation = selectedBranchPose.getTranslation()
