@@ -27,7 +27,7 @@ public class Elevator extends SubsystemBase {
             ElevatorPosition.kSource, 0.198,
             ElevatorPosition.kTrough, 0.172,
             ElevatorPosition.kL2, 0.311,
-            ElevatorPosition.kL3, 0.428,
+            ElevatorPosition.kL3, 0.458,
             ElevatorPosition.kL4, 0.627);
 
     private ElevatorInputsAutoLogged _inputs = new ElevatorInputsAutoLogged();
