@@ -20,6 +20,7 @@ import frc.robot.game.AprilTagReefMap;
 import frc.robot.game.ReefBranchSide;
 import frc.robot.oi.ImpactRumbleHelper;
 import frc.robot.Container;
+import frc.robot.Elastic;
 import frc.robot.Robot;
 import frc.robot.subsystems.swerve.util.AutoAlign;
 import frc.robot.subsystems.vision.LimelightNameEnum;
@@ -354,6 +355,13 @@ public class Swerve extends SubsystemBase {
   public Command driveToInViewReefTargetBranch(ReefBranchSide branchSide) {
     return this.defer(() -> {
       var llInputs = Container.Vision.getLimelightInputs(LimelightNameEnum.kFront);
+
+      if (!Vision.isReefTag(llInputs.ApriltagId)) {
+        Container.Vision.blinkLed(LimelightNameEnum.kRear, 2);
+        Elastic.sendWarning("Command Failed", "No reef tag in view");
+
+        return Commands.print("[SWERVE] - No reef tag in view");
+      }
 
       var reefSide = AprilTagReefMap.getReefSide(llInputs.ApriltagId);
       Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/targeted-face", reefSide.getFaceName());

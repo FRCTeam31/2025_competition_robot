@@ -5,6 +5,7 @@ import org.prime.control.HolonomicControlStyle;
 import org.prime.control.SupplierXboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import frc.robot.Container;
+import frc.robot.game.ReefBranchSide;
 import frc.robot.subsystems.swerve.SwerveMap;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.elevator.ElevatorPosition;
@@ -27,24 +28,29 @@ public class OperatorInterface {
                 OperatorController = new SupplierXboxController(Controls.OPERATOR_PORT);
         }
 
-        public void bindDriverControls(Swerve swerveSubsystem, Climber climber,
-                        Vision visionSubsystem) {
+        public void bindDriverControls(Swerve swerve, Climber climber, Vision vision) {
                 var controlProfile = DriverController.getSwerveControlProfile(
                                 OIMap.DefaultDriveControlStyle,
                                 SwerveMap.Control.DriveDeadband,
                                 SwerveMap.Control.DeadbandCurveWeight);
 
-                swerveSubsystem.setDefaultCommand(swerveSubsystem.driveFieldRelativeCommand(controlProfile));
+                swerve.setDefaultCommand(swerve.driveFieldRelativeCommand(controlProfile));
 
                 DriverController.x()
-                                .onTrue(swerveSubsystem.disableAutoAlignCommand());
+                                .onTrue(swerve.disableAutoAlignCommand());
                 DriverController.a()
-                                .onTrue(swerveSubsystem.resetGyroCommand());
+                                .onTrue(swerve.resetGyroCommand());
 
                 // While holding POV up, auto-align the robot to the in-view apriltag target's rotation
                 DriverController.pov(Controls.up)
-                                .whileTrue(swerveSubsystem.enableReefAutoAlignCommand())
-                                .onFalse(swerveSubsystem.disableAutoAlignCommand());
+                                .whileTrue(swerve.enableReefAutoAlignCommand())
+                                .onFalse(swerve.disableAutoAlignCommand());
+
+                // When L or R bumper is pressed, and Y is unpressed, drive to the in-view reef target branch
+                DriverController.leftBumper().and(DriverController.y().negate())
+                                .onTrue(swerve.driveToInViewReefTargetBranch(ReefBranchSide.kLeft));
+                DriverController.rightBumper().and(DriverController.y().negate())
+                                .onTrue(swerve.driveToInViewReefTargetBranch(ReefBranchSide.kRight));
 
                 // Climber Controls
                 // Climber in will only go in until it hits the artifical stop measured by the encoder
@@ -70,8 +76,8 @@ public class OperatorInterface {
 
                 // Changes the vision mode for the rear limelight. 
                 OperatorController.start()
-                                .onTrue(visionSubsystem.setLimelightPipeline(LimelightNameEnum.kRear, 1))
-                                .onFalse(visionSubsystem.setLimelightPipeline(LimelightNameEnum.kRear, 0));
+                                .onTrue(vision.setLimelightPipeline(LimelightNameEnum.kRear, 1))
+                                .onFalse(vision.setLimelightPipeline(LimelightNameEnum.kRear, 0));
         }
 
         public void bindOperatorControls(Elevator elevatorSubsystem,
