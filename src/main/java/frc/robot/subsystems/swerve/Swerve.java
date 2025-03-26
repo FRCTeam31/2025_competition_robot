@@ -369,7 +369,6 @@ public class Swerve extends SubsystemBase {
       // Get the approach pose for the desired branch side
       var approachPose = AprilTagReefMap.getBranchApproachPose(
           branchSide,
-          _inputs.EstimatedRobotPose,
           aprilTagPoseFieldSpace,
           (SwerveMap.Chassis.WheelBaseMeters / 2) + SwerveMap.Chassis.BumperWidthMeters);
       Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/branch-approach-pose", aprilTagPoseFieldSpace);
