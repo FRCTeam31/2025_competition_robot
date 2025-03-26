@@ -7,6 +7,7 @@ import java.util.Map;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class AprilTagReefMap {
@@ -34,16 +35,15 @@ public class AprilTagReefMap {
     * Returns the pose of the desired side of reef pegs from the current robot pose (assumed to be the midpoint between pegs)
     */
     public static Pose2d getBranchPoseFromAprilTag(ReefBranchSide side, Pose2d inputPose, Rotation2d currentHeading) {
-        var currentHeadingRadians = currentHeading.getRadians();
-        var a = side == ReefBranchSide.kLeft
-                ? currentHeadingRadians + (Math.PI / 2)
-                : currentHeadingRadians - (Math.PI / 2);
+        // Determine the translation direction (left = +90°, right = -90°)
+        var offsetRotation = currentHeading.plus(side == ReefBranchSide.kLeft
+                ? Rotation2d.fromDegrees(90)
+                : Rotation2d.fromDegrees(-90));
 
-        var newX = inputPose.getX() + Centimeters.mutable(16.5).in(Meters) * Math.cos(a);
-        var newY = inputPose.getY() + Centimeters.mutable(16.5).in(Meters) * Math.sin(a);
-        var desiredPose = new Pose2d(newX, newY, currentHeading);
+        // Apply a translation of 16.5 cm in the calculated direction
+        var branchTranslation = new Translation2d(Centimeters.mutable(16.5).in(Meters), offsetRotation);
 
-        return desiredPose;
+        return new Pose2d(inputPose.getTranslation().plus(branchTranslation), currentHeading);
     }
 
     public static Pose2d getBranchApproachPose(
@@ -54,15 +54,9 @@ public class AprilTagReefMap {
         // Select the correct reef branch (left or right)
         var selectedBranchPose = getBranchPoseFromAprilTag(branchSide, aprilTagPose, currentRobotPose.getRotation());
 
-        // Get the direction vector from the AprilTag to the selected branch
-        var directionToBranch = selectedBranchPose.getTranslation().minus(aprilTagPose.getTranslation());
-
-        // Normalize direction vector (unit vector) to maintain relative positioning
-        var normalizedDirection = directionToBranch.div(directionToBranch.getNorm());
-
-        // Compute the final approach position by extending N meters from the reefTagPose in this direction
-        var approachTranslation = aprilTagPose.getTranslation()
-                .plus(normalizedDirection.times(approachDistance));
+        // Translate the pose approachDistance meters forward in the direction of its rotation
+        var approachTranslation = selectedBranchPose.getTranslation()
+                .plus(new Translation2d(approachDistance, selectedBranchPose.getRotation()));
 
         // The robot should be facing the reef, so use the AprilTag's rotation
         return new Pose2d(approachTranslation, aprilTagPose.getRotation());
