@@ -34,7 +34,7 @@ public class Container {
   public static DashboardSection TestDashboardSection;
   public static BuildableAutoRoutine AutoBuilder;
 
-  // public static PwmLEDs LEDs;
+  public static PwmLEDs LEDs;
   public static Swerve Swerve;
   public static Vision Vision;
   public static Climber Climber;
@@ -51,7 +51,7 @@ public class Container {
       TestDashboardSection = new DashboardSection("Test");
 
       // Create subsystems
-      // LEDs = new PwmLEDs();
+      LEDs = new PwmLEDs();
       Vision = new Vision();
       Swerve = new Swerve(isReal);
       Elevator = new Elevator(isReal);

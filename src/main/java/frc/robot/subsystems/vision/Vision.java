@@ -26,7 +26,6 @@ public class Vision extends SubsystemBase {
 
     Map<LimelightNameEnum, LimeLightNT> _limelights = new HashMap<>();
     Map<LimelightNameEnum, LimelightInputs> _limelightInputs = new HashMap<>();
-    private UsbCamera _usbCamera;
 
     public Vision() {
         setName("Vision");
@@ -37,10 +36,6 @@ public class Vision extends SubsystemBase {
 
         _limelightInputs.put(LimelightNameEnum.kFront, new LimelightInputs());
         _limelightInputs.put(LimelightNameEnum.kRear, new LimelightInputs());
-
-        _usbCamera = CameraServer.startAutomaticCapture();
-        _usbCamera.setResolution(320, 240);
-        _usbCamera.setFPS(30);
     }
 
     /**

@@ -4,6 +4,7 @@ import org.ejml.simple.SimpleMatrix;
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -15,7 +16,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 
 public class LimelightPose implements LoggableInputs, Cloneable {
-
   public Pose3d Pose = new Pose3d();
   public double Timestamp = 0.0;
   public double TagCount = 0.0;
@@ -56,48 +56,11 @@ public class LimelightPose implements LoggableInputs, Cloneable {
   }
 
   private double[] calculateTrustByArea(double tagArea) {
-    var trustLevel = 25.12396 * Math.pow(0.00156944, tagArea);
+    var trustLevel = LimelightUtil.StdDeviationAreaTreeMap.get(tagArea);
+    trustLevel = MathUtil.clamp(trustLevel, 0, 50);
 
     return VecBuilder.fill(trustLevel, trustLevel, 9999999).getData();
   }
-
-  // public LimelightPose(Pose3d pose, double[] tagPipelineData, double[] stdDeviations) {
-  //   if (tagPipelineData.length < 5 || tagPipelineData.length > 5) {
-  //     System.err.println("Bad LL 3D Pose Data!");
-  //     return;
-  //   }
-
-  //   if (stdDeviations.length < 3 || stdDeviations.length > 3) {
-  //     System.err.println("Bad LL StdDeviations Data!");
-  //     return;
-  //   }
-
-  //   Pose = pose;
-
-  //   var latencyMs = tagPipelineData[0];
-  //   Timestamp = Timer.getFPGATimestamp() - (latencyMs / 1000.0);
-  //   TagCount = tagPipelineData[1];
-  //   TagSpan = tagPipelineData[2];
-  //   AvgTagDistanceMeters = tagPipelineData[3];
-  //   AvgTagArea = tagPipelineData[4];
-  //   StdDeviations = stdDeviations;
-  // }
-
-  // public LimelightPose(Pose3d pose, double[] tagPipelineData) {
-  //   if (tagPipelineData.length < 5 || tagPipelineData.length > 5) {
-  //     System.err.println("Bad LL 3D Pose Data!");
-  //     return;
-  //   }
-
-  //   Pose = pose;
-
-  //   var latencyMs = tagPipelineData[0];
-  //   Timestamp = Timer.getFPGATimestamp() - (latencyMs / 1000.0);
-  //   TagCount = tagPipelineData[1];
-  //   TagSpan = tagPipelineData[2];
-  //   AvgTagDistanceMeters = tagPipelineData[3];
-  //   AvgTagArea = tagPipelineData[4];
-  // }
 
   public Matrix<N3, N1> getStdDeviations() {
     return new Matrix<N3, N1>(new SimpleMatrix(StdDeviations));

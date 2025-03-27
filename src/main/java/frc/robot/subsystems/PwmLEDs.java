@@ -29,8 +29,8 @@ public class PwmLEDs extends SubsystemBase {
     private final ScheduledExecutorService _updateLoopExecutor = Executors.newScheduledThreadPool(1);
     private AddressableLED _led;
     private AddressableLEDBuffer _ledBuffer;
-    private AddressableLEDBufferView[] _sections;
-    private LEDPattern[] _sectionPatterns;
+    private AddressableLEDBufferView[] _sections = new AddressableLEDBufferView[LEDMap.SectionCount];
+    private LEDPattern[] _sectionPatterns = new LEDPattern[LEDMap.SectionCount];
     public byte _loopErrorCounter = 0;
 
     private LEDPattern _initialPattern = LEDPattern.solid(Color.kGhostWhite).breathe(Units.Seconds.of(4));

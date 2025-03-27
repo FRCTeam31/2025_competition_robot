@@ -202,65 +202,6 @@ public class Swerve extends SubsystemBase {
 
     evaluatePoseEstimation(Container.Vision.getLimelightInputs(LimelightNameEnum.kFront));
     evaluatePoseEstimation(Container.Vision.getLimelightInputs(LimelightNameEnum.kRear));
-
-    // // TESTING
-    // var frontInputs = Container.Vision.getLimelightInputs(LimelightNameEnum.kFront);
-    // if (VisionSubsystem.isReefTag(frontInputs.ApriltagId)) {
-    //   var reefBranch = AprilTagReefMap.getReefSide(frontInputs.ApriltagId);
-    //   Logger.recordOutput(getName() + "/reef-targetpose-side-name", reefBranch.getFaceName());
-
-    //   // Get the target pose, and then get the L and R branch offsets from that
-    //   var targetPose = frontInputs.RobotSpaceTargetPose.Pose;
-    //   Logger.recordOutput(getName() + "/reef-targetpose", targetPose.toPose2d());
-    //   var leftPose = AprilTagReefMap.getBranchPoseFromTarget(
-    //       ReefBranchSide.kLeft,
-    //       targetPose.toPose2d(),
-    //       _inputs.GyroAngle);
-    //   var rightPose = AprilTagReefMap.getBranchPoseFromTarget(
-    //       ReefBranchSide.kRight,
-    //       targetPose.toPose2d(),
-    //       _inputs.GyroAngle);
-
-    //   Logger.recordOutput(getName() + "/reef-targetpose-left_branch", leftPose);
-    //   Logger.recordOutput(getName() + "/reef-targetpose-right_branch", rightPose);
-
-    //   // Generate a straight line trajectory from each side of the target pose
-    //   var tConfig = new TrajectoryConfig(1, 1)
-    //       .setStartVelocity(1)
-    //       .setEndVelocity(1)
-    //       .setKinematics(_swervePackager.Kinematics);
-    //   var leftLineTraj = PoseUtil.generateStraightLineTrajectory(leftPose, 2, tConfig);
-    //   var rightLineTraj = PoseUtil.generateStraightLineTrajectory(rightPose, 2, tConfig);
-
-    //   // Get the closest pose in each trajectory to the robot's current pose
-    //   var leftPoses = PoseUtil.getTrajectoryPoses(leftLineTraj);
-    //   var rightPoses = PoseUtil.getTrajectoryPoses(rightLineTraj);
-
-    //   Pose2d closestLeft = PoseUtil.getClosestPoseInList(_inputs.EstimatedRobotPose, leftPoses);
-    //   Pose2d closestRight = PoseUtil.getClosestPoseInList(_inputs.EstimatedRobotPose, rightPoses);
-
-    //   // If either of the closest poses are null, something went wrong
-    //   if (closestLeft == null || closestRight == null) {
-    //     Logger.recordOutput(getName() + "/reef-auto-side-selection", "FAILED");
-    //     return;
-    //   }
-
-    //   Logger.recordOutput(getName() + "/reef-left-traj-closest-pose", closestLeft);
-    //   Logger.recordOutput(getName() + "/reef-right-traj-closest-pose", closestRight);
-
-    //   // Get the distance to the closest pose in each trajectory
-    //   double distanceToClosestLeft = PoseUtil.getDistanceBetweenPoses(_inputs.EstimatedRobotPose, closestLeft);
-    //   double distanceToClosestRight = PoseUtil.getDistanceBetweenPoses(_inputs.EstimatedRobotPose, closestRight);
-
-    //   Logger.recordOutput(getName() + "/reef-left-dist-to-closest-traj-pose", distanceToClosestLeft);
-    //   Logger.recordOutput(getName() + "/reef-right-dist-to-closest-traj-pose", distanceToClosestRight);
-
-    //   if (distanceToClosestLeft < distanceToClosestRight) {
-    //     Logger.recordOutput(getName() + "/reef-auto-side-selection", "left");
-    //   } else {
-    //     Logger.recordOutput(getName() + "/reef-auto-side-selection", "right");
-    //   }
-    // }
   }
 
   /**
@@ -273,10 +214,12 @@ public class Swerve extends SubsystemBase {
 
     var llPose = limelightInputs.BlueAllianceOriginFieldSpaceRobotPose;
 
-    _swervePackager.addPoseEstimatorVisionMeasurement(
-        llPose.Pose.toPose2d(),
-        llPose.Timestamp,
-        llPose.getStdDeviations());
+    if (_inputs.EstimatedRobotPose.getTranslation().getDistance(llPose.Pose.toPose2d().getTranslation()) <= 1) {
+      _swervePackager.addPoseEstimatorVisionMeasurement(
+          llPose.Pose.toPose2d(),
+          llPose.Timestamp,
+          llPose.getStdDeviations());
+    }
   }
 
   // #endregion
@@ -372,14 +315,16 @@ public class Swerve extends SubsystemBase {
       var aprilTagPoseFieldSpace = PoseUtil.convertPoseFromRobotToFieldSpace(
           _inputs.EstimatedRobotPose,
           llInputs.RobotSpaceTargetPose.Pose.toPose2d());
-      Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/target-pose", aprilTagPoseFieldSpace);
+      Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/target-pose-robot-space",
+          llInputs.RobotSpaceTargetPose.Pose.toPose2d());
+      Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/target-pose-field-space", aprilTagPoseFieldSpace);
 
       // Get the approach pose for the desired branch side
       var approachPose = AprilTagReefMap.getBranchApproachPose(
           branchSide,
           aprilTagPoseFieldSpace,
           (SwerveMap.Chassis.WheelBaseMeters / 2) + SwerveMap.Chassis.BumperWidthMeters);
-      Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/branch-approach-pose", aprilTagPoseFieldSpace);
+      Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/branch-approach-pose", approachPose);
 
       var pathfindConstraints = new PathConstraints(
           SwerveMap.Chassis.MaxSpeedMetersPerSecond,
@@ -387,7 +332,8 @@ public class Swerve extends SubsystemBase {
           SwerveMap.Chassis.MaxAngularSpeedRadians,
           SwerveMap.Chassis.MaxAngularSpeedRadians * 1.5);
 
-      return AutoBuilder.pathfindToPose(approachPose, pathfindConstraints);
+      return Commands.print("RANCOMMAND");
+      // return AutoBuilder.pathfindToPose(approachPose, pathfindConstraints);
     });
   }
 
