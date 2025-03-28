@@ -55,24 +55,20 @@ public class OperatorInterface {
                 // Climber Controls
                 // Climber in will only go in until it hits the artifical stop measured by the encoder
                 DriverController.y().and(DriverController.leftBumper())
-                                .whileTrue(climber.retractWinchCommand())
-                                .onFalse(climber.stopAllMotors());
+                                .onTrue(climber.retractWinchAuto());
                 DriverController.y().and(DriverController.rightBumper())
-                                .whileTrue(climber.extendWinchCommand())
-                                .onFalse(climber.stopWinchMotorsCommand());
+                                .onTrue(climber.extendWinchAuto());
 
                 // Hooks Controls
                 DriverController.b().and(DriverController.leftBumper())
-                                .whileTrue(climber.runHooksOpenCommand())
-                                .onFalse(climber.stopHooksMotorCommand());
+                                .onTrue(climber.setHooksOpenAuto());
                 DriverController.b().and(DriverController.rightBumper())
-                                .whileTrue(climber.runHooksClosedCommand())
-                                .onFalse(climber.stopHooksMotorCommand());
+                                .onTrue(climber.setHooksClosedAuto());
 
                 // Manual Control for setting the climber all the way in                
                 DriverController.back()
                                 .whileTrue(climber.retractWinchCommand())
-                                .onFalse(climber.stopWinchMotorsCommand());
+                                .onFalse(climber.stopAllMotors());
 
                 // Changes the vision mode for the rear limelight. 
                 OperatorController.start()

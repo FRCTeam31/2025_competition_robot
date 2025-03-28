@@ -202,6 +202,35 @@ public class Swerve extends SubsystemBase {
 
     evaluatePoseEstimation(Container.Vision.getLimelightInputs(LimelightNameEnum.kFront));
     evaluatePoseEstimation(Container.Vision.getLimelightInputs(LimelightNameEnum.kRear));
+
+    var llInputs = Container.Vision.getLimelightInputs(LimelightNameEnum.kFront);
+
+    if (!Vision.isReefTag(llInputs.ApriltagId)) {
+      return;
+    }
+
+    var reefSide = AprilTagReefMap.getReefSide(llInputs.ApriltagId);
+    Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/targeted-face", reefSide.getFaceName());
+
+    // Get the target pose, and convert it to field space
+    Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/target-pose-robot-space",
+        llInputs.RobotSpaceTargetPose.Pose.toPose2d());
+    var aprilTagPoseFieldSpace = PoseUtil.convertPoseFromRobotToFieldSpace(
+        _inputs.EstimatedRobotPose,
+        llInputs.RobotSpaceTargetPose.Pose.toPose2d());
+    Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/target-pose-field-space", aprilTagPoseFieldSpace);
+
+    // Get the approach pose for the desired branch side
+    var leftApproachPose = AprilTagReefMap.getBranchApproachPose(
+        ReefBranchSide.kLeft,
+        aprilTagPoseFieldSpace,
+        (SwerveMap.Chassis.WheelBaseMeters / 2) + SwerveMap.Chassis.BumperWidthMeters);
+    var rightApproachPose = AprilTagReefMap.getBranchApproachPose(
+        ReefBranchSide.kRight,
+        aprilTagPoseFieldSpace,
+        (SwerveMap.Chassis.WheelBaseMeters / 2) + SwerveMap.Chassis.BumperWidthMeters);
+    Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/branch-approach-pose-L", leftApproachPose);
+    Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/branch-approach-pose-R", rightApproachPose);
   }
 
   /**
@@ -214,12 +243,12 @@ public class Swerve extends SubsystemBase {
 
     var llPose = limelightInputs.BlueAllianceOriginFieldSpaceRobotPose;
 
-    if (_inputs.EstimatedRobotPose.getTranslation().getDistance(llPose.Pose.toPose2d().getTranslation()) <= 1) {
-      _swervePackager.addPoseEstimatorVisionMeasurement(
-          llPose.Pose.toPose2d(),
-          llPose.Timestamp,
-          llPose.getStdDeviations());
-    }
+    // if (_inputs.EstimatedRobotPose.getTranslation().getDistance(llPose.Pose.toPose2d().getTranslation()) <= 1) {
+    _swervePackager.addPoseEstimatorVisionMeasurement(
+        llPose.Pose.toPose2d(),
+        llPose.Timestamp,
+        llPose.getStdDeviations());
+    // }
   }
 
   // #endregion
@@ -312,11 +341,15 @@ public class Swerve extends SubsystemBase {
           reefSide.getBranchName(branchSide));
 
       // Get the target pose, and convert it to field space
+      var robotSpaceTargetPoseCorrected = new Pose2d(llInputs.RobotSpaceTargetPose.Pose.getZ(),
+          llInputs.RobotSpaceTargetPose.Pose.getX(),
+          llInputs.RobotSpaceTargetPose.Pose.getRotation().toRotation2d());
+      Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/target-pose-robot-space",
+          robotSpaceTargetPoseCorrected);
+
       var aprilTagPoseFieldSpace = PoseUtil.convertPoseFromRobotToFieldSpace(
           _inputs.EstimatedRobotPose,
-          llInputs.RobotSpaceTargetPose.Pose.toPose2d());
-      Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/target-pose-robot-space",
-          llInputs.RobotSpaceTargetPose.Pose.toPose2d());
+          robotSpaceTargetPoseCorrected);
       Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/target-pose-field-space", aprilTagPoseFieldSpace);
 
       // Get the approach pose for the desired branch side

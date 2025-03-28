@@ -40,8 +40,9 @@ public class Climber extends SubsystemBase {
     private Trigger _setClimberOutTimedTrigger;
 
     private LEDPattern _winchRetractPattern = LEDPattern
-            .gradient(GradientType.kContinuous, Color.kBlack, Color.kYellow)
-            .scrollAtRelativeSpeed(Hertz.of(2));
+            .gradient(GradientType.kContinuous, Color.kBlack, Color.kDarkGoldenrod)
+            .scrollAtRelativeSpeed(Hertz.of(2))
+            .reversed();
     private LEDPattern _hooksRunningOutPattern = _winchRetractPattern
             .overlayOn(_winchRetractPattern.reversed());
 
@@ -93,8 +94,7 @@ public class Climber extends SubsystemBase {
      */
     private void setWinchSpeed(double speed) {
         if (speed > 0) {
-            if (_inputs.WinchInnerLimitSwitch
-                    || _inputs.climberShaftRotations > ClimberMap.FullyClimbedOutputRotations) {
+            if (_inputs.WinchInnerLimitSwitch) {
                 _climber.stopWinchMotors();
                 return;
             }
@@ -157,27 +157,19 @@ public class Climber extends SubsystemBase {
      * @return
      */
     private Command runUntilLimitSwitch(Command moveCommand, BooleanSupplier limitSwitch, Command stopCommand) {
-        return moveCommand.until(limitSwitch).andThen(stopCommand);
+        return moveCommand.until(limitSwitch).andThen(stopCommand).finallyDo(() -> {
+            _climber.stopHooksMotors();
+            _climber.stopWinchMotors();
+        });
     }
 
     /**
      * Automatically closes the hooks until the limit switch is hit
      * @return
      */
-    // public Command setHooksClosedAuto() {
-    //     var movementCommand = runHooksClosedCommand()
-    //             .alongWith(Container.LEDs.setAllSectionPatternsCommand(_hooksRunningOutPattern));
-    //     var stopMovementCommand = stopHooksMotorCommand()
-    //             .alongWith(Container.LEDs.setAllSectionPatternsCommand(LEDPattern.solid(Color.kGreen)));
-
-    //     return runUntilLimitSwitch(movementCommand, () -> _inputs.HooksClosedLimitSwitch, stopMovementCommand);
-    // }
-
     public Command setHooksClosedAuto() {
-        var movementCommand = runHooksClosedCommand();
-        var stopMovementCommand = stopHooksMotorCommand();
-
-        return runUntilLimitSwitch(movementCommand, () -> _inputs.HooksClosedLimitSwitch, stopMovementCommand);
+        return runUntilLimitSwitch(runHooksClosedCommand(), () -> _inputs.HooksClosedLimitSwitch,
+                stopHooksMotorCommand());
     }
 
     /**
@@ -185,7 +177,12 @@ public class Climber extends SubsystemBase {
      * @return
      */
     public Command setHooksOpenAuto() {
-        return runUntilLimitSwitch(runHooksOpenCommand(), () -> _inputs.HooksOpenLimitSwitch, stopHooksMotorCommand());
+        var movementCommand = runHooksOpenCommand()
+                .alongWith(Container.LEDs.setAllSectionPatternsCommand(_hooksRunningOutPattern));
+        var stopMovementCommand = stopHooksMotorCommand()
+                .alongWith(Container.LEDs.setAllSectionPatternsCommand(LEDPattern.solid(Color.kGreen)));
+
+        return runUntilLimitSwitch(movementCommand, () -> _inputs.HooksOpenLimitSwitch, stopMovementCommand);
     }
 
     /**
@@ -200,40 +197,16 @@ public class Climber extends SubsystemBase {
      * Automatically retracts the winch until the inner limit switch is hit
      * @return
      */
-    // public Command retractWinchAuto() {
-    //     var movementCommand = retractWinchCommand()
-    //             .alongWith(Container.LEDs.setAllSectionPatternsCommand(_winchRetractPattern));
-    //     var stopMovementCommand = stopWinchMotorsCommand()
-    //             .alongWith(Container.LEDs.setAllSectionPatternsCommand(LEDPattern.solid(Color.kGreen)));
-
-    //     return runUntilLimitSwitch(movementCommand, () -> _inputs.WinchInnerLimitSwitch, stopMovementCommand);
-    // }
-
     public Command retractWinchAuto() {
-        var movementCommand = retractWinchCommand();
-        var stopMovementCommand = stopWinchMotorsCommand();
+        var movementCommand = retractWinchCommand()
+                .alongWith(Container.LEDs.setAllSectionPatternsCommand(_winchRetractPattern));
+        var stopMovementCommand = stopWinchMotorsCommand()
+                .alongWith(Container.LEDs.setAllSectionPatternsCommand(LEDPattern.solid(Color.kGreen)));
 
-        return runUntilLimitSwitch(movementCommand, () -> _inputs.WinchInnerLimitSwitch, stopMovementCommand);
-    }
-
-    /**
-     * Automatically climbs the robot off the ground according to a predetermined rotational target. Times out after 5 seconds
-     * @return
-     */
-    // public Command climbOffTheGround() {
-    //     return retractWinchCommand()
-    //             .alongWith(Container.LEDs.setAllSectionPatternsCommand(_winchRetractPattern))
-    //             .until(() -> _inputs.climberShaftRotations > ClimberMap.FullyClimbedOutputRotations)
-    //             .withTimeout(5)
-    //             .andThen(stopWinchMotorsCommand()
-    //                     .alongWith(Container.LEDs.setAllSectionPatternsCommand(LEDPattern.solid(Color.kGreen))));
-    // }
-
-    public Command climbOffTheGround() {
-        return retractWinchCommand()
-                .until(() -> _inputs.climberShaftRotations > ClimberMap.FullyClimbedOutputRotations)
-                .withTimeout(5)
-                .andThen(stopWinchMotorsCommand());
+        return runUntilLimitSwitch(movementCommand,
+                () -> _inputs.climberShaftRotations > ClimberMap.FullyClimbedOutputRotations
+                        || _inputs.WinchInnerLimitSwitch,
+                stopMovementCommand);
     }
 
     /**

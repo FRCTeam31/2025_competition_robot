@@ -77,31 +77,31 @@ public class Container {
 
   //#region Commands
 
-  // public static Command setCombinedHeightAndAngle(ElevatorPosition position) {
-  //   return Commands.parallel(
-  //       Commands.print("Setting combined height and angle: " + position),
-  //       LEDs.setAllSectionPatternsCommand(LEDPattern.solid(Color.kYellow)
-  //           .mask(LEDPattern.progressMaskLayer(Elevator::getElevatorPositionPercent))),
-  //       Elevator.setElevatorSetpointCommand(position),
-  //       EndEffector.setWristSetpointCommand(position))
-  //       .alongWith(Commands.waitUntil(() -> EndEffector.wristAtSetpoint() && Elevator.atSetpoint()).withTimeout(3))
-  //       .andThen(LEDs.setAllSectionPatternsCommand(LEDPattern.solid(Color.kGreen)))
-  //       .finallyDo(() -> {
-  //         System.out.println("Finished setting combined setpoints");
-  //         LEDs.setAllSectionPatterns(LEDPattern.solid(Color.kGreen));
-  //       });
-  // }
-
   public static Command setCombinedHeightAndAngle(ElevatorPosition position) {
     return Commands.parallel(
         Commands.print("Setting combined height and angle: " + position),
+        LEDs.setAllSectionPatternsCommand(LEDPattern.solid(Color.kYellow)
+            .mask(LEDPattern.progressMaskLayer(Elevator::getElevatorPositionPercent))),
         Elevator.setElevatorSetpointCommand(position),
         EndEffector.setWristSetpointCommand(position))
         .alongWith(Commands.waitUntil(() -> EndEffector.wristAtSetpoint() && Elevator.atSetpoint()).withTimeout(3))
+        .andThen(LEDs.setAllSectionPatternsCommand(LEDPattern.solid(Color.kGreen)))
         .finallyDo(() -> {
           System.out.println("Finished setting combined setpoints");
+          LEDs.setAllSectionPatterns(LEDPattern.solid(Color.kGreen));
         });
   }
+
+  // public static Command setCombinedHeightAndAngle(ElevatorPosition position) {
+  //   return Commands.parallel(
+  //       Commands.print("Setting combined height and angle: " + position),
+  //       Elevator.setElevatorSetpointCommand(position),
+  //       EndEffector.setWristSetpointCommand(position))
+  //       .alongWith(Commands.waitUntil(() -> EndEffector.wristAtSetpoint() && Elevator.atSetpoint()).withTimeout(3))
+  //       .finallyDo(() -> {
+  //         System.out.println("Finished setting combined setpoints");
+  //       });
+  // }
 
   public static Command scoreAtHeight(ElevatorPosition position) {
     return setCombinedHeightAndAngle(position)

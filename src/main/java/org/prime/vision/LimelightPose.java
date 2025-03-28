@@ -57,7 +57,7 @@ public class LimelightPose implements LoggableInputs, Cloneable {
 
   private double[] calculateTrustByArea(double tagArea) {
     var trustLevel = LimelightUtil.StdDeviationAreaTreeMap.get(tagArea);
-    trustLevel = MathUtil.clamp(trustLevel, 0, 50);
+    trustLevel = MathUtil.clamp(trustLevel, 2, 15);
 
     return VecBuilder.fill(trustLevel, trustLevel, 9999999).getData();
   }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
@@ -75,14 +76,8 @@ public class PoseUtil {
          * @return
          */
         public static Pose2d convertPoseFromRobotToFieldSpace(Pose2d robotPose_Field, Pose2d targetPose_Robot) {
-                // Transform target translation from robot space to field space
-                Translation2d targetTranslation_Field = robotPose_Field.getTranslation()
-                                .plus(targetPose_Robot.getTranslation().rotateBy(robotPose_Field.getRotation()));
+                var transform = new Transform2d(targetPose_Robot.getTranslation(), targetPose_Robot.getRotation());
 
-                // Compute new field-space rotation
-                Rotation2d targetRotation_Field = robotPose_Field.getRotation()
-                                .plus(targetPose_Robot.getRotation());
-
-                return new Pose2d(targetTranslation_Field, targetRotation_Field);
+                return robotPose_Field.transformBy(transform);
         }
 }
