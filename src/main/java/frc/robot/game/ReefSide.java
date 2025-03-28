@@ -1,5 +1,8 @@
 package frc.robot.game;
 
+import java.util.Optional;
+
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 /**
@@ -7,11 +10,10 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
  */
 public class ReefSide {
     public int AprilTagId;
-
     public ReefBranch LeftBranch;
     public ReefBranch RightBranch;
-
     public Alliance Alliance;
+    public Optional<Pose3d> TagPose;
 
     public ReefSide(int tagId, ReefBranch leftBranch, ReefBranch rightBranch) {
         AprilTagId = tagId;

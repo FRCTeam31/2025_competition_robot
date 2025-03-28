@@ -14,7 +14,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class AprilTagReefMap {
-    public static AprilTagFieldLayout FieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+    private static AprilTagFieldLayout FieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
 
     static {
         // Ensure the AprilTagFieldLayout is loaded correctly
@@ -42,36 +42,40 @@ public class AprilTagReefMap {
             Map.entry(22, new ReefSide(22, ReefBranch.kE, ReefBranch.kF, Alliance.Blue)));
 
     public static ReefSide getReefSide(int tagId) {
-        return Branches.get(tagId);
+        var reefSide = Branches.get(tagId);
+        reefSide.TagPose = FieldLayout.getTagPose(tagId);
+
+        return reefSide;
     }
 
     /**
     * Returns the pose of the desired side of reef pegs from the current robot pose (assumed to be the midpoint between pegs)
+    * @param side The side of the reef pegs to get the pose of
+    * @param targetPose The target pose
     */
-    public static Pose2d getBranchPoseFromAprilTag(ReefBranchSide side, Pose2d inputPose) {
+    public static Pose2d getBranchPoseFromTarget(ReefBranchSide side, Pose2d targetPose) {
         // Determine the translation direction (left = +90°, right = -90°)
-        var offsetRotation = inputPose.getRotation().plus(side == ReefBranchSide.kLeft
+        var offsetRotation = targetPose.getRotation().plus(side == ReefBranchSide.kLeft
                 ? Rotation2d.fromDegrees(90)
                 : Rotation2d.fromDegrees(-90));
 
         // Apply a translation of 16.5 cm in the calculated direction
         var branchTranslation = new Translation2d(Centimeters.mutable(16.5).in(Meters), offsetRotation);
 
-        return new Pose2d(inputPose.getTranslation().plus(branchTranslation), inputPose.getRotation());
+        return new Pose2d(targetPose.getTranslation().plus(branchTranslation), targetPose.getRotation());
     }
 
-    public static Pose2d getBranchApproachPose(
-            ReefBranchSide branchSide,
-            Pose2d aprilTagPose,
-            double approachDistance) {
-        // Select the correct reef branch (left or right)
-        var selectedBranchPose = getBranchPoseFromAprilTag(branchSide, aprilTagPose);
-
+    /**
+     * Returns a pose that is a desired distance in the direction the target pose is facing
+     * @param targetPose The target pose
+     * @param approachDistance The distance of the pose in the direction the target pose is facing
+     */
+    public static Pose2d getApproachPose(Pose2d targetPose, double approachDistance) {
         // Translate the pose approachDistance meters forward in the direction of its rotation
-        var approachTranslation = selectedBranchPose.getTranslation()
-                .plus(new Translation2d(approachDistance, selectedBranchPose.getRotation()));
+        var approachTranslation = targetPose.getTranslation()
+                .plus(new Translation2d(approachDistance, targetPose.getRotation()));
 
         // The robot should be facing the reef, so use the AprilTag's rotation
-        return new Pose2d(approachTranslation, aprilTagPose.getRotation());
+        return new Pose2d(approachTranslation, targetPose.getRotation());
     }
 }

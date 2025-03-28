@@ -43,8 +43,7 @@ public class OperatorInterface {
 
                 // While holding POV up, auto-align the robot to the in-view apriltag target's rotation
                 DriverController.pov(Controls.up)
-                                .whileTrue(swerve.enableReefAutoAlignCommand())
-                                .onFalse(swerve.disableAutoAlignCommand());
+                                .onTrue(swerve.disableAutoAlignCommand());
 
                 // When L or R bumper is pressed, and Y is unpressed, drive to the in-view reef target branch
                 DriverController.leftBumper().and(DriverController.y().negate())
