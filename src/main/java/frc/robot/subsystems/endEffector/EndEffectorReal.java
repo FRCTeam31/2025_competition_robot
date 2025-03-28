@@ -5,6 +5,7 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 
 import org.prime.control.ExtendedPIDConstants;
 
+import com.ctre.phoenix6.hardware.CANrange;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -14,6 +15,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DigitalInput;
 
 public class EndEffectorReal implements IEndEffector {
+    private CANrange _distanceSensor;
 
     private SparkFlex _intakeMotor;
 
@@ -22,6 +24,7 @@ public class EndEffectorReal implements IEndEffector {
     private DigitalInput _coralLimitSwitch;
 
     public EndEffectorReal() {
+        _distanceSensor = new CANrange(EndEffectorMap.DistanceSensorCanID);
         _coralLimitSwitch = new DigitalInput(EndEffectorMap.LimitSwitchDIOChannel);
 
         setupIntakeMotor();
@@ -54,6 +57,7 @@ public class EndEffectorReal implements IEndEffector {
         inputs.WristMotorSpeed = wristMotorSpeed;
         inputs.CoralLimitSwitchState = limitSwitchState;
         inputs.EndEffectorAngleDegrees = getWristAngle();
+        inputs.RangeSensorDistance = _distanceSensor.getDistance().getValueAsDouble();
     }
 
     @Override
