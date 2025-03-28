@@ -5,12 +5,26 @@ import static edu.wpi.first.units.Units.Meters;
 
 import java.util.Map;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class AprilTagReefMap {
+    public static AprilTagFieldLayout FieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+
+    static {
+        // Ensure the AprilTagFieldLayout is loaded correctly
+        if (FieldLayout == null) {
+            throw new IllegalStateException("AprilTagFieldLayout could not be loaded.");
+        }
+
+        FieldLayout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
+    }
+
     public static final Map<Integer, ReefSide> Branches = Map.ofEntries(
             // Red Alliance
             Map.entry(6, new ReefSide(6, ReefBranch.kK, ReefBranch.kL, Alliance.Red)),

@@ -295,7 +295,7 @@ public class Swerve extends SubsystemBase {
    * @param branchSide
    * @return
    */
-  public Command driveToInViewReefTargetBranch(ReefBranchSide branchSide) {
+  public Command driveToReefTargetBranch(ReefBranchSide branchSide) {
     return this.defer(() -> {
       var llInputs = Container.Vision.getLimelightInputs(LimelightNameEnum.kFront);
 
@@ -311,18 +311,22 @@ public class Swerve extends SubsystemBase {
       Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/targeted-branch",
           reefSide.getBranchName(branchSide));
 
-      // Get the target pose, and convert it to field space
-      var aprilTagPoseFieldSpace = PoseUtil.convertPoseFromRobotToFieldSpace(
-          _inputs.EstimatedRobotPose,
-          llInputs.RobotSpaceTargetPose.Pose.toPose2d());
-      Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/target-pose-robot-space",
-          llInputs.RobotSpaceTargetPose.Pose.toPose2d());
-      Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/target-pose-field-space", aprilTagPoseFieldSpace);
+      // Get the 3D target pose from the field layout
+      var targetPoseOptional = AprilTagReefMap.FieldLayout.getTagPose(llInputs.ApriltagId);
+      if (targetPoseOptional.isEmpty()) {
+        Container.Vision.blinkLed(LimelightNameEnum.kRear, 2);
+        Elastic.sendWarning("Command Failed", "AprilTag pose not found in field layout");
+
+        return Commands.print("[SWERVE] - AprilTag " + llInputs.ApriltagId + " pose not found in field layout");
+      }
+
+      var targetPose = targetPoseOptional.orElseThrow();
+      Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/target-pose-field-space", targetPose);
 
       // Get the approach pose for the desired branch side
       var approachPose = AprilTagReefMap.getBranchApproachPose(
           branchSide,
-          aprilTagPoseFieldSpace,
+          targetPose.toPose2d(),
           (SwerveMap.Chassis.WheelBaseMeters / 2) + SwerveMap.Chassis.BumperWidthMeters);
       Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/branch-approach-pose", approachPose);
 
@@ -385,9 +389,19 @@ public class Swerve extends SubsystemBase {
 
       // If targeted AprilTag is in validTargets, align to its offset
       if (Vision.isReefTag(frontLimelightInputs.ApriltagId)) {
-        var targetPose_FieldSpace = PoseUtil.convertPoseFromRobotToFieldSpace(_inputs.EstimatedRobotPose,
-            frontLimelightInputs.RobotSpaceTargetPose.Pose.toPose2d());
-        var targetFieldRotationFlipped = targetPose_FieldSpace.getRotation()
+        var targetPoseOptional = AprilTagReefMap.FieldLayout.getTagPose(frontLimelightInputs.ApriltagId);
+        if (targetPoseOptional.isEmpty()) {
+          Container.Vision.blinkLed(LimelightNameEnum.kRear, 2);
+
+          DriverStation.reportWarning(
+              "[SWERVE] - AprilTag " + frontLimelightInputs.ApriltagId + " pose not found in field layout", false);
+
+          return;
+        }
+
+        var targetPose = targetPoseOptional.orElseThrow();
+        var targetFieldRotationFlipped = targetPose.toPose2d()
+            .getRotation()
             .plus(Rotation2d.fromDegrees(180)); // By default, targets are facing the robot, so we flip this 180 degrees
 
         // Set the drivetrain to align to the target heading
