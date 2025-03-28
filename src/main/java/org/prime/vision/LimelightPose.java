@@ -36,7 +36,7 @@ public class LimelightPose implements LoggableInputs, Cloneable {
               Units.degreesToRadians(poseTagPipelineData[4]),
               Units.degreesToRadians(poseTagPipelineData[5])));
 
-      StdDeviations = calculateTrustByArea(0.5);
+      StdDeviations = calculateTrust(0.5);
     }
 
     if (poseTagPipelineData.length >= 7) {
@@ -51,15 +51,32 @@ public class LimelightPose implements LoggableInputs, Cloneable {
       TagSpan = poseTagPipelineData[8];
       AvgTagDistanceMeters = poseTagPipelineData[9];
       AvgTagArea = poseTagPipelineData[10];
-      StdDeviations = calculateTrustByArea(AvgTagArea);
+      StdDeviations = calculateTrust(AvgTagDistanceMeters, TagCount);
     }
   }
 
-  private double[] calculateTrustByArea(double tagArea) {
+  /**
+   * Calculate the trust level based on the area of the tag. Interpolates between some known trust values.
+   * @param tagArea
+   * @return
+   */
+  private double[] calculateTrust(double tagArea) {
     var trustLevel = LimelightUtil.StdDeviationAreaTreeMap.get(tagArea);
     trustLevel = MathUtil.clamp(trustLevel, 2, 15);
 
     return VecBuilder.fill(trustLevel, trustLevel, 9999999).getData();
+  }
+
+  /**
+   * Calculate the standard deviations for the pose based on the average tag distance and the number of tags.
+   * Shamelessly taken from 2383's 2025 code: https://github.com/Ninjineers-2383/REEFSCAPE/blob/f6e2f0a69e47640b84fc4e9a6b0997a6f02d401f/src/main/java/frc/robot/subsystems/vision/Vision.java#L119C9-L122C69
+   */
+  private double[] calculateTrust(double avgTagDistance, double tagCount) {
+    var stdDevFactor = Math.pow(avgTagDistance, 2.0) / tagCount;
+    var linearStdDev = 0.02 * stdDevFactor; // multiply by a baseline in meters
+    var angularStdDev = 0.06 * stdDevFactor; // multiply by a baseline in radians
+
+    return VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev).getData();
   }
 
   public Matrix<N3, N1> getStdDeviations() {

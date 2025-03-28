@@ -20,6 +20,7 @@ public class SwerveMap {
                 public static final double MaxSpeedMetersPerSecond = 5.4;
                 public static final double MaxAngularSpeedRadians = Math.PI * 2;
                 public static final double BumperWidthMeters = Units.inchesToMeters(2.5);
+                public static final double ApproachDistance = (WheelBaseMeters / 2) + BumperWidthMeters;
         }
 
         public class Control {

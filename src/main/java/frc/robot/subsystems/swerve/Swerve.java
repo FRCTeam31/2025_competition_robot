@@ -36,7 +36,6 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.PrimeHolonomicDriveController;
 import org.prime.control.SwerveControlSuppliers;
-import org.prime.pose.PoseUtil;
 import org.prime.vision.LimelightInputs;
 
 public class Swerve extends SubsystemBase {
@@ -324,7 +323,7 @@ public class Swerve extends SubsystemBase {
    * @param branchSide
    * @return
    */
-  public Command driveToInViewReefTargetBranch(ReefBranchSide branchSide) {
+  public Command driveToReefTargetBranch(ReefBranchSide branchSide) {
     return this.defer(() -> {
       var llInputs = Container.Vision.getLimelightInputs(LimelightNameEnum.kFront);
 
@@ -336,28 +335,24 @@ public class Swerve extends SubsystemBase {
       }
 
       var reefSide = AprilTagReefMap.getReefSide(llInputs.ApriltagId);
-      Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/targeted-face", reefSide.getFaceName());
-      Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/targeted-branch",
-          reefSide.getBranchName(branchSide));
+      Logger.recordOutput(getName() + "/driveToReefTargetBranch/targeted-face", reefSide.getFaceName());
+      Logger.recordOutput(getName() + "/driveToReefTargetBranch/targeted-branch", reefSide.getBranchName(branchSide));
 
-      // Get the target pose, and convert it to field space
-      var robotSpaceTargetPoseCorrected = new Pose2d(llInputs.RobotSpaceTargetPose.Pose.getZ(),
-          llInputs.RobotSpaceTargetPose.Pose.getX(),
-          llInputs.RobotSpaceTargetPose.Pose.getRotation().toRotation2d());
-      Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/target-pose-robot-space",
-          robotSpaceTargetPoseCorrected);
+      // Check to make sure the tag pose is available
+      if (reefSide.TagPose.isEmpty()) {
+        Container.Vision.blinkLed(LimelightNameEnum.kRear, 2);
+        Elastic.sendWarning("Command Failed", "AprilTag pose not found in field layout");
 
-      var aprilTagPoseFieldSpace = PoseUtil.convertPoseFromRobotToFieldSpace(
-          _inputs.EstimatedRobotPose,
-          robotSpaceTargetPoseCorrected);
-      Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/target-pose-field-space", aprilTagPoseFieldSpace);
+        return Commands.print("[SWERVE] - AprilTag " + llInputs.ApriltagId + " pose not found in field layout");
+      }
+
+      var targetPose = reefSide.TagPose.orElseThrow();
+      Logger.recordOutput(getName() + "/driveToReefTargetBranch/target-pose-field-space", targetPose);
 
       // Get the approach pose for the desired branch side
-      var approachPose = AprilTagReefMap.getBranchApproachPose(
-          branchSide,
-          aprilTagPoseFieldSpace,
-          (SwerveMap.Chassis.WheelBaseMeters / 2) + SwerveMap.Chassis.BumperWidthMeters);
-      Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/branch-approach-pose", approachPose);
+      var branchPose = AprilTagReefMap.getBranchPoseFromTarget(branchSide, targetPose.toPose2d()); // translated over 16.5 cm
+      var approachPose = AprilTagReefMap.getApproachPose(branchPose, SwerveMap.Chassis.ApproachDistance); // translated forward
+      Logger.recordOutput(getName() + "/driveToReefTargetBranch/branch-approach-pose", approachPose);
 
       var pathfindConstraints = new PathConstraints(
           SwerveMap.Chassis.MaxSpeedMetersPerSecond,
@@ -405,35 +400,6 @@ public class Swerve extends SubsystemBase {
   public Command disableAutoAlignCommand() {
     var cmd = Commands.runOnce(() -> setAutoAlignEnabled(false));
     cmd.setName("DisableAutoAlign");
-
-    return cmd;
-  }
-
-  /**
-   * Enables lock-on control to whichever target is in view
-   */
-  public Command enableReefAutoAlignCommand() {
-    var cmd = Commands.run(() -> {
-      var frontLimelightInputs = Container.Vision.getLimelightInputs(LimelightNameEnum.kFront);
-
-      // If targeted AprilTag is in validTargets, align to its offset
-      if (Vision.isReefTag(frontLimelightInputs.ApriltagId)) {
-        var targetPose_FieldSpace = PoseUtil.convertPoseFromRobotToFieldSpace(_inputs.EstimatedRobotPose,
-            frontLimelightInputs.RobotSpaceTargetPose.Pose.toPose2d());
-        var targetFieldRotationFlipped = targetPose_FieldSpace.getRotation()
-            .plus(Rotation2d.fromDegrees(180)); // By default, targets are facing the robot, so we flip this 180 degrees
-
-        // Set the drivetrain to align to the target heading
-        _autoAlign.setSetpoint(targetFieldRotationFlipped);
-        setAutoAlignEnabled(true);
-        // _inputs.DrivingRobotRelative = true; // TODO: Enable if we want drivers to move robot relative while aligned
-      } else {
-        setAutoAlignEnabled(false);
-        // _inputs.DrivingRobotRelative = false; // TODO: Enable if we want drivers to move robot relative while aligned
-      }
-    });
-
-    cmd.setName("EnableLockOn");
 
     return cmd;
   }
