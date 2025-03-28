@@ -67,15 +67,15 @@ public class AprilTagReefMap {
 
     /**
      * Returns a pose that is a desired distance in the direction the target pose is facing
-     * @param targetPose The target pose
+     * @param branchPose The target pose
      * @param approachDistance The distance of the pose in the direction the target pose is facing
      */
-    public static Pose2d getApproachPose(Pose2d targetPose, double approachDistance) {
+    public static Pose2d getApproachPose(Pose2d branchPose, double approachDistance) {
         // Translate the pose approachDistance meters forward in the direction of its rotation
-        var approachTranslation = targetPose.getTranslation()
-                .plus(new Translation2d(approachDistance, targetPose.getRotation()));
+        var approachTranslation = branchPose.getTranslation()
+                .plus(new Translation2d(approachDistance, branchPose.getRotation()));
 
         // The robot should be facing the reef, so use the AprilTag's rotation
-        return new Pose2d(approachTranslation, targetPose.getRotation());
+        return new Pose2d(approachTranslation, branchPose.getRotation());
     }
 }
