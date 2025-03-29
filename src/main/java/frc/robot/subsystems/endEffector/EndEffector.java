@@ -129,6 +129,19 @@ public class EndEffector extends SubsystemBase {
         _wristManuallyControlled = false;
     }
 
+    private void manageIntakeSpeeds(boolean runIntakeOut) {
+        if (runIntakeOut && DriverStation.isTeleopEnabled()) {
+            _endEffector.setIntakeSpeed(EndEffectorMap.EjectSpeed);
+        } else if (_intakeIsEjecting) {
+            _endEffector.setIntakeSpeed(EndEffectorMap.EjectSpeed);
+
+        } else if (!_intakeIsEjecting && !_inputs.CoralLimitSwitchState) {
+            _endEffector.setIntakeSpeed(EndEffectorMap.IntakeSpeed);
+        } else {
+            _endEffector.stopIntakeMotor();
+        }
+    }
+
     @Override
     public void periodic() {
         _endEffector.updateInputs(_inputs);
@@ -155,14 +168,7 @@ public class EndEffector extends SubsystemBase {
     public Command defaultCommand(BooleanSupplier runIntakeOut,
             DoubleSupplier wristManualControl) {
         return this.run(() -> {
-            if (runIntakeOut.getAsBoolean() && DriverStation.isTeleopEnabled()) {
-                _endEffector.setIntakeSpeed(EndEffectorMap.EjectSpeed);
-            } else {
-                _endEffector.setIntakeSpeed(_intakeIsEjecting
-                        ? EndEffectorMap.EjectSpeed
-                        : EndEffectorMap.IntakeSpeed);
-            }
-
+            manageIntakeSpeeds(runIntakeOut.getAsBoolean());
             _manualControlSpeed = MathUtil.applyDeadband(wristManualControl.getAsDouble(), 0.05);
         });
     }
@@ -174,7 +180,6 @@ public class EndEffector extends SubsystemBase {
      */
     public Command setWristSetpointCommand(double angle) {
         return Commands.runOnce(this::disableWristManualControl)
-                .andThen(enableIntakeCommand())
                 .andThen(() -> _wristPID.setSetpoint(angle));
     }
 

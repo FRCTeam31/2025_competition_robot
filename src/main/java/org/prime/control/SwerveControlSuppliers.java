@@ -16,7 +16,7 @@ public class SwerveControlSuppliers {
 
   // The number of samples for which the input filters operate over
   private boolean _useFiltering = true;
-  private static final int _sampleWindow = 5;
+  private static final int _sampleWindow = 2;
   private MedianFilter _medianFilterX = new MedianFilter(_sampleWindow * 2);
   private MedianFilter _medianFilterY = new MedianFilter(_sampleWindow * 2);
   private MedianFilter _medianFilterZ = new MedianFilter(_sampleWindow * 2);

@@ -34,7 +34,8 @@ public class EndEffectorReal implements IEndEffector {
     private void setupIntakeMotor() {
         _intakeMotor = new SparkFlex(EndEffectorMap.IntakeMotorCanID, MotorType.kBrushless);
         SparkFlexConfig config = new SparkFlexConfig();
-        config.smartCurrentLimit(20);
+        config.inverted(true);
+        config.smartCurrentLimit(50);
         config.idleMode(IdleMode.kBrake);
         _intakeMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
@@ -49,20 +50,16 @@ public class EndEffectorReal implements IEndEffector {
 
     @Override
     public void updateInputs(EndEffectorInputsAutoLogged inputs) {
-        var intakeMotorSpeed = _intakeMotor.getAbsoluteEncoder().getVelocity();
-        var wristMotorSpeed = _wristMotor.getAbsoluteEncoder().getVelocity();
-        var limitSwitchState = getLimitSwitchState();
-
-        inputs.IntakeMotorSpeed = intakeMotorSpeed;
-        inputs.WristMotorSpeed = wristMotorSpeed;
-        inputs.CoralLimitSwitchState = limitSwitchState;
+        inputs.IntakeMotorSpeed = _intakeMotor.getAbsoluteEncoder().getVelocity();
+        inputs.WristMotorSpeed = _wristMotor.getAbsoluteEncoder().getVelocity();
+        inputs.CoralLimitSwitchState = getLimitSwitchState();
         inputs.EndEffectorAngleDegrees = getWristAngle();
         inputs.RangeSensorDistance = _distanceSensor.getDistance().getValueAsDouble();
     }
 
     @Override
     public void setIntakeSpeed(double speed) {
-        // _intakeMotor.set(speed);
+        _intakeMotor.set(speed);
     }
 
     @Override
@@ -93,6 +90,6 @@ public class EndEffectorReal implements IEndEffector {
     }
 
     private boolean getLimitSwitchState() {
-        return _coralLimitSwitch.get();
+        return !_coralLimitSwitch.get();
     }
 }

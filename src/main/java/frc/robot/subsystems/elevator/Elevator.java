@@ -24,10 +24,10 @@ import frc.robot.Robot;
 public class Elevator extends SubsystemBase {
     private Map<ElevatorPosition, Double> _positionMap = Map.of(
             ElevatorPosition.kAbsoluteMinimum, 0.0,
-            ElevatorPosition.kSource, 0.198,
+            ElevatorPosition.kSource, 0.16,
             ElevatorPosition.kTrough, 0.172,
-            ElevatorPosition.kL2, 0.311,
-            ElevatorPosition.kL3, 0.458,
+            ElevatorPosition.kL2, 0.28,
+            ElevatorPosition.kL3, 0.432,
             ElevatorPosition.kL4, 0.627);
 
     private ElevatorInputsAutoLogged _inputs = new ElevatorInputsAutoLogged();
