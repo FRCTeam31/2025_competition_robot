@@ -62,7 +62,7 @@ public class EndEffectorReal implements IEndEffector {
 
     @Override
     public void setIntakeSpeed(double speed) {
-        _intakeMotor.set(speed);
+        // _intakeMotor.set(speed);
     }
 
     @Override

@@ -12,7 +12,7 @@ public class EndEffectorMap {
         public static final byte IntakeMotorCanID = 19;
         public static final byte WristMotorCanID = 20;
         public static final byte LimitSwitchDIOChannel = 9;
-        public static final int DistanceSensorCanID = 56;
+        public static final int DistanceSensorCanID = 23;
 
         // Speeds
         public static final double EjectSpeed = -1;

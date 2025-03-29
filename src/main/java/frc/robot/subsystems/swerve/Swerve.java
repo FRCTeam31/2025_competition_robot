@@ -36,6 +36,7 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.PrimeHolonomicDriveController;
 import org.prime.control.SwerveControlSuppliers;
+import org.prime.pose.PoseUtil;
 import org.prime.vision.LimelightInputs;
 
 public class Swerve extends SubsystemBase {
@@ -220,14 +221,12 @@ public class Swerve extends SubsystemBase {
     Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/target-pose-field-space", aprilTagPoseFieldSpace);
 
     // Get the approach pose for the desired branch side
-    var leftApproachPose = AprilTagReefMap.getBranchApproachPose(
+    var leftApproachPose = AprilTagReefMap.getBranchPoseFromTarget(
         ReefBranchSide.kLeft,
-        aprilTagPoseFieldSpace,
-        (SwerveMap.Chassis.WheelBaseMeters / 2) + SwerveMap.Chassis.BumperWidthMeters);
-    var rightApproachPose = AprilTagReefMap.getBranchApproachPose(
+        aprilTagPoseFieldSpace);
+    var rightApproachPose = AprilTagReefMap.getBranchPoseFromTarget(
         ReefBranchSide.kRight,
-        aprilTagPoseFieldSpace,
-        (SwerveMap.Chassis.WheelBaseMeters / 2) + SwerveMap.Chassis.BumperWidthMeters);
+        aprilTagPoseFieldSpace);
     Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/branch-approach-pose-L", leftApproachPose);
     Logger.recordOutput(getName() + "/driveToInViewReefTargetBranch/branch-approach-pose-R", rightApproachPose);
   }
