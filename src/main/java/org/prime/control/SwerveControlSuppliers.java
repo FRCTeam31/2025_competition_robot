@@ -2,13 +2,11 @@ package org.prime.control;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.robot.Container;
-import frc.robot.subsystems.drivetrain.SwerveMap;
+import frc.robot.subsystems.swerve.SwerveMap;
 
 public class SwerveControlSuppliers {
 
@@ -17,8 +15,8 @@ public class SwerveControlSuppliers {
   public DoubleSupplier Z;
 
   // The number of samples for which the input filters operate over
-  private boolean _useFiltering = false;
-  private static final int _sampleWindow = 5;
+  private boolean _useFiltering = true;
+  private static final int _sampleWindow = 2;
   private MedianFilter _medianFilterX = new MedianFilter(_sampleWindow * 2);
   private MedianFilter _medianFilterY = new MedianFilter(_sampleWindow * 2);
   private MedianFilter _medianFilterZ = new MedianFilter(_sampleWindow * 2);

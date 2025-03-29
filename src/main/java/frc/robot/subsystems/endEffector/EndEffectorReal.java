@@ -5,6 +5,7 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 
 import org.prime.control.ExtendedPIDConstants;
 
+import com.ctre.phoenix6.hardware.CANrange;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -12,9 +13,9 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DigitalInput;
-import frc.robot.subsystems.endEffector.EndEffectorSubsystem.EndEffectorMap;
 
 public class EndEffectorReal implements IEndEffector {
+    private CANrange _distanceSensor;
 
     private SparkFlex _intakeMotor;
 
@@ -23,6 +24,7 @@ public class EndEffectorReal implements IEndEffector {
     private DigitalInput _coralLimitSwitch;
 
     public EndEffectorReal() {
+        _distanceSensor = new CANrange(EndEffectorMap.DistanceSensorCanID);
         _coralLimitSwitch = new DigitalInput(EndEffectorMap.LimitSwitchDIOChannel);
 
         setupIntakeMotor();
@@ -32,7 +34,8 @@ public class EndEffectorReal implements IEndEffector {
     private void setupIntakeMotor() {
         _intakeMotor = new SparkFlex(EndEffectorMap.IntakeMotorCanID, MotorType.kBrushless);
         SparkFlexConfig config = new SparkFlexConfig();
-        config.smartCurrentLimit(20);
+        config.inverted(true);
+        config.smartCurrentLimit(50);
         config.idleMode(IdleMode.kBrake);
         _intakeMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
@@ -47,14 +50,11 @@ public class EndEffectorReal implements IEndEffector {
 
     @Override
     public void updateInputs(EndEffectorInputsAutoLogged inputs) {
-        var intakeMotorSpeed = _intakeMotor.getAbsoluteEncoder().getVelocity();
-        var wristMotorSpeed = _wristMotor.getAbsoluteEncoder().getVelocity();
-        var limitSwitchState = getLimitSwitchState();
-
-        inputs.IntakeMotorSpeed = intakeMotorSpeed;
-        inputs.WristMotorSpeed = wristMotorSpeed;
-        inputs.CoralLimitSwitchState = limitSwitchState;
+        inputs.IntakeMotorSpeed = _intakeMotor.getAbsoluteEncoder().getVelocity();
+        inputs.WristMotorSpeed = _wristMotor.getAbsoluteEncoder().getVelocity();
+        inputs.CoralLimitSwitchState = getLimitSwitchState();
         inputs.EndEffectorAngleDegrees = getWristAngle();
+        inputs.RangeSensorDistance = _distanceSensor.getDistance().getValueAsDouble();
     }
 
     @Override
@@ -84,12 +84,12 @@ public class EndEffectorReal implements IEndEffector {
     }
 
     private double getWristAngle() {
-        double wristRotations = _wristMotor.getEncoder().getPosition() / EndEffectorMap.GearRatio;
+        double wristRotations = _wristMotor.getEncoder().getPosition() / EndEffectorMap.WristGearRatio;
 
         return Rotation2d.fromRotations(wristRotations).getDegrees();
     }
 
     private boolean getLimitSwitchState() {
-        return _coralLimitSwitch.get();
+        return !_coralLimitSwitch.get();
     }
 }

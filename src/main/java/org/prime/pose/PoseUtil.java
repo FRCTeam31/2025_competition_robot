@@ -5,6 +5,7 @@ import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
@@ -66,5 +67,17 @@ public class PoseUtil {
                                                 getDistanceBetweenPoses(currentPose, pose1),
                                                 getDistanceBetweenPoses(currentPose, pose2)))
                                 .orElse(null);
+        }
+
+        /**
+         * Converts a pose from robot space to field space.
+         * @param robotPose_Field The robot's pose in field space.
+         * @param targetPose_Robot The target pose in robot space.
+         * @return
+         */
+        public static Pose2d convertPoseFromRobotToFieldSpace(Pose2d robotPose_Field, Pose2d targetPose_Robot) {
+                var transform = new Transform2d(targetPose_Robot.getTranslation(), targetPose_Robot.getRotation());
+
+                return robotPose_Field.transformBy(transform);
         }
 }

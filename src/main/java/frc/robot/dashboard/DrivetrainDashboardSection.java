@@ -13,7 +13,7 @@ public class DrivetrainDashboardSection extends DashboardSection {
         super("Drivetrain");
 
         putBoolean(_autoAlignKey, false);
-        putDouble(_autoAlignTargetKey, 0);
+        putNumber(_autoAlignTargetKey, 0);
     }
 
     public void setAutoAlignEnabled(boolean enabled) {
@@ -34,6 +34,6 @@ public class DrivetrainDashboardSection extends DashboardSection {
     }
 
     public void setAutoAlignTarget(Rotation2d target) {
-        putDouble(_autoAlignTargetKey, target.getRadians());
+        putNumber(_autoAlignTargetKey, target.getRadians());
     }
 }

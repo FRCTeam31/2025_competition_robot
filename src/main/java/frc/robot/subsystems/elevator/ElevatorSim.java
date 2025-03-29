@@ -7,7 +7,6 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.RobotController;
-import frc.robot.subsystems.elevator.ElevatorSubsystem.ElevatorMap;
 
 public class ElevatorSim implements IElevator {
 
