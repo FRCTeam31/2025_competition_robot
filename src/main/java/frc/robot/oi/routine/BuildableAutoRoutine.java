@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 import frc.robot.Container;
 import frc.robot.Elastic;
+import frc.robot.subsystems.elevator.ElevatorPosition;
 
 /**
  * A dashboard widget for building autonomous routines from a base of Pathplanner paths and named commands.
@@ -286,7 +287,9 @@ public class BuildableAutoRoutine {
 
         // Start with a command that immediately completes, just to give us a starting point
         Command autoCommand = new InstantCommand();
-        for (var step : _routineSteps) {
+        // for (var step : _routineSteps) {
+        for (var i = 0; i < _routineSteps.size(); i++) {
+            var step = _routineSteps.get(i);
             if (stepIsPath(step)) {
                 try {
                     // Load path from file
@@ -313,7 +316,23 @@ public class BuildableAutoRoutine {
                         throw new Exception("Failed to build path command");
                     }
 
-                    autoCommand = autoCommand.andThen(followPathCommand);
+                    var nextStep = _routineSteps.get(i + 1);
+                    var nextStepIsScore = nextStep != null && nextStep.contains("Score-");
+                    var stepIsGoingToReef = step.matches("^.+-[A-L]");
+                    var stepIsGoingToSource = step.endsWith("SRC1") || step.endsWith("SRC2");
+
+                    if (stepIsGoingToReef && nextStepIsScore) {
+                        autoCommand = autoCommand
+                                .andThen(Container.setCombinedHeightAndAngle(
+                                        ElevatorPosition.getFromRawName(nextStep.replace("Score-", "")))
+                                        .alongWith(followPathCommand));
+                    } else if (stepIsGoingToSource) {
+                        autoCommand = autoCommand
+                                .andThen(Container.setCombinedHeightAndAngle(ElevatorPosition.kSource)
+                                        .alongWith(followPathCommand));
+                    } else {
+                        autoCommand = autoCommand.andThen(followPathCommand);
+                    }
                 } catch (Exception e) {
                     DriverStation.reportError("[AUTOBUILDER] Failed to load path: " + step, false);
 

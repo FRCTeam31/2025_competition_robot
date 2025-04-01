@@ -126,25 +126,21 @@ public class Container {
         .andThen(setCombinedHeightAndAngle(ElevatorPosition.kAbsoluteMinimum));
   }
 
-  public static Command scoreOnSideAndLower(ReefBranchSide side, ElevatorPosition position) {
-    return scoreAtHeightAndLower(position);
-  }
-
   public static Map<String, Supplier<Command>> getNamedCommandSuppliers() {
     return Map.of(
-        "Score-L4", () -> scoreOnSideAndLower(ReefBranchSide.kRight, ElevatorPosition.kL4),
-        "Score-L3", () -> scoreOnSideAndLower(ReefBranchSide.kRight, ElevatorPosition.kL3),
-        "Score-L2", () -> scoreOnSideAndLower(ReefBranchSide.kRight, ElevatorPosition.kL2),
-        "Score-Trough", () -> scoreAtHeightAndLower(ElevatorPosition.kTrough),
+        "Score-L4", () -> scoreAtHeight(ElevatorPosition.kL4),
+        "Score-L3", () -> scoreAtHeight(ElevatorPosition.kL3),
+        "Score-L2", () -> scoreAtHeight(ElevatorPosition.kL2),
+        "Score-Trough", () -> scoreAtHeight(ElevatorPosition.kTrough),
         "Pickup-Source", () -> pickupFromSourceAndLower());
   }
 
   public static Map<String, Command> getNamedCommands() {
     return Map.of(
-        "Score-L4", scoreOnSideAndLower(ReefBranchSide.kRight, ElevatorPosition.kL4),
-        "Score-L3", scoreOnSideAndLower(ReefBranchSide.kRight, ElevatorPosition.kL3),
-        "Score-L2", scoreOnSideAndLower(ReefBranchSide.kRight, ElevatorPosition.kL2),
-        "Score-Trough", scoreAtHeightAndLower(ElevatorPosition.kTrough),
+        "Score-L4", scoreAtHeight(ElevatorPosition.kL4),
+        "Score-L3", scoreAtHeight(ElevatorPosition.kL3),
+        "Score-L2", scoreAtHeight(ElevatorPosition.kL2),
+        "Score-Trough", scoreAtHeight(ElevatorPosition.kTrough),
         "Pickup-Source", pickupFromSourceAndLower(),
         "AutoSetElevatorL4", setCombinedHeightAndAngle(ElevatorPosition.kL4),
         "AutoSetElevatorSource", setCombinedHeightAndAngle(ElevatorPosition.kSource));

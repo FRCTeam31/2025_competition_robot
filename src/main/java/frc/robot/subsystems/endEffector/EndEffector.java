@@ -229,19 +229,6 @@ public class EndEffector extends SubsystemBase {
                 .andThen(disableEjectCommand());
     }
 
-    /**
-     * Picks up coral until the limit switch is triggered, then pulls the wrist back to 0 degrees
-     * @return
-     */
-    // public Command pickupCoral() {
-    //     return disableEjectCommand()
-    //             .andThen(Container.LEDs.setAllSectionPatternsCommand(_waitingForCoralLEDPattern))
-    //             .andThen(Commands.waitUntil(this::coralLimitSwitchTriggered))
-    //             .andThen(Container.LEDs.setAllSectionPatternsCommand(LEDPattern.solid(Color.kGreen)))
-    //             .andThen(setWristSetpointCommand(0))
-    //             .andThen(Commands.print(">> INTAKE: Coral picked up"));
-    // }
-
     public Command pickupCoral() {
         return disableEjectCommand()
                 .andThen(Commands.waitUntil(this::coralLimitSwitchTriggered))
