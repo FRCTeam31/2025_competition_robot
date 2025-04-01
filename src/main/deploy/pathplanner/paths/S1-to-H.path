@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "AutoRaiseElevator",
+      "name": "AutoSetElevatorL4",
       "waypointRelativePos": 0.0,
       "endWaypointRelativePos": null,
       "command": null

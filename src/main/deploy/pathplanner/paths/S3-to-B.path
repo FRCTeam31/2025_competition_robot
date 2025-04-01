@@ -21,7 +21,7 @@
       },
       "prevControl": {
         "x": 2.726736842105263,
-        "y": 6.657004385964911
+        "y": 6.65700438596491
       },
       "nextControl": null,
       "isLocked": false,
@@ -36,7 +36,14 @@
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "AutoSetElevatorL4",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
