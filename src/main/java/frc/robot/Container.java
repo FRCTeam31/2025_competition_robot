@@ -141,9 +141,7 @@ public class Container {
         "Score-L3", scoreAtHeight(ElevatorPosition.kL3),
         "Score-L2", scoreAtHeight(ElevatorPosition.kL2),
         "Score-Trough", scoreAtHeight(ElevatorPosition.kTrough),
-        "Pickup-Source", pickupFromSourceAndLower(),
-        "AutoSetElevatorL4", setCombinedHeightAndAngle(ElevatorPosition.kL4),
-        "AutoSetElevatorSource", setCombinedHeightAndAngle(ElevatorPosition.kSource));
+        "Pickup-Source", pickupFromSourceAndLower());
   }
   //#endregion
 }
