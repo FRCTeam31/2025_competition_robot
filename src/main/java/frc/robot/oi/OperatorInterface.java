@@ -20,8 +20,8 @@ public class OperatorInterface {
                 public static final HolonomicControlStyle DefaultDriveControlStyle = HolonomicControlStyle.Drone;
         }
 
-        private SupplierXboxController DriverController;
-        private SupplierXboxController OperatorController;
+        public SupplierXboxController DriverController;
+        public SupplierXboxController OperatorController;
 
         public OperatorInterface() {
                 DriverController = new SupplierXboxController(Controls.DRIVER_PORT);
@@ -35,6 +35,7 @@ public class OperatorInterface {
                                 SwerveMap.Control.DeadbandCurveWeight);
 
                 swerve.setDefaultCommand(swerve.driveFieldRelativeCommand(controlProfile));
+                swerve.setControlProfile(controlProfile);
 
                 DriverController.x()
                                 .onTrue(swerve.disableAutoAlignCommand());
@@ -47,9 +48,9 @@ public class OperatorInterface {
 
                 // When L or R bumper is pressed, and Y is unpressed, drive to the in-view reef target branch
                 DriverController.leftBumper().and(DriverController.y().negate())
-                                .onTrue(swerve.driveToReefTargetBranch(ReefBranchSide.kLeft));
+                                .onTrue(swerve.driveToReefTargetBranch(ReefBranchSide.kLeft, controlProfile));
                 DriverController.rightBumper().and(DriverController.y().negate())
-                                .onTrue(swerve.driveToReefTargetBranch(ReefBranchSide.kRight));
+                                .onTrue(swerve.driveToReefTargetBranch(ReefBranchSide.kRight, controlProfile));
 
                 // Climber Controls
                 // Climber in will only go in until it hits the artifical stop measured by the encoder
