@@ -283,6 +283,7 @@ public class EndEffector extends SubsystemBase {
     public Command pickupCoral() {
         return enableIntakeCommand()
                 .andThen(Commands.waitUntil(() -> _inputs.CoralLimitSwitchState))
+                .andThen(disableEjectCommand())
                 .andThen(setWristSetpointCommand(0))
                 .andThen(Commands.print(">> INTAKE: Coral picked up"));
     }
