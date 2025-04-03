@@ -116,25 +116,6 @@ public class EndEffector extends SubsystemBase {
         _wristManuallyControlled = false;
     }
 
-    private void manageIntakeSpeeds(boolean runIntakeOut) {
-        // Driver is trying to eject && InTeleop
-        if (runIntakeOut && DriverStation.isTeleopEnabled()) {
-            _endEffector.setIntakeSpeed(EndEffectorMap.EjectSpeed);
-            return;
-        }
-
-        // Use instance variable (used in automation)
-        if (_intakeIsEjecting) {
-            _endEffector.setIntakeSpeed(EndEffectorMap.EjectSpeed);
-            return;
-        }
-
-        // if (_inputs.CoralLimitSwitchState) {
-        _endEffector.stopIntakeMotor();
-        //     return;
-        // }
-    }
-
     @Override
     public void periodic() {
         _endEffector.updateInputs(_inputs);
@@ -155,7 +136,13 @@ public class EndEffector extends SubsystemBase {
      */
     public Command defaultCommand(BooleanSupplier runIntakeOut, DoubleSupplier wristManualControl) {
         return this.run(() -> {
-            manageIntakeSpeeds(runIntakeOut.getAsBoolean());
+            // Driver is trying to eject && InTeleop or use instance variable (used in automation)
+            if ((runIntakeOut.getAsBoolean() && DriverStation.isTeleopEnabled()) || _intakeIsEjecting) {
+                _endEffector.setIntakeSpeed(EndEffectorMap.EjectSpeed);
+            } else {
+                _endEffector.stopIntakeMotor();
+            }
+
             _manualControlSpeed = MathUtil.applyDeadband(wristManualControl.getAsDouble(), 0.05);
         });
     }
