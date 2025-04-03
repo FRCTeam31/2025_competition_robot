@@ -53,23 +53,22 @@ public class EndEffector extends SubsystemBase {
     }
 
     public void manageWristControl() {
-        boolean isSafeForManualControl = Container.Elevator
+        var inDangerZone = Container.Elevator.getElevatorPositionMeters() <= EndEffectorMap.LowerElevatorSafetyLimit;
+        var isSafeForManualControl = Container.Elevator
                 .getElevatorPositionMeters() >= EndEffectorMap.LowerElevatorSafetyLimit
                 && _inputs.EndEffectorAngleDegrees <= EndEffectorMap.WristMaxManuallyControllableAngle;
 
-        boolean tryingToUseManualControl = (_manualControlSpeed != 0 || _wristManuallyControlled);
+        var tryingToUseManualControl = (_manualControlSpeed != 0 || _wristManuallyControlled);
+        _wristManuallyControlled = (isSafeForManualControl && tryingToUseManualControl);
 
-        _wristManuallyControlled = (isSafeForManualControl && tryingToUseManualControl) ? true : false;
-
-        if (_wristManuallyControlled) {
+        if (_wristManuallyControlled && !inDangerZone) {
             runWristManual(_manualControlSpeed);
-        } else if (!_wristManuallyControlled) {
-            seekWristAnglePID();
+        } else {
+            seekWristAnglePID(inDangerZone);
         }
     }
 
-    public void seekWristAnglePID() {
-        var inDangerZone = Container.Elevator.getElevatorPositionMeters() <= EndEffectorMap.LowerElevatorSafetyLimit;
+    public void seekWristAnglePID(boolean inDangerZone) {
         SmartDashboard.putBoolean(getName() + "/InDangerZone", inDangerZone);
 
         var safeAngle = calculateDangerZoneAngle(Container.Elevator.getElevatorPositionMeters());
@@ -79,7 +78,7 @@ public class EndEffector extends SubsystemBase {
         double pid = inDangerZone
                 ? _wristPID.calculate(_inputs.EndEffectorAngleDegrees, 0) // Revert instructions: set this to 0
                 : _wristPID.calculate(_inputs.EndEffectorAngleDegrees,
-                        Math.max(EndEffectorMap.WristMaxAngle, _manualControlSpeed));
+                        Math.max(EndEffectorMap.WristMaxAngle, _wristSetpoint));
 
         // if (!inDangerZone) {
         //     double previousSetpoint = _wristPID.getSetpoint();
