@@ -129,9 +129,10 @@ public class EndEffector extends SubsystemBase {
             return;
         }
 
-        if (_inputs.CoralLimitSwitchState) {
-            _endEffector.stopIntakeMotor();
-        }
+        // if (_inputs.CoralLimitSwitchState) {
+        _endEffector.stopIntakeMotor();
+        //     return;
+        // }
     }
 
     @Override
