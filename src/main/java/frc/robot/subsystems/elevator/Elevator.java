@@ -24,7 +24,7 @@ import frc.robot.Robot;
 public class Elevator extends SubsystemBase {
     private Map<ElevatorPosition, Double> _positionMap = Map.of(
             ElevatorPosition.kAbsoluteMinimum, 0.0,
-            ElevatorPosition.kSource, 0.1346,
+            ElevatorPosition.kSource, 0.1446,
             ElevatorPosition.kTrough, 0.172,
             ElevatorPosition.kL2, 0.28,
             ElevatorPosition.kL3, 0.432,
