@@ -217,12 +217,12 @@ public class Swerve extends SubsystemBase {
 
     var llPose = limelightInputs.BlueAllianceOriginFieldSpaceRobotPose;
 
-    // if (_inputs.EstimatedRobotPose.getTranslation().getDistance(llPose.Pose.toPose2d().getTranslation()) <= 1) {
-    _swervePackager.addPoseEstimatorVisionMeasurement(
-        llPose.Pose.toPose2d(),
-        llPose.Timestamp,
-        llPose.getStdDeviations());
-    // }
+    if (_inputs.EstimatedRobotPose.getTranslation().getDistance(llPose.Pose.toPose2d().getTranslation()) <= 1) {
+      _swervePackager.addPoseEstimatorVisionMeasurement(
+          llPose.Pose.toPose2d(),
+          llPose.Timestamp,
+          llPose.getStdDeviations());
+    }
   }
 
   // #endregion

@@ -317,22 +317,24 @@ public class BuildableAutoRoutine {
                     }
 
                     var nextStep = _routineSteps.get(i + 1);
-                    var nextStepIsScore = nextStep != null && nextStep.contains("Score-");
-                    var stepIsGoingToReef = step.matches("^.+-[A-L]");
-                    var stepIsGoingToSource = step.endsWith("SRC1") || step.endsWith("SRC2");
+                    // var nextStepIsScore = nextStep != null && nextStep.contains("Score-");
+                    // var stepIsGoingToReef = step.matches("^.+-[A-L]");
+                    // var stepIsGoingToSource = step.endsWith("SRC1") || step.endsWith("SRC2");
 
-                    if (stepIsGoingToReef && nextStepIsScore) {
-                        autoCommand = autoCommand
-                                .andThen(Container.setCombinedHeightAndAngle(
-                                        ElevatorPosition.getFromRawName(nextStep.replace("Score-", "")))
-                                        .alongWith(followPathCommand));
-                    } else if (stepIsGoingToSource) {
-                        autoCommand = autoCommand
-                                .andThen(Container.setCombinedHeightAndAngle(ElevatorPosition.kSource)
-                                        .alongWith(followPathCommand));
-                    } else {
-                        autoCommand = autoCommand.andThen(followPathCommand);
-                    }
+                    // if (stepIsGoingToReef && nextStepIsScore) {
+                    //     autoCommand = autoCommand
+                    //             .andThen(Container.setCombinedHeightAndAngle(
+                    //                     ElevatorPosition.getFromRawName(nextStep.replace("Score-", "")))
+                    //                     .alongWith(followPathCommand));
+                    // } else if (stepIsGoingToSource) {
+                    //     autoCommand = autoCommand
+                    //             .andThen(Container.setCombinedHeightAndAngle(ElevatorPosition.kSource)
+                    //                     .alongWith(followPathCommand));
+                    // } else {
+                    //     autoCommand = autoCommand.andThen(followPathCommand);
+                    // }
+
+                    autoCommand = autoCommand.andThen(followPathCommand);
                 } catch (Exception e) {
                     DriverStation.reportError("[AUTOBUILDER] Failed to load path: " + step, false);
 
