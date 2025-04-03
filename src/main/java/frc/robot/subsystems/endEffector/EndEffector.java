@@ -77,7 +77,7 @@ public class EndEffector extends SubsystemBase {
         double pid = inDangerZone
                 ? _wristPID.calculate(_inputs.EndEffectorAngleDegrees, 0) // Revert instructions: set this to 0
                 : _wristPID.calculate(_inputs.EndEffectorAngleDegrees,
-                        Math.max(EndEffectorMap.WristMaxAngle, _wristSetpoint));
+                        Math.min(EndEffectorMap.WristMaxAngle, _wristSetpoint));
 
         // if (!inDangerZone) {
         //     double previousSetpoint = _wristPID.getSetpoint();
