@@ -13,14 +13,14 @@ import org.prime.control.ExtendedPIDConstants;
 
 public class SwerveMap {
         public class Chassis {
-                // public static final double TrackWidthMeters = Units.inchesToMeters(24.75);
-                // public static final double WheelBaseMeters = Units.inchesToMeters(24.75);
-                public static final double TrackWidthMeters = Units.inchesToMeters(21.25);
-                public static final double WheelBaseMeters = Units.inchesToMeters(21.25);
+                public static final double TrackWidthMeters = Units.inchesToMeters(24.75);
+                public static final double WheelBaseMeters = Units.inchesToMeters(24.75);
+                // public static final double TrackWidthMeters = Units.inchesToMeters(21.25);
+                // public static final double WheelBaseMeters = Units.inchesToMeters(21.25);
                 public static final double MaxSpeedMetersPerSecond = 5.4;
                 public static final double MaxAngularSpeedRadians = Math.PI * 2;
                 public static final double BumperWidthMeters = Units.inchesToMeters(2.5);
-                public static final double ApproachDistance = (WheelBaseMeters / 2) + BumperWidthMeters;
+                public static final double ApproachDistance = (WheelBaseMeters / 2) + BumperWidthMeters - 0.1;
         }
 
         public class Control {
