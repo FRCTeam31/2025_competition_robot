@@ -65,7 +65,6 @@ public class Container {
       // Register the named commands from each subsystem that may be used in PathPlanner
       NamedCommands.registerCommands(Swerve.getNamedCommands());
       NamedCommands.registerCommands(Elevator.getNamedCommands());
-      NamedCommands.registerCommands(getNamedCommands());
 
       // Create our custom auto builder
       AutoBuilder = new BuildableAutoRoutine(getNamedCommandSuppliers());
@@ -132,15 +131,6 @@ public class Container {
         "Score-L2", () -> scoreAtHeightAndLower(ElevatorPosition.kL2),
         "Score-Trough", () -> scoreAtHeightAndLower(ElevatorPosition.kTrough),
         "Pickup-Source", () -> pickupFromSourceAndLower());
-  }
-
-  public static Map<String, Command> getNamedCommands() {
-    return Map.of(
-        "Score-L4", scoreAtHeightAndLower(ElevatorPosition.kL4),
-        "Score-L3", scoreAtHeightAndLower(ElevatorPosition.kL3),
-        "Score-L2", scoreAtHeightAndLower(ElevatorPosition.kL2),
-        "Score-Trough", scoreAtHeightAndLower(ElevatorPosition.kTrough),
-        "Pickup-Source", pickupFromSourceAndLower());
   }
   //#endregion
 }
