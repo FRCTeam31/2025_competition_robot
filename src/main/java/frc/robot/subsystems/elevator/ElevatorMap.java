@@ -31,16 +31,16 @@ public class ElevatorMap {
         //             10.5, 4.5, 0, 1.05);
 
         public static final MRSGConstants ElevatorControllerConstantsSmall = new MRSGConstants(
-                        11.5, 5, 0, 1.05);
+                        11.5, 4.5, 0, 1.05);
 
         public static final MRSGConstants ElevatorControllerConstantsMedium = new MRSGConstants(
                         8, 4, 0, 0);
 
-        // Only M and R are used.$
+        // Only M and R are used.
         public static final MRSGConstants ElevatorControllerConstantsBig = new MRSGConstants(
                         8.5, 3, 0, 0);
 
-        public static final MRSGConstants ElevatorControllerConstantsAbsoultelyMassive = new MRSGConstants(7, 3, 0,
+        public static final MRSGConstants ElevatorControllerConstantsAbsoultelyMassive = new MRSGConstants(7, 4, 0,
                         0);
 
         // Manual control 
