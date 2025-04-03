@@ -75,7 +75,7 @@ public class EndEffector extends SubsystemBase {
         var safeAngle = calculateDangerZoneAngle(Container.Elevator.getElevatorPositionMeters());
         SmartDashboard.putNumber(getName() + "/dangerZoneCalculatedSafeAngle", safeAngle);
 
-        SmartDashboard.putNumber(getName() + "/PID-Setpoint", inDangerZone ? 0 : _wristSetpoint);
+        SmartDashboard.putNumber(getName() + "/PID-Setpoint", _wristSetpoint);
         double pid = inDangerZone
                 ? _wristPID.calculate(_inputs.EndEffectorAngleDegrees, 0) // Revert instructions: set this to 0
                 : _wristPID.calculate(_inputs.EndEffectorAngleDegrees, _wristSetpoint);
