@@ -60,26 +60,13 @@ public class Swerve extends SubsystemBase {
   private SwerveIOPackager _swervePackager;
   private SwerveSubsystemInputsAutoLogged _inputs = new SwerveSubsystemInputsAutoLogged();
 
-  // AutoAlign
+  // AutoAlign & Pathfinding
   private AutoAlign _autoAlign;
+  private Command _activePathfindCommand;
 
   // Vision, Kinematics, odometry
   private PrimeHolonomicDriveController _primeHolonomicController;
   private RobotConfig _pathplannerRobotConfig;
-  private boolean _canDisableReefPathfind = false;
-
-  private ChassisSpeeds chassisSpeeds = _controlSuppliers.getChassisSpeeds(false, _inputs.GyroAngle,
-      () -> setAutoAlignEnabled(false));
-
-  private Boolean tryingToMove = chassisSpeeds.vxMetersPerSecond != 0
-      && chassisSpeeds.vyMetersPerSecond != 0 && chassisSpeeds.omegaRadiansPerSecond != 0;
-
-  private BooleanEvent checkJoysticks = new BooleanEvent(Robot.EventLoop, () -> tryingToMove)
-      .falling();
-
-  private BooleanEvent stopPathfinding = new BooleanEvent(Robot.EventLoop,
-      () -> _canDisableReefPathfind && tryingToMove)
-      .rising();
 
   /**
    * Creates a new Drivetrain.
@@ -99,15 +86,6 @@ public class Swerve extends SubsystemBase {
     _drivetrainDashboardSection = new DrivetrainDashboardSection();
 
     configurePathPlanner();
-
-    checkJoysticks.ifHigh(() -> {
-      _canDisableReefPathfind = true;
-      System.out.println("Can now disable reef pathfind");
-    });
-
-    stopPathfinding.ifHigh(() -> {
-      System.out.println("No Command to Stop");
-    });
   }
 
   private void configurePathPlanner() {
@@ -329,20 +307,26 @@ public class Swerve extends SubsystemBase {
    */
   public Command driveFieldRelativeCommand(SwerveControlSuppliers controlSuppliers) {
     return this.run(() -> {
-      // if (_inputs.DrivingRobotRelative) {
-      //   // Robot-relative override
-      //   var inputChassisSpeeds = controlSuppliers.getChassisSpeeds(false, _inputs.GyroAngle,
-      //       () -> {
-      //         setAutoAlignEnabled(false);
-      //         _inputs.DrivingRobotRelative = false;
-      //       });
+      var speeds = controlSuppliers.getChassisSpeeds(
+          false,
+          _inputs.GyroAngle,
+          () -> setAutoAlignEnabled(false));
 
-      //   driveRobotRelative(ChassisSpeeds.fromFieldRelativeSpeeds(inputChassisSpeeds, _inputs.GyroAngle));
-      // } else {
-      driveRobotRelative(controlSuppliers.getChassisSpeeds(false, _inputs.GyroAngle,
-          () -> setAutoAlignEnabled(false)));
-      // }
+      // If the driver is trying to move and we have an active pathfinding command, cancel it.
+      var driverIsTryingToMove = speeds.omegaRadiansPerSecond > 0
+          || speeds.vxMetersPerSecond > 0
+          || speeds.vyMetersPerSecond > 0;
+      if (driverIsTryingToMove) {
+        var pathfindCommandIsCancellable = _activePathfindCommand != null
+            && _activePathfindCommand.isScheduled()
+            && !_activePathfindCommand.isFinished();
 
+        if (pathfindCommandIsCancellable) {
+          _activePathfindCommand.cancel();
+        }
+      }
+
+      driveRobotRelative(speeds);
     });
   }
 
@@ -352,59 +336,57 @@ public class Swerve extends SubsystemBase {
    * @return
    */
   public Command driveToReefTargetBranch(ReefBranchSide branchSide, SwerveControlSuppliers controlSuppliers) {
-    return this.defer(() -> {
-      _canDisableReefPathfind = false;
-      // var llInputs = Container.Vision.getLimelightInputs(LimelightNameEnum.kFront);
+    return stopAllMotorsCommand()
+        .andThen(Commands.runOnce(() -> {
+          // Cancel the command if it's already running
+          if (_activePathfindCommand != null && _activePathfindCommand.isScheduled()
+              && !_activePathfindCommand.isFinished()) {
+            _activePathfindCommand.cancel();
+          }
+        }))
+        .andThen(this.defer(() -> {
+          var llInputs = Container.Vision.getLimelightInputs(LimelightNameEnum.kFront);
 
-      // if (!Vision.isReefTag(llInputs.ApriltagId)) {
-      //   Container.Vision.blinkLed(LimelightNameEnum.kRear, 2);
-      //   Elastic.sendWarning("Command Failed", "No reef tag in view");
+          if (!Vision.isReefTag(llInputs.ApriltagId)) {
+            Container.Vision.blinkLed(LimelightNameEnum.kRear, 2);
+            Elastic.sendWarning("Command Failed", "No reef tag in view");
 
-      //   return Commands.print("[SWERVE] - No reef tag in view");
-      // }
+            return Commands.print("[SWERVE] - No reef tag in view");
+          }
 
-      // var reefSide = AprilTagReefMap.getReefSide(llInputs.ApriltagId);
-      // Logger.recordOutput(getName() + "/driveToReefTargetBranch/targeted-face", reefSide.getFaceName());
-      // Logger.recordOutput(getName() + "/driveToReefTargetBranch/targeted-branch", reefSide.getBranchName(branchSide));
+          var reefSide = AprilTagReefMap.getReefSide(llInputs.ApriltagId);
+          Logger.recordOutput(getName() + "/driveToReefTargetBranch/targeted-face", reefSide.getFaceName());
+          Logger.recordOutput(getName() + "/driveToReefTargetBranch/targeted-branch",
+              reefSide.getBranchName(branchSide));
 
-      // Check to make sure the tag pose is available
-      // if (reefSide.TagPose.isEmpty()) {
-      //   Container.Vision.blinkLed(LimelightNameEnum.kRear, 2);
-      //   Elastic.sendWarning("Command Failed", "AprilTag pose not found in field layout");
+          // Check to make sure the tag pose is available
+          if (reefSide.TagPose.isEmpty()) {
+            Container.Vision.blinkLed(LimelightNameEnum.kRear, 2);
+            Elastic.sendWarning("Command Failed", "AprilTag pose not found in field layout");
 
-      //   return Commands.print("[SWERVE] - AprilTag " + llInputs.ApriltagId + " pose not found in field layout");
-      // }
+            return Commands.print("[SWERVE] - AprilTag " + llInputs.ApriltagId + " pose not found in field layout");
+          }
 
-      // var targetPose = reefSide.TagPose.orElseThrow();
-      // Logger.recordOutput(getName() + "/driveToReefTargetBranch/target-pose-field-space", targetPose);
+          var targetPose = reefSide.TagPose.orElseThrow();
+          Logger.recordOutput(getName() + "/driveToReefTargetBranch/target-pose-field-space", targetPose);
 
-      // Get the approach pose for the desired branch side
-      // var branchPose = AprilTagReefMap.getBranchPoseFromTarget(branchSide, targetPose.toPose2d()); // translated over 16.5 cm
-      // var approachPose = AprilTagReefMap.getApproachPose(branchPose, SwerveMap.Chassis.ApproachDistance); // translated forward
-      // Logger.recordOutput(getName() + "/driveToReefTargetBranch/branch-approach-pose", approachPose);
+          // Get the approach pose for the desired branch side
+          var branchPose = AprilTagReefMap.getBranchPoseFromTarget(branchSide, targetPose.toPose2d()); // translated over 16.5 cm
+          var approachPose = AprilTagReefMap.getApproachPose(branchPose, SwerveMap.Chassis.ApproachDistance); // translated forward
+          Logger.recordOutput(getName() + "/driveToReefTargetBranch/branch-approach-pose", approachPose);
 
-      // var pathfindConstraints = new PathConstraints(
-      //     SwerveMap.Chassis.MaxSpeedMetersPerSecond,
-      //     SwerveMap.Chassis.MaxSpeedMetersPerSecond * 1.5,
-      //     SwerveMap.Chassis.MaxAngularSpeedRadians,
-      //     SwerveMap.Chassis.MaxAngularSpeedRadians * 1.5);
+          var pathfindConstraints = new PathConstraints(
+              SwerveMap.Chassis.MaxSpeedMetersPerSecond,
+              SwerveMap.Chassis.MaxSpeedMetersPerSecond * 1.5,
+              SwerveMap.Chassis.MaxAngularSpeedRadians,
+              SwerveMap.Chassis.MaxAngularSpeedRadians * 1.5);
 
-      // Command pathfindToBranchPoseCommand = AutoBuilder.pathfindToPose(approachPose, pathfindConstraints);
-      Command pathfindToBranchPoseCommand = Commands.run(() -> System.out.println("Pathfinding to branch pose"));
+          _activePathfindCommand = AutoBuilder.pathfindToPose(approachPose, pathfindConstraints)
+              .withTimeout(3); // TODO: Check this
 
-      stopPathfinding.ifHigh(() -> {
-        pathfindToBranchPoseCommand.cancel();
-        System.out.println("Stopping reef pathfind");
-      });
-
-      if (!tryingToMove) {
-        _canDisableReefPathfind = true;
-        System.out.println("Can now disable reef pathfind");
-      }
-
-      // return Commands.print("RANCOMMAND");
-      return pathfindToBranchPoseCommand;
-    });
+          return _activePathfindCommand;
+        }));
+    // .andThen(setAutoAlignSetpointCommand(_inputs.GyroAngle.getDegrees()));
   }
 
   /**
