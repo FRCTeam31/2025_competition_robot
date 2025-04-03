@@ -132,9 +132,9 @@ public class Robot extends LoggedRobot {
           Commands.print("TESTLEDS"),
           Container.LEDs.setAllSectionPatternsCommand(
               LEDPattern.solid(getAllianceColor()).blink(Units.Seconds.of(0.15), Units.Seconds.of(0.85))),
-          Commands.waitSeconds(3),
+          Commands.waitSeconds(3.15),
           Container.LEDs.setAllSectionPatternsCommand(
-              LEDPattern.solid(getAllianceColor()).blink(Units.Seconds.of(0.15), Units.Seconds.of(0.15))),
+              LEDPattern.solid(Color.kGreen).blink(Units.Seconds.of(0.15), Units.Seconds.of(0.15))),
           Commands.waitSeconds(0.75),
           Container.LEDs
               .setAllSectionPatternsCommand(LEDPattern.solid(getAllianceColor()).breathe(Units.Seconds.of(4))))
