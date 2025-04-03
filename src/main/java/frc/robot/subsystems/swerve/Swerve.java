@@ -382,7 +382,7 @@ public class Swerve extends SubsystemBase {
       _activePathfindCommand = Commands.sequence(
           cancelPathfindingCommand(),
           stopAllMotorsCommand(),
-          AutoBuilder.pathfindToPose(approachPose, pathfindConstraints, 0)
+          AutoBuilder.pathfindToPose(approachPose, pathfindConstraints)
               .withTimeout(5)
               .finallyDo(_swervePackager::stopAllMotors),
           stopAllMotorsCommand())
