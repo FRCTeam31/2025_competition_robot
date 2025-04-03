@@ -173,8 +173,10 @@ public class SwerveModuleReal implements ISwerveModule {
     // Set the drive motor to the desired speed
     setDriveSpeed(desiredState.speedMetersPerSecond);
 
-    // Set the steering motor to the desired angle
-    setModuleAngle(desiredState.angle);
+    // Set the steering motor to the desired angle, if trying to drive
+    if (desiredState.speedMetersPerSecond > 0) {
+      setModuleAngle(desiredState.angle);
+    }
   }
 
   private void setDriveSpeed(double desiredSpeedMetersPerSecond) {

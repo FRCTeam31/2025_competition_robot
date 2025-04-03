@@ -15,10 +15,12 @@ import org.prime.util.BuildConstants;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 
 import edu.wpi.first.net.WebServer;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -41,6 +43,7 @@ public class Robot extends LoggedRobot {
 
   public static EventLoop EventLoop = new EventLoop();
   private Command _autonomousCommand;
+  private boolean _hasEnteredTeleop = false;
 
   public Robot() {
     // Set up pathfinding compatibility with AdvantageKit
@@ -48,6 +51,7 @@ public class Robot extends LoggedRobot {
 
     // Configure logging
     configureLogging();
+    DriverStation.silenceJoystickConnectionWarning(true);
 
     // Start the web server for downloading elastic layout from robot
     WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
@@ -67,6 +71,9 @@ public class Robot extends LoggedRobot {
     Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
     Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
     Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
+    Logger.recordMetadata("Event", DriverStation.getEventName());
+    Logger.recordMetadata("Match Type", DriverStation.getMatchType().toString());
+    Logger.recordMetadata("Match Number", String.valueOf(DriverStation.getMatchNumber()));
 
     switch (BuildConstants.DIRTY) {
       case 0:
@@ -119,6 +126,21 @@ public class Robot extends LoggedRobot {
     Container.Elevator.stopMotorsCommand().schedule();
     Container.Swerve.stopAllMotorsCommand();
     Container.Climber.stopAllMotors();
+
+    if (_hasEnteredTeleop) {
+      Commands.sequence(
+          Commands.print("TESTLEDS"),
+          Container.LEDs.setAllSectionPatternsCommand(
+              LEDPattern.solid(getAllianceColor()).blink(Units.Seconds.of(0.15), Units.Seconds.of(0.85))),
+          Commands.waitSeconds(3),
+          Container.LEDs.setAllSectionPatternsCommand(
+              LEDPattern.solid(getAllianceColor()).blink(Units.Seconds.of(0.15), Units.Seconds.of(0.15))),
+          Commands.waitSeconds(0.75),
+          Container.LEDs
+              .setAllSectionPatternsCommand(LEDPattern.solid(getAllianceColor()).breathe(Units.Seconds.of(4))))
+          .ignoringDisable(true)
+          .schedule();
+    }
   }
 
   /**
@@ -172,6 +194,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     DataLogManager.log("Teleop Enabled");
+    _hasEnteredTeleop = true;
 
     if (DriverStation.isFMSAttached()) {
       Elastic.selectTab("Teleop");
@@ -183,16 +206,13 @@ public class Robot extends LoggedRobot {
 
       // Stop any subsystems still running
       Container.Swerve.stopAllMotorsCommand();
-
     } else {
       Container.Swerve.resetGyro();
     }
 
-    // Set teleop LED pattern
     Container.Swerve.disableAutoAlignCommand().schedule();
     Container.Climber.stopAllMotors();
     Container.Elevator.stopMotorsCommand().schedule();
-
   }
 
   /**

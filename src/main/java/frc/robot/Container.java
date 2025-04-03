@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.dashboard.TeleopDashboardTab;
-import frc.robot.game.ReefBranchSide;
 import frc.robot.dashboard.DashboardSection;
 import frc.robot.oi.OperatorInterface;
 import frc.robot.oi.routine.BuildableAutoRoutine;

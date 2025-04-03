@@ -330,57 +330,57 @@ public class Swerve extends SubsystemBase {
    * @return
    */
   public Command driveToReefTargetBranch(ReefBranchSide branchSide, SwerveControlSuppliers controlSuppliers) {
-    return stopAllMotorsCommand()
-        .andThen(Commands.runOnce(() -> {
-          // Cancel the command if it's already running
-          if (_activePathfindCommand != null && _activePathfindCommand.isScheduled()
-              && !_activePathfindCommand.isFinished()) {
-            _activePathfindCommand.cancel();
-          }
-        }))
-        .andThen(this.defer(() -> {
-          var llInputs = Container.Vision.getLimelightInputs(LimelightNameEnum.kFront);
+    return this.defer(() -> {
+      var llInputs = Container.Vision.getLimelightInputs(LimelightNameEnum.kFront);
 
-          if (!Vision.isReefTag(llInputs.ApriltagId)) {
-            Container.Vision.blinkLed(LimelightNameEnum.kRear, 2);
-            Elastic.sendWarning("Command Failed", "No reef tag in view");
+      if (!Vision.isReefTag(llInputs.ApriltagId)) {
+        Container.Vision.blinkLed(LimelightNameEnum.kRear, 2);
+        Elastic.sendWarning("Command Failed", "No reef tag in view");
 
-            return Commands.print("[SWERVE] - No reef tag in view");
-          }
+        return Commands.print("[SWERVE] - No reef tag in view");
+      }
 
-          var reefSide = AprilTagReefMap.getReefSide(llInputs.ApriltagId);
-          Logger.recordOutput(getName() + "/driveToReefTargetBranch/targeted-face", reefSide.getFaceName());
-          Logger.recordOutput(getName() + "/driveToReefTargetBranch/targeted-branch",
-              reefSide.getBranchName(branchSide));
+      var reefSide = AprilTagReefMap.getReefSide(llInputs.ApriltagId);
+      Logger.recordOutput(getName() + "/driveToReefTargetBranch/targeted-face", reefSide.getFaceName());
+      Logger.recordOutput(getName() + "/driveToReefTargetBranch/targeted-branch",
+          reefSide.getBranchName(branchSide));
 
-          // Check to make sure the tag pose is available
-          if (reefSide.TagPose.isEmpty()) {
-            Container.Vision.blinkLed(LimelightNameEnum.kRear, 2);
-            Elastic.sendWarning("Command Failed", "AprilTag pose not found in field layout");
+      // Check to make sure the tag pose is available
+      if (reefSide.TagPose.isEmpty()) {
+        Container.Vision.blinkLed(LimelightNameEnum.kRear, 2);
+        Elastic.sendWarning("Command Failed", "AprilTag pose not found in field layout");
 
-            return Commands.print("[SWERVE] - AprilTag " + llInputs.ApriltagId + " pose not found in field layout");
-          }
+        return Commands.print("[SWERVE] - AprilTag " + llInputs.ApriltagId + " pose not found in field layout");
+      }
 
-          var targetPose = reefSide.TagPose.orElseThrow();
-          Logger.recordOutput(getName() + "/driveToReefTargetBranch/target-pose-field-space", targetPose);
+      var targetPose = reefSide.TagPose.orElseThrow();
+      Logger.recordOutput(getName() + "/driveToReefTargetBranch/target-pose-field-space", targetPose);
 
-          // Get the approach pose for the desired branch side
-          var branchPose = AprilTagReefMap.getBranchPoseFromTarget(branchSide, targetPose.toPose2d()); // translated over 16.5 cm
-          var approachPose = AprilTagReefMap.getApproachPose(branchPose, SwerveMap.Chassis.ApproachDistance); // translated forward
-          Logger.recordOutput(getName() + "/driveToReefTargetBranch/branch-approach-pose", approachPose);
+      // Get the approach pose for the desired branch side
+      var branchPose = AprilTagReefMap.getBranchPoseFromTarget(branchSide, targetPose.toPose2d()); // translated over 16.5 cm
+      var approachPose = AprilTagReefMap.getApproachPose(branchPose, SwerveMap.Chassis.ApproachDistance); // translated forward
+      Logger.recordOutput(getName() + "/driveToReefTargetBranch/branch-approach-pose", approachPose);
 
-          var pathfindConstraints = new PathConstraints(
-              SwerveMap.Chassis.MaxSpeedMetersPerSecond,
-              SwerveMap.Chassis.MaxSpeedMetersPerSecond * 1.5,
-              SwerveMap.Chassis.MaxAngularSpeedRadians,
-              SwerveMap.Chassis.MaxAngularSpeedRadians * 1.5);
+      var pathfindConstraints = new PathConstraints(
+          SwerveMap.Chassis.MaxSpeedMetersPerSecond,
+          SwerveMap.Chassis.MaxSpeedMetersPerSecond * 1.5,
+          SwerveMap.Chassis.MaxAngularSpeedRadians,
+          SwerveMap.Chassis.MaxAngularSpeedRadians * 1.5);
 
-          _activePathfindCommand = AutoBuilder.pathfindToPose(approachPose, pathfindConstraints)
-              .withTimeout(3); // TODO: Check this
+      _activePathfindCommand = stopAllMotorsCommand()
+          .andThen(Commands.runOnce(() -> {
+            // Cancel the command if it's already running
+            if (_activePathfindCommand != null && _activePathfindCommand.isScheduled()
+                && !_activePathfindCommand.isFinished()) {
+              _activePathfindCommand.cancel();
+            }
+          }))
+          .andThen(AutoBuilder.pathfindToPose(approachPose, pathfindConstraints, 0)
+              .withTimeout(5)); // TODO: Check this
+      // .andThen(setAutoAlignSetpointCommand(_inputs.GyroAngle.getDegrees()));
 
-          return _activePathfindCommand;
-        }));
-    // .andThen(setAutoAlignSetpointCommand(_inputs.GyroAngle.getDegrees()));
+      return _activePathfindCommand;
+    });
   }
 
   /**

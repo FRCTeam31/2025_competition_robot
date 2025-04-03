@@ -114,10 +114,10 @@ public class PwmLEDs extends SubsystemBase {
     }
 
     public Command setSectionPatternCommand(int section, LEDPattern pattern) {
-        return Commands.runOnce(() -> setSectionPattern(section, pattern));
+        return Commands.runOnce(() -> setSectionPattern(section, pattern)).ignoringDisable(true);
     }
 
     public Command setAllSectionPatternsCommand(LEDPattern pattern) {
-        return Commands.runOnce(() -> setAllSectionPatterns(pattern));
+        return Commands.runOnce(() -> setAllSectionPatterns(pattern)).ignoringDisable(true);
     }
 }
