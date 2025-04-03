@@ -6,7 +6,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
-import frc.robot.subsystems.endEffector.EndEffectorSubsystem.EndEffectorMap;
 
 public class EndEffectorSim implements IEndEffector {
 
@@ -23,13 +22,13 @@ public class EndEffectorSim implements IEndEffector {
 
     private void setupIntakeMotor() {
         _intakeMotor = new DCMotorSim(
-                LinearSystemId.createDCMotorSystem(DCMotor.getNeoVortex(1), 0.001, EndEffectorMap.GearRatio),
+                LinearSystemId.createDCMotorSystem(DCMotor.getNeoVortex(1), 0.001, EndEffectorMap.WristGearRatio),
                 DCMotor.getNeoVortex(1));
     }
 
     private void setupWristMotor(ExtendedPIDConstants pid) {
         _wristMotor = new DCMotorSim(
-                LinearSystemId.createDCMotorSystem(DCMotor.getNeoVortex(1), 0.001, EndEffectorMap.GearRatio),
+                LinearSystemId.createDCMotorSystem(DCMotor.getNeoVortex(1), 0.001, EndEffectorMap.WristGearRatio),
                 DCMotor.getNeoVortex(1));
 
     }
@@ -72,7 +71,7 @@ public class EndEffectorSim implements IEndEffector {
     }
 
     private double getWristAngle() {
-        double wristRotations = _wristMotor.getAngularPositionRotations() / EndEffectorMap.GearRatio;
+        double wristRotations = _wristMotor.getAngularPositionRotations() / EndEffectorMap.WristGearRatio;
 
         return Rotation2d.fromRotations(wristRotations).getDegrees();
     }

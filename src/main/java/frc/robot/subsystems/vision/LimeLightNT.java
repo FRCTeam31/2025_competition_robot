@@ -197,6 +197,10 @@ public class LimeLightNT implements AutoCloseable {
      * @param mode
      */
     public void setLedMode(int mode) {
+        if (mode < 0 || mode > 3) {
+            throw new IllegalArgumentException("LED mode must be between 0 and 3");
+        }
+
         m_limelightTable.getEntry("ledMode").setNumber(mode);
     }
 
@@ -229,20 +233,14 @@ public class LimeLightNT implements AutoCloseable {
     }
 
     /**
-     * Sets limelight’s operation mode.
-     *    0 = Vision processor.
-     *    1 = Driver Camera (Increases exposure, disables vision processing).
-     * @param mode
-     */
-    public void setCameraMode(int mode) {
-        m_limelightTable.getEntry("camMode").setNumber(mode);
-    }
-
-    /**
      * Sets limelight’s pipeline.
      * @param pipeline
      */
     public void setPipeline(int pipeline) {
+        if (pipeline < 0 || pipeline > 9) {
+            throw new IllegalArgumentException("Pipeline must be between 0 and 9");
+        }
+
         m_limelightTable.getEntry("pipeline").setNumber(pipeline);
     }
 
@@ -251,16 +249,11 @@ public class LimeLightNT implements AutoCloseable {
      * @param mode
      */
     public void setPiPStreamingMode(int mode) {
-        m_limelightTable.getEntry("stream").setNumber(mode);
-    }
+        if (mode < 0 || mode > 2) {
+            throw new IllegalArgumentException("Streaming mode must be between 0 and 2");
+        }
 
-    /**
-     * Allows users to take snapshots during a match
-     */
-    public void takeSnapshot() {
-        m_limelightTable.getEntry("snapshot").setNumber(0); // Reset
-        m_limelightTable.getEntry("snapshot").setNumber(1); // Take snapshot
-        m_limelightTable.getEntry("snapshot").setNumber(0); // Reset
+        m_limelightTable.getEntry("stream").setNumber(mode);
     }
 
     /**
@@ -268,10 +261,14 @@ public class LimeLightNT implements AutoCloseable {
      * @param pose
      */
     public void setCameraPose(Pose3d pose) {
-        var poseData = new double[] { pose.getTranslation().getX(), pose.getTranslation().getY(),
-                pose.getTranslation().getZ(), Units.radiansToDegrees(pose.getRotation().getX()),
+        var poseData = new double[] {
+                pose.getTranslation().getX(),
+                pose.getTranslation().getY(),
+                pose.getTranslation().getZ(),
+                Units.radiansToDegrees(pose.getRotation().getX()),
                 Units.radiansToDegrees(pose.getRotation().getY()),
-                Units.radiansToDegrees(pose.getRotation().getZ()), };
+                Units.radiansToDegrees(pose.getRotation().getZ()),
+        };
 
         m_limelightTable.getEntry("camerapose_robotspace_set").setDoubleArray(poseData);
     }

@@ -74,7 +74,15 @@
   {
     "name": "/Preferences/autoroutine-history",
     "type": "string",
-    "value": "{\"TestAuto1740265219290\":[\"S2R-to-GH\",\"GH-to-SRC2\",\"EnableAutoAlignRotationFeedback\"]}",
+    "value": "{\"TestAuto1743543496666\":[\"S6-to-C\",\"Score-L4\",\"C-to-SRC2\",\"SRC2-to-G\",\"Score-L4\"],\"TestAuto1743544021565\":[\"S3-to-A\",\"Score-L4\",\"A-to-SRC1\",\"SRC1-to-L\",\"Score-L4\"],\"TestAuto1743544435206\":[\"S3-to-A\",\"Score-L4\",\"A-to-SRC1\",\"SRC1-to-L\",\"Score-L4\",\"L-to-SRC2\"],\"TestAuto1743545631536\":[\"S3-to-A\",\"Score-L4\",\"A-to-SRC1\",\"Pickup-Source\",\"SRC1-to-L\",\"Score-L2\"],\"TestAuto1743546579369\":[\"S3-to-A\",\"Score-L2\",\"A-to-SRC1\",\"Pickup-Source\",\"SRC1-to-L\",\"Score-L4\"],\"TestAuto1743546798022\":[\"S6-to-C\",\"Score-L4\",\"C-to-SRC2\",\"SRC2-to-G\",\"Score-L4\"],\"TestAuto1743547048861\":[\"S6-to-C\",\"Score-L4\",\"C-to-SRC2\",\"SRC2-to-G\",\"Score-L4\"],\"TestAuto1743547091486\":[\"S3-to-A\",\"Score-L4\",\"A-to-SRC1\",\"Pickup-Source\",\"SRC1-to-L\",\"Score-L2\"]}",
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/autoroutine-preloader",
+    "type": "string",
+    "value": "S2R-to-EF,DisableAutoAlignRotationFeedback,EF-to-SRC2,SRC2-to-AB,AB-to-SRC1",
     "properties": {
       "persistent": true
     }

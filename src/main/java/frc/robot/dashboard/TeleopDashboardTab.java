@@ -30,7 +30,7 @@ public class TeleopDashboardTab extends DashboardSection {
                 super("Driver");
 
                 putBoolean(_allianceBoxName, false);
-                putDouble(_headingGyroName, 0.0);
+                putNumber(_headingGyroName, 0.0);
                 putBoolean(_frontPoseEstimationSwitchName, false);
                 putBoolean(_rearPoseEstimationSwitchName, false);
 
@@ -79,7 +79,7 @@ public class TeleopDashboardTab extends DashboardSection {
         }
 
         public void setGyroHeading(Rotation2d heading) {
-                putDouble(_headingGyroName, heading.getDegrees());
+                putNumber(_headingGyroName, heading.getDegrees());
         }
 
         public void setFrontPoseEstimationSwitch(boolean enabled) {
