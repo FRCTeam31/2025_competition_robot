@@ -31,7 +31,7 @@ public class ElevatorMap {
         //             10.5, 4.5, 0, 1.05);
 
         public static final MRSGConstants ElevatorControllerConstantsSmall = new MRSGConstants(
-                        12, 4.5, 0, 1.05);
+                        11.5, 4.5, 0, 1.05);
 
         public static final MRSGConstants ElevatorControllerConstantsMedium = new MRSGConstants(
                         8, 4, 0, 0);
