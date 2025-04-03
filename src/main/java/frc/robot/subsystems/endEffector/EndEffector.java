@@ -130,14 +130,25 @@ public class EndEffector extends SubsystemBase {
     }
 
     private void manageIntakeSpeeds(boolean runIntakeOut) {
+        // Driver is trying to eject && InTeleop
         if (runIntakeOut && DriverStation.isTeleopEnabled()) {
             _endEffector.setIntakeSpeed(EndEffectorMap.EjectSpeed);
-        } else if (_intakeIsEjecting) {
-            _endEffector.setIntakeSpeed(EndEffectorMap.EjectSpeed);
+            return;
+        }
 
-        } else if (!_intakeIsEjecting && !_inputs.CoralLimitSwitchState) {
-            _endEffector.setIntakeSpeed(EndEffectorMap.IntakeSpeed);
-        } else {
+        // Use instance variable (used in automation)
+        if (_intakeIsEjecting) {
+            _endEffector.setIntakeSpeed(EndEffectorMap.EjectSpeed);
+            return;
+        }
+
+        // Default to intaking
+        // if (!_intakeIsEjecting && !_inputs.CoralLimitSwitchState) {
+        //     _endEffector.setIntakeSpeed(EndEffectorMap.IntakeSpeed);
+        //     return;
+        // }
+
+        if (_inputs.CoralLimitSwitchState) {
             _endEffector.stopIntakeMotor();
         }
     }
@@ -250,15 +261,23 @@ public class EndEffector extends SubsystemBase {
         });
     }
 
+    public Command disableEjectCommand() {
+        return this.runOnce(() -> {
+            _endEffector.stopIntakeMotor();
+            _intakeIsEjecting = false;
+        });
+    }
+
     public Command scoreCoral() {
-        return enableIntakeCommand() // intake until wrist is at setpoint
-                .andThen(Commands.waitUntil(this::wristAtSetpoint))
+        // return enableIntakeCommand() // intake until wrist is at setpoint
+        return Commands.waitUntil(this::wristAtSetpoint)
                 .andThen(enableEjectCommand()) // eject until limit switch is let go (or times out)
                 .until(() -> !_inputs.CoralLimitSwitchState).withTimeout(2)
                 .andThen(Commands.waitSeconds(0.75)) // slight delay to allow the coral to begin ejecting
                 .andThen(setWristSetpointCommand(-30)) // set the angle up while ejecting
                 .andThen(Commands.waitSeconds(0.75))
-                .andThen(enableIntakeCommand());
+                .andThen(disableEjectCommand());
+        // .andThen(enableIntakeCommand());
     }
 
     public Command pickupCoral() {
@@ -266,13 +285,5 @@ public class EndEffector extends SubsystemBase {
                 .andThen(Commands.waitUntil(() -> _inputs.CoralLimitSwitchState))
                 .andThen(setWristSetpointCommand(0))
                 .andThen(Commands.print(">> INTAKE: Coral picked up"));
-    }
-
-    // TODO: Add more named commands for running the intake and rotating the wrist to predefined setpoints (See above todo)
-    public Map<String, Command> getNamedCommands() {
-        return Map.of("Stop Intake", stopIntakeMotorCommand(),
-                "Stop Both Motors", stopBothMotorsCommand(),
-                "Intake Coral", enableIntakeCommand(),
-                "Eject Coral", enableEjectCommand());
     }
 }

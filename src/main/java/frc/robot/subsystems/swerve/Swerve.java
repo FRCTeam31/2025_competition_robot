@@ -123,10 +123,6 @@ public class Swerve extends SubsystemBase {
 
   // #region Control methods
 
-  public void setControlProfile(SwerveControlSuppliers controlSuppliers) {
-    _controlSuppliers = controlSuppliers;
-  }
-
   /**
    * Resets the gyro angle
    */

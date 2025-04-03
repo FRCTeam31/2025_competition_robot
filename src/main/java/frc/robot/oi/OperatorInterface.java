@@ -35,7 +35,6 @@ public class OperatorInterface {
                                 SwerveMap.Control.DeadbandCurveWeight);
 
                 swerve.setDefaultCommand(swerve.driveFieldRelativeCommand(controlProfile));
-                swerve.setControlProfile(controlProfile);
 
                 DriverController.x()
                                 .onTrue(swerve.disableAutoAlignCommand());
