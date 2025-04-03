@@ -54,8 +54,7 @@ public class EndEffector extends SubsystemBase {
 
     public void manageWristControl() {
         var inDangerZone = Container.Elevator.getElevatorPositionMeters() <= EndEffectorMap.LowerElevatorSafetyLimit;
-        var isSafeForManualControl = Container.Elevator
-                .getElevatorPositionMeters() >= EndEffectorMap.LowerElevatorSafetyLimit
+        var isSafeForManualControl = !inDangerZone
                 && _inputs.EndEffectorAngleDegrees <= EndEffectorMap.WristMaxManuallyControllableAngle;
 
         var tryingToUseManualControl = (_manualControlSpeed != 0 || _wristManuallyControlled);
