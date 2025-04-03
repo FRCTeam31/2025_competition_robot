@@ -323,6 +323,16 @@ public class Swerve extends SubsystemBase {
       }
 
       driveRobotRelative(speeds);
+    }).handleInterrupt(() -> DriverStation.reportWarning("[DRIVE] Default command interrupted", false));
+  }
+
+  public Command cancelPathfindingCommand() {
+    return Commands.runOnce(() -> {
+      // Cancel the command if it's already running
+      if (_activePathfindCommand != null && _activePathfindCommand.isScheduled()
+          && !_activePathfindCommand.isFinished()) {
+        _activePathfindCommand.cancel();
+      }
     });
   }
 
@@ -369,16 +379,16 @@ public class Swerve extends SubsystemBase {
           SwerveMap.Chassis.MaxAngularSpeedRadians,
           SwerveMap.Chassis.MaxAngularSpeedRadians * 1.5);
 
-      _activePathfindCommand = stopAllMotorsCommand()
-          .andThen(Commands.runOnce(() -> {
-            // Cancel the command if it's already running
-            if (_activePathfindCommand != null && _activePathfindCommand.isScheduled()
-                && !_activePathfindCommand.isFinished()) {
-              _activePathfindCommand.cancel();
-            }
-          }))
-          .andThen(AutoBuilder.pathfindToPose(approachPose, pathfindConstraints, 0)
-              .withTimeout(5)); // TODO: Check this
+      _activePathfindCommand = Commands.sequence(
+          cancelPathfindingCommand(),
+          stopAllMotorsCommand(),
+          AutoBuilder.pathfindToPose(approachPose, pathfindConstraints, 0)
+              .withTimeout(5)
+              .finallyDo(_swervePackager::stopAllMotors),
+          stopAllMotorsCommand())
+          .handleInterrupt(() -> DriverStation.reportWarning("[DRIVE] driveToReefTargetBranch interrupted", false))
+          .asProxy();
+
       // .andThen(setAutoAlignSetpointCommand(_inputs.GyroAngle.getDegrees()));
 
       return _activePathfindCommand;
