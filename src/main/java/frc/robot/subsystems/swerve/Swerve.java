@@ -36,7 +36,6 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.PrimeHolonomicDriveController;
 import org.prime.control.SwerveControlSuppliers;
-import org.prime.pose.PoseUtil;
 import org.prime.vision.LimelightInputs;
 
 public class Swerve extends SubsystemBase {
@@ -217,7 +216,7 @@ public class Swerve extends SubsystemBase {
 
     var llPose = limelightInputs.BlueAllianceOriginFieldSpaceRobotPose;
 
-    if (_inputs.EstimatedRobotPose.getTranslation().getDistance(llPose.Pose.toPose2d().getTranslation()) <= 1) {
+    if (_inputs.EstimatedRobotPose.getTranslation().getDistance(llPose.Pose.toPose2d().getTranslation()) <= 1.5) {
       _swervePackager.addPoseEstimatorVisionMeasurement(
           llPose.Pose.toPose2d(),
           llPose.Timestamp,

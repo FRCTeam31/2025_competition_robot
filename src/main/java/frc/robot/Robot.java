@@ -160,7 +160,6 @@ public class Robot extends LoggedRobot {
    */
   @Override
   public void autonomousInit() {
-    Elastic.selectTab("Auto");
     Container.Swerve.disableAutoAlignCommand().schedule();
 
     // Cancel any auto command that's still running and reset the subsystem states
@@ -196,10 +195,6 @@ public class Robot extends LoggedRobot {
     DataLogManager.log("Teleop Enabled");
     _hasEnteredTeleop = true;
 
-    if (DriverStation.isFMSAttached()) {
-      Elastic.selectTab("Teleop");
-    }
-
     if (_autonomousCommand != null) {
       // Cancel the auto command if it's still running
       _autonomousCommand.cancel();
@@ -220,8 +215,6 @@ public class Robot extends LoggedRobot {
    */
   @Override
   public void testInit() {
-    Elastic.selectTab("Test");
-
     CommandScheduler.getInstance().cancelAll();
     Container.Swerve.disableAutoAlignCommand().schedule();
   }

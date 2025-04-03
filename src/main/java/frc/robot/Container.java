@@ -127,19 +127,19 @@ public class Container {
 
   public static Map<String, Supplier<Command>> getNamedCommandSuppliers() {
     return Map.of(
-        "Score-L4", () -> scoreAtHeight(ElevatorPosition.kL4),
-        "Score-L3", () -> scoreAtHeight(ElevatorPosition.kL3),
-        "Score-L2", () -> scoreAtHeight(ElevatorPosition.kL2),
-        "Score-Trough", () -> scoreAtHeight(ElevatorPosition.kTrough),
+        "Score-L4", () -> scoreAtHeightAndLower(ElevatorPosition.kL4),
+        "Score-L3", () -> scoreAtHeightAndLower(ElevatorPosition.kL3),
+        "Score-L2", () -> scoreAtHeightAndLower(ElevatorPosition.kL2),
+        "Score-Trough", () -> scoreAtHeightAndLower(ElevatorPosition.kTrough),
         "Pickup-Source", () -> pickupFromSourceAndLower());
   }
 
   public static Map<String, Command> getNamedCommands() {
     return Map.of(
-        "Score-L4", scoreAtHeight(ElevatorPosition.kL4),
-        "Score-L3", scoreAtHeight(ElevatorPosition.kL3),
-        "Score-L2", scoreAtHeight(ElevatorPosition.kL2),
-        "Score-Trough", scoreAtHeight(ElevatorPosition.kTrough),
+        "Score-L4", scoreAtHeightAndLower(ElevatorPosition.kL4),
+        "Score-L3", scoreAtHeightAndLower(ElevatorPosition.kL3),
+        "Score-L2", scoreAtHeightAndLower(ElevatorPosition.kL2),
+        "Score-Trough", scoreAtHeightAndLower(ElevatorPosition.kTrough),
         "Pickup-Source", pickupFromSourceAndLower());
   }
   //#endregion

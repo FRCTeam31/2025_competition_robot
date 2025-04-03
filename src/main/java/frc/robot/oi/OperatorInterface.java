@@ -46,9 +46,9 @@ public class OperatorInterface {
                                 .onTrue(swerve.disableAutoAlignCommand());
 
                 // When L or R bumper is pressed, and Y is unpressed, drive to the in-view reef target branch
-                DriverController.leftBumper().and(DriverController.y().negate())
+                DriverController.leftBumper().and(DriverController.y().negate()).and(DriverController.b().negate())
                                 .onTrue(swerve.driveToReefTargetBranch(ReefBranchSide.kLeft, controlProfile));
-                DriverController.rightBumper().and(DriverController.y().negate())
+                DriverController.rightBumper().and(DriverController.y().negate()).and(DriverController.b().negate())
                                 .onTrue(swerve.driveToReefTargetBranch(ReefBranchSide.kRight, controlProfile));
 
                 // Climber Controls
