@@ -160,7 +160,9 @@ public class Swerve extends SubsystemBase {
     robotRelativeChassisSpeeds = ChassisSpeeds.discretize(robotRelativeChassisSpeeds, 0.02);
     Logger.recordOutput(getName() + "/desiredChassisSpeeds", robotRelativeChassisSpeeds);
 
-    if (DriverStation.isTeleopEnabled()) {
+    var isRunningPathfind = _activePathfindCommand != null && _activePathfindCommand.isScheduled()
+        && !_activePathfindCommand.isFinished();
+    if (DriverStation.isTeleopEnabled() && isRunningPathfind) {
       double elevatorHeight = Container.Elevator.getElevatorPositionMeters();
       double speedCoef = DriveSpeedSlowCoeffient.get(elevatorHeight);
       speedCoef = elevatorHeight < 0.3 ? 1 : speedCoef;
