@@ -125,7 +125,7 @@ public class Elevator extends SubsystemBase {
         if (_elevatorManaullyControlled) {
             var manualControlVolts = manualControlSpeed * 12;
             setMotorVoltageWithLimitSwitches(manualControlSpeed < 0
-                    ? (manualControlVolts * 0.75)
+                    ? (manualControlVolts * 0.50)
                     : manualControlVolts);
         } else {
             var ec = _elevatorController.calculate(_inputs.ElevatorDistanceMeters,
