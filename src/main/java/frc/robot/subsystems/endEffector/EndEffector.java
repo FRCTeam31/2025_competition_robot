@@ -20,6 +20,7 @@ public class EndEffector extends SubsystemBase {
     private IEndEffector _endEffector;
     private PIDController _wristPID;
     private boolean _wristManuallyControlled = false;
+    private boolean _previouslyManaullyControlled;
 
     // private LockableEvent<ElevatorPosition> _lockableSetpoint = new LockableEvent<>(
     //         null,
@@ -58,13 +59,13 @@ public class EndEffector extends SubsystemBase {
                 && _inputs.EndEffectorAngleDegrees <= EndEffectorMap.WristMaxManuallyControllableAngle;
 
         var tryingToUseManualControl = _manualControlSpeed != 0;
-        boolean previouslyManaullyControlled = _wristManuallyControlled;
+        _previouslyManaullyControlled = _wristManuallyControlled;
         _wristManuallyControlled = (isSafeForManualControl && tryingToUseManualControl);
 
         if (_wristManuallyControlled && !inDangerZone) {
             runWristManual(_manualControlSpeed);
         } else {
-            if (previouslyManaullyControlled && !_wristManuallyControlled) {
+            if (_previouslyManaullyControlled && !_wristManuallyControlled) {
                 _wristSetpoint = _inputs.EndEffectorAngleDegrees; // Remember current angle
             }
             seekWristAnglePID(inDangerZone);
