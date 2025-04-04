@@ -57,12 +57,16 @@ public class EndEffector extends SubsystemBase {
         var isSafeForManualControl = !inDangerZone
                 && _inputs.EndEffectorAngleDegrees <= EndEffectorMap.WristMaxManuallyControllableAngle;
 
-        var tryingToUseManualControl = (_manualControlSpeed != 0 || _wristManuallyControlled);
+        var tryingToUseManualControl = _manualControlSpeed != 0;
+        boolean previouslyManaullyControlled = _wristManuallyControlled;
         _wristManuallyControlled = (isSafeForManualControl && tryingToUseManualControl);
 
         if (_wristManuallyControlled && !inDangerZone) {
             runWristManual(_manualControlSpeed);
         } else {
+            if (previouslyManaullyControlled && !_wristManuallyControlled) {
+                _wristSetpoint = _inputs.EndEffectorAngleDegrees; // Remember current angle
+            }
             seekWristAnglePID(inDangerZone);
         }
     }
