@@ -32,10 +32,10 @@ public class ElevatorReal implements IElevator {
 
         SparkMaxConfig leftMotorConfig = new SparkMaxConfig();
         SparkMaxConfig rightMotorConfig = new SparkMaxConfig();
-        leftMotorConfig.smartCurrentLimit(40);
-        rightMotorConfig.smartCurrentLimit(40);
-        leftMotorConfig.openLoopRampRate(2);
-        rightMotorConfig.openLoopRampRate(2);
+        leftMotorConfig.smartCurrentLimit(60);
+        rightMotorConfig.smartCurrentLimit(60);
+        leftMotorConfig.openLoopRampRate(1);
+        rightMotorConfig.openLoopRampRate(1);
 
         leftMotorConfig.idleMode(IdleMode.kBrake);
         rightMotorConfig.idleMode(IdleMode.kBrake);

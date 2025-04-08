@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.dashboard.TeleopDashboardTab;
-import frc.robot.game.ReefBranchSide;
 import frc.robot.dashboard.DashboardSection;
 import frc.robot.oi.OperatorInterface;
 import frc.robot.oi.routine.BuildableAutoRoutine;
@@ -66,7 +65,6 @@ public class Container {
       // Register the named commands from each subsystem that may be used in PathPlanner
       NamedCommands.registerCommands(Swerve.getNamedCommands());
       NamedCommands.registerCommands(Elevator.getNamedCommands());
-      NamedCommands.registerCommands(getNamedCommands());
 
       // Create our custom auto builder
       AutoBuilder = new BuildableAutoRoutine(getNamedCommandSuppliers());
@@ -128,20 +126,11 @@ public class Container {
 
   public static Map<String, Supplier<Command>> getNamedCommandSuppliers() {
     return Map.of(
-        "Score-L4", () -> scoreAtHeight(ElevatorPosition.kL4),
-        "Score-L3", () -> scoreAtHeight(ElevatorPosition.kL3),
-        "Score-L2", () -> scoreAtHeight(ElevatorPosition.kL2),
-        "Score-Trough", () -> scoreAtHeight(ElevatorPosition.kTrough),
+        "Score-L4", () -> scoreAtHeightAndLower(ElevatorPosition.kL4),
+        "Score-L3", () -> scoreAtHeightAndLower(ElevatorPosition.kL3),
+        "Score-L2", () -> scoreAtHeightAndLower(ElevatorPosition.kL2),
+        "Score-Trough", () -> scoreAtHeightAndLower(ElevatorPosition.kTrough),
         "Pickup-Source", () -> pickupFromSourceAndLower());
-  }
-
-  public static Map<String, Command> getNamedCommands() {
-    return Map.of(
-        "Score-L4", scoreAtHeight(ElevatorPosition.kL4),
-        "Score-L3", scoreAtHeight(ElevatorPosition.kL3),
-        "Score-L2", scoreAtHeight(ElevatorPosition.kL2),
-        "Score-Trough", scoreAtHeight(ElevatorPosition.kTrough),
-        "Pickup-Source", pickupFromSourceAndLower());
   }
   //#endregion
 }

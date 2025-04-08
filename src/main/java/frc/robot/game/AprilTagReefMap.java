@@ -76,6 +76,6 @@ public class AprilTagReefMap {
                 .plus(new Translation2d(approachDistance, branchPose.getRotation()));
 
         // The robot should be facing the reef, so use the AprilTag's rotation
-        return new Pose2d(approachTranslation, branchPose.getRotation());
+        return new Pose2d(approachTranslation, branchPose.getRotation().plus(Rotation2d.fromDegrees(180)));
     }
 }

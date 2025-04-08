@@ -160,7 +160,7 @@ public class Climber extends SubsystemBase {
         return moveCommand.until(limitSwitch).andThen(stopCommand).finallyDo(() -> {
             _climber.stopHooksMotors();
             _climber.stopWinchMotors();
-        });
+        }).withTimeout(5);
     }
 
     /**

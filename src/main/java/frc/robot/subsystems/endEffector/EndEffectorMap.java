@@ -28,7 +28,7 @@ public class EndEffectorMap {
         public static final double WristMaxManuallyControllableAngle = -25;
         public static final double WristNonVerticalAngleThreshold = -110;
 
-        public static final double LowerElevatorSafetyLimit = 0.15;
+        public static final double LowerElevatorSafetyLimit = 0.0738;
         public static final Map<ElevatorPosition, Double> ElevatorHeightWristAngleMap = Map.of(
                         ElevatorPosition.kAbsoluteMinimum, 0.0,
                         ElevatorPosition.kSource, -42.36,

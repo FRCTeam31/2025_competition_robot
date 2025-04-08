@@ -17,7 +17,7 @@ public class ClimberMap {
     public static final double ClimbingPitchThresholdDegrees = 5;
     public static final double ClimberArmlengthMeters = Units.inchesToMeters(16);
     public static final double ClimberOutputShaftDiameterMeters = Units.inchesToMeters(0.5);
-    public static final double FullyClimbedOutputRotations = 3;
+    public static final double FullyClimbedOutputRotations = 2.8;
 
     // Speeds and timeouts
     public static final double WinchInSpeed = 1;
