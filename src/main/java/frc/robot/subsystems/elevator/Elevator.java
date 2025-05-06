@@ -7,9 +7,11 @@ import java.util.Map;
 import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.Logger;
-import org.prime.control.ElevatorController;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.units.DistanceUnit;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
@@ -32,8 +34,18 @@ public class Elevator extends SubsystemBase {
 
     private ElevatorInputsAutoLogged _inputs = new ElevatorInputsAutoLogged();
     private IElevator _elevatorIO;
-    public ElevatorController _elevatorController = new ElevatorController(ElevatorMap.ElevatorControllerConstantsSmall,
-            ElevatorMap.MaxElevatorHeight);
+
+    private final ElevatorFeedforward m_feedforward = new ElevatorFeedforward(1, 1, 1);
+
+    // Create a motion profile with the given maximum voltage and characteristics kV, kA
+    // These gains should match your feedforward kV, kA for best results.
+    private final ExponentialProfile m_profile = new ExponentialProfile(
+            ExponentialProfile.Constraints.fromCharacteristics(10, 1, 1));
+    private ExponentialProfile.State m_goal = new ExponentialProfile.State(0, 0);
+    private ExponentialProfile.State m_setpoint = new ExponentialProfile.State(0, 0);
+
+    private final PIDController _elevatorPidController = ElevatorMap.PositionPID.createPIDController(0.02);
+
     private boolean _elevatorManaullyControlled = false;
 
     private BooleanEvent _positionResetEvent;
@@ -57,7 +69,7 @@ public class Elevator extends SubsystemBase {
      * @return
      */
     public boolean atSetpoint() {
-        return _elevatorController.atSetpoint(0.02);
+        return _elevatorPidController.atSetpoint();
     }
 
     /**
@@ -128,11 +140,21 @@ public class Elevator extends SubsystemBase {
                     ? (manualControlVolts * 0.50)
                     : manualControlVolts);
         } else {
-            var ec = _elevatorController.calculate(_inputs.ElevatorDistanceMeters,
-                    _inputs.ElevatorSpeedMetersPerSecond);
+            // Retrieve the profiled setpoint for the next timestep. This setpoint moves
+            // toward the goal while obeying the constraints.
+            ExponentialProfile.State next = m_profile.calculate(0.02, m_setpoint, m_goal);
 
-            SmartDashboard.putNumber(getName() + "/Raw-EC", ec);
-            setMotorVoltageWithLimitSwitches(ec);
+            // Send setpoint to offboard controller PID
+            _elevatorPidController.setSetpoint(
+                    m_setpoint.position);
+
+            var ff = m_feedforward.calculate(next.velocity) / 12.0;
+            var pid = _elevatorPidController.calculate(_inputs.ElevatorDistanceMeters);
+
+            m_setpoint = next;
+
+            SmartDashboard.putNumber(getName() + "/ffPID", ff + pid);
+            setMotorVoltageWithLimitSwitches(ff + pid);
         }
     }
 
@@ -182,30 +204,17 @@ public class Elevator extends SubsystemBase {
     }
 
     private void setPositionSetpoint(ElevatorPosition pos) {
-        _elevatorController.setSetpoint(_positionMap.get(pos));
+        m_goal = new ExponentialProfile.State(_positionMap.get(pos), 0);
         disableElevatorManualControl();
 
-        if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.5) {
-            _elevatorController.setM(ElevatorMap.ElevatorControllerConstantsAbsoultelyMassive.M);
-            _elevatorController.setR(ElevatorMap.ElevatorControllerConstantsAbsoultelyMassive.R);
-        } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.4) {
-            _elevatorController.setM(ElevatorMap.ElevatorControllerConstantsBig.M);
-            _elevatorController.setR(ElevatorMap.ElevatorControllerConstantsBig.R);
-        } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) > 0.2) {
-            _elevatorController.setM(ElevatorMap.ElevatorControllerConstantsMedium.M);
-            _elevatorController.setR(ElevatorMap.ElevatorControllerConstantsMedium.R);
-        } else if (Math.abs(_positionMap.get(pos) - _inputs.ElevatorDistanceMeters) < 0.2) {
-            _elevatorController.setM(ElevatorMap.ElevatorControllerConstantsSmall.M);
-            _elevatorController.setR(ElevatorMap.ElevatorControllerConstantsSmall.R);
-        }
     }
 
     @Override
     public void periodic() {
         _elevatorIO.updateInputs(_inputs);
         Logger.processInputs(getName(), _inputs);
-        Logger.recordOutput(getName() + "EC-setpoint", _elevatorController.getSetpoint());
-        Logger.recordOutput(getName() + "/EC-error", _elevatorController.getError());
+        Logger.recordOutput(getName() + "/PID-setpoint", _elevatorPidController.getSetpoint());
+        Logger.recordOutput(getName() + "/PID-error", _elevatorPidController.getError());
 
         SmartDashboard.putBoolean(getName() + " is elevator manaully controlled", _elevatorManaullyControlled);
     }
@@ -229,7 +238,7 @@ public class Elevator extends SubsystemBase {
                 .withTimeout(7)
                 .andThen(Commands.runOnce(() -> {
                     _elevatorIO.stopMotors();
-                    _elevatorController.setSetpoint(0);
+                    _elevatorPidController.setSetpoint(0);
                 }));
     }
 
