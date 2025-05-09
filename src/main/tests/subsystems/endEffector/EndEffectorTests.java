@@ -1,3 +1,5 @@
+package tests.subsystems.endEffector;
+
 public class EndEffectorTests {
     private EndEffector endEffector;
     private IEndEffector mockHardware;
