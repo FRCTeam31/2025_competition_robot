@@ -1,4 +1,12 @@
-package tests.subsystems.endEffector;
+package test.subsystems.endEffector;
+
+import frc.robot.subsystems.endEffector.EndEffector;
+import frc.robot.subsystems.endEffector.IEndEffector;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 public class EndEffectorTests {
     private EndEffector endEffector;
