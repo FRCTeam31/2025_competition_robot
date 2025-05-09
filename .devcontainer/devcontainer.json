@@ -1,0 +1,4 @@
+{
+  "image": "wpilib/roborio-cross-ubuntu:2025-22.04",
+  "features": {}
+}
