@@ -1,7 +1,6 @@
 package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -9,9 +8,6 @@ import frc.robot.SuperStructure;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import org.littletonrobotics.junction.Logger;
-import org.prime.vision.LimelightInputs;
 
 public class Vision extends SubsystemBase {
     public class VisionMap {
@@ -23,25 +19,17 @@ public class Vision extends SubsystemBase {
         };
     }
 
-    Map<LimelightNameEnum, LimeLightNT> _limelights = new HashMap<>();
+    Map<LimelightNameEnum, LimeLight> _limelights = new HashMap<>();
 
     public Vision() {
         setName("Vision");
-        var defaultInstance = NetworkTableInstance.getDefault();
 
-        _limelights.put(LimelightNameEnum.kFront, new LimeLightNT(defaultInstance, VisionMap.LimelightFrontName));
-        _limelights.put(LimelightNameEnum.kRear, new LimeLightNT(defaultInstance, VisionMap.LimelightRearName));
+        _limelights.put(LimelightNameEnum.kFront, new LimeLight(VisionMap.LimelightFrontName));
+        _limelights.put(LimelightNameEnum.kRear, new LimeLight(VisionMap.LimelightRearName));
 
-        SuperStructure.LimelightStates.put(LimelightNameEnum.kFront, new LimelightInputs());
-        SuperStructure.LimelightStates.put(LimelightNameEnum.kRear, new LimelightInputs());
-    }
-
-    /**
-     * Gets the inputs for the specified limelight.
-     * @param llIndex The index of the limelight to get inputs from.
-     */
-    public LimelightInputs getLimelightInputs(LimelightNameEnum ll) {
-        return SuperStructure.LimelightStates.get(ll);
+        // Initialize the limelight states
+        SuperStructure.LimelightStates.put(LimelightNameEnum.kFront, new LimelightInputsAutoLogged());
+        SuperStructure.LimelightStates.put(LimelightNameEnum.kRear, new LimelightInputsAutoLogged());
     }
 
     /**
@@ -98,10 +86,10 @@ public class Vision extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // Update all limelight inputs
+        // Update superstructure
         for (var ll : _limelights.keySet()) {
             _limelights.get(ll).updateInputs(SuperStructure.LimelightStates.get(ll));
-            Logger.processInputs("Vision/LL/" + ll.name(), SuperStructure.LimelightStates.get(ll));
+            // Logger.processInputs("Vision/LL/" + ll.name(), SuperStructure.LimelightStates.get(ll));
         }
     }
 
@@ -109,7 +97,7 @@ public class Vision extends SubsystemBase {
         return apriltagId >= 1 && apriltagId <= 22;
     }
 
-    public static boolean isReefTag(int tagId) {
+    public static boolean isReefTag(double tagId) {
         for (var i = 0; i < VisionMap.ReefAprilTags.length; i++) {
             if (tagId == VisionMap.ReefAprilTags[i])
                 return true;

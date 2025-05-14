@@ -6,6 +6,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
@@ -24,6 +25,7 @@ import frc.robot.Elastic;
 import frc.robot.Robot;
 import frc.robot.SuperStructure;
 import frc.robot.subsystems.swerve.util.AutoAlign;
+import frc.robot.subsystems.vision.LimelightInputs;
 import frc.robot.subsystems.vision.LimelightNameEnum;
 import frc.robot.subsystems.vision.Vision;
 
@@ -37,7 +39,6 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.PrimeHolonomicDriveController;
 import org.prime.control.SwerveControlSuppliers;
-import org.prime.vision.LimelightInputs;
 
 public class Swerve extends SubsystemBase {
 
@@ -162,7 +163,7 @@ public class Swerve extends SubsystemBase {
     var isRunningPathfind = _activePathfindCommand != null && _activePathfindCommand.isScheduled()
         && !_activePathfindCommand.isFinished();
     if (DriverStation.isTeleopEnabled() && !isRunningPathfind) {
-      double elevatorHeight = Container.Elevator.getElevatorPositionMeters();
+      double elevatorHeight = SuperStructure.ElevatorState.DistanceMeters;
       double speedCoef = DriveSpeedSlowCoeffient.get(elevatorHeight);
       speedCoef = elevatorHeight < 0.3 ? 1 : speedCoef;
 
@@ -202,26 +203,33 @@ public class Swerve extends SubsystemBase {
       return;
     }
 
-    evaluatePoseEstimation(Container.Vision.getLimelightInputs(LimelightNameEnum.kFront));
-    evaluatePoseEstimation(Container.Vision.getLimelightInputs(LimelightNameEnum.kRear));
+    evaluatePoseEstimation(SuperStructure.LimelightStates.get(LimelightNameEnum.kFront));
+    evaluatePoseEstimation(SuperStructure.LimelightStates.get(LimelightNameEnum.kRear));
   }
 
   /**
    * Evaluates a limelight pose and feeds it into the pose estimator
    */
-  private void evaluatePoseEstimation(LimelightInputs limelightInputs) {
-    // If we have a valid target, update the pose estimator
-    if (!Vision.isAprilTagIdValid(limelightInputs.ApriltagId))
+  private void evaluatePoseEstimation(LimelightInputs llInputs) {
+    // If no tags in view, reject the update
+    if (llInputs.BotPoseEstimate.tagCount == 0)
       return;
 
-    var llPose = limelightInputs.BlueAllianceOriginFieldSpaceRobotPose;
+    if (llInputs.BotPoseEstimate.tagCount == 1 && llInputs.BotPoseEstimate.rawFiducials.length == 1) {
+      boolean isValidTarget = Vision.isAprilTagIdValid(llInputs.BotPoseEstimate.rawFiducials[0].id);
+      boolean tooAmbiguous = llInputs.BotPoseEstimate.rawFiducials[0].ambiguity > .7;
+      boolean tooFar = llInputs.BotPoseEstimate.rawFiducials[0].distToCamera > 3;
 
-    if (SuperStructure.SwerveState.EstimatedRobotPose.getTranslation().getDistance(llPose.Pose.toPose2d().getTranslation()) <= 1.5) {
-      _swervePackager.addPoseEstimatorVisionMeasurement(
-          llPose.Pose.toPose2d(),
-          llPose.Timestamp,
-          llPose.getStdDeviations());
+      // If the tag is not valid, too ambiguous, or too far, reject the update
+      if (!isValidTarget || tooAmbiguous || tooFar)
+        return;
     }
+
+    // If we've made it this far, we can trust the pose estimate
+    _swervePackager.addPoseEstimatorVisionMeasurement(
+        llInputs.BotPoseEstimate.pose,
+        llInputs.BotPoseEstimate.timestampSeconds,
+        VecBuilder.fill(.5, .5, 9999999));
   }
 
   // #endregion
@@ -315,26 +323,32 @@ public class Swerve extends SubsystemBase {
    */
   public Command driveToReefTargetBranch(ReefBranchSide branchSide, SwerveControlSuppliers controlSuppliers) {
     return this.defer(() -> {
-      var llInputs = Container.Vision.getLimelightInputs(LimelightNameEnum.kFront);
+      var llInputs = SuperStructure.LimelightStates.get(LimelightNameEnum.kFront);
 
-      if (!Vision.isReefTag(llInputs.ApriltagId)) {
-        Container.Vision.blinkLed(LimelightNameEnum.kRear, 2);
+      if (llInputs.CurrentResults.targets_Fiducials.length != 1 ||
+          !Vision.isReefTag(llInputs.CurrentResults.targets_Fiducials[0].fiducialID)) {
+
+        // TODO: figure out how to do this
+        // Container.Vision.blinkLed(LimelightNameEnum.kRear, 2);
         Elastic.sendWarning("Command Failed", "No reef tag in view");
 
         return Commands.print("[SWERVE] - No reef tag in view");
       }
 
-      var reefSide = AprilTagReefMap.getReefSide(llInputs.ApriltagId);
+      var tagId = llInputs.CurrentResults.targets_Fiducials[0].fiducialID;
+
+      var reefSide = AprilTagReefMap.getReefSide(tagId);
       Logger.recordOutput(getName() + "/driveToReefTargetBranch/targeted-face", reefSide.getFaceName());
       Logger.recordOutput(getName() + "/driveToReefTargetBranch/targeted-branch",
           reefSide.getBranchName(branchSide));
 
       // Check to make sure the tag pose is available
       if (reefSide.TagPose.isEmpty()) {
-        Container.Vision.blinkLed(LimelightNameEnum.kRear, 2);
+        // TODO: figure out how to do this
+        // Container.Vision.blinkLed(LimelightNameEnum.kRear, 2);
         Elastic.sendWarning("Command Failed", "AprilTag pose not found in field layout");
 
-        return Commands.print("[SWERVE] - AprilTag " + llInputs.ApriltagId + " pose not found in field layout");
+        return Commands.print("[SWERVE] - AprilTag " + tagId + " pose not found in field layout");
       }
 
       var targetPose = reefSide.TagPose.orElseThrow();
@@ -360,8 +374,6 @@ public class Swerve extends SubsystemBase {
           stopAllMotorsCommand())
           .handleInterrupt(() -> DriverStation.reportWarning("[DRIVE] driveToReefTargetBranch interrupted", false))
           .asProxy();
-
-      // .andThen(setAutoAlignSetpointCommand(SuperStructure.SwerveState.GyroAngle.getDegrees()));
 
       return _activePathfindCommand;
     });

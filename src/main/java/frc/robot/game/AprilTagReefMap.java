@@ -25,25 +25,25 @@ public class AprilTagReefMap {
         FieldLayout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
     }
 
-    public static final Map<Integer, ReefSide> Branches = Map.ofEntries(
+    public static final Map<Double, ReefSide> Branches = Map.ofEntries(
             // Red Alliance
-            Map.entry(6, new ReefSide(6, ReefBranch.kK, ReefBranch.kL, Alliance.Red)),
-            Map.entry(7, new ReefSide(7, ReefBranch.kA, ReefBranch.kB, Alliance.Red)),
-            Map.entry(8, new ReefSide(8, ReefBranch.kC, ReefBranch.kD, Alliance.Red)),
-            Map.entry(9, new ReefSide(9, ReefBranch.kE, ReefBranch.kF, Alliance.Red)),
-            Map.entry(10, new ReefSide(10, ReefBranch.kH, ReefBranch.kG, Alliance.Red)),
-            Map.entry(11, new ReefSide(11, ReefBranch.kI, ReefBranch.kJ, Alliance.Red)),
+            Map.entry(6d, new ReefSide(6, ReefBranch.kK, ReefBranch.kL, Alliance.Red)),
+            Map.entry(7d, new ReefSide(7, ReefBranch.kA, ReefBranch.kB, Alliance.Red)),
+            Map.entry(8d, new ReefSide(8, ReefBranch.kC, ReefBranch.kD, Alliance.Red)),
+            Map.entry(9d, new ReefSide(9, ReefBranch.kE, ReefBranch.kF, Alliance.Red)),
+            Map.entry(10d, new ReefSide(10, ReefBranch.kH, ReefBranch.kG, Alliance.Red)),
+            Map.entry(11d, new ReefSide(11, ReefBranch.kI, ReefBranch.kJ, Alliance.Red)),
             // Blue alliance
-            Map.entry(17, new ReefSide(17, ReefBranch.kC, ReefBranch.kD, Alliance.Blue)),
-            Map.entry(18, new ReefSide(18, ReefBranch.kA, ReefBranch.kB, Alliance.Blue)),
-            Map.entry(19, new ReefSide(19, ReefBranch.kK, ReefBranch.kL, Alliance.Blue)),
-            Map.entry(20, new ReefSide(20, ReefBranch.kI, ReefBranch.kJ, Alliance.Blue)),
-            Map.entry(21, new ReefSide(21, ReefBranch.kH, ReefBranch.kG, Alliance.Blue)),
-            Map.entry(22, new ReefSide(22, ReefBranch.kE, ReefBranch.kF, Alliance.Blue)));
+            Map.entry(17d, new ReefSide(17, ReefBranch.kC, ReefBranch.kD, Alliance.Blue)),
+            Map.entry(18d, new ReefSide(18, ReefBranch.kA, ReefBranch.kB, Alliance.Blue)),
+            Map.entry(19d, new ReefSide(19, ReefBranch.kK, ReefBranch.kL, Alliance.Blue)),
+            Map.entry(20d, new ReefSide(20, ReefBranch.kI, ReefBranch.kJ, Alliance.Blue)),
+            Map.entry(21d, new ReefSide(21, ReefBranch.kH, ReefBranch.kG, Alliance.Blue)),
+            Map.entry(22d, new ReefSide(22, ReefBranch.kE, ReefBranch.kF, Alliance.Blue)));
 
-    public static ReefSide getReefSide(int tagId) {
+    public static ReefSide getReefSide(double tagId) {
         var reefSide = Branches.get(tagId);
-        reefSide.TagPose = FieldLayout.getTagPose(tagId);
+        reefSide.TagPose = FieldLayout.getTagPose((int)tagId);
 
         return reefSide;
     }
