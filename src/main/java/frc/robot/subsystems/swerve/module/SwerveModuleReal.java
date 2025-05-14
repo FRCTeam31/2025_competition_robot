@@ -170,6 +170,9 @@ public class SwerveModuleReal implements ISwerveModule {
       desiredState = SwerveUtil.optimize(desiredState, getCurrentHeading());
     }
 
+    // Scale speed by cosine of angle error for smoother driving.
+    desiredState.cosineScale(getCurrentHeading());
+
     // Set the drive motor to the desired speed
     setDriveSpeed(desiredState.speedMetersPerSecond);
 
