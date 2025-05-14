@@ -54,7 +54,7 @@ public class AprilTagReefMap {
     * @param targetPose The target pose
     */
     public static Pose2d getBranchPoseFromTarget(ReefBranchSide side, Pose2d targetPose) {
-        // Determine the translation direction (left = +90°, right = -90°)
+        // Determine the translation direction (left = +90deg, right = -90deg)
         var offsetRotation = targetPose.getRotation().plus(side == ReefBranchSide.kLeft
                 ? Rotation2d.fromDegrees(90)
                 : Rotation2d.fromDegrees(-90));

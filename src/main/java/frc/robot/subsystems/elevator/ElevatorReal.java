@@ -50,8 +50,8 @@ public class ElevatorReal implements IElevator {
     public void updateInputs(ElevatorInputsAutoLogged inputs) {
         inputs.MotorSpeed = _leftElevatorMotor.get();
         inputs.MotorVoltage = _leftElevatorMotor.getBusVoltage() * _leftElevatorMotor.getAppliedOutput();
-        inputs.ElevatorDistanceMeters = getElevatorDistance();
-        inputs.ElevatorSpeedMetersPerSecond = getElevatorSpeedMetersPerSecond();
+        inputs.DistanceMeters = getElevatorDistance();
+        inputs.SpeedMPS = getElevatorSpeedMetersPerSecond();
         inputs.TopLimitSwitch = _topElevatorLimitSwitch.get();
         inputs.BottomLimitSwitch = _bottomElevatorLimitSwitch.get();
     }

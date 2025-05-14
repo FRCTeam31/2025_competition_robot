@@ -189,7 +189,7 @@ public class LimeLightNT implements AutoCloseable {
     //#region Camera Controls
 
     /**
-     * Sets limelight’s LED state.
+     * Sets limelight's LED state.
      *    0 = use the LED Mode set in the current pipeline.
      *    1 = force off.
      *    2 = force blink.
@@ -233,7 +233,7 @@ public class LimeLightNT implements AutoCloseable {
     }
 
     /**
-     * Sets limelight’s pipeline.
+     * Sets limelight's pipeline.
      * @param pipeline
      */
     public void setPipeline(int pipeline) {

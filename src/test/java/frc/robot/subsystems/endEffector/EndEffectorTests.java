@@ -1,12 +1,16 @@
-package test.subsystems.endEffector;
+package frc.robot.subsystems.endEffector;
 
-import frc.robot.subsystems.endEffector.EndEffector;
-import frc.robot.subsystems.endEffector.IEndEffector;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.ArgumentCaptor;
+
+import edu.wpi.first.wpilibj.simulation.DriverStationSim;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.SuperStructure;
+import frc.robot.subsystems.elevator.ElevatorMap;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 public class EndEffectorTests {
     private EndEffector endEffector;
@@ -21,11 +25,15 @@ public class EndEffectorTests {
                 this._endEffector = mockHardware; // Inject the mock
             }
         };
+
+        // "Enables" the robot simulation
+        DriverStationSim.setEnabled(true);
+        DriverStationSim.notifyNewData();
     }
 
     @Test
     public void testRunWristManualLimitsAtMinAngle() {
-        endEffector._inputs.EndEffectorAngleDegrees = EndEffectorMap.WristMinAngle - 5;
+        SuperStructure.EndEffectorState.EndEffectorAngleDegrees = EndEffectorMap.WristMinAngle - 5;
         endEffector.runWristManual(-1.0);
 
         ArgumentCaptor<Double> captor = ArgumentCaptor.forClass(Double.class);
@@ -37,7 +45,8 @@ public class EndEffectorTests {
 
     @Test
     public void testSeekWristPIDInDangerZoneSetsZero() {
-        endEffector._inputs.EndEffectorAngleDegrees = 45.0;
+        SuperStructure.ElevatorState.DistanceMeters = 0.0;
+        SuperStructure.EndEffectorState.EndEffectorAngleDegrees = 45.0;
         endEffector._wristSetpoint = 90.0;
 
         endEffector.seekWristAnglePID(true);
@@ -50,14 +59,19 @@ public class EndEffectorTests {
 
     @Test
     public void testWristSetpointCommandChangesSetpoint() {
+        // Fails due to CommandScheduler not being something that you can interact with in tests
+        SuperStructure.ElevatorState.DistanceMeters = ElevatorMap.MaxElevatorHeight;
+
+        CommandScheduler.getInstance().enable();
         CommandScheduler.getInstance().schedule(endEffector.setWristSetpointCommand(30.0));
         CommandScheduler.getInstance().run();
 
-        assertEquals(30.0, endEffector._wristSetpoint, 0.001);
+        assertEquals(30.0, endEffector._wristSetpoint);
     }
 
     @Test
     public void testIntakeEjectToggle() {
+        CommandScheduler.getInstance().enable();
         endEffector.enableEjectCommand().schedule();
         CommandScheduler.getInstance().run();
 

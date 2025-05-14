@@ -27,8 +27,8 @@ public class ElevatorSim implements IElevator {
 
     @Override
     public void updateInputs(ElevatorInputsAutoLogged inputs) {
-        inputs.ElevatorDistanceMeters = _elevatorSim.getPositionMeters();
-        inputs.ElevatorSpeedMetersPerSecond = _elevatorSim.getVelocityMetersPerSecond();
+        inputs.DistanceMeters = _elevatorSim.getPositionMeters();
+        inputs.SpeedMPS = _elevatorSim.getVelocityMetersPerSecond();
         inputs.TopLimitSwitch = _elevatorSim.hasHitUpperLimit();
         inputs.BottomLimitSwitch = _elevatorSim.hasHitUpperLimit();
     }

@@ -14,7 +14,7 @@ public class ExtendedPIDConstants {
   // See https://docs.wpilib.org/en/latest/docs/software/advanced-controls/introduction/introduction-to-feedforward.html#the-permanent-magnet-dc-motor-feedforward-equation
   public double kV; // Voltage needed to hold a constant velocity while overcoming any additional friction that increases with speed
   public double kA; // Voltage needed to induce a given acceleration in the system
-  public double kS; // Voltage needed to overcome the system’s static friction
+  public double kS; // Voltage needed to overcome the system's static friction
 
   public ExtendedPIDConstants(double kP, double kI, double kD, double kF, double kV, double kA, double kS) {
     this.kP = kP;

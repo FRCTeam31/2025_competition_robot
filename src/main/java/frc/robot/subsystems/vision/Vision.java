@@ -5,6 +5,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.SuperStructure;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +24,6 @@ public class Vision extends SubsystemBase {
     }
 
     Map<LimelightNameEnum, LimeLightNT> _limelights = new HashMap<>();
-    Map<LimelightNameEnum, LimelightInputs> _limelightInputs = new HashMap<>();
 
     public Vision() {
         setName("Vision");
@@ -32,8 +32,8 @@ public class Vision extends SubsystemBase {
         _limelights.put(LimelightNameEnum.kFront, new LimeLightNT(defaultInstance, VisionMap.LimelightFrontName));
         _limelights.put(LimelightNameEnum.kRear, new LimeLightNT(defaultInstance, VisionMap.LimelightRearName));
 
-        _limelightInputs.put(LimelightNameEnum.kFront, new LimelightInputs());
-        _limelightInputs.put(LimelightNameEnum.kRear, new LimelightInputs());
+        SuperStructure.LimelightStates.put(LimelightNameEnum.kFront, new LimelightInputs());
+        SuperStructure.LimelightStates.put(LimelightNameEnum.kRear, new LimelightInputs());
     }
 
     /**
@@ -41,11 +41,11 @@ public class Vision extends SubsystemBase {
      * @param llIndex The index of the limelight to get inputs from.
      */
     public LimelightInputs getLimelightInputs(LimelightNameEnum ll) {
-        return _limelightInputs.get(ll);
+        return SuperStructure.LimelightStates.get(ll);
     }
 
     /**
-     * Sets limelight’s LED state.
+     * Sets limelight's LED state.
      *    0 = use the LED Mode set in the current pipeline.
      *    1 = force off.
      *    2 = force blink.
@@ -67,7 +67,7 @@ public class Vision extends SubsystemBase {
     }
 
     /**
-     * Sets limelight’s active vision pipeline.
+     * Sets limelight's active vision pipeline.
      * @param llIndex The index of the desired limelight
      * @param pipeline The pipeline to set active
      */
@@ -76,7 +76,7 @@ public class Vision extends SubsystemBase {
     }
 
     /**
-     * Sets limelight’s streaming mode.
+     * Sets limelight's streaming mode.
      *    0 = Standard - Side-by-side streams if a webcam is attached to Limelight
      *    1 = PiP Main - The secondary camera stream is placed in the lower-right corner of the primary camera stream
      *    2 = PiP Secondary - The primary camera stream is placed in the lower-right corner of the secondary camera stream
@@ -100,8 +100,8 @@ public class Vision extends SubsystemBase {
     public void periodic() {
         // Update all limelight inputs
         for (var ll : _limelights.keySet()) {
-            _limelights.get(ll).updateInputs(_limelightInputs.get(ll));
-            Logger.processInputs("Vision/LL/" + ll.name(), _limelightInputs.get(ll));
+            _limelights.get(ll).updateInputs(SuperStructure.LimelightStates.get(ll));
+            Logger.processInputs("Vision/LL/" + ll.name(), SuperStructure.LimelightStates.get(ll));
         }
     }
 
