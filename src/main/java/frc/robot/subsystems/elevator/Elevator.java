@@ -32,8 +32,7 @@ public class Elevator extends SubsystemBase {
             ElevatorPosition.kL4, 0.627);
 
     private IElevator _elevatorIO;
-    public ElevatorController _elevatorController = new ElevatorController(ElevatorMap.ElevatorControllerConstantsSmall,
-            ElevatorMap.MaxElevatorHeight);
+    public ElevatorController _elevatorController = new ElevatorController(ElevatorMap.ElevatorControllerConstantsSmall);
     private boolean _elevatorManaullyControlled = false;
 
     private BooleanEvent _positionResetEvent;

@@ -42,18 +42,6 @@ public class ElevatorController extends MRSGController {
         super(constants);
     }
 
-    // public ElevatorController(double M, double R, double S, double G, double frictionDeadband) {
-    //     super(M, R, S, G, frictionDeadband);
-    // }
-
-    // public ElevatorController(MRSGConstants constants, double frictionDeadband) {
-    //     super(constants, frictionDeadband);
-    // }
-
-    public ElevatorController(MRSGConstants constants, double maxTravel) {
-        super(constants, maxTravel);
-    }
-
     public void findConstants(
             double lowerPositionBound,
             double upperPositionBound,
