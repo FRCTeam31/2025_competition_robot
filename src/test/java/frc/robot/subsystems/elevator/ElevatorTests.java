@@ -7,6 +7,8 @@ import org.junit.jupiter.api.*;
 import org.mockito.*;
 
 import edu.wpi.first.units.Units;
+import edu.wpi.first.wpilibj.simulation.DriverStationSim;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.SuperStructure;
 
 public class ElevatorTests {
@@ -51,17 +53,25 @@ public class ElevatorTests {
 
     @Test
     void testGetElevatorPositionPercent() {
-        SuperStructure.ElevatorState.DistanceMeters = 0.314; // Assuming MaxElevatorHeight is 0.627
+        SuperStructure.ElevatorState.DistanceMeters = ElevatorMap.MaxElevatorHeight / 2; // Assuming MaxElevatorHeight is 0.627
         assertEquals(0.5, elevator.getElevatorPositionPercent(), 1e-3,
                 "Elevator should be at 50% of its maximum height.");
     }
 
     @Test
     void testSetElevatorSetpointCommand() {
-        var command = elevator.setElevatorSetpointCommand(ElevatorPosition.kL3);
-        command.initialize(); // Simulate command initialization
+        // "Enables" the robot simulation
+        DriverStationSim.setEnabled(true);
+        DriverStationSim.notifyNewData();
+        CommandScheduler.getInstance().enable();
 
-        assertEquals(0.432, elevator._elevatorController.getSetpoint(), 1e-3,
+        var command = elevator.setElevatorSetpointCommand(ElevatorPosition.kL3);
+        command.schedule();
+        CommandScheduler.getInstance().run();
+
+        assertEquals(elevator._positionMap.get(ElevatorPosition.kL3),
+                elevator._elevatorController.getSetpoint(),
+                1e-3,
                 "Setpoint should be set to 0.432 meters for kL3.");
     }
 
@@ -78,8 +88,14 @@ public class ElevatorTests {
         // Simulate the bottom limit switch being triggered
         SuperStructure.ElevatorState.BottomLimitSwitch = true;
 
+        // "Enables" the robot simulation
+        DriverStationSim.setEnabled(true);
+        DriverStationSim.notifyNewData();
+        CommandScheduler.getInstance().enable();
+
         var command = elevator.goToElevatorBottomCommand();
-        command.initialize(); // Simulate command initialization
+        command.schedule();
+        CommandScheduler.getInstance().run();
 
         verify(mockElevatorIO, times(1)).setMotorSpeeds(-ElevatorMap.MaxSpeedCoefficient / 2);
         verify(mockElevatorIO, times(1)).stopMotors();
