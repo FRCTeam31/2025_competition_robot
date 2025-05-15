@@ -19,7 +19,7 @@ public class ElevatorSim implements IElevator {
                 Units.Pounds.of(3).in(Kilograms),
                 ElevatorMap.OutputSprocketDiameterMeters,
                 0,
-                ElevatorMap.MaxElevatorHeight,
+                ElevatorMap.MaxHeight,
                 true,
                 0,
                 0, 0);

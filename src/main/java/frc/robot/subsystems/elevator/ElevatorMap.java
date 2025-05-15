@@ -2,15 +2,17 @@ package frc.robot.subsystems.elevator;
 
 import static edu.wpi.first.units.Units.Meters;
 
+import java.util.Map;
+
 import org.prime.control.MRSGConstants;
 
 import edu.wpi.first.units.Units;
 
 public class ElevatorMap {
         // CAN ids
-        public static final int LeftElevatorMotorCANID = 15;
-        public static final int RightElevatorMotorCANID = 16;
-        public static final int ElevatorEncoderCANID = 22;
+        public static final int LeftMotorCANID = 15;
+        public static final int RightMotorCANID = 16;
+        public static final int EncoderCANID = 22;
 
         // Limit switch constants
         public static final int TopLimitSwitchChannel = 0;
@@ -18,29 +20,23 @@ public class ElevatorMap {
         public static final double BottomLimitResetDebounceSeconds = 0.25;
 
         // Physical constraints
-        public static final double MaxElevatorHeight = 0.63;
+        public static final double MaxHeight = 0.63;
         public static final double MaxSpeedCoefficient = 0.5;
         public static final double OutputSprocketDiameterMeters = Units.Millimeters.of(32.2).in(Meters);
         public static final double GearRatio = 16;
 
         // MRSG constants
-        // public static final MRSGConstants ElevatorControllerConstants = new MRSGConstants(
-        //         8, 4.5, 0, 1.4);
-
-        //     public static final MRSGConstants ElevatorControllerConstantsSmall = new MRSGConstants(
-        //             10.5, 4.5, 0, 1.05);
-
-        public static final MRSGConstants ElevatorControllerConstantsSmall = new MRSGConstants(
+        public static final MRSGConstants MRSGConstantsSmall = new MRSGConstants(
                         11.5, 4.5, 0, 1.05);
 
-        public static final MRSGConstants ElevatorControllerConstantsMedium = new MRSGConstants(
+        public static final MRSGConstants MRSGConstantsMedium = new MRSGConstants(
                         8, 4, 0, 0);
 
         // Only M and R are used.
-        public static final MRSGConstants ElevatorControllerConstantsBig = new MRSGConstants(
+        public static final MRSGConstants MRSGConstantsBig = new MRSGConstants(
                         8.5, 3, 0, 0);
 
-        public static final MRSGConstants ElevatorControllerConstantsAbsoultelyMassive = new MRSGConstants(7, 4, 0,
+        public static final MRSGConstants MRSGConstantsAbsoultelyMassive = new MRSGConstants(7, 4, 0,
                         0);
 
         // Manual control 
@@ -57,4 +53,12 @@ public class ElevatorMap {
         //         3.9,
         //         0.3,
         //         0.355);
+
+        public static final Map<ElevatorPosition, Double> PositionMap = Map.of(
+                        ElevatorPosition.kAbsoluteMinimum, 0.0,
+                        ElevatorPosition.kSource, 0.16,
+                        ElevatorPosition.kTrough, 0.172,
+                        ElevatorPosition.kL2, 0.28,
+                        ElevatorPosition.kL3, 0.432,
+                        ElevatorPosition.kL4, 0.627);
 }

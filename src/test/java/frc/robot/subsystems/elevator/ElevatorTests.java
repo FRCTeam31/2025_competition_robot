@@ -28,9 +28,9 @@ public class ElevatorTests {
     void testAtSetpoint() {
         elevator.setPositionSetpoint(ElevatorPosition.kL2); // Set the desired position
         // Simulate the elevator reaching the setpoint
-        SuperStructure.ElevatorState.DistanceMeters = elevator._positionMap.get(ElevatorPosition.kL2);
+        SuperStructure.ElevatorState.DistanceMeters = ElevatorMap.PositionMap.get(ElevatorPosition.kL2);
         SuperStructure.ElevatorState.SpeedMPS = 0.0;
-        elevator.controlElevator(0);
+        elevator.periodic(); // Call periodic to update the state (simulate one tick of the control loop)
 
         assertTrue(elevator.atSetpoint(), "Elevator should be at setpoint.");
     }
@@ -53,7 +53,7 @@ public class ElevatorTests {
 
     @Test
     void testGetElevatorPositionPercent() {
-        SuperStructure.ElevatorState.DistanceMeters = ElevatorMap.MaxElevatorHeight / 2; // Assuming MaxElevatorHeight is 0.627
+        SuperStructure.ElevatorState.DistanceMeters = ElevatorMap.MaxHeight / 2; // Assuming MaxElevatorHeight is 0.627
         assertEquals(0.5, elevator.getElevatorPositionPercent(), 1e-3,
                 "Elevator should be at 50% of its maximum height.");
     }
@@ -69,7 +69,7 @@ public class ElevatorTests {
         command.schedule();
         CommandScheduler.getInstance().run();
 
-        assertEquals(elevator._positionMap.get(ElevatorPosition.kL3),
+        assertEquals(ElevatorMap.PositionMap.get(ElevatorPosition.kL3),
                 elevator._elevatorController.getSetpoint(),
                 1e-3,
                 "Setpoint should be set to 0.432 meters for kL3.");
@@ -93,7 +93,7 @@ public class ElevatorTests {
         DriverStationSim.notifyNewData();
         CommandScheduler.getInstance().enable();
 
-        var command = elevator.goToElevatorBottomCommand();
+        var command = elevator.homeLiftCommand();
         command.schedule();
         CommandScheduler.getInstance().run();
 

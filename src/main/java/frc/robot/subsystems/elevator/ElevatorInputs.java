@@ -1,10 +1,12 @@
 package frc.robot.subsystems.elevator;
 
 import org.littletonrobotics.junction.AutoLog;
+import org.prime.control.SubsystemControlMode;
 
 @AutoLog
 public class ElevatorInputs {
 
+    // IO inputs
     public double MotorSpeed = 0;
     public double MotorVoltage = 0;
     public double DistanceMeters = 0;
@@ -12,4 +14,6 @@ public class ElevatorInputs {
     public boolean TopLimitSwitch;
     public boolean BottomLimitSwitch;
 
+    // Subsystem state
+    public SubsystemControlMode ControlMode = SubsystemControlMode.ManuallyControlled;
 }

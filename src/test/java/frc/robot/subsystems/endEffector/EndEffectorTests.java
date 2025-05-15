@@ -89,7 +89,7 @@ public class EndEffectorTests {
     @Test
     public void testWristSetpointCommandChangesSetpoint() {
         // Fails due to CommandScheduler not being something that you can interact with in tests
-        SuperStructure.ElevatorState.DistanceMeters = ElevatorMap.MaxElevatorHeight;
+        SuperStructure.ElevatorState.DistanceMeters = ElevatorMap.MaxHeight;
 
         CommandScheduler.getInstance().enable();
         CommandScheduler.getInstance().schedule(endEffector.setWristSetpointCommand(30.0));

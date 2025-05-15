@@ -8,6 +8,7 @@ import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.Logger;
 import org.prime.control.ElevatorController;
+import org.prime.control.SubsystemControlMode;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.DistanceUnit;
@@ -15,7 +16,6 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.event.BooleanEvent;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -23,20 +23,10 @@ import frc.robot.Robot;
 import frc.robot.SuperStructure;
 
 public class Elevator extends SubsystemBase {
-    public Map<ElevatorPosition, Double> _positionMap = Map.of(
-            ElevatorPosition.kAbsoluteMinimum, 0.0,
-            ElevatorPosition.kSource, 0.16,
-            ElevatorPosition.kTrough, 0.172,
-            ElevatorPosition.kL2, 0.28,
-            ElevatorPosition.kL3, 0.432,
-            ElevatorPosition.kL4, 0.627);
-
     public IElevator _elevatorIO;
-    public ElevatorController _elevatorController = new ElevatorController(
-            ElevatorMap.ElevatorControllerConstantsSmall);
-    private boolean _elevatorManaullyControlled = false;
-
+    public ElevatorController _elevatorController = new ElevatorController(ElevatorMap.MRSGConstantsSmall);
     private BooleanEvent _positionResetEvent;
+    private double _manualControlSpeed = 0;
 
     public Elevator(boolean isReal) {
         setName("Elevator");
@@ -45,12 +35,15 @@ public class Elevator extends SubsystemBase {
                 ? new ElevatorReal()
                 : new ElevatorSim();
 
-        _positionResetEvent = new BooleanEvent(Robot.EventLoop, () -> SuperStructure.ElevatorState.BottomLimitSwitch)
+        _positionResetEvent = new BooleanEvent(Robot.EventLoop,
+                () -> SuperStructure.ElevatorState.BottomLimitSwitch)
                 .debounce(ElevatorMap.BottomLimitResetDebounceSeconds)
                 .rising();
 
         _positionResetEvent.ifHigh(_elevatorIO::resetEncoderPos);
     }
+
+    //#region Properties
 
     /**
      * Returns true if the elevator is at its PID setpoint
@@ -86,7 +79,7 @@ public class Elevator extends SubsystemBase {
      * @return
      */
     public Measure<DistanceUnit> getElevatorPositionAtLocation(ElevatorPosition pos) {
-        return Meters.of(_positionMap.get(pos));
+        return Meters.of(ElevatorMap.PositionMap.get(pos));
     }
 
     /**
@@ -110,94 +103,68 @@ public class Elevator extends SubsystemBase {
      * @return
      */
     public double getElevatorPositionPercent() {
-        return getElevatorPositionMeters() / ElevatorMap.MaxElevatorHeight;
+        return getElevatorPositionMeters() / ElevatorMap.MaxHeight;
     }
+
+    //#endregion
 
     //#region Control
 
     /**
-     * 
-     * @param manualControlSpeed
-     */
-    public void controlElevator(double manualControlSpeed) {
-        _elevatorManaullyControlled = manualControlSpeed != 0 || _elevatorManaullyControlled;
-
-        if (_elevatorManaullyControlled) {
-            var manualControlVolts = manualControlSpeed * 12;
-            setMotorVoltageWithLimitSwitches(manualControlSpeed < 0
-                    ? (manualControlVolts * 0.50)
-                    : manualControlVolts);
-        } else {
-            var ec = _elevatorController.calculate(
-                    SuperStructure.ElevatorState.DistanceMeters,
-                    SuperStructure.ElevatorState.SpeedMPS);
-
-            SmartDashboard.putNumber(getName() + "/Raw-EC", ec);
-            setMotorVoltageWithLimitSwitches(ec);
-        }
-    }
-
-    /**
      * Sets the motor voltage, respecting the limit switches
-     * @param finalOutput
+     * @param voltage
      */
-    private void setMotorVoltageWithLimitSwitches(double finalOutput) {
-        Logger.recordOutput(getName() + "/output-raw", finalOutput);
+    private void setMotorVoltageWithLimitSwitches(double voltage) {
+        Logger.recordOutput(getName() + "/output-voltage-unfiltered", voltage);
+
         // If the elevator is at the top or bottom, stop the motor from moving in that direction
-        if (SuperStructure.ElevatorState.TopLimitSwitch && finalOutput > 0) {
-            finalOutput = MathUtil.clamp(finalOutput, -12, 0);
-        } else if (SuperStructure.ElevatorState.BottomLimitSwitch && finalOutput < 0) {
-            finalOutput = MathUtil.clamp(finalOutput, 0, 12);
+        if (SuperStructure.ElevatorState.TopLimitSwitch && voltage > 0) {
+            voltage = MathUtil.clamp(voltage, -12, 0);
+        } else if (SuperStructure.ElevatorState.BottomLimitSwitch && voltage < 0) {
+            voltage = MathUtil.clamp(voltage, 0, 12);
         }
 
-        finalOutput = MathUtil.clamp(finalOutput, -12, 12);
+        voltage = MathUtil.clamp(voltage, -12, 12);
         // Within 5% of max height, reduce speed
-        finalOutput = scaleOutputApproachingLimits(finalOutput, SuperStructure.ElevatorState.DistanceMeters);
-        finalOutput = MathUtil.applyDeadband(finalOutput, 0.1); // Deadband at 10%
+        voltage = scaleOutputApproachingLimits(voltage, SuperStructure.ElevatorState.DistanceMeters);
+        voltage = MathUtil.applyDeadband(voltage, 0.1); // Deadband at 10%
 
-        Logger.recordOutput(getName() + "/output-final", finalOutput);
-        _elevatorIO.setMotorVoltages(finalOutput);
+        Logger.recordOutput(getName() + "/output-voltage-filtered", voltage);
+        _elevatorIO.setMotorVoltages(voltage);
     }
 
     private double scaleOutputApproachingLimits(double output, double currentPosition) {
-        var lowPositionScaleDownThreshold = ElevatorMap.MaxElevatorHeight * 0.2;
-        var highPositionScaleDownThreshold = ElevatorMap.MaxElevatorHeight - lowPositionScaleDownThreshold - 0.1;
+        var lowPositionScaleDownThreshold = ElevatorMap.MaxHeight * 0.2;
+        var highPositionScaleDownThreshold = ElevatorMap.MaxHeight - lowPositionScaleDownThreshold - 0.1;
 
         var speedScalingFactor = 1.0;
         if (currentPosition <= lowPositionScaleDownThreshold && output < 0) {
             var scale = currentPosition / lowPositionScaleDownThreshold;
             speedScalingFactor = Math.max(0.4, scale);
         } else if (currentPosition >= highPositionScaleDownThreshold && output > 0) {
-            var scale = (ElevatorMap.MaxElevatorHeight - currentPosition) / lowPositionScaleDownThreshold;
+            var scale = (ElevatorMap.MaxHeight - currentPosition) / lowPositionScaleDownThreshold;
             speedScalingFactor = Math.max(0.4, scale);
         }
-
-        Logger.recordOutput(getName() + "/output-limit-scalar", speedScalingFactor);
-        Logger.recordOutput(getName() + "/output-limit-scaled", speedScalingFactor * output);
 
         return output * speedScalingFactor;
     }
 
-    private void disableElevatorManualControl() {
-        _elevatorManaullyControlled = false;
-    }
-
     public void setPositionSetpoint(ElevatorPosition pos) {
-        _elevatorController.setSetpoint(_positionMap.get(pos));
-        disableElevatorManualControl();
+        _elevatorController.setSetpoint(ElevatorMap.PositionMap.get(pos));
+        SuperStructure.ElevatorState.ControlMode = SubsystemControlMode.PIDControlled;
 
-        if (Math.abs(_positionMap.get(pos) - SuperStructure.ElevatorState.DistanceMeters) > 0.5) {
-            _elevatorController.setM(ElevatorMap.ElevatorControllerConstantsAbsoultelyMassive.M);
-            _elevatorController.setR(ElevatorMap.ElevatorControllerConstantsAbsoultelyMassive.R);
-        } else if (Math.abs(_positionMap.get(pos) - SuperStructure.ElevatorState.DistanceMeters) > 0.4) {
-            _elevatorController.setM(ElevatorMap.ElevatorControllerConstantsBig.M);
-            _elevatorController.setR(ElevatorMap.ElevatorControllerConstantsBig.R);
-        } else if (Math.abs(_positionMap.get(pos) - SuperStructure.ElevatorState.DistanceMeters) > 0.2) {
-            _elevatorController.setM(ElevatorMap.ElevatorControllerConstantsMedium.M);
-            _elevatorController.setR(ElevatorMap.ElevatorControllerConstantsMedium.R);
-        } else if (Math.abs(_positionMap.get(pos) - SuperStructure.ElevatorState.DistanceMeters) < 0.2) {
-            _elevatorController.setM(ElevatorMap.ElevatorControllerConstantsSmall.M);
-            _elevatorController.setR(ElevatorMap.ElevatorControllerConstantsSmall.R);
+        if (Math.abs(ElevatorMap.PositionMap.get(pos) - SuperStructure.ElevatorState.DistanceMeters) > 0.5) {
+            _elevatorController.setM(ElevatorMap.MRSGConstantsAbsoultelyMassive.M);
+            _elevatorController.setR(ElevatorMap.MRSGConstantsAbsoultelyMassive.R);
+        } else if (Math.abs(ElevatorMap.PositionMap.get(pos) - SuperStructure.ElevatorState.DistanceMeters) > 0.4) {
+            _elevatorController.setM(ElevatorMap.MRSGConstantsBig.M);
+            _elevatorController.setR(ElevatorMap.MRSGConstantsBig.R);
+        } else if (Math.abs(ElevatorMap.PositionMap.get(pos) - SuperStructure.ElevatorState.DistanceMeters) > 0.2) {
+            _elevatorController.setM(ElevatorMap.MRSGConstantsMedium.M);
+            _elevatorController.setR(ElevatorMap.MRSGConstantsMedium.R);
+        } else if (Math.abs(ElevatorMap.PositionMap.get(pos) - SuperStructure.ElevatorState.DistanceMeters) < 0.2) {
+            _elevatorController.setM(ElevatorMap.MRSGConstantsSmall.M);
+            _elevatorController.setR(ElevatorMap.MRSGConstantsSmall.R);
         }
     }
 
@@ -205,25 +172,48 @@ public class Elevator extends SubsystemBase {
     public void periodic() {
         _elevatorIO.updateInputs(SuperStructure.ElevatorState);
         Logger.processInputs(getName(), SuperStructure.ElevatorState);
-        Logger.recordOutput(getName() + "EC-setpoint", _elevatorController.getSetpoint());
-        Logger.recordOutput(getName() + "/EC-error", _elevatorController.getError());
 
-        SmartDashboard.putBoolean(getName() + " is elevator manaully controlled", _elevatorManaullyControlled);
+        // Manually logging the elevator controller state
+        Logger.recordOutput(getName() + "/closed-loop-setpoint", _elevatorController.getSetpoint());
+        Logger.recordOutput(getName() + "/closed-loop-error", _elevatorController.getError());
+
+        // Control the elevator based on the current control mode
+        switch (SuperStructure.ElevatorState.ControlMode) {
+            case ManuallyControlled:
+                var manualControlVolts = _manualControlSpeed * 12;
+                setMotorVoltageWithLimitSwitches(_manualControlSpeed < 0
+                        ? (manualControlVolts * 0.50) // Slow down speed when going down
+                        : manualControlVolts);
+                break;
+            default:
+                var closedLoopOutput = _elevatorController.calculate(
+                        SuperStructure.ElevatorState.DistanceMeters,
+                        SuperStructure.ElevatorState.SpeedMPS);
+
+                setMotorVoltageWithLimitSwitches(closedLoopOutput);
+                break;
+        }
     }
     //#endregion
 
     //#region Commands
 
     public Command elevatorDefaultCommand(DoubleSupplier elevatorManualControl) {
-        return this.run(() -> controlElevator(elevatorManualControl.getAsDouble()));
+        return this.run(() -> {
+            _manualControlSpeed = elevatorManualControl.getAsDouble();
+
+            if (Math.abs(_manualControlSpeed) > 0.05) {
+                SuperStructure.ElevatorState.ControlMode = SubsystemControlMode.ManuallyControlled;
+            }
+        });
     }
 
     public Command setElevatorSetpointCommand(ElevatorPosition pos) {
-        return Commands.print("Setting elevator position to: " + _positionMap.get(pos))
+        return Commands.print("Setting elevator position to: " + ElevatorMap.PositionMap.get(pos))
                 .andThen(() -> setPositionSetpoint(pos));
     }
 
-    public Command goToElevatorBottomCommand() {
+    public Command homeLiftCommand() {
         return Commands
                 .run(() -> _elevatorIO.setMotorSpeeds(-ElevatorMap.MaxSpeedCoefficient / 2))
                 .until(() -> SuperStructure.ElevatorState.BottomLimitSwitch)
@@ -235,11 +225,15 @@ public class Elevator extends SubsystemBase {
     }
 
     public Command disableElevatorManualControlCommand() {
-        return Commands.runOnce(this::disableElevatorManualControl);
+        return Commands.runOnce(() -> SuperStructure.ElevatorState.ControlMode = SubsystemControlMode.PIDControlled);
     }
 
     public Command stopMotorsCommand() {
-        return this.runOnce(_elevatorIO::stopMotors);
+        return this.runOnce(() -> {
+            _elevatorIO.stopMotors();
+            _manualControlSpeed = 0;
+            SuperStructure.ElevatorState.ControlMode = SubsystemControlMode.ManuallyControlled;
+        });
     }
 
     public Map<String, Command> getNamedCommands() {
