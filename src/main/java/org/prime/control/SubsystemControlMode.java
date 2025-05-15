@@ -4,7 +4,7 @@ public enum SubsystemControlMode {
     /** The subsystem is controlled by the user through a joystick or other input device. */
     ManuallyControlled,
     /** The subsystem is controlled by a PID controller. */
-    PIDControlled,
+    ClosedLoopControlled,
     /** The subsystem is controlled by the robot's superstructure or another subsystem. */
     SuperStructureControlled,
     /** The subsystem is controlled directly by an autonomous routine. */
@@ -15,7 +15,7 @@ public enum SubsystemControlMode {
             case "manuallycontrolled":
                 return ManuallyControlled;
             case "pidcontrolled":
-                return PIDControlled;
+                return ClosedLoopControlled;
             case "superstructurecontrolled":
                 return SuperStructureControlled;
             case "autocontrolled":
@@ -31,7 +31,7 @@ public enum SubsystemControlMode {
                 return "ManuallyControlled";
             case ManuallyControlled:
                 return "ManuallyControlled";
-            case PIDControlled:
+            case ClosedLoopControlled:
                 return "PIDControlled";
             case SuperStructureControlled:
                 return "SuperStructureControlled";

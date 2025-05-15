@@ -15,5 +15,5 @@ public class ElevatorInputs {
     public boolean BottomLimitSwitch;
 
     // Subsystem state
-    public SubsystemControlMode ControlMode = SubsystemControlMode.ManuallyControlled;
+    public SubsystemControlMode ControlMode = SubsystemControlMode.ClosedLoopControlled;
 }

@@ -11,9 +11,9 @@ import frc.robot.subsystems.vision.LimelightInputsAutoLogged;
 import frc.robot.subsystems.vision.LimelightNameEnum;
 
 public class SuperStructure {
-    public static ClimberInputsAutoLogged ClimberState = new ClimberInputsAutoLogged();
-    public static ElevatorInputsAutoLogged ElevatorState = new ElevatorInputsAutoLogged();
-    public static EndEffectorInputsAutoLogged EndEffectorState = new EndEffectorInputsAutoLogged();
-    public static SwerveSubsystemInputsAutoLogged SwerveState = new SwerveSubsystemInputsAutoLogged();
-    public static Map<LimelightNameEnum, LimelightInputsAutoLogged> LimelightStates = new HashMap<>();
+    public static ClimberInputsAutoLogged Climber = new ClimberInputsAutoLogged();
+    public static ElevatorInputsAutoLogged Elevator = new ElevatorInputsAutoLogged();
+    public static EndEffectorInputsAutoLogged EndEffector = new EndEffectorInputsAutoLogged();
+    public static SwerveSubsystemInputsAutoLogged Swerve = new SwerveSubsystemInputsAutoLogged();
+    public static Map<LimelightNameEnum, LimelightInputsAutoLogged> Limelights = new HashMap<>();
 }

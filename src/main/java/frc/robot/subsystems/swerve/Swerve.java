@@ -76,7 +76,7 @@ public class Swerve extends SubsystemBase {
 
     // Create swerve controller
     _swervePackager = new SwerveIOPackager(isReal);
-    _swervePackager.updateInputs(SuperStructure.SwerveState);
+    _swervePackager.updateInputs(SuperStructure.Swerve);
 
     // Configure AutoAlign
     _autoAlign = new AutoAlign(SwerveMap.AutoAlignPID);
@@ -108,9 +108,9 @@ public class Swerve extends SubsystemBase {
         SwerveMap.PathPlannerTranslationPID.toPIDConstants(),
         SwerveMap.PathPlannerRotationPID.toPIDConstants());
     AutoBuilder.configure(
-        () -> SuperStructure.SwerveState.EstimatedRobotPose,
+        () -> SuperStructure.Swerve.EstimatedRobotPose,
         _swervePackager::setEstimatorPose,
-        () -> SuperStructure.SwerveState.RobotRelativeChassisSpeeds,
+        () -> SuperStructure.Swerve.RobotRelativeChassisSpeeds,
         (speeds, feedForwards) -> driveRobotRelative(speeds),
         _primeHolonomicController,
         _pathplannerRobotConfig,
@@ -134,9 +134,9 @@ public class Swerve extends SubsystemBase {
    * Enabled/disables AutoAlign control. Also overrides PathPlanner's rotation, if enabled
    */
   private void setAutoAlignEnabled(boolean enabled) {
-    SuperStructure.SwerveState.UseAutoAlign = enabled;
+    SuperStructure.Swerve.UseAutoAlign = enabled;
     if (enabled) {
-      PPHolonomicDriveController.overrideRotationFeedback(() -> SuperStructure.SwerveState.AutoAlignCorrection);
+      PPHolonomicDriveController.overrideRotationFeedback(() -> SuperStructure.Swerve.AutoAlignCorrection);
     } else {
       PPHolonomicDriveController.clearRotationFeedbackOverride();
     }
@@ -149,10 +149,10 @@ public class Swerve extends SubsystemBase {
    */
   private void driveRobotRelative(ChassisSpeeds robotRelativeChassisSpeeds) {
     // If AutoAlign is enabled, override the input rotational speed to reach the setpoint
-    Logger.recordOutput(getName() + "/autoAlignCorrection", SuperStructure.SwerveState.AutoAlignCorrection);
+    Logger.recordOutput(getName() + "/autoAlignCorrection", SuperStructure.Swerve.AutoAlignCorrection);
 
-    robotRelativeChassisSpeeds.omegaRadiansPerSecond = SuperStructure.SwerveState.UseAutoAlign
-        ? SuperStructure.SwerveState.AutoAlignCorrection
+    robotRelativeChassisSpeeds.omegaRadiansPerSecond = SuperStructure.Swerve.UseAutoAlign
+        ? SuperStructure.Swerve.AutoAlignCorrection
         : robotRelativeChassisSpeeds.omegaRadiansPerSecond;
 
     // Correct drift by taking the input speeds and converting them to a desired
@@ -163,7 +163,7 @@ public class Swerve extends SubsystemBase {
     var isRunningPathfind = _activePathfindCommand != null && _activePathfindCommand.isScheduled()
         && !_activePathfindCommand.isFinished();
     if (DriverStation.isTeleopEnabled() && !isRunningPathfind) {
-      double elevatorHeight = SuperStructure.ElevatorState.DistanceMeters;
+      double elevatorHeight = SuperStructure.Elevator.DistanceMeters;
       double speedCoef = DriveSpeedSlowCoeffient.get(elevatorHeight);
       speedCoef = elevatorHeight < 0.3 ? 1 : speedCoef;
 
@@ -190,9 +190,9 @@ public class Swerve extends SubsystemBase {
   private void processVisionEstimations() {
     // (1 rad/s is about 60 degrees/s)
     var currentRotationalVelocity = RadiansPerSecond
-        .of(Math.abs(SuperStructure.SwerveState.RobotRelativeChassisSpeeds.omegaRadiansPerSecond));
-    var currentXVelocity = MetersPerSecond.of(SuperStructure.SwerveState.RobotRelativeChassisSpeeds.vxMetersPerSecond);
-    var currentYVelocity = MetersPerSecond.of(SuperStructure.SwerveState.RobotRelativeChassisSpeeds.vyMetersPerSecond);
+        .of(Math.abs(SuperStructure.Swerve.RobotRelativeChassisSpeeds.omegaRadiansPerSecond));
+    var currentXVelocity = MetersPerSecond.of(SuperStructure.Swerve.RobotRelativeChassisSpeeds.vxMetersPerSecond);
+    var currentYVelocity = MetersPerSecond.of(SuperStructure.Swerve.RobotRelativeChassisSpeeds.vyMetersPerSecond);
 
     var withinPoseEstimationVelocity = currentRotationalVelocity.lt(DegreesPerSecond.of(60))
         && currentXVelocity.lt(MetersPerSecond.of(2))
@@ -203,8 +203,8 @@ public class Swerve extends SubsystemBase {
       return;
     }
 
-    evaluatePoseEstimation(SuperStructure.LimelightStates.get(LimelightNameEnum.kFront));
-    evaluatePoseEstimation(SuperStructure.LimelightStates.get(LimelightNameEnum.kRear));
+    evaluatePoseEstimation(SuperStructure.Limelights.get(LimelightNameEnum.kFront));
+    evaluatePoseEstimation(SuperStructure.Limelights.get(LimelightNameEnum.kRear));
   }
 
   /**
@@ -240,15 +240,15 @@ public class Swerve extends SubsystemBase {
   @Override
   public void periodic() {
     // Get inputs
-    _swervePackager.updateInputs(SuperStructure.SwerveState);
-    SuperStructure.SwerveState.AutoAlignCorrection = _autoAlign.getCorrection(SuperStructure.SwerveState.GyroAngle);
-    Logger.processInputs(getName(), SuperStructure.SwerveState);
+    _swervePackager.updateInputs(SuperStructure.Swerve);
+    SuperStructure.Swerve.AutoAlignCorrection = _autoAlign.getCorrection(SuperStructure.Swerve.GyroAngle);
+    Logger.processInputs(getName(), SuperStructure.Swerve);
 
     processVisionEstimations();
-    Container.TeleopDashboardSection.setFieldRobotPose(SuperStructure.SwerveState.EstimatedRobotPose);
+    Container.TeleopDashboardSection.setFieldRobotPose(SuperStructure.Swerve.EstimatedRobotPose);
 
     // Update LEDs
-    Logger.recordOutput(getName() + "/autoAlign/Enabled", SuperStructure.SwerveState.UseAutoAlign);
+    Logger.recordOutput(getName() + "/autoAlign/Enabled", SuperStructure.Swerve.UseAutoAlign);
     Logger.recordOutput(getName() + "/autoAlign/Setpoint", _autoAlign.getSetpoint());
     Logger.recordOutput(getName() + "/autoAlign/AtSetpoint", _autoAlign.atSetpoint());
 
@@ -258,19 +258,19 @@ public class Swerve extends SubsystemBase {
 
     // Update shuffleboard
     if (DriverStation.isEnabled()) {
-      Container.TeleopDashboardSection.setFieldRobotPose(SuperStructure.SwerveState.EstimatedRobotPose);
-      Container.TeleopDashboardSection.setGyroHeading(SuperStructure.SwerveState.GyroAngle);
+      Container.TeleopDashboardSection.setFieldRobotPose(SuperStructure.Swerve.EstimatedRobotPose);
+      Container.TeleopDashboardSection.setGyroHeading(SuperStructure.Swerve.GyroAngle);
     }
-    Logger.recordOutput(getName() + "/estimatedRobotPose", SuperStructure.SwerveState.EstimatedRobotPose);
-    _drivetrainDashboardSection.setAutoAlignEnabled(SuperStructure.SwerveState.UseAutoAlign);
+    Logger.recordOutput(getName() + "/estimatedRobotPose", SuperStructure.Swerve.EstimatedRobotPose);
+    _drivetrainDashboardSection.setAutoAlignEnabled(SuperStructure.Swerve.UseAutoAlign);
     _drivetrainDashboardSection.setAutoAlignTarget(_autoAlign.getSetpoint());
 
     // Update rumble
     _rumbleHelper.addSample(
-        SuperStructure.SwerveState.GyroAccelX,
-        SuperStructure.SwerveState.GyroAccelY,
-        SuperStructure.SwerveState.GyroAccelZ,
-        SuperStructure.SwerveState.RobotRelativeChassisSpeeds.vxMetersPerSecond,
+        SuperStructure.Swerve.GyroAccelX,
+        SuperStructure.Swerve.GyroAccelY,
+        SuperStructure.Swerve.GyroAccelZ,
+        SuperStructure.Swerve.RobotRelativeChassisSpeeds.vxMetersPerSecond,
         SwerveMap.Chassis.MaxSpeedMetersPerSecond);
     Container.OperatorInterface.setDriverRumbleIntensity(_rumbleHelper.getRumbleIntensity());
   }
@@ -285,7 +285,7 @@ public class Swerve extends SubsystemBase {
     return this.run(() -> {
       var speeds = controlSuppliers.getChassisSpeeds(
           false,
-          SuperStructure.SwerveState.GyroAngle,
+          SuperStructure.Swerve.GyroAngle,
           () -> setAutoAlignEnabled(false));
 
       // If the driver is trying to move and we have an active pathfinding command, cancel it.
@@ -323,7 +323,7 @@ public class Swerve extends SubsystemBase {
    */
   public Command driveToReefTargetBranch(ReefBranchSide branchSide, SwerveControlSuppliers controlSuppliers) {
     return this.defer(() -> {
-      var llInputs = SuperStructure.LimelightStates.get(LimelightNameEnum.kFront);
+      var llInputs = SuperStructure.Limelights.get(LimelightNameEnum.kFront);
 
       if (llInputs.CurrentResults.targets_Fiducials.length != 1 ||
           !Vision.isReefTag(llInputs.CurrentResults.targets_Fiducials[0].fiducialID)) {
@@ -424,7 +424,7 @@ public class Swerve extends SubsystemBase {
    */
   public Command enablePathPlannerAutoAlignRotationFeedbackCommand() {
     var cmd = Commands.runOnce(() -> {
-      PPHolonomicDriveController.overrideRotationFeedback(() -> SuperStructure.SwerveState.AutoAlignCorrection);
+      PPHolonomicDriveController.overrideRotationFeedback(() -> SuperStructure.Swerve.AutoAlignCorrection);
     });
     cmd.setName("EnableAutoAlignRotationFeedback");
 

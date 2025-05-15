@@ -28,8 +28,8 @@ public class ElevatorTests {
     void testAtSetpoint() {
         elevator.setPositionSetpoint(ElevatorPosition.kL2); // Set the desired position
         // Simulate the elevator reaching the setpoint
-        SuperStructure.ElevatorState.DistanceMeters = ElevatorMap.PositionMap.get(ElevatorPosition.kL2);
-        SuperStructure.ElevatorState.SpeedMPS = 0.0;
+        SuperStructure.Elevator.DistanceMeters = ElevatorMap.PositionMap.get(ElevatorPosition.kL2);
+        SuperStructure.Elevator.SpeedMPS = 0.0;
         elevator.periodic(); // Call periodic to update the state (simulate one tick of the control loop)
 
         assertTrue(elevator.atSetpoint(), "Elevator should be at setpoint.");
@@ -38,7 +38,7 @@ public class ElevatorTests {
     @Test
     void testPositionIsNear() {
         // Set the elevator's current position
-        SuperStructure.ElevatorState.DistanceMeters = 0.16; // Corresponds to kSource
+        SuperStructure.Elevator.DistanceMeters = 0.16; // Corresponds to kSource
 
         assertTrue(elevator.positionIsNear(ElevatorPosition.kSource, 1.0),
                 "Elevator should be within 1 cm of kSource position.");
@@ -53,7 +53,7 @@ public class ElevatorTests {
 
     @Test
     void testGetElevatorPositionPercent() {
-        SuperStructure.ElevatorState.DistanceMeters = ElevatorMap.MaxHeight / 2; // Assuming MaxElevatorHeight is 0.627
+        SuperStructure.Elevator.DistanceMeters = ElevatorMap.MaxHeight / 2; // Assuming MaxElevatorHeight is 0.627
         assertEquals(0.5, elevator.getElevatorPositionPercent(), 1e-3,
                 "Elevator should be at 50% of its maximum height.");
     }
@@ -86,7 +86,7 @@ public class ElevatorTests {
     @Test
     void testGoToElevatorBottomCommand() {
         // Simulate the bottom limit switch being triggered
-        SuperStructure.ElevatorState.BottomLimitSwitch = true;
+        SuperStructure.Elevator.BottomLimitSwitch = true;
 
         // "Enables" the robot simulation
         DriverStationSim.setEnabled(true);

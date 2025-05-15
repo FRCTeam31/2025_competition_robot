@@ -28,8 +28,8 @@ public class Vision extends SubsystemBase {
         _limelights.put(LimelightNameEnum.kRear, new LimeLight(VisionMap.LimelightRearName));
 
         // Initialize the limelight states
-        SuperStructure.LimelightStates.put(LimelightNameEnum.kFront, new LimelightInputsAutoLogged());
-        SuperStructure.LimelightStates.put(LimelightNameEnum.kRear, new LimelightInputsAutoLogged());
+        SuperStructure.Limelights.put(LimelightNameEnum.kFront, new LimelightInputsAutoLogged());
+        SuperStructure.Limelights.put(LimelightNameEnum.kRear, new LimelightInputsAutoLogged());
     }
 
     /**
@@ -88,7 +88,7 @@ public class Vision extends SubsystemBase {
     public void periodic() {
         // Update superstructure
         for (var ll : _limelights.keySet()) {
-            _limelights.get(ll).updateInputs(SuperStructure.LimelightStates.get(ll));
+            _limelights.get(ll).updateInputs(SuperStructure.Limelights.get(ll));
             // Logger.processInputs("Vision/LL/" + ll.name(), SuperStructure.LimelightStates.get(ll));
         }
     }
