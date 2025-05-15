@@ -412,7 +412,7 @@ public class Swerve extends SubsystemBase {
    * Disables AutoAlign control
    */
   public Command disableAutoAlignCommand() {
-    var cmd = Commands.runOnce(() -> setAutoAlignEnabled(false));
+    var cmd = Commands.runOnce(() -> setAutoAlignEnabled(false)).ignoringDisable(true);
     cmd.setName("DisableAutoAlign");
 
     return cmd;

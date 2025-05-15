@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.event.BooleanEvent;
 import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -53,13 +54,27 @@ public class Robot extends LoggedRobot {
     configureLogging();
     DriverStation.silenceJoystickConnectionWarning(true);
 
-    // Start the web server for downloading elastic layout from robot
-    WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
-
     // Initialize the robot container
     Container.initialize(isReal());
 
+    // Set up the dashboard
+    WebServer.start(5800, Filesystem.getDeployDirectory().getPath()); // Start the web server for downloading elastic layout from robot
     Elastic.selectTab("Auto");
+
+    // Set an LED pattern to display when the robot goes disabled after a match
+    new BooleanEvent(EventLoop, () -> DriverStation.isFMSAttached() && DriverStation.isDisabled() && _hasEnteredTeleop)
+        .rising()
+        .ifHigh(() -> Commands.sequence(
+            Container.LEDs.setAllSectionPatternsCommand(
+                LEDPattern.solid(getAllianceColor()).blink(Units.Seconds.of(0.15), Units.Seconds.of(0.85))),
+            Commands.waitSeconds(3.15),
+            Container.LEDs.setAllSectionPatternsCommand(
+                LEDPattern.solid(Color.kGreen).blink(Units.Seconds.of(0.15), Units.Seconds.of(0.15))),
+            Commands.waitSeconds(0.75),
+            Container.LEDs
+                .setAllSectionPatternsCommand(LEDPattern.solid(getAllianceColor()).breathe(Units.Seconds.of(4))))
+            .ignoringDisable(true)
+            .schedule());
   }
 
   /**
@@ -123,24 +138,6 @@ public class Robot extends LoggedRobot {
   public void disabledInit() {
     DataLogManager.log("Robot disabled");
     Container.Swerve.disableAutoAlignCommand().schedule();
-    Container.Elevator.stopMotorsCommand().schedule();
-    Container.Swerve.stopAllMotorsCommand();
-    Container.Climber.stopAllMotors();
-
-    if (_hasEnteredTeleop) {
-      Commands.sequence(
-          Commands.print("TESTLEDS"),
-          Container.LEDs.setAllSectionPatternsCommand(
-              LEDPattern.solid(getAllianceColor()).blink(Units.Seconds.of(0.15), Units.Seconds.of(0.85))),
-          Commands.waitSeconds(3.15),
-          Container.LEDs.setAllSectionPatternsCommand(
-              LEDPattern.solid(Color.kGreen).blink(Units.Seconds.of(0.15), Units.Seconds.of(0.15))),
-          Commands.waitSeconds(0.75),
-          Container.LEDs
-              .setAllSectionPatternsCommand(LEDPattern.solid(getAllianceColor()).breathe(Units.Seconds.of(4))))
-          .ignoringDisable(true)
-          .schedule();
-    }
   }
 
   /**
@@ -151,8 +148,6 @@ public class Robot extends LoggedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     EventLoop.poll();
-
-    Container.TeleopDashboardSection.setAllianceColor(onRedAlliance());
   }
 
   /**
@@ -160,24 +155,16 @@ public class Robot extends LoggedRobot {
    */
   @Override
   public void autonomousInit() {
-    Container.Swerve.disableAutoAlignCommand().schedule();
-
-    // Cancel any auto command that's still running and reset the subsystem states
-    if (_autonomousCommand != null) {
+    // Cancel any auto command that's still running
+    if (_autonomousCommand != null)
       _autonomousCommand.cancel();
-
-      // Stop any subsystems still running
-      Container.Swerve.stopAllMotorsCommand();
-    }
 
     _autonomousCommand = Container.AutoBuilder.exportCombinedAutoRoutine();
 
     if (_autonomousCommand == null || _autonomousCommand == Commands.none()) {
-      // Exit without scheduling an auto command if none is selected
       DriverStation.reportError("[ERROR] >> No auto command selected", false);
-      Container.Swerve.resetGyro();
     } else {
-      // Reset the gyro if we're on the red alliance
+      // Reset the gyro immediately if we're on the red alliance to get the correct angle (reversed on red alliance)
       if (onRedAlliance()) {
         Container.Swerve.resetGyro();
       }
@@ -198,16 +185,9 @@ public class Robot extends LoggedRobot {
     if (_autonomousCommand != null) {
       // Cancel the auto command if it's still running
       _autonomousCommand.cancel();
-
-      // Stop any subsystems still running
-      Container.Swerve.stopAllMotorsCommand();
     } else {
       Container.Swerve.resetGyro();
     }
-
-    Container.Swerve.disableAutoAlignCommand().schedule();
-    Container.Climber.stopAllMotors();
-    Container.Elevator.stopMotorsCommand().schedule();
   }
 
   /**
@@ -216,7 +196,6 @@ public class Robot extends LoggedRobot {
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
-    Container.Swerve.disableAutoAlignCommand().schedule();
   }
 
   public static boolean onRedAlliance() {
