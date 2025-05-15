@@ -23,7 +23,7 @@ import frc.robot.Robot;
 import frc.robot.SuperStructure;
 
 public class Elevator extends SubsystemBase {
-    private Map<ElevatorPosition, Double> _positionMap = Map.of(
+    public Map<ElevatorPosition, Double> _positionMap = Map.of(
             ElevatorPosition.kAbsoluteMinimum, 0.0,
             ElevatorPosition.kSource, 0.16,
             ElevatorPosition.kTrough, 0.172,
@@ -31,8 +31,9 @@ public class Elevator extends SubsystemBase {
             ElevatorPosition.kL3, 0.432,
             ElevatorPosition.kL4, 0.627);
 
-    private IElevator _elevatorIO;
-    public ElevatorController _elevatorController = new ElevatorController(ElevatorMap.ElevatorControllerConstantsSmall);
+    public IElevator _elevatorIO;
+    public ElevatorController _elevatorController = new ElevatorController(
+            ElevatorMap.ElevatorControllerConstantsSmall);
     private boolean _elevatorManaullyControlled = false;
 
     private BooleanEvent _positionResetEvent;
@@ -118,7 +119,7 @@ public class Elevator extends SubsystemBase {
      * 
      * @param manualControlSpeed
      */
-    private void controlElevator(double manualControlSpeed) {
+    public void controlElevator(double manualControlSpeed) {
         _elevatorManaullyControlled = manualControlSpeed != 0 || _elevatorManaullyControlled;
 
         if (_elevatorManaullyControlled) {
@@ -127,7 +128,8 @@ public class Elevator extends SubsystemBase {
                     ? (manualControlVolts * 0.50)
                     : manualControlVolts);
         } else {
-            var ec = _elevatorController.calculate(SuperStructure.ElevatorState.DistanceMeters,
+            var ec = _elevatorController.calculate(
+                    SuperStructure.ElevatorState.DistanceMeters,
                     SuperStructure.ElevatorState.SpeedMPS);
 
             SmartDashboard.putNumber(getName() + "/Raw-EC", ec);
@@ -180,7 +182,7 @@ public class Elevator extends SubsystemBase {
         _elevatorManaullyControlled = false;
     }
 
-    private void setPositionSetpoint(ElevatorPosition pos) {
+    public void setPositionSetpoint(ElevatorPosition pos) {
         _elevatorController.setSetpoint(_positionMap.get(pos));
         disableElevatorManualControl();
 

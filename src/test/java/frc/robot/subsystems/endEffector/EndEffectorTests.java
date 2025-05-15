@@ -12,6 +12,30 @@ import frc.robot.subsystems.elevator.ElevatorMap;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/*
+**List of Unit Tests:**
+
+1. testConstructor_initializesRealOrSim
+2. testSetWristSetpointCommand_double
+3. testSetWristSetpointCommand_elevatorPosition
+4. testWristManualControlCommand_setsWristSpeed
+5. testDisableWristManualControlCommand_disablesManual
+6. testStopIntakeMotorCommand_callsStopIntakeMotor
+7. testStopWristMotorCommand_callsStopWristMotor
+8. testStopBothMotorsCommand_callsStopMotors
+9. testEnableIntakeCommand_setsIntakeSpeedAndFlag
+10. testEnableEjectCommand_setsEjectSpeedAndFlag
+11. testDisableEjectCommand_stopsIntakeAndFlag
+12. testWristAtSetpoint_trueWhenWithinTolerance
+13. testWristAtSetpoint_falseWhenOutsideTolerance
+14. testManageWristControl_switchesManualAndPID
+15. testRunWristManual_clampsAtMinAndMax
+16. testPeriodic_callsUpdateInputsLoggerAndManage
+17. testScoreCoral_commandSequenceStructure
+18. testPickupCoral_commandSequenceStructure
+
+ */
+
 public class EndEffectorTests {
     private EndEffector endEffector;
     private IEndEffector mockHardware;
@@ -33,9 +57,14 @@ public class EndEffectorTests {
 
     @Test
     public void testRunWristManualLimitsAtMinAngle() {
+        // Arrange
         SuperStructure.EndEffectorState.EndEffectorAngleDegrees = EndEffectorMap.WristMinAngle - 5;
+
+        // Act
         endEffector.runWristManual(-1.0);
 
+        // Assert
+        // Verify that the wrist speed is set to 0 when below the minimum angle
         ArgumentCaptor<Double> captor = ArgumentCaptor.forClass(Double.class);
         verify(mockHardware).setWristSpeed(captor.capture());
 
