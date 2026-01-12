@@ -23,12 +23,12 @@ public class ElevatorReal implements IElevator {
         setupElevatorMotors();
         _topElevatorLimitSwitch = new DigitalInput(ElevatorMap.TopLimitSwitchChannel);
         _bottomElevatorLimitSwitch = new DigitalInput(ElevatorMap.BottomLimitSwitchChannel);
-        _elevatorEncoder = new CANcoder(ElevatorMap.ElevatorEncoderCANID);
+        _elevatorEncoder = new CANcoder(ElevatorMap.EncoderCANID);
     }
 
     public void setupElevatorMotors() {
-        _leftElevatorMotor = new SparkFlex(ElevatorMap.LeftElevatorMotorCANID, MotorType.kBrushless);
-        _rightElevatorMotor = new SparkFlex(ElevatorMap.RightElevatorMotorCANID, MotorType.kBrushless);
+        _leftElevatorMotor = new SparkFlex(ElevatorMap.LeftMotorCANID, MotorType.kBrushless);
+        _rightElevatorMotor = new SparkFlex(ElevatorMap.RightMotorCANID, MotorType.kBrushless);
 
         SparkMaxConfig leftMotorConfig = new SparkMaxConfig();
         SparkMaxConfig rightMotorConfig = new SparkMaxConfig();
@@ -40,7 +40,7 @@ public class ElevatorReal implements IElevator {
         leftMotorConfig.idleMode(IdleMode.kBrake);
         rightMotorConfig.idleMode(IdleMode.kBrake);
 
-        rightMotorConfig.follow(ElevatorMap.LeftElevatorMotorCANID, true);
+        rightMotorConfig.follow(ElevatorMap.LeftMotorCANID, true);
 
         _leftElevatorMotor.configure(leftMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         _rightElevatorMotor.configure(rightMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -50,8 +50,8 @@ public class ElevatorReal implements IElevator {
     public void updateInputs(ElevatorInputsAutoLogged inputs) {
         inputs.MotorSpeed = _leftElevatorMotor.get();
         inputs.MotorVoltage = _leftElevatorMotor.getBusVoltage() * _leftElevatorMotor.getAppliedOutput();
-        inputs.ElevatorDistanceMeters = getElevatorDistance();
-        inputs.ElevatorSpeedMetersPerSecond = getElevatorSpeedMetersPerSecond();
+        inputs.DistanceMeters = getElevatorDistance();
+        inputs.SpeedMPS = getElevatorSpeedMetersPerSecond();
         inputs.TopLimitSwitch = _topElevatorLimitSwitch.get();
         inputs.BottomLimitSwitch = _bottomElevatorLimitSwitch.get();
     }

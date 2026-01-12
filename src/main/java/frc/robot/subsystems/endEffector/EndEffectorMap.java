@@ -51,4 +51,12 @@ public class EndEffectorMap {
         // PID Constants
         public static final ExtendedPIDConstants WristPID = new ExtendedPIDConstants(0.01, 0, 0);
         public static final double WristTolerance = 3.0;
+
+        public static final Map<ElevatorPosition, Double> LiftHeightWristAngleMap = Map.of(
+            ElevatorPosition.kAbsoluteMinimum, 0.0,
+            ElevatorPosition.kSource, -42.36,
+            ElevatorPosition.kTrough, -92.0,
+            ElevatorPosition.kL2, -126.0,
+            ElevatorPosition.kL3, -126.0,
+            ElevatorPosition.kL4, -121.0);
 }

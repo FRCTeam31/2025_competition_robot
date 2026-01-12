@@ -31,6 +31,7 @@ public class Container {
   public static DashboardSection CommandsDashboardSection;
   public static DashboardSection AutoDashboardSection;
   public static DashboardSection TestDashboardSection;
+  public static OperatorInterface OperatorInterface;
   public static BuildableAutoRoutine AutoBuilder;
 
   public static PwmLEDs LEDs;
@@ -39,7 +40,6 @@ public class Container {
   public static Climber Climber;
   public static EndEffector EndEffector;
   public static Elevator Elevator;
-  public static OperatorInterface OperatorInterface;
 
   public static void initialize(boolean isReal) {
     try {

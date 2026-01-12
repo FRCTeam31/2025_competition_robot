@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Container;
 import frc.robot.Robot;
+import frc.robot.SuperStructure;
 import frc.robot.subsystems.elevator.ElevatorMap;
 
 public class Climber extends SubsystemBase {
@@ -34,7 +35,6 @@ public class Climber extends SubsystemBase {
     }
 
     private IClimber _climber;
-    private ClimberInputsAutoLogged _inputs = new ClimberInputsAutoLogged();
 
     private BooleanEvent _positionResetEvent;
     private Trigger _setClimberOutTimedTrigger;
@@ -59,7 +59,7 @@ public class Climber extends SubsystemBase {
      * Sets up the automatic triggers and events
      */
     private void setupTriggersAndEvents() {
-        _positionResetEvent = new BooleanEvent(Robot.EventLoop, () -> _inputs.WinchOuterLimitSwitch)
+        _positionResetEvent = new BooleanEvent(Robot.EventLoop, () -> SuperStructure.Climber.WinchOuterLimitSwitch)
                 .debounce(ElevatorMap.BottomLimitResetDebounceSeconds)
                 .rising();
         _positionResetEvent.ifHigh(_climber::resetClimberAngle);
@@ -78,7 +78,8 @@ public class Climber extends SubsystemBase {
      * @param speed
      */
     private void setHooksSpeed(double speed) {
-        if ((speed > 0 && _inputs.HooksClosedLimitSwitch) || (speed < 0 && _inputs.HooksOpenLimitSwitch)) {
+        if ((speed > 0 && SuperStructure.Climber.HooksClosedLimitSwitch)
+                || (speed < 0 && SuperStructure.Climber.HooksOpenLimitSwitch)) {
             _climber.stopHooksMotors();
             Logger.recordOutput(getName() + "/hooks-speed", 0);
             return;
@@ -94,11 +95,11 @@ public class Climber extends SubsystemBase {
      */
     private void setWinchSpeed(double speed) {
         if (speed > 0) {
-            if (_inputs.WinchInnerLimitSwitch) {
+            if (SuperStructure.Climber.WinchInnerLimitSwitch) {
                 _climber.stopWinchMotors();
                 return;
             }
-        } else if (speed < 0 && _inputs.WinchOuterLimitSwitch) {
+        } else if (speed < 0 && SuperStructure.Climber.WinchOuterLimitSwitch) {
             _climber.stopWinchMotors();
             return;
         }
@@ -111,8 +112,8 @@ public class Climber extends SubsystemBase {
 
     @Override
     public void periodic() {
-        _climber.updateInputs(_inputs);
-        Logger.processInputs(getName(), _inputs);
+        _climber.updateInputs(SuperStructure.Climber);
+        Logger.processInputs(getName(), SuperStructure.Climber);
     }
 
     //#region Commands
@@ -168,7 +169,7 @@ public class Climber extends SubsystemBase {
      * @return
      */
     public Command setHooksClosedAuto() {
-        return runUntilLimitSwitch(runHooksClosedCommand(), () -> _inputs.HooksClosedLimitSwitch,
+        return runUntilLimitSwitch(runHooksClosedCommand(), () -> SuperStructure.Climber.HooksClosedLimitSwitch,
                 stopHooksMotorCommand());
     }
 
@@ -182,7 +183,8 @@ public class Climber extends SubsystemBase {
         var stopMovementCommand = stopHooksMotorCommand()
                 .alongWith(Container.LEDs.setAllSectionPatternsCommand(LEDPattern.solid(Color.kGreen)));
 
-        return runUntilLimitSwitch(movementCommand, () -> _inputs.HooksOpenLimitSwitch, stopMovementCommand);
+        return runUntilLimitSwitch(movementCommand, () -> SuperStructure.Climber.HooksOpenLimitSwitch,
+                stopMovementCommand);
     }
 
     /**
@@ -190,7 +192,8 @@ public class Climber extends SubsystemBase {
      * @return
      */
     public Command extendWinchAuto() {
-        return runUntilLimitSwitch(extendWinchCommand(), () -> _inputs.WinchOuterLimitSwitch, stopWinchMotorsCommand());
+        return runUntilLimitSwitch(extendWinchCommand(), () -> SuperStructure.Climber.WinchOuterLimitSwitch,
+                stopWinchMotorsCommand());
     }
 
     /**
@@ -204,8 +207,8 @@ public class Climber extends SubsystemBase {
                 .alongWith(Container.LEDs.setAllSectionPatternsCommand(LEDPattern.solid(Color.kGreen)));
 
         return runUntilLimitSwitch(movementCommand,
-                () -> _inputs.climberShaftRotations > ClimberMap.FullyClimbedOutputRotations
-                        || _inputs.WinchInnerLimitSwitch,
+                () -> SuperStructure.Climber.climberShaftRotations > ClimberMap.FullyClimbedOutputRotations
+                        || SuperStructure.Climber.WinchInnerLimitSwitch,
                 stopMovementCommand);
     }
 

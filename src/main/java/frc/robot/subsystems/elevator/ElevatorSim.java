@@ -19,7 +19,7 @@ public class ElevatorSim implements IElevator {
                 Units.Pounds.of(3).in(Kilograms),
                 ElevatorMap.OutputSprocketDiameterMeters,
                 0,
-                ElevatorMap.MaxElevatorHeight,
+                ElevatorMap.MaxHeight,
                 true,
                 0,
                 0, 0);
@@ -27,8 +27,8 @@ public class ElevatorSim implements IElevator {
 
     @Override
     public void updateInputs(ElevatorInputsAutoLogged inputs) {
-        inputs.ElevatorDistanceMeters = _elevatorSim.getPositionMeters();
-        inputs.ElevatorSpeedMetersPerSecond = _elevatorSim.getVelocityMetersPerSecond();
+        inputs.DistanceMeters = _elevatorSim.getPositionMeters();
+        inputs.SpeedMPS = _elevatorSim.getVelocityMetersPerSecond();
         inputs.TopLimitSwitch = _elevatorSim.hasHitUpperLimit();
         inputs.BottomLimitSwitch = _elevatorSim.hasHitUpperLimit();
     }
